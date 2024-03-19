@@ -1,41 +1,58 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    //[Header("---Access Script---")]
+    [Header("---Access Script---")]
+    public CameraManager camMgr;
+
     [Header("---Access Component---")]
     [SerializeField] private Transform fieldNodeTrf;
     [SerializeField] private Transform characterTrf;
 
-    [Header("--- Assignment Variable---")]
-    public Vector2 fieldSize;
-    public Vector2 startPos;
-    public Vector2 endPos;
+    [Header("--- Assignment Variable---\n[Character]")]
+    public List<CharacterController> playerList;
+    public List<CharacterController> enemyList;
+
+    [Header("[FieldNode]")]
+    [SerializeField] private Vector2 fieldSize;
+    [SerializeField] private LayerMask layerMask;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
-    [SerializeField] private List<FieldNode> openNodes = new List<FieldNode>();
-    [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
+    private List<FieldNode> openNodes = new List<FieldNode>();
+    private List<FieldNode> closeNodes = new List<FieldNode>();
 
     private readonly float nodeSize = 1.2f;
     private readonly float nodeInterval = 0.1f;
 
     public void Start()
     {
+        camMgr = FindAnyObjectByType<CameraManager>();
+        camMgr.SetComponents();
+
         fieldNodeTrf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTrf = GameObject.FindGameObjectWithTag("Characters").transform;
         CreateField();
-        CreateCharacter();
+        CreateCharacter(CharacterOwner.Player);
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        MouseClick();
+    }
+
+    private void MouseClick()
+    {
+        if (Input.GetMouseButtonDown(0))
         {
-            var startNode = fieldNodes.Find(x => x.nodePos == startPos);
-            var endNode = fieldNodes.Find(x => x.nodePos == endPos);
-            ResultNodePass(startNode, endNode);
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+            {
+                var node = hit.collider.GetComponentInParent<FieldNode>();
+                CharacterMove(playerList[0], node);
+            }
         }
     }
 
@@ -60,6 +77,7 @@ public class GameManager : MonoBehaviour
                 }
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(this, new Vector2(i, j));
+                fieldNode.NodeColor = Color.gray;
                 fieldNodes.Add(fieldNode);
             }
         }
@@ -71,17 +89,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateCharacter()
+    private void CreateCharacter(CharacterOwner ownerType)
     {
         var charCtr = Instantiate(Resources.Load<CharacterController>("Prefabs/Character/Soldier_A"));
         charCtr.transform.SetParent(characterTrf, false);
         charCtr.transform.position = Vector3.zero;
         var node = fieldNodes.Find(x => x.nodePos == new Vector2(0f, 0f));
-        charCtr.SetComponents(this, node);
+        charCtr.SetComponents(this, ownerType, node);
     }
 
-    public void ResultNodePass(FieldNode startNode, FieldNode endNode)
+    private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
     {
+        ResultNodePass(charCtr.currentNode, targetNode);
+        charCtr.AddCommand(CommandType.Move, closeNodes);
+    }
+
+    private void ResultNodePass(FieldNode startNode, FieldNode endNode)
+    {
+        openNodes.Clear();
+        for (int i = 0; i < closeNodes.Count; i++)
+        {
+            var closeNode = closeNodes[i];
+            closeNode.NodeColor = Color.gray;
+        }
+        closeNodes.Clear();
+
         var currentNode = startNode;
         closeNodes.Add(currentNode);
         currentNode.GetAdjacentNodes(ref openNodes, ref closeNodes);
@@ -125,7 +157,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    currentNode = closeNodes[closeNodes.Count - 1];
+                    currentNode = closeNodes[^1];
                 }
             }
         }

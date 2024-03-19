@@ -10,7 +10,6 @@ public class FieldNode : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private MeshRenderer mesh;
-    public TextMeshProUGUI testText;
 
     [Header("--- Assignment Variable---")]
     public Vector2 nodePos;
@@ -28,8 +27,6 @@ public class FieldNode : MonoBehaviour
         mesh = GetComponentInChildren<MeshRenderer>();
         var material = new Material(Resources.Load<Material>("Materials/Node"));
         mesh.material = material;
-        testText = GetComponentInChildren<TextMeshProUGUI>();
-        testText.enabled = false;
 
         canMove = true;
     }
@@ -56,11 +53,14 @@ public class FieldNode : MonoBehaviour
         for (int i = 0; i < adjacentNodes.Count; i++)
         {
             var adjacentNode = adjacentNodes[i];
-            var findOpen = openNodes.Find(x => x == adjacentNode);
             var findClose = closeNodes.Find(x => x == adjacentNode);
-            if (findOpen != null && findClose == null && canMove)
+            if (findClose == null && adjacentNode.canMove)
             {
-                openNodes.Add(adjacentNode);
+                var findOpen = openNodes.Find(x => x == adjacentNode);
+                if (findOpen == null)
+                {
+                    openNodes.Add(adjacentNode);
+                }
             }
         }
     }
