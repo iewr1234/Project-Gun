@@ -23,7 +23,7 @@ public class CameraManager : MonoBehaviour
 
     private void MoveCamera()
     {
-        var pos = transform.position;
+        var pos = mainCam.transform.position;
         if (Input.GetKey(KeyCode.W))
         {
             pos.z += moveSpeed * Time.deltaTime;
@@ -40,6 +40,6 @@ public class CameraManager : MonoBehaviour
         {
             pos.x += moveSpeed * Time.deltaTime;
         }
-        transform.position = pos;
+        mainCam.transform.position = pos;
     }
 }

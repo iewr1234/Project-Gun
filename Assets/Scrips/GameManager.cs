@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -38,24 +39,6 @@ public class GameManager : MonoBehaviour
         CreateCharacter(CharacterOwner.Player);
     }
 
-    public void Update()
-    {
-        MouseClick();
-    }
-
-    private void MouseClick()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
-            {
-                var node = hit.collider.GetComponentInParent<FieldNode>();
-                CharacterMove(playerList[0], node);
-            }
-        }
-    }
-
     private void CreateField()
     {
         var size_X = (int)fieldSize.x;
@@ -76,7 +59,7 @@ public class GameManager : MonoBehaviour
                     pos.z += i * nodeInterval;
                 }
                 fieldNode.transform.position = pos;
-                fieldNode.SetComponents(this, new Vector2(i, j));
+                fieldNode.SetComponents(this, new Vector2(j, i));
                 fieldNode.NodeColor = Color.gray;
                 fieldNodes.Add(fieldNode);
             }
@@ -98,10 +81,63 @@ public class GameManager : MonoBehaviour
         charCtr.SetComponents(this, ownerType, node);
     }
 
+    public void Update()
+    {
+        MouseClick();
+        ShowMovableNodes();
+        SetCover();
+    }
+
+    private void MouseClick()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+            {
+                var node = hit.collider.GetComponentInParent<FieldNode>();
+                CharacterMove(playerList[0], node);
+            }
+        }
+    }
+
     private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
     {
+        if (charCtr.animator.GetBool("isMove")) return;
+
         ResultNodePass(charCtr.currentNode, targetNode);
         charCtr.AddCommand(CommandType.Move, closeNodes);
+    }
+
+    private void ShowMovableNodes()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            var currentNode = playerList[0].currentNode;
+            var movableNodes = fieldNodes.FindAll(
+                x => Mathf.Abs(currentNode.nodePos.x - x.nodePos.x) + Mathf.Abs(currentNode.nodePos.y - x.nodePos.y) <= playerList[0].mobility
+             && x != currentNode);
+            for (int i = 0; i < movableNodes.Count; i++)
+            {
+                var movableNode = movableNodes[i];
+                movableNode.NodeColor = Color.white;
+            }
+        }
+    }
+
+    private void SetCover()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+            {
+                var node = hit.collider.GetComponentInParent<FieldNode>();
+                var cover = Instantiate(Resources.Load<GameObject>("Prefabs/Cover"));
+                cover.transform.SetParent(node.transform, false);
+                node.canMove = false;
+            }
+        }
     }
 
     private void ResultNodePass(FieldNode startNode, FieldNode endNode)
@@ -120,7 +156,7 @@ public class GameManager : MonoBehaviour
         FieldNode nextNode = null;
         while (currentNode != endNode)
         {
-            float curF = 9999f;
+            float currentF = 9999f;
             for (int i = 0; i < currentNode.adjacentNodes.Count; i++)
             {
                 var adjacentNode = currentNode.adjacentNodes[i];
@@ -131,9 +167,9 @@ public class GameManager : MonoBehaviour
                     var g = DataUtility.GetDistance(currentNode.transform.position, adjacentNode.transform.position);
                     var h = DataUtility.GetDistance(adjacentNode.transform.position, endNode.transform.position);
                     var f = g + h;
-                    if (f < curF)
+                    if (f < currentF)
                     {
-                        curF = f;
+                        currentF = f;
                         nextNode = adjacentNode;
                     }
                 }

@@ -33,13 +33,14 @@ public class CharacterController : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
-    public FieldNode currentNode;
-    [Space(5f)]
+    public int mobility;
 
-    public float moveSpeed;
+    [HideInInspector] public FieldNode currentNode;
 
     private List<CharacterCommand> commandList = new List<CharacterCommand>();
     private bool moving;
+
+    private readonly float moveSpeed = 0.045f;
 
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
     {
@@ -84,7 +85,7 @@ public class CharacterController : MonoBehaviour
     private void CharacterMove(CharacterCommand command)
     {
         var targetNode = command.passList[0];
-        if (targetNode == currentNode)
+        if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
             command.passList.RemoveAt(0);
             if (command.passList.Count == 0)
@@ -97,6 +98,7 @@ public class CharacterController : MonoBehaviour
             if (!animator.GetBool("isMove"))
             {
                 animator.SetBool("isMove", true);
+                currentNode = command.passList[^1];
             }
             if (!moving)
             {
@@ -111,7 +113,6 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                currentNode = targetNode;
                 transform.position = targetNode.transform.position;
                 moving = false;
                 command.passList.RemoveAt(0);
