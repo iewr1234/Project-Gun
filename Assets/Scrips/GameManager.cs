@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
+    private List<FieldNode> movableNodes = new List<FieldNode>();
 
     private readonly float nodeSize = 1.2f;
     private readonly float nodeInterval = 0.1f;
@@ -49,15 +50,7 @@ public class GameManager : MonoBehaviour
             {
                 var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
                 fieldNode.transform.SetParent(fieldNodeTrf, false);
-                var pos = new Vector3(j * nodeSize, 0f, i * nodeSize);
-                if (j > 0)
-                {
-                    pos.x += j * nodeInterval;
-                }
-                if (i > 0)
-                {
-                    pos.z += i * nodeInterval;
-                }
+                var pos = new Vector3((j * nodeSize) + (j * nodeInterval), 0f, (i * nodeSize) + (i * nodeInterval));
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(this, new Vector2(j, i));
                 fieldNode.NodeColor = Color.gray;
@@ -84,7 +77,7 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         MouseClick();
-        ShowMovableNodes();
+        ShowMovableNodes(playerList[0]);
         SetCover();
     }
 
@@ -109,18 +102,43 @@ public class GameManager : MonoBehaviour
         charCtr.AddCommand(CommandType.Move, closeNodes);
     }
 
-    private void ShowMovableNodes()
+    private void ShowMovableNodes(CharacterController charCtr)
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            var currentNode = playerList[0].currentNode;
-            var movableNodes = fieldNodes.FindAll(
-                x => Mathf.Abs(currentNode.nodePos.x - x.nodePos.x) + Mathf.Abs(currentNode.nodePos.y - x.nodePos.y) <= playerList[0].mobility
-             && x != currentNode);
+            for (int i = 0; i < closeNodes.Count; i++)
+            {
+                var closeNode = closeNodes[i];
+                closeNode.NodeColor = Color.gray;
+            }
             for (int i = 0; i < movableNodes.Count; i++)
             {
                 var movableNode = movableNodes[i];
-                movableNode.NodeColor = Color.white;
+                movableNode.NodeColor = Color.gray;
+            }
+            movableNodes.Clear();
+            ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility);
+        }
+    }
+
+    private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility)
+    {
+        var canChain = mobility > 0 && node.canMove;
+        if (!canChain) return;
+
+        mobility--;
+        for (int i = 0; i < node.orthogonalNodes.Count; i++)
+        {
+            var orthogonalNode = node.orthogonalNodes[i];
+            if (orthogonalNode != currentNode && orthogonalNode.canMove)
+            {
+                var find = movableNodes.Find(x => x == orthogonalNode);
+                if (find == null)
+                {
+                    movableNodes.Add(orthogonalNode);
+                }
+                orthogonalNode.NodeColor = Color.white;
+                ChainOfMovableNode(currentNode, orthogonalNode, mobility);
             }
         }
     }

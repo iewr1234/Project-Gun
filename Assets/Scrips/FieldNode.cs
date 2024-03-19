@@ -13,9 +13,11 @@ public class FieldNode : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public Vector2 nodePos;
-    public List<FieldNode> adjacentNodes;
-    [Space(5f)]
+    public List<FieldNode> orthogonalNodes;
+    public List<FieldNode> diagonalNodes;
+    [HideInInspector] public List<FieldNode> adjacentNodes = new List<FieldNode>();
 
+    [Space(5f)]
     public bool canMove;
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
@@ -40,8 +42,14 @@ public class FieldNode : MonoBehaviour
                 if (i == 0 && j == 0) continue;
 
                 var adjacentNode = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
-                if (adjacentNode != null)
+                if (adjacentNode != null && i != 0 && j != 0)
                 {
+                    diagonalNodes.Add(adjacentNode);
+                    adjacentNodes.Add(adjacentNode);
+                }
+                else if (adjacentNode != null)
+                {
+                    orthogonalNodes.Add(adjacentNode);
                     adjacentNodes.Add(adjacentNode);
                 }
             }
