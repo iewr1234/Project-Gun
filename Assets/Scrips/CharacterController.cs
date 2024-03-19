@@ -60,6 +60,7 @@ public class CharacterController : MonoBehaviour
                 break;
         }
         currentNode = _currentNode;
+        currentNode.charCtr = this;
     }
 
     private void Update()
@@ -98,7 +99,9 @@ public class CharacterController : MonoBehaviour
             if (!animator.GetBool("isMove"))
             {
                 animator.SetBool("isMove", true);
+                currentNode.charCtr = null;
                 currentNode = command.passList[^1];
+                currentNode.charCtr = this;
             }
             if (!moving)
             {

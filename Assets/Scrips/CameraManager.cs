@@ -23,23 +23,29 @@ public class CameraManager : MonoBehaviour
 
     private void MoveCamera()
     {
+        Vector3 dir; 
         var pos = mainCam.transform.position;
         if (Input.GetKey(KeyCode.W))
         {
-            pos.z += moveSpeed * Time.deltaTime;
+            dir = mainCam.transform.forward;
+            dir.y = mainCam.transform.position.y;
+            pos += dir * (moveSpeed * Time.deltaTime);
         }
         else if (Input.GetKey(KeyCode.S))
         {
-            pos.z -= moveSpeed * Time.deltaTime;
+            dir = mainCam.transform.forward;
+            dir.y = mainCam.transform.position.y;
+            pos -= dir * (moveSpeed * Time.deltaTime);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            pos.x -= moveSpeed * Time.deltaTime;
+            pos -= mainCam.transform.right * (moveSpeed * Time.deltaTime);
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            pos.x += moveSpeed * Time.deltaTime;
+            pos += mainCam.transform.right * (moveSpeed * Time.deltaTime);
         }
+        pos.y = mainCam.transform.position.y;
         mainCam.transform.position = pos;
     }
 }

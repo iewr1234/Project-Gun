@@ -12,13 +12,14 @@ public class FieldNode : MonoBehaviour
     [SerializeField] private MeshRenderer mesh;
 
     [Header("--- Assignment Variable---")]
-    public Vector2 nodePos;
-    public List<FieldNode> orthogonalNodes;
-    public List<FieldNode> diagonalNodes;
-    [HideInInspector] public List<FieldNode> adjacentNodes = new List<FieldNode>();
+    public CharacterController charCtr;
 
-    [Space(5f)]
-    public bool canMove;
+    [HideInInspector] public Vector2 nodePos;
+    [HideInInspector] public bool canMove;
+
+    [HideInInspector] public List<FieldNode> orthogonalNodes;
+    [HideInInspector] public List<FieldNode> diagonalNodes;
+    [HideInInspector] public List<FieldNode> adjacentNodes = new List<FieldNode>();
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
     {

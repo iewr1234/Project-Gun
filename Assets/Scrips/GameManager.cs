@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     [Header("--- Assignment Variable---\n[Character]")]
     public List<CharacterController> playerList;
     public List<CharacterController> enemyList;
+    private CharacterController selectChar;
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
@@ -77,7 +78,6 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         MouseClick();
-        ShowMovableNodes(playerList[0]);
         SetCover();
     }
 
@@ -89,36 +89,34 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                CharacterMove(playerList[0], node);
+                if (node.charCtr != null && selectChar == null)
+                {
+                    selectChar = node.charCtr;
+                    ShowMovableNodes(selectChar);
+                }
+                else if (node.charCtr == null && selectChar != null)
+                {
+                    CharacterMove(selectChar, node);
+                    selectChar = null;
+                }
             }
         }
-    }
-
-    private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
-    {
-        if (charCtr.animator.GetBool("isMove")) return;
-
-        ResultNodePass(charCtr.currentNode, targetNode);
-        charCtr.AddCommand(CommandType.Move, closeNodes);
     }
 
     private void ShowMovableNodes(CharacterController charCtr)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        for (int i = 0; i < closeNodes.Count; i++)
         {
-            for (int i = 0; i < closeNodes.Count; i++)
-            {
-                var closeNode = closeNodes[i];
-                closeNode.NodeColor = Color.gray;
-            }
-            for (int i = 0; i < movableNodes.Count; i++)
-            {
-                var movableNode = movableNodes[i];
-                movableNode.NodeColor = Color.gray;
-            }
-            movableNodes.Clear();
-            ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility);
+            var closeNode = closeNodes[i];
+            closeNode.NodeColor = Color.gray;
         }
+        for (int i = 0; i < movableNodes.Count; i++)
+        {
+            var movableNode = movableNodes[i];
+            movableNode.NodeColor = Color.gray;
+        }
+        movableNodes.Clear();
+        ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility);
     }
 
     private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility)
@@ -141,6 +139,20 @@ public class GameManager : MonoBehaviour
                 ChainOfMovableNode(currentNode, orthogonalNode, mobility);
             }
         }
+    }
+
+    private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
+    {
+        if (charCtr.animator.GetBool("isMove")) return;
+
+        for (int i = 0; i < movableNodes.Count; i++)
+        {
+            var movableNode = movableNodes[i];
+            movableNode.NodeColor = Color.gray;
+        }
+        movableNodes.Clear();
+        ResultNodePass(charCtr.currentNode, targetNode);
+        charCtr.AddCommand(CommandType.Move, closeNodes);
     }
 
     private void SetCover()
