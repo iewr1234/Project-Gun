@@ -13,6 +13,7 @@ public class FieldNode : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public CharacterController charCtr;
+    public Cover cover;
 
     [HideInInspector] public Vector2 nodePos;
     [HideInInspector] public bool canMove;
@@ -52,23 +53,6 @@ public class FieldNode : MonoBehaviour
                 {
                     orthogonalNodes.Add(adjacentNode);
                     adjacentNodes.Add(adjacentNode);
-                }
-            }
-        }
-    }
-
-    public void GetAdjacentNodes(ref List<FieldNode> openNodes, ref List<FieldNode> closeNodes)
-    {
-        for (int i = 0; i < adjacentNodes.Count; i++)
-        {
-            var adjacentNode = adjacentNodes[i];
-            var findClose = closeNodes.Find(x => x == adjacentNode);
-            if (findClose == null && adjacentNode.canMove)
-            {
-                var findOpen = openNodes.Find(x => x == adjacentNode);
-                if (findOpen == null)
-                {
-                    openNodes.Add(adjacentNode);
                 }
             }
         }

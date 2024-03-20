@@ -13,6 +13,7 @@ public enum CommandType
 {
     None,
     Move,
+    Cover,
 }
 
 public class CharacterCommand
@@ -21,6 +22,9 @@ public class CharacterCommand
 
     //Move
     public List<FieldNode> passList;
+
+    //Cover
+    public FieldNode coverNode;
 }
 
 public class CharacterController : MonoBehaviour
@@ -78,6 +82,9 @@ public class CharacterController : MonoBehaviour
             case CommandType.Move:
                 CharacterMove(command);
                 break;
+            case CommandType.Cover:
+                CharacterCover(command);
+                break;
             default:
                 break;
         }
@@ -126,6 +133,11 @@ public class CharacterController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void CharacterCover(CharacterCommand command)
+    {
+
     }
 
     public void AddCommand(CommandType type, List<FieldNode> passList)

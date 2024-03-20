@@ -25,7 +25,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
-    private List<FieldNode> movableNodes = new List<FieldNode>();
 
     private readonly float nodeSize = 1.2f;
     private readonly float nodeInterval = 0.1f;
@@ -78,7 +77,7 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         MouseClick();
-        SetCover();
+        CreateCover();
     }
 
     private void MouseClick()
@@ -110,12 +109,12 @@ public class GameManager : MonoBehaviour
             var closeNode = closeNodes[i];
             closeNode.NodeColor = Color.gray;
         }
-        for (int i = 0; i < movableNodes.Count; i++)
+        for (int i = 0; i < openNodes.Count; i++)
         {
-            var movableNode = movableNodes[i];
+            var movableNode = openNodes[i];
             movableNode.NodeColor = Color.gray;
         }
-        movableNodes.Clear();
+        openNodes.Clear();
         ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility);
     }
 
@@ -130,10 +129,10 @@ public class GameManager : MonoBehaviour
             var orthogonalNode = node.orthogonalNodes[i];
             if (orthogonalNode != currentNode && orthogonalNode.canMove)
             {
-                var find = movableNodes.Find(x => x == orthogonalNode);
+                var find = openNodes.Find(x => x == orthogonalNode);
                 if (find == null)
                 {
-                    movableNodes.Add(orthogonalNode);
+                    openNodes.Add(orthogonalNode);
                 }
                 orthogonalNode.NodeColor = Color.white;
                 ChainOfMovableNode(currentNode, orthogonalNode, mobility);
@@ -145,17 +144,16 @@ public class GameManager : MonoBehaviour
     {
         if (charCtr.animator.GetBool("isMove")) return;
 
-        for (int i = 0; i < movableNodes.Count; i++)
+        for (int i = 0; i < openNodes.Count; i++)
         {
-            var movableNode = movableNodes[i];
+            var movableNode = openNodes[i];
             movableNode.NodeColor = Color.gray;
         }
-        movableNodes.Clear();
         ResultNodePass(charCtr.currentNode, targetNode);
         charCtr.AddCommand(CommandType.Move, closeNodes);
     }
 
-    private void SetCover()
+    private void CreateCover()
     {
         if (Input.GetKeyDown(KeyCode.C))
         {
@@ -163,8 +161,9 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                var cover = Instantiate(Resources.Load<GameObject>("Prefabs/Cover"));
+                var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
                 cover.transform.SetParent(node.transform, false);
+                node.cover = cover;
                 node.canMove = false;
             }
         }
@@ -172,7 +171,6 @@ public class GameManager : MonoBehaviour
 
     private void ResultNodePass(FieldNode startNode, FieldNode endNode)
     {
-        openNodes.Clear();
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var closeNode = closeNodes[i];
@@ -182,7 +180,6 @@ public class GameManager : MonoBehaviour
 
         var currentNode = startNode;
         closeNodes.Add(currentNode);
-        currentNode.GetAdjacentNodes(ref openNodes, ref closeNodes);
         FieldNode nextNode = null;
         while (currentNode != endNode)
         {
@@ -210,7 +207,6 @@ public class GameManager : MonoBehaviour
                 currentNode = nextNode;
                 closeNodes.Add(currentNode);
                 openNodes.Remove(currentNode);
-                currentNode.GetAdjacentNodes(ref openNodes, ref closeNodes);
                 nextNode = null;
             }
             else
@@ -233,5 +229,6 @@ public class GameManager : MonoBehaviour
             var closeNode = closeNodes[i];
             closeNode.NodeColor = Color.yellow;
         }
+        openNodes.Clear();
     }
 }
