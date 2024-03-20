@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour
                     selectChar = node.charCtr;
                     ShowMovableNodes(selectChar);
                 }
-                else if (node.charCtr == null && selectChar != null)
+                else if (node.canMove && selectChar != null)
                 {
                     CharacterMove(selectChar, node);
                     selectChar = null;
@@ -144,11 +144,6 @@ public class GameManager : MonoBehaviour
     {
         if (charCtr.animator.GetBool("isMove")) return;
 
-        for (int i = 0; i < openNodes.Count; i++)
-        {
-            var movableNode = openNodes[i];
-            movableNode.NodeColor = Color.gray;
-        }
         ResultNodePass(charCtr.currentNode, targetNode);
         charCtr.AddCommand(CommandType.Move, closeNodes);
     }
@@ -165,19 +160,44 @@ public class GameManager : MonoBehaviour
                 cover.transform.SetParent(node.transform, false);
                 node.cover = cover;
                 node.canMove = false;
+                node.ReleaseAdjacentNodes();
             }
         }
     }
 
     private void ResultNodePass(FieldNode startNode, FieldNode endNode)
     {
+        for (int i = 0; i < openNodes.Count; i++)
+        {
+            var movableNode = openNodes[i];
+            movableNode.NodeColor = Color.gray;
+        }
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var closeNode = closeNodes[i];
             closeNode.NodeColor = Color.gray;
         }
         closeNodes.Clear();
+        FindNodeRoute(startNode, endNode);
 
+        openNodes.Clear();
+        for (int i = 0; i < closeNodes.Count; i++)
+        {
+            var closeNode = closeNodes[i];
+            closeNode.NodeColor = Color.yellow;
+            openNodes.Add(closeNode);
+        }
+        ReverseResultNodePass(endNode, startNode);
+    }
+
+    private void ReverseResultNodePass(FieldNode startNode, FieldNode endNode)
+    {
+        closeNodes.Clear();
+        FindNodeRoute(startNode, endNode);
+    }
+
+    private void FindNodeRoute(FieldNode startNode, FieldNode endNode)
+    {
         var currentNode = startNode;
         closeNodes.Add(currentNode);
         FieldNode nextNode = null;
@@ -223,12 +243,5 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-
-        for (int i = 0; i < closeNodes.Count; i++)
-        {
-            var closeNode = closeNodes[i];
-            closeNode.NodeColor = Color.yellow;
-        }
-        openNodes.Clear();
     }
 }

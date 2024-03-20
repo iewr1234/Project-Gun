@@ -19,8 +19,6 @@ public class CameraManager : MonoBehaviour
     {
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
-
-        currentRot = 0f;
     }
 
     private void Update()
@@ -31,31 +29,6 @@ public class CameraManager : MonoBehaviour
 
     private void CameraMove()
     {
-        //Vector3 dir;
-        //var pos = pivotPoint.transform.position;
-        //if (Input.GetKey(KeyCode.W))
-        //{
-        //    dir = mainCam.transform.forward;
-        //    dir.y = mainCam.transform.position.y;
-        //    pos += dir * (moveSpeed * Time.deltaTime);
-        //}
-        //else if (Input.GetKey(KeyCode.S))
-        //{
-        //    dir = mainCam.transform.forward;
-        //    dir.y = mainCam.transform.position.y;
-        //    pos -= dir * (moveSpeed * Time.deltaTime);
-        //}
-        //if (Input.GetKey(KeyCode.A))
-        //{
-        //    pos -= mainCam.transform.right * (moveSpeed * Time.deltaTime);
-        //}
-        //else if (Input.GetKey(KeyCode.D))
-        //{
-        //    pos += mainCam.transform.right * (moveSpeed * Time.deltaTime);
-        //}
-        //pos.y = pivotPoint.transform.position.y;
-        //pivotPoint.transform.position = pos;
-
         var dir = Vector3.zero;
         if (Input.GetKey(KeyCode.W))
         {
@@ -81,24 +54,27 @@ public class CameraManager : MonoBehaviour
 
     private void CameraRotate()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            currentRot += 45f;
-        }
-        else if (Input.GetKeyDown(KeyCode.E))
-        {
-            currentRot -= 45f;
-        }
-
         var rotDiff = Mathf.DeltaAngle(pivotPoint.transform.eulerAngles.y, currentRot);
-        var rotDir = Mathf.Sign(rotDiff);
-
-        var rotStep = rotSpeed * Time.deltaTime;
-        if (Mathf.Abs(rotDiff) < rotStep)
+        if (rotDiff == 0f)
         {
-            rotStep = Mathf.Abs(rotDiff);
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                currentRot += 45f;
+            }
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                currentRot -= 45f;
+            }
         }
-
-        pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
+        else
+        {
+            var rotDir = Mathf.Sign(rotDiff);
+            var rotStep = rotSpeed * Time.deltaTime;
+            if (Mathf.Abs(rotDiff) < rotStep)
+            {
+                rotStep = Mathf.Abs(rotDiff);
+            }
+            pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
+        }
     }
 }

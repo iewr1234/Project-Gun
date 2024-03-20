@@ -16,6 +16,7 @@ public enum CommandType
     Cover,
 }
 
+[System.Serializable]
 public class CharacterCommand
 {
     public CommandType type;
@@ -41,7 +42,7 @@ public class CharacterController : MonoBehaviour
 
     [HideInInspector] public FieldNode currentNode;
 
-    private List<CharacterCommand> commandList = new List<CharacterCommand>();
+    [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
     private bool moving;
 
     private readonly float moveSpeed = 0.045f;
@@ -92,10 +93,10 @@ public class CharacterController : MonoBehaviour
 
     private void CharacterMove(CharacterCommand command)
     {
-        var targetNode = command.passList[0];
+        var targetNode = command.passList[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
-            command.passList.RemoveAt(0);
+            command.passList.Remove(targetNode);
             if (command.passList.Count == 0)
             {
                 commandList.RemoveAt(0);
@@ -107,7 +108,7 @@ public class CharacterController : MonoBehaviour
             {
                 animator.SetBool("isMove", true);
                 currentNode.charCtr = null;
-                currentNode = command.passList[^1];
+                currentNode = command.passList[0];
                 currentNode.charCtr = this;
             }
             if (!moving)
@@ -125,7 +126,7 @@ public class CharacterController : MonoBehaviour
             {
                 transform.position = targetNode.transform.position;
                 moving = false;
-                command.passList.RemoveAt(0);
+                command.passList.Remove(targetNode);
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
@@ -151,6 +152,22 @@ public class CharacterController : MonoBehaviour
                     passList = new List<FieldNode>(passList),
                 };
                 commandList.Add(moveCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void AddCommand(CommandType type)
+    {
+        switch (type)
+        {
+            case CommandType.Cover:
+                var coverCommand = new CharacterCommand
+                {
+                    type = CommandType.Cover,
+                };
+                commandList.Add(coverCommand);
                 break;
             default:
                 break;

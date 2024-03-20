@@ -18,8 +18,8 @@ public class FieldNode : MonoBehaviour
     [HideInInspector] public Vector2 nodePos;
     [HideInInspector] public bool canMove;
 
-    [HideInInspector] public List<FieldNode> orthogonalNodes;
-    [HideInInspector] public List<FieldNode> diagonalNodes;
+    public List<FieldNode> orthogonalNodes;
+    public List<FieldNode> diagonalNodes;
     [HideInInspector] public List<FieldNode> adjacentNodes = new List<FieldNode>();
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
@@ -54,6 +54,32 @@ public class FieldNode : MonoBehaviour
                     orthogonalNodes.Add(adjacentNode);
                     adjacentNodes.Add(adjacentNode);
                 }
+            }
+        }
+    }
+
+    public void ReleaseAdjacentNodes()
+    {
+        var nodeList = new List<FieldNode>();
+        for (int i = 0; i < orthogonalNodes.Count; i++)
+        {
+            nodeList.Clear();
+            var orthogonalNode = orthogonalNodes[i];
+            for (int j = 0; j < orthogonalNode.diagonalNodes.Count; j++)
+            {
+                var diagonalNode = orthogonalNode.diagonalNodes[j];
+                var find = orthogonalNodes.Find(x => x == diagonalNode);
+                if (find != null)
+                {
+                    nodeList.Add(diagonalNode);
+                }
+            }
+
+            for (int j = 0; j < nodeList.Count; j++)
+            {
+                var node = nodeList[j];
+                orthogonalNode.diagonalNodes.Remove(node);
+                orthogonalNode.adjacentNodes.Remove(node);
             }
         }
     }
