@@ -17,9 +17,12 @@ public class Weapon : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public WeaponType type;
+    public float range;
+    public int damage;
+    [Space(5f)]
+
     public int magMax;
     public int magAmmo;
-    public int damage;
 
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-3f, 92.5f, -95f);

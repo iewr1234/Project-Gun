@@ -76,6 +76,28 @@ public class CharacterController : MonoBehaviour
         currentNode.charCtr = this;
     }
 
+    private void OnDrawGizmos()
+    {
+        if (weapon == null) return;
+
+        Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+        Gizmos.color = Color.red;
+        var height = 1f;
+        var segments = 30f;
+        var angleStep = 360f / segments;
+        var angle = 0 * angleStep * Mathf.Deg2Rad;
+        var startPos = new Vector3(Mathf.Cos(angle) * weapon.range, height, Mathf.Sin(angle) * weapon.range);
+        for (int i = 0; i <= segments; i++)
+        {
+            angle = i * angleStep * Mathf.Deg2Rad;
+            var endPos = new Vector3(Mathf.Cos(angle) * weapon.range, height, Mathf.Sin(angle) * weapon.range);
+
+            Gizmos.DrawLine(startPos, endPos);
+
+            startPos = endPos;
+        }
+    }
+
     private void Update()
     {
         CommandApplication();
@@ -261,21 +283,12 @@ public class CharacterController : MonoBehaviour
     {
         switch (type)
         {
-            case CommandType.TakeCover:
-                var takeCoverCommand = new CharacterCommand
-                {
-                    type = CommandType.TakeCover,
-                };
-                commandList.Add(takeCoverCommand);
-                break;
-            case CommandType.LeaveCover:
-                var leaveCoverCommand = new CharacterCommand
-                {
-                    type = CommandType.LeaveCover,
-                };
-                commandList.Add(leaveCoverCommand);
-                break;
             default:
+                var command = new CharacterCommand
+                {
+                    type = type,
+                };
+                commandList.Add(command);
                 break;
         }
     }
