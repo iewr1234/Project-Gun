@@ -4180,9 +4180,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
   animator: {fileID: 0}
-  mobility: 5
   ownerType: 0
+  mobility: 5
   currentNode: {fileID: 0}
+  commandList: []
+  coverPos: {x: 0, y: 0, z: 0}
+  moveSpeed: 7
+  coverSpeed: 1
 --- !u!1 &2077115330512147994
 GameObject:
   m_ObjectHideFlags: 0

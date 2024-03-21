@@ -20,14 +20,11 @@ public class GameManager : MonoBehaviour
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
-    [SerializeField] private LayerMask layerMask;
+    private LayerMask nodeLayer;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
-
-    private readonly float nodeSize = 1.2f;
-    private readonly float nodeInterval = 0.1f;
 
     public void Start()
     {
@@ -36,6 +33,8 @@ public class GameManager : MonoBehaviour
 
         fieldNodeTrf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTrf = GameObject.FindGameObjectWithTag("Characters").transform;
+        nodeLayer = LayerMask.GetMask("Node");
+
         CreateField();
         CreateCharacter(CharacterOwner.Player);
     }
@@ -44,13 +43,15 @@ public class GameManager : MonoBehaviour
     {
         var size_X = (int)fieldSize.x;
         var size_Y = (int)fieldSize.y;
+        var size = DataUtility.nodeSize;
+        var interval = DataUtility.nodeInterval;
         for (int i = 0; i < size_Y; i++)
         {
             for (int j = 0; j < size_X; j++)
             {
                 var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
                 fieldNode.transform.SetParent(fieldNodeTrf, false);
-                var pos = new Vector3((j * nodeSize) + (j * nodeInterval), 0f, (i * nodeSize) + (i * nodeInterval));
+                var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(this, new Vector2(j, i));
                 fieldNode.NodeColor = Color.gray;
@@ -85,7 +86,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.charCtr != null && selectChar == null)
@@ -104,11 +105,6 @@ public class GameManager : MonoBehaviour
 
     private void ShowMovableNodes(CharacterController charCtr)
     {
-        for (int i = 0; i < closeNodes.Count; i++)
-        {
-            var closeNode = closeNodes[i];
-            closeNode.NodeColor = Color.gray;
-        }
         for (int i = 0; i < openNodes.Count; i++)
         {
             var movableNode = openNodes[i];
@@ -124,18 +120,18 @@ public class GameManager : MonoBehaviour
         if (!canChain) return;
 
         mobility--;
-        for (int i = 0; i < node.orthogonalNodes.Count; i++)
+        for (int i = 0; i < node.onAxisNodes.Count; i++)
         {
-            var orthogonalNode = node.orthogonalNodes[i];
-            if (orthogonalNode != currentNode && orthogonalNode.canMove)
+            var onAxisNode = node.onAxisNodes[i];
+            if (onAxisNode != currentNode && onAxisNode.canMove)
             {
-                var find = openNodes.Find(x => x == orthogonalNode);
+                var find = openNodes.Find(x => x == onAxisNode);
                 if (find == null)
                 {
-                    openNodes.Add(orthogonalNode);
+                    openNodes.Add(onAxisNode);
                 }
-                orthogonalNode.NodeColor = Color.white;
-                ChainOfMovableNode(currentNode, orthogonalNode, mobility);
+                onAxisNode.NodeColor = Color.white;
+                ChainOfMovableNode(currentNode, onAxisNode, mobility);
             }
         }
     }
@@ -145,7 +141,12 @@ public class GameManager : MonoBehaviour
         if (charCtr.animator.GetBool("isMove")) return;
 
         ResultNodePass(charCtr.currentNode, targetNode);
+        if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
+        {
+            charCtr.AddCommand(CommandType.LeaveCover);
+        }
         charCtr.AddCommand(CommandType.Move, closeNodes);
+        charCtr.AddCommand(CommandType.TakeCover);
     }
 
     private void CreateCover()
@@ -153,14 +154,12 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
                 cover.transform.SetParent(node.transform, false);
-                node.cover = cover;
-                node.canMove = false;
-                node.ReleaseAdjacentNodes();
+                cover.SetComponents(node);
             }
         }
     }
@@ -172,11 +171,6 @@ public class GameManager : MonoBehaviour
             var movableNode = openNodes[i];
             movableNode.NodeColor = Color.gray;
         }
-        for (int i = 0; i < closeNodes.Count; i++)
-        {
-            var closeNode = closeNodes[i];
-            closeNode.NodeColor = Color.gray;
-        }
         closeNodes.Clear();
         FindNodeRoute(startNode, endNode);
 
@@ -184,7 +178,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var closeNode = closeNodes[i];
-            closeNode.NodeColor = Color.yellow;
             openNodes.Add(closeNode);
         }
         ReverseResultNodePass(endNode, startNode);
@@ -204,20 +197,20 @@ public class GameManager : MonoBehaviour
         while (currentNode != endNode)
         {
             float currentF = 9999f;
-            for (int i = 0; i < currentNode.adjacentNodes.Count; i++)
+            for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
             {
-                var adjacentNode = currentNode.adjacentNodes[i];
-                var findOpen = openNodes.Find(x => x == adjacentNode);
-                var findClose = closeNodes.Find(x => x == adjacentNode);
+                var node = currentNode.allAxisNodes[i];
+                var findOpen = openNodes.Find(x => x == node);
+                var findClose = closeNodes.Find(x => x == node);
                 if (findOpen != null && findClose == null)
                 {
-                    var g = DataUtility.GetDistance(currentNode.transform.position, adjacentNode.transform.position);
-                    var h = DataUtility.GetDistance(adjacentNode.transform.position, endNode.transform.position);
+                    var g = DataUtility.GetDistance(currentNode.transform.position, node.transform.position);
+                    var h = DataUtility.GetDistance(node.transform.position, endNode.transform.position);
                     var f = g + h;
                     if (f < currentF)
                     {
                         currentF = f;
-                        nextNode = adjacentNode;
+                        nextNode = node;
                     }
                 }
             }

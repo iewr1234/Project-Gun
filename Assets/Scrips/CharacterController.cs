@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum CharacterOwner
@@ -13,19 +15,16 @@ public enum CommandType
 {
     None,
     Move,
-    Cover,
+    TakeCover,
+    LeaveCover,
 }
 
-[System.Serializable]
 public class CharacterCommand
 {
     public CommandType type;
 
     //Move
     public List<FieldNode> passList;
-
-    //Cover
-    public FieldNode coverNode;
 }
 
 public class CharacterController : MonoBehaviour
@@ -40,12 +39,18 @@ public class CharacterController : MonoBehaviour
     public CharacterOwner ownerType;
     public int mobility;
 
+    private LayerMask coverLayer;
     [HideInInspector] public FieldNode currentNode;
 
-    [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
+    private List<CharacterCommand> commandList = new List<CharacterCommand>();
     private bool moving;
+    private bool covering;
+    private Vector3 coverPos;
 
-    private readonly float moveSpeed = 0.045f;
+    private readonly float moveSpeed = 7f;
+    private readonly float closeDistance = 0.05f;
+    private readonly float coverSpeed = 1f;
+    private readonly float coverInterval = 0.2f;
 
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
     {
@@ -64,16 +69,18 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+        coverLayer = LayerMask.GetMask("Cover");
+
         currentNode = _currentNode;
         currentNode.charCtr = this;
     }
 
     private void Update()
     {
-        CommandProcess();
+        CommandApplication();
     }
 
-    private void CommandProcess()
+    private void CommandApplication()
     {
         if (commandList.Count == 0) return;
 
@@ -81,17 +88,20 @@ public class CharacterController : MonoBehaviour
         switch (command.type)
         {
             case CommandType.Move:
-                CharacterMove(command);
+                MoveProcess(command);
                 break;
-            case CommandType.Cover:
-                CharacterCover(command);
+            case CommandType.TakeCover:
+                TakeCoverProcess(command);
+                break;
+            case CommandType.LeaveCover:
+                LeaveCoverProcess(command);
                 break;
             default:
                 break;
         }
     }
 
-    private void CharacterMove(CharacterCommand command)
+    private void MoveProcess(CharacterCommand command)
     {
         var targetNode = command.passList[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
@@ -111,18 +121,20 @@ public class CharacterController : MonoBehaviour
                 currentNode = command.passList[0];
                 currentNode.charCtr = this;
             }
-            if (!moving)
+
+            var canLook = animator.GetCurrentAnimatorStateInfo(0).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(0).IsTag("Move");
+            if (canLook && !moving)
             {
                 transform.LookAt(targetNode.transform);
+                moving = true;
             }
-
             var direction = Vector3.Normalize(targetNode.transform.position - transform.position);
             var distance = DataUtility.GetDistance(transform.position, targetNode.transform.position);
-            if (distance > 0.05f)
+            if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Move") && distance > closeDistance)
             {
-                transform.position += direction * (moveSpeed * Time.timeScale);
+                transform.position += direction * (moveSpeed * Time.deltaTime);
             }
-            else
+            else if (distance <= closeDistance)
             {
                 transform.position = targetNode.transform.position;
                 moving = false;
@@ -130,15 +142,79 @@ public class CharacterController : MonoBehaviour
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
-                    commandList.RemoveAt(0);
+                    commandList.Remove(command);
                 }
             }
         }
     }
 
-    private void CharacterCover(CharacterCommand command)
+    private void TakeCoverProcess(CharacterCommand command)
     {
+        if (!covering)
+        {
+            FieldNode coverNode = null;
+            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+            {
+                var cover = hit.collider.GetComponentInParent<Cover>();
+                coverNode = cover.node;
+            }
+            else
+            {
+                var node = currentNode.onAxisNodes.Find(x => x.cover != null);
+                if (node != null)
+                {
+                    Debug.Log(node.name);
+                    coverNode = node;
 
+                }
+            }
+
+            if (coverNode != null)
+            {
+                transform.LookAt(coverNode.transform);
+                coverPos = transform.position + (transform.forward * coverInterval);
+                covering = true;
+                animator.SetBool("isCover", true);
+            }
+            else
+            {
+                commandList.Remove(command);
+            }
+        }
+        else
+        {
+            if (transform.position != coverPos)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverSpeed * Time.deltaTime);
+            }
+            else
+            {
+                covering = false;
+                commandList.Remove(command);
+            }
+        }
+    }
+
+    private void LeaveCoverProcess(CharacterCommand command)
+    {
+        if (!covering)
+        {
+            coverPos = currentNode.transform.position;
+            covering = true;
+            animator.SetBool("isCover", false);
+        }
+        else
+        {
+            if (transform.position != coverPos)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverSpeed * Time.deltaTime);
+            }
+            else
+            {
+                covering = false;
+                commandList.Remove(command);
+            }
+        }
     }
 
     public void AddCommand(CommandType type, List<FieldNode> passList)
@@ -162,12 +238,19 @@ public class CharacterController : MonoBehaviour
     {
         switch (type)
         {
-            case CommandType.Cover:
-                var coverCommand = new CharacterCommand
+            case CommandType.TakeCover:
+                var takeCoverCommand = new CharacterCommand
                 {
-                    type = CommandType.Cover,
+                    type = CommandType.TakeCover,
                 };
-                commandList.Add(coverCommand);
+                commandList.Add(takeCoverCommand);
+                break;
+            case CommandType.LeaveCover:
+                var leaveCoverCommand = new CharacterCommand
+                {
+                    type = CommandType.LeaveCover,
+                };
+                commandList.Add(leaveCoverCommand);
                 break;
             default:
                 break;

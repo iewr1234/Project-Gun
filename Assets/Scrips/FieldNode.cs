@@ -18,9 +18,9 @@ public class FieldNode : MonoBehaviour
     [HideInInspector] public Vector2 nodePos;
     [HideInInspector] public bool canMove;
 
-    public List<FieldNode> orthogonalNodes;
-    public List<FieldNode> diagonalNodes;
-    [HideInInspector] public List<FieldNode> adjacentNodes = new List<FieldNode>();
+    public List<FieldNode> onAxisNodes;
+    public List<FieldNode> offAxisNodes;
+    [HideInInspector] public List<FieldNode> allAxisNodes = new List<FieldNode>();
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
     {
@@ -43,16 +43,16 @@ public class FieldNode : MonoBehaviour
             {
                 if (i == 0 && j == 0) continue;
 
-                var adjacentNode = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
-                if (adjacentNode != null && i != 0 && j != 0)
+                var node = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
+                if (node != null && i != 0 && j != 0)
                 {
-                    diagonalNodes.Add(adjacentNode);
-                    adjacentNodes.Add(adjacentNode);
+                    offAxisNodes.Add(node);
+                    allAxisNodes.Add(node);
                 }
-                else if (adjacentNode != null)
+                else if (node != null)
                 {
-                    orthogonalNodes.Add(adjacentNode);
-                    adjacentNodes.Add(adjacentNode);
+                    onAxisNodes.Add(node);
+                    allAxisNodes.Add(node);
                 }
             }
         }
@@ -61,25 +61,25 @@ public class FieldNode : MonoBehaviour
     public void ReleaseAdjacentNodes()
     {
         var nodeList = new List<FieldNode>();
-        for (int i = 0; i < orthogonalNodes.Count; i++)
+        for (int i = 0; i < onAxisNodes.Count; i++)
         {
             nodeList.Clear();
-            var orthogonalNode = orthogonalNodes[i];
-            for (int j = 0; j < orthogonalNode.diagonalNodes.Count; j++)
+            var onAxisNode = onAxisNodes[i];
+            for (int j = 0; j < onAxisNode.offAxisNodes.Count; j++)
             {
-                var diagonalNode = orthogonalNode.diagonalNodes[j];
-                var find = orthogonalNodes.Find(x => x == diagonalNode);
+                var offAxisNode = onAxisNode.offAxisNodes[j];
+                var find = onAxisNodes.Find(x => x == offAxisNode);
                 if (find != null)
                 {
-                    nodeList.Add(diagonalNode);
+                    nodeList.Add(offAxisNode);
                 }
             }
 
             for (int j = 0; j < nodeList.Count; j++)
             {
                 var node = nodeList[j];
-                orthogonalNode.diagonalNodes.Remove(node);
-                orthogonalNode.adjacentNodes.Remove(node);
+                onAxisNode.offAxisNodes.Remove(node);
+                onAxisNode.allAxisNodes.Remove(node);
             }
         }
     }
