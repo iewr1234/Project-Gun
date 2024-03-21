@@ -37,6 +37,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
+    [HideInInspector] public Transform aimingPoint;
 
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
@@ -61,6 +62,7 @@ public class CharacterController : MonoBehaviour
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
+        aimingPoint = transform.Find("Root/Hips/Spine_01/Spine_02");
 
         ownerType = _ownerType;
         switch (ownerType)
@@ -342,5 +344,11 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(command);
                 break;
         }
+    }
+
+    public GameManager GameMgr
+    {
+        private set { gameMgr = value; }
+        get { return gameMgr; }
     }
 }

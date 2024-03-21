@@ -13,7 +13,11 @@ public enum WeaponType
 public class Weapon : MonoBehaviour
 {
     [Header("---Access Script---")]
+    [SerializeField] private GameManager gameMgr;
     [SerializeField] private CharacterController charCtr;
+
+    [Header("---Access Component---")]
+    [SerializeField] private Transform muzzleTf;
 
     [Header("--- Assignment Variable---")]
     public WeaponType type;
@@ -30,8 +34,10 @@ public class Weapon : MonoBehaviour
 
     public void SetComponets(CharacterController _charCtr)
     {
+        gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapon = this;
+        muzzleTf = transform.Find("Muzzle");
 
         var handTf = charCtr.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         transform.SetParent(handTf, false);
@@ -43,6 +49,18 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
+        var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
+        if (bullet == null)
+        {
+            Debug.LogError("There are no bullet in the bulletPool");
+            return;
+        }
+
+        bullet.gameObject.SetActive(true);
+        bullet.SetComponents(this);
+        bullet.transform.position = muzzleTf.position;
+        bullet.transform.LookAt(target.aimingPoint);
+        bullet.bulletRb.velocity = bullet.transform.forward * bullet.speed;
         magAmmo--;
     }
 }

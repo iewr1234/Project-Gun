@@ -2,17 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 public class Bullet : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private Weapon weapon;
 
-    [Header("---Access Component---")]
-    public Rigidbody rigidBody;
-    public Collider bulletCdr;
-    public TrailRenderer trail;
-    public List<MeshRenderer> meshRenderers;
+    //[Header("---Access Component---")]
+    [HideInInspector] public Rigidbody bulletRb;
+    private Collider bulletCd;
+    private TrailRenderer trail;
+    private List<MeshRenderer> meshRenderers;
 
     [Header("--- Assignment Variable---")]
     public float speed = 150f;
@@ -23,8 +24,15 @@ public class Bullet : MonoBehaviour
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
-    private void Start()
+    public void SetComponents(Weapon _weapon)
     {
+        weapon = _weapon;
+
+        bulletRb = GetComponent<Rigidbody>();
+        bulletCd = GetComponent<Collider>();
+        trail = GetComponent<TrailRenderer>();
+        meshRenderers = GetComponentsInChildren<MeshRenderer>().ToList();
+
         trail.startWidth = startWidth;
         trail.endWidth = 0f;
     }
@@ -34,7 +42,8 @@ public class Bullet : MonoBehaviour
         timer += Time.deltaTime;
         if (timer > destroyTime)
         {
-            Destroy(gameObject);
+            timer = 0f;
+            gameObject.SetActive(false);
         }
     }
 
@@ -44,9 +53,9 @@ public class Bullet : MonoBehaviour
         {
             meshRenderers[i].enabled = false;
         }
-        rigidBody.velocity = Vector3.zero;
-        rigidBody.constraints = RigidbodyConstraints.FreezeAll;
-        rigidBody.isKinematic = true;
+        bulletRb.velocity = Vector3.zero;
+        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+        bulletRb.isKinematic = true;
         CheckHitObject(collision.gameObject);
     }
 
@@ -56,9 +65,9 @@ public class Bullet : MonoBehaviour
         {
             meshRenderers[i].enabled = false;
         }
-        rigidBody.velocity = Vector3.zero;
-        rigidBody.constraints = RigidbodyConstraints.FreezeAll;
-        rigidBody.isKinematic = true;
+        bulletRb.velocity = Vector3.zero;
+        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+        bulletRb.isKinematic = true;
     }
 
     private void CheckHitObject(GameObject hitObject)

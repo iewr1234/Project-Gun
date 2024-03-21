@@ -9,9 +9,10 @@ public class GameManager : MonoBehaviour
     [Header("---Access Script---")]
     public CameraManager camMgr;
 
-    [Header("---Access Component---")]
-    [SerializeField] private Transform fieldNodeTf;
-    [SerializeField] private Transform characterTf;
+    //[Header("---Access Component---")]
+    private Transform fieldNodeTf;
+    private Transform characterTf;
+    private Transform bulletsPoolTf;
 
     [Header("--- Assignment Variable---\n[Character]")]
     public List<CharacterController> playerList;
@@ -26,6 +27,10 @@ public class GameManager : MonoBehaviour
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
 
+    [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
+
+    private readonly int bulletPoolMax = 50;
+
     public void Start()
     {
         camMgr = FindAnyObjectByType<CameraManager>();
@@ -33,11 +38,13 @@ public class GameManager : MonoBehaviour
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+        bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
         CreateCharacter(CharacterOwner.Enemy, new Vector2(fieldSize.x - 1, fieldSize.y - 1), "Insurgent_A", "Rifle_02");
+        CreateBullets();
     }
 
     private void CreateField()
@@ -77,6 +84,17 @@ public class GameManager : MonoBehaviour
 
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
         weapon.SetComponets(charCtr);
+    }
+
+    private void CreateBullets()
+    {
+        for (int i = 0; i < bulletPoolMax; i++)
+        {
+            var bullet = Instantiate(Resources.Load<Bullet>("Prefabs/Weapon/Bullet"));
+            bullet.transform.SetParent(bulletsPoolTf, false);
+            bullet.gameObject.SetActive(false);
+            bulletPool.Add(bullet);
+        }
     }
 
     public void Update()
