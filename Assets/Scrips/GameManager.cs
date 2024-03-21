@@ -10,8 +10,8 @@ public class GameManager : MonoBehaviour
     public CameraManager camMgr;
 
     [Header("---Access Component---")]
-    [SerializeField] private Transform fieldNodeTrf;
-    [SerializeField] private Transform characterTrf;
+    [SerializeField] private Transform fieldNodeTf;
+    [SerializeField] private Transform characterTf;
 
     [Header("--- Assignment Variable---\n[Character]")]
     public List<CharacterController> playerList;
@@ -31,12 +31,13 @@ public class GameManager : MonoBehaviour
         camMgr = FindAnyObjectByType<CameraManager>();
         camMgr.SetComponents();
 
-        fieldNodeTrf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
-        characterTrf = GameObject.FindGameObjectWithTag("Characters").transform;
+        fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
+        characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         nodeLayer = LayerMask.GetMask("Node");
 
         CreateField();
-        CreateCharacter(CharacterOwner.Player);
+        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
+        CreateCharacter(CharacterOwner.Enemy, new Vector2(fieldSize.x - 1, fieldSize.y - 1), "Insurgent_A", "Rifle_02");
     }
 
     private void CreateField()
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
             for (int j = 0; j < size_X; j++)
             {
                 var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
-                fieldNode.transform.SetParent(fieldNodeTrf, false);
+                fieldNode.transform.SetParent(fieldNodeTf, false);
                 var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(this, new Vector2(j, i));
@@ -66,13 +67,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateCharacter(CharacterOwner ownerType)
+    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName)
     {
-        var charCtr = Instantiate(Resources.Load<CharacterController>("Prefabs/Character/Soldier_A"));
-        charCtr.transform.SetParent(characterTrf, false);
-        charCtr.transform.position = Vector3.zero;
-        var node = fieldNodes.Find(x => x.nodePos == new Vector2(0f, 0f));
+        var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charName}"));
+        charCtr.transform.SetParent(characterTf, false);
+        var node = fieldNodes.Find(x => x.nodePos == nodePos);
+        charCtr.transform.position = node.transform.position;
         charCtr.SetComponents(this, ownerType, node);
+        
+        var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
+        weapon.SetComponets(charCtr);
     }
 
     public void Update()
@@ -157,9 +161,12 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
-                cover.transform.SetParent(node.transform, false);
-                cover.SetComponents(node);
+                if (node.cover == null)
+                {
+                    var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
+                    cover.transform.SetParent(node.transform, false);
+                    cover.SetComponents(node);
+                }
             }
         }
     }
@@ -196,7 +203,7 @@ public class GameManager : MonoBehaviour
         FieldNode nextNode = null;
         while (currentNode != endNode)
         {
-            float currentF = 9999f;
+            float currentF = 999999f;
             for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
             {
                 var node = currentNode.allAxisNodes[i];

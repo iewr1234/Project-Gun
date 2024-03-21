@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum CharacterOwner
@@ -31,6 +29,7 @@ public class CharacterController : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
+    public Weapon weapon;
 
     [Header("---Access Component---")]
     public Animator animator;
@@ -38,6 +37,8 @@ public class CharacterController : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
     public int mobility;
+    public int maxHealth;
+    public int health;
 
     private LayerMask coverLayer;
     [HideInInspector] public FieldNode currentNode;
@@ -153,28 +154,36 @@ public class CharacterController : MonoBehaviour
         if (!covering)
         {
             FieldNode coverNode = null;
+            var rotY = transform.rotation.y;
             if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
             {
                 var cover = hit.collider.GetComponentInParent<Cover>();
-                coverNode = cover.node;
+                var find = currentNode.onAxisNodes.Find(x => x == cover.node);
+                if (find != null)
+                {
+                    coverNode = cover.node;
+                }
+                else
+                {
+                    var node = currentNode.onAxisNodes.Find(x => x.cover != null);
+                    if (node != null)
+                    {
+                        coverNode = node;
+                    }
+                }
             }
             else
             {
                 var node = currentNode.onAxisNodes.Find(x => x.cover != null);
                 if (node != null)
                 {
-                    Debug.Log(node.name);
                     coverNode = node;
-
                 }
             }
 
             if (coverNode != null)
             {
-                transform.LookAt(coverNode.transform);
-                coverPos = transform.position + (transform.forward * coverInterval);
-                covering = true;
-                animator.SetBool("isCover", true);
+                FindDirectionForCover(coverNode);
             }
             else
             {
@@ -183,16 +192,25 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            if (transform.position != coverPos)
-            {
-                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverSpeed * Time.deltaTime);
-            }
-            else
-            {
-                covering = false;
-                commandList.Remove(command);
-            }
+            MoveCoverPosition(command);
         }
+    }
+
+    private void FindDirectionForCover(FieldNode coverNode)
+    {
+        transform.LookAt(coverNode.transform);
+        var pos = transform.position + (transform.right * DataUtility.nodeSize);
+        if (Physics.Raycast(pos, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+        {
+            animator.SetBool("isRight", false);
+        }
+        else
+        {
+            animator.SetBool("isRight", true);
+        }
+        coverPos = transform.position + (transform.forward * coverInterval);
+        covering = true;
+        animator.SetBool("isCover", true);
     }
 
     private void LeaveCoverProcess(CharacterCommand command)
@@ -205,15 +223,20 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            if (transform.position != coverPos)
-            {
-                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverSpeed * Time.deltaTime);
-            }
-            else
-            {
-                covering = false;
-                commandList.Remove(command);
-            }
+            MoveCoverPosition(command);
+        }
+    }
+
+    private void MoveCoverPosition(CharacterCommand command)
+    {
+        if (transform.position != coverPos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, coverPos, coverSpeed * Time.deltaTime);
+        }
+        else
+        {
+            covering = false;
+            commandList.Remove(command);
         }
     }
 

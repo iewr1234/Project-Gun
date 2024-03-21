@@ -1,0 +1,39 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.TextCore.Text;
+
+public enum WeaponType
+{
+    None,
+    Pistol,
+    Rifle,
+}
+
+public class Weapon : MonoBehaviour
+{
+    [Header("---Access Script---")]
+    [SerializeField] private CharacterController charCtr;
+
+    [Header("--- Assignment Variable---")]
+    public WeaponType type;
+    public int magMax;
+    public int magAmmo;
+    public int damage;
+
+    private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0f);
+    private readonly Vector3 weaponRot_Rifle = new Vector3(-3f, 92.5f, -95f);
+
+    public void SetComponets(CharacterController _charCtr)
+    {
+        charCtr = _charCtr;
+        charCtr.weapon = this;
+
+        var handTf = charCtr.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+        transform.SetParent(handTf, false);
+        transform.localPosition = weaponPos_Rifle;
+        transform.localRotation = Quaternion.Euler(weaponRot_Rifle);
+
+        magAmmo = magMax;
+    }
+}
