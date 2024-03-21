@@ -74,18 +74,79 @@ public class GameManager : MonoBehaviour
         var node = fieldNodes.Find(x => x.nodePos == nodePos);
         charCtr.transform.position = node.transform.position;
         charCtr.SetComponents(this, ownerType, node);
-        
+
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
         weapon.SetComponets(charCtr);
     }
 
     public void Update()
     {
-        MouseClick();
+        KeyboardInput();
+        MouseInput();
         CreateCover();
     }
 
-    private void MouseClick()
+    private void KeyboardInput()
+    {
+        if (selectChar == null) return;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            var target = FindTarget(selectChar);
+            if (target != null && selectChar.weapon.magAmmo > 0)
+            {
+                selectChar.AddCommand(CommandType.Shoot, target);
+                for (int i = 0; i < openNodes.Count; i++)
+                {
+                    var openNode = openNodes[i];
+                    openNode.NodeColor = Color.gray;
+                }
+                openNodes.Clear();
+                selectChar = null;
+            }
+            else if (target != null && selectChar.weapon.magAmmo == 0)
+            {
+                Debug.Log($"{selectChar.name}: No Ammo");
+            }
+            else
+            {
+                Debug.Log($"{selectChar.name}: No Target");
+            }
+        }
+    }
+
+    private CharacterController FindTarget(CharacterController shooter)
+    {
+        CharacterController shootTarget = null;
+        var targetList = new List<CharacterController>();
+        switch (shooter.ownerType)
+        {
+            case CharacterOwner.Player:
+                targetList = enemyList;
+                break;
+            case CharacterOwner.Enemy:
+                targetList = playerList;
+                break;
+            default:
+                break;
+        }
+
+        var targetDist = 999999f;
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            var target = targetList[i];
+            var dist = DataUtility.GetDistance(shooter.transform.position, target.transform.position);
+            if (dist < targetDist && dist <= shooter.weapon.range)
+            {
+                targetDist = dist;
+                shootTarget = target;
+            }
+        }
+
+        return shootTarget;
+    }
+
+    private void MouseInput()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -175,8 +236,8 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < openNodes.Count; i++)
         {
-            var movableNode = openNodes[i];
-            movableNode.NodeColor = Color.gray;
+            var openNode = openNodes[i];
+            openNode.NodeColor = Color.gray;
         }
         closeNodes.Clear();
         FindNodeRoute(startNode, endNode);

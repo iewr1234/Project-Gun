@@ -15,6 +15,7 @@ public enum CommandType
     Move,
     TakeCover,
     LeaveCover,
+    Shoot,
 }
 
 public class CharacterCommand
@@ -23,6 +24,9 @@ public class CharacterCommand
 
     //Move
     public List<FieldNode> passList;
+
+    //Shoot
+    public CharacterController target;
 }
 
 public class CharacterController : MonoBehaviour
@@ -78,6 +82,11 @@ public class CharacterController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        DrawWeaponRange();
+    }
+
+    private void DrawWeaponRange()
+    {
         if (weapon == null) return;
 
         Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
@@ -91,9 +100,7 @@ public class CharacterController : MonoBehaviour
         {
             angle = i * angleStep * Mathf.Deg2Rad;
             var endPos = new Vector3(Mathf.Cos(angle) * weapon.range, height, Mathf.Sin(angle) * weapon.range);
-
             Gizmos.DrawLine(startPos, endPos);
-
             startPos = endPos;
         }
     }
@@ -119,6 +126,9 @@ public class CharacterController : MonoBehaviour
             case CommandType.LeaveCover:
                 LeaveCoverProcess(command);
                 break;
+            case CommandType.Shoot:
+                ShootProcess(command);
+                break;
             default:
                 break;
         }
@@ -139,6 +149,7 @@ public class CharacterController : MonoBehaviour
         {
             if (!animator.GetBool("isMove"))
             {
+                animator.SetBool("isAim", false);
                 animator.SetBool("isMove", true);
                 currentNode.charCtr = null;
                 currentNode = command.passList[0];
@@ -262,6 +273,29 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    private void ShootProcess(CharacterCommand command)
+    {
+        if (!animator.GetBool("isAim"))
+        {
+            transform.LookAt(command.target.transform);
+            animator.SetBool("isAim", true);
+            animator.SetInteger("shootNum", weapon.bulletsPerShot);
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+        {
+            weapon.FireBullet(command.target);
+            var shootNum = animator.GetInteger("shootNum");
+            shootNum--;
+            animator.SetInteger("shootNum", shootNum);
+            if (shootNum == 0)
+            {
+                animator.SetBool("isAim", false);
+                commandList.Remove(command);
+            }
+        }
+    }
+
     public void AddCommand(CommandType type, List<FieldNode> passList)
     {
         switch (type)
@@ -273,6 +307,23 @@ public class CharacterController : MonoBehaviour
                     passList = new List<FieldNode>(passList),
                 };
                 commandList.Add(moveCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void AddCommand(CommandType type, CharacterController target)
+    {
+        switch (type)
+        {
+            case CommandType.Shoot:
+                var shootCommand = new CharacterCommand
+                {
+                    type = CommandType.Shoot,
+                    target = target,
+                };
+                commandList.Add(shootCommand);
                 break;
             default:
                 break;
