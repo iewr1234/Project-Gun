@@ -76,6 +76,12 @@ public class CharacterController : MonoBehaviour
     private readonly float aimPointY = 0.9f;
     private readonly float aimOffTime = 0.3f;
 
+    /// <summary>
+    /// 구성요소 설정
+    /// </summary>
+    /// <param name="_gameMgr"></param>
+    /// <param name="_ownerType"></param>
+    /// <param name="_currentNode"></param>
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
@@ -128,6 +134,9 @@ public class CharacterController : MonoBehaviour
         DrawWeaponRange();
     }
 
+    /// <summary>
+    /// 무기 사거리 범위 표시
+    /// </summary>
     private void DrawWeaponRange()
     {
         if (weapon == null) return;
@@ -153,6 +162,9 @@ public class CharacterController : MonoBehaviour
         CommandApplication();
     }
 
+    /// <summary>
+    /// 커맨드리스트의 커맨드를 실행
+    /// </summary>
     private void CommandApplication()
     {
         if (commandList.Count == 0) return;
@@ -186,6 +198,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 이동 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void MoveProcess(CharacterCommand command)
     {
         var targetNode = command.passList[^1];
@@ -236,6 +252,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 엄폐실행 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void TakeCoverProcess(CharacterCommand command)
     {
         if (!covering)
@@ -283,6 +303,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엄폐 후 캐릭터 방향 찾기
+    /// </summary>
+    /// <param name="coverNode"></param>
     private void FindDirectionForCover(FieldNode coverNode)
     {
         transform.LookAt(coverNode.transform);
@@ -301,6 +325,10 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isCover", true);
     }
 
+    /// <summary>
+    /// 캐릭터 엄폐해제 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void LeaveCoverProcess(CharacterCommand command)
     {
         if (!covering)
@@ -316,6 +344,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엄폐중 캐릭터 이동 적용
+    /// </summary>
+    /// <param name="command"></param>
     private void MoveCoverPosition(CharacterCommand command)
     {
         if (transform.position != coverPos)
@@ -329,6 +361,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 엄폐사격 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void CoverAimProcess(CharacterCommand command)
     {
         if (!covering && !animator.GetBool("isAim"))
@@ -356,6 +392,9 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엄폐사격을 위해 이동할 노드를 찾음
+    /// </summary>
     private void FindCoverAimNode()
     {
         Vector3 dir;
@@ -371,6 +410,7 @@ public class CharacterController : MonoBehaviour
         if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, nodeLayer))
         {
             var node = hit.collider.GetComponentInParent<FieldNode>();
+            Debug.Log($"CoverAim: {currentNode.name} => {node.name}");
             coverPos = node.transform.position;
             covering = true;
         }
@@ -380,6 +420,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엄폐사격 후 재엄폐 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
         if (transform.position != coverPos)
@@ -392,6 +436,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 사격 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void ShootProcess(CharacterCommand command)
     {
         if (!animator.GetBool("isAim"))
@@ -420,6 +468,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 재장전 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void ReloadPrecess(CharacterCommand command)
     {
         if (!reloading && animator.GetCurrentAnimatorStateInfo(1).IsTag("None"))
@@ -430,6 +482,11 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="passList"></param>
     public void AddCommand(CommandType type, List<FieldNode> passList)
     {
         switch (type)
@@ -447,6 +504,11 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="target"></param>
     public void AddCommand(CommandType type, CharacterController target)
     {
         switch (type)
@@ -472,6 +534,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
     public void AddCommand(CommandType type)
     {
         switch (type)
@@ -487,6 +553,11 @@ public class CharacterController : MonoBehaviour
     }
 
     #region Coroutine
+    /// <summary>
+    /// (코루틴)조준해제 대기
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     private IEnumerator WaitAimOff(CharacterCommand command)
     {
         yield return new WaitForSeconds(aimOffTime);
@@ -498,11 +569,18 @@ public class CharacterController : MonoBehaviour
     #endregion
 
     #region Animation Event
+    /// <summary>
+    /// (애니메이션 이벤트)무기 위치 변경
+    /// </summary>
+    /// <param name="switchPos"></param>
     public void Event_WeaponSwitching(string switchPos)
     {
         weapon.WeaponSwitching(switchPos);
     }
 
+    /// <summary>
+    /// (애니메이션 이벤트)재장전 완료
+    /// </summary>
     public void Event_ReloadEnd()
     {
         if (commandList.Count == 0)
