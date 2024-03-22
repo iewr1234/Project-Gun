@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public enum CharacterOwner
 {
@@ -37,7 +38,10 @@ public class CharacterController : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
-    [HideInInspector] public Transform aimingPoint;
+
+    private RigBuilder rigBdr;
+    private Transform aimPoint;
+    [HideInInspector] public Transform aimTarget;
 
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
@@ -62,7 +66,11 @@ public class CharacterController : MonoBehaviour
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
-        aimingPoint = transform.Find("Root/Hips/Spine_01/Spine_02");
+
+        rigBdr = GetComponent<RigBuilder>();
+        rigBdr.enabled = false;
+        aimPoint = transform.Find("AimPoint");
+        aimTarget = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03");
 
         ownerType = _ownerType;
         switch (ownerType)
@@ -80,6 +88,7 @@ public class CharacterController : MonoBehaviour
 
         currentNode = _currentNode;
         currentNode.charCtr = this;
+        currentNode.canMove = false;
     }
 
     private void OnDrawGizmos()
@@ -153,8 +162,10 @@ public class CharacterController : MonoBehaviour
             {
                 animator.SetBool("isAim", false);
                 animator.SetBool("isMove", true);
+                currentNode.canMove = true;
                 currentNode.charCtr = null;
                 currentNode = command.passList[0];
+                currentNode.canMove = false;
                 currentNode.charCtr = this;
             }
 
@@ -280,14 +291,15 @@ public class CharacterController : MonoBehaviour
         if (!animator.GetBool("isAim"))
         {
             transform.LookAt(command.target.transform);
+            weapon.firstShot = true;
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
         }
 
         if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
-            weapon.FireBullet(command.target);
             var shootNum = animator.GetInteger("shootNum");
+            weapon.FireBullet(command.target);
             shootNum--;
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)

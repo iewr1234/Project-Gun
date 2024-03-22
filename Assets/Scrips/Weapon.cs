@@ -29,8 +29,12 @@ public class Weapon : MonoBehaviour
     public int magMax;
     public int magAmmo;
 
+    [HideInInspector] public bool firstShot;
+
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
+
+    private readonly float shootDisparity = 0.2f;
 
     public void SetComponets(CharacterController _charCtr)
     {
@@ -57,9 +61,22 @@ public class Weapon : MonoBehaviour
         }
 
         bullet.gameObject.SetActive(true);
-        bullet.SetComponents(this);
         bullet.transform.position = muzzleTf.position;
-        bullet.transform.LookAt(target.aimingPoint);
+        if (firstShot)
+        {
+            bullet.transform.LookAt(target.aimTarget.position);
+            firstShot = false;
+        }
+        else
+        {
+            var aimPos = target.aimTarget.position;
+            var random = Random.Range(-shootDisparity, shootDisparity);
+            aimPos += charCtr.transform.right * random;
+            random = Random.Range(-shootDisparity, shootDisparity);
+            aimPos += charCtr.transform.up * random;
+            bullet.transform.LookAt(aimPos);
+        }
+        bullet.SetComponents(this);
         bullet.bulletRb.velocity = bullet.transform.forward * bullet.speed;
         magAmmo--;
     }

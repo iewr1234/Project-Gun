@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     [Header("--- Assignment Variable---\n[Character]")]
     public List<CharacterController> playerList;
     public List<CharacterController> enemyList;
-    private CharacterController selectChar;
+    public CharacterController selectChar;
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
@@ -194,12 +194,12 @@ public class GameManager : MonoBehaviour
             movableNode.NodeColor = Color.gray;
         }
         openNodes.Clear();
-        ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility);
+        ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility, true);
     }
 
-    private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility)
+    private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility, bool isFirst)
     {
-        var canChain = mobility > 0 && node.canMove;
+        var canChain = isFirst || (mobility > 0 && node.canMove);
         if (!canChain) return;
 
         mobility--;
@@ -214,7 +214,7 @@ public class GameManager : MonoBehaviour
                     openNodes.Add(onAxisNode);
                 }
                 onAxisNode.NodeColor = Color.white;
-                ChainOfMovableNode(currentNode, onAxisNode, mobility);
+                ChainOfMovableNode(currentNode, onAxisNode, mobility, false);
             }
         }
     }

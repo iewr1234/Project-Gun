@@ -14,12 +14,13 @@ public class FieldNode : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public CharacterController charCtr;
     public Cover cover;
+    [Space(5f)]
+
+    public bool canMove;
 
     [HideInInspector] public Vector2 nodePos;
-    [HideInInspector] public bool canMove;
-
-    public List<FieldNode> onAxisNodes;
-    public List<FieldNode> offAxisNodes;
+    [HideInInspector] public List<FieldNode> onAxisNodes;
+    [HideInInspector] public List<FieldNode> offAxisNodes;
     [HideInInspector] public List<FieldNode> allAxisNodes = new List<FieldNode>();
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)

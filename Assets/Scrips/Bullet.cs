@@ -10,9 +10,9 @@ public class Bullet : MonoBehaviour
     [SerializeField] private Weapon weapon;
 
     //[Header("---Access Component---")]
+    [HideInInspector] public TrailRenderer trail;
     [HideInInspector] public Rigidbody bulletRb;
     private Collider bulletCd;
-    private TrailRenderer trail;
     private List<MeshRenderer> meshRenderers;
 
     [Header("--- Assignment Variable---")]
@@ -28,11 +28,12 @@ public class Bullet : MonoBehaviour
     {
         weapon = _weapon;
 
+        trail = GetComponent<TrailRenderer>();
         bulletRb = GetComponent<Rigidbody>();
         bulletCd = GetComponent<Collider>();
-        trail = GetComponent<TrailRenderer>();
         meshRenderers = GetComponentsInChildren<MeshRenderer>().ToList();
 
+        trail.enabled = true;
         trail.startWidth = startWidth;
         trail.endWidth = 0f;
     }
@@ -43,6 +44,8 @@ public class Bullet : MonoBehaviour
         if (timer > destroyTime)
         {
             timer = 0f;
+            trail.Clear();
+            trail.enabled = false;
             gameObject.SetActive(false);
         }
     }
