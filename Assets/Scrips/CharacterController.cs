@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.TextCore.Text;
 
 public enum CharacterOwner
 {
@@ -18,6 +17,7 @@ public enum CommandType
     TakeCover,
     LeaveCover,
     Shoot,
+    Reload,
 }
 
 public class CharacterCommand
@@ -37,6 +37,9 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private GameManager gameMgr;
     public Weapon weapon;
 
+    [HideInInspector] public FieldNode currentNode;
+    [HideInInspector] public Cover cover;
+
     [Header("---Access Component---")]
     public Animator animator;
 
@@ -54,10 +57,10 @@ public class CharacterController : MonoBehaviour
     public int health;
 
     private LayerMask coverLayer;
-    [HideInInspector] public FieldNode currentNode;
 
     private List<CharacterCommand> commandList = new List<CharacterCommand>();
     private bool moving;
+    private bool reloading;
     private bool covering;
     private Vector3 coverPos;
 
@@ -149,6 +152,9 @@ public class CharacterController : MonoBehaviour
                 break;
             case CommandType.Shoot:
                 ShootProcess(command);
+                break;
+            case CommandType.Reload:
+                ReloadPrecess(command);
                 break;
             default:
                 break;
@@ -264,6 +270,7 @@ public class CharacterController : MonoBehaviour
         {
             animator.SetBool("isRight", true);
         }
+        cover = coverNode.cover;
         coverPos = transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);
@@ -273,6 +280,7 @@ public class CharacterController : MonoBehaviour
     {
         if (!covering)
         {
+            cover = null;
             coverPos = currentNode.transform.position;
             covering = true;
             animator.SetBool("isCover", false);
@@ -319,6 +327,16 @@ public class CharacterController : MonoBehaviour
             {
                 StartCoroutine(WaitAimOff(command));
             }
+        }
+    }
+
+    private void ReloadPrecess(CharacterCommand command)
+    {
+        if (!reloading && animator.GetCurrentAnimatorStateInfo(1).IsTag("None"))
+        {
+            animator.SetTrigger("reload");
+            weapon.Reload();
+            reloading = true;
         }
     }
 
@@ -385,6 +403,23 @@ public class CharacterController : MonoBehaviour
     public void Event_WeaponSwitching(string switchPos)
     {
         weapon.WeaponSwitching(switchPos);
+    }
+
+    public void Event_ReloadEnd()
+    {
+        if (commandList.Count == 0)
+        {
+            Debug.LogError("No Command in the CommanderList");
+            return;
+        }
+        else if (commandList[0].type != CommandType.Reload)
+        {
+            Debug.LogError("CommandType is not Reload");
+            return;
+        }
+
+        commandList.RemoveAt(0);
+        reloading = false;
     }
     #endregion
 

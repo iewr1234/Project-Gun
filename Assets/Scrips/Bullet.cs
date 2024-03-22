@@ -1,15 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
 using System.Linq;
+using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private Weapon weapon;
 
-    //[Header("---Access Component---")]
+    [Header("---Access Component---")]
     [HideInInspector] public TrailRenderer trail;
     [HideInInspector] public Rigidbody bulletRb;
     private Collider bulletCd;

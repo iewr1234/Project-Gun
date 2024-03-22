@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -134,6 +132,17 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log($"{selectChar.name}: No Target");
             }
+        }
+        else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
+        {
+            selectChar.AddCommand(CommandType.Reload);
+            for (int i = 0; i < openNodes.Count; i++)
+            {
+                var openNode = openNodes[i];
+                openNode.NodeColor = Color.gray;
+            }
+            openNodes.Clear();
+            selectChar = null;
         }
     }
 

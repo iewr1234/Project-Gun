@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public enum WeaponType
 {
@@ -34,7 +33,7 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
 
-    private readonly float shootDisparity = 0.2f;
+    private readonly float shootDisparity = 0.15f;
 
     public void SetComponets(CharacterController _charCtr)
     {
@@ -92,5 +91,10 @@ public class Weapon : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    public void Reload()
+    {
+        magAmmo = magMax;
     }
 }
