@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -48,6 +49,9 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Transform rightHandTf;
     [HideInInspector] public Transform leftHandTf;
 
+    private List<Collider> ragdollCds = new List<Collider>();
+    private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
+
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
     public int mobility;
@@ -84,6 +88,20 @@ public class CharacterController : MonoBehaviour
 
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+
+        ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
+        for (int i = 0; i < ragdollCds.Count; i++)
+        {
+            var cd = ragdollCds[i];
+            cd.gameObject.layer = LayerMask.NameToLayer("BodyParts");
+            cd.enabled = false;
+        }
+        ragdollRbs = transform.Find("Root").GetComponentsInChildren<Rigidbody>().ToList();
+        for (int i = 0; i < ragdollRbs.Count; i++)
+        {
+            var rb = ragdollRbs[i];
+            rb.isKinematic = true;
+        }
 
         ownerType = _ownerType;
         switch (ownerType)
