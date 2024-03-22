@@ -80,6 +80,10 @@ public class GameManager : MonoBehaviour
         charCtr.transform.SetParent(characterTf, false);
         var node = fieldNodes.Find(x => x.nodePos == nodePos);
         charCtr.transform.position = node.transform.position;
+        if (ownerType == CharacterOwner.Enemy)
+        {
+            charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
         charCtr.SetComponents(this, ownerType, node);
 
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));

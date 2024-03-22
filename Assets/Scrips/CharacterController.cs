@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.TextCore.Text;
 
 public enum CharacterOwner
 {
@@ -43,6 +44,9 @@ public class CharacterController : MonoBehaviour
     private Transform aimPoint;
     [HideInInspector] public Transform aimTarget;
 
+    [HideInInspector] public Transform rightHandTf;
+    [HideInInspector] public Transform leftHandTf;
+
     [Header("--- Assignment Variable---")]
     public CharacterOwner ownerType;
     public int mobility;
@@ -62,6 +66,9 @@ public class CharacterController : MonoBehaviour
     private readonly float coverSpeed = 1f;
     private readonly float coverInterval = 0.2f;
 
+    private readonly float aimPointY = 0.9f;
+    private readonly float aimOffTime = 0.3f;
+
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
@@ -71,6 +78,9 @@ public class CharacterController : MonoBehaviour
         rigBdr.enabled = false;
         aimPoint = transform.Find("AimPoint");
         aimTarget = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03");
+
+        rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+        leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
 
         ownerType = _ownerType;
         switch (ownerType)
@@ -292,20 +302,22 @@ public class CharacterController : MonoBehaviour
         {
             transform.LookAt(command.target.transform);
             weapon.firstShot = true;
+            rigBdr.enabled = true;
+            var targetPos = command.target.transform.position;
+            aimPoint.transform.position = new Vector3(targetPos.x, aimPointY, targetPos.z);
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
         }
 
-        if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+        var shootNum = animator.GetInteger("shootNum");
+        if (animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim") && shootNum > 0)
         {
-            var shootNum = animator.GetInteger("shootNum");
             weapon.FireBullet(command.target);
             shootNum--;
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
-                animator.SetBool("isAim", false);
-                commandList.Remove(command);
+                StartCoroutine(WaitAimOff(command));
             }
         }
     }
@@ -357,6 +369,24 @@ public class CharacterController : MonoBehaviour
                 break;
         }
     }
+
+    #region Coroutine
+    private IEnumerator WaitAimOff(CharacterCommand command)
+    {
+        yield return new WaitForSeconds(aimOffTime);
+
+        rigBdr.enabled = false;
+        commandList.Remove(command);
+        animator.SetBool("isAim", false);
+    }
+    #endregion
+
+    #region Animation Event
+    public void Event_WeaponSwitching(string switchPos)
+    {
+        weapon.WeaponSwitching(switchPos);
+    }
+    #endregion
 
     public GameManager GameMgr
     {

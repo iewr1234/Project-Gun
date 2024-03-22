@@ -43,11 +43,7 @@ public class Weapon : MonoBehaviour
         charCtr.weapon = this;
         muzzleTf = transform.Find("Muzzle");
 
-        var handTf = charCtr.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
-        transform.SetParent(handTf, false);
-        transform.localPosition = weaponPos_Rifle;
-        transform.localRotation = Quaternion.Euler(weaponRot_Rifle);
-
+        WeaponSwitching("Right");
         magAmmo = magMax;
     }
 
@@ -79,5 +75,22 @@ public class Weapon : MonoBehaviour
         bullet.SetComponents(this);
         bullet.bulletRb.velocity = bullet.transform.forward * bullet.speed;
         magAmmo--;
+    }
+
+    public void WeaponSwitching(string switchPos)
+    {
+        switch (switchPos)
+        {
+            case "Right":
+                transform.SetParent(charCtr.rightHandTf, false);
+                transform.localPosition = weaponPos_Rifle;
+                transform.localRotation = Quaternion.Euler(weaponRot_Rifle);
+                break;
+            case "Left":
+                transform.SetParent(charCtr.leftHandTf);
+                break;
+            default:
+                break;
+        }
     }
 }
