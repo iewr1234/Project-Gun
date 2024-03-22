@@ -68,6 +68,7 @@ public class CharacterController : MonoBehaviour
     private readonly float closeDistance = 0.05f;
     private readonly float coverSpeed = 1f;
     private readonly float coverInterval = 0.2f;
+    private readonly float coverShootSpeed = 5f;
 
     private readonly float aimPointY = 0.9f;
     private readonly float aimOffTime = 0.3f;
@@ -308,11 +309,18 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("isAim"))
         {
-            transform.LookAt(command.target.transform);
             weapon.firstShot = true;
-            rigBdr.enabled = true;
+            if (!animator.GetBool("isCover"))
+            {
+                transform.LookAt(command.target.transform);
+                rigBdr.enabled = true;
+            }
+            else
+            {
+
+            }
             var targetPos = command.target.transform.position;
-            aimPoint.transform.position = new Vector3(targetPos.x, aimPointY, targetPos.z);
+            aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
         }
