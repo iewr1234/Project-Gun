@@ -49,28 +49,28 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        for (int i = 0; i < meshRenderers.Count; i++)
-        {
-            meshRenderers[i].enabled = false;
-        }
-        bulletRb.velocity = Vector3.zero;
-        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-        bulletRb.isKinematic = true;
-        CheckHitObject(collision.gameObject);
-    }
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    for (int i = 0; i < meshRenderers.Count; i++)
+    //    {
+    //        meshRenderers[i].enabled = false;
+    //    }
+    //    bulletRb.velocity = Vector3.zero;
+    //    bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+    //    bulletRb.isKinematic = true;
+    //    CheckHitObject(collision.gameObject);
+    //}
 
-    private void OnTriggerEnter(Collider other)
-    {
-        for (int i = 0; i < meshRenderers.Count; i++)
-        {
-            meshRenderers[i].enabled = false;
-        }
-        bulletRb.velocity = Vector3.zero;
-        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-        bulletRb.isKinematic = true;
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    for (int i = 0; i < meshRenderers.Count; i++)
+    //    {
+    //        meshRenderers[i].enabled = false;
+    //    }
+    //    bulletRb.velocity = Vector3.zero;
+    //    bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+    //    bulletRb.isKinematic = true;
+    //}
 
     private void CheckHitObject(GameObject hitObject)
     {

@@ -115,7 +115,16 @@ public class GameManager : MonoBehaviour
             var target = FindTarget(selectChar);
             if (target != null && selectChar.weapon.magAmmo > 0)
             {
-                selectChar.AddCommand(CommandType.Shoot, target);
+                if (selectChar.animator.GetBool("isCover"))
+                {
+                    selectChar.AddCommand(CommandType.CoverAim, target);
+                    selectChar.AddCommand(CommandType.Shoot, target);
+                    selectChar.AddCommand(CommandType.BackCover);
+                }
+                else
+                {
+                    selectChar.AddCommand(CommandType.Shoot, target);
+                }
                 for (int i = 0; i < openNodes.Count; i++)
                 {
                     var openNode = openNodes[i];

@@ -16,6 +16,8 @@ public enum CommandType
     Move,
     TakeCover,
     LeaveCover,
+    CoverAim,
+    BackCover,
     Shoot,
     Reload,
 }
@@ -23,11 +25,7 @@ public enum CommandType
 public class CharacterCommand
 {
     public CommandType type;
-
-    //Move
     public List<FieldNode> passList;
-
-    //Shoot
     public CharacterController target;
 }
 
@@ -56,6 +54,7 @@ public class CharacterController : MonoBehaviour
     public int maxHealth;
     public int health;
 
+    private LayerMask nodeLayer;
     private LayerMask coverLayer;
 
     private List<CharacterCommand> commandList = new List<CharacterCommand>();
@@ -68,7 +67,7 @@ public class CharacterController : MonoBehaviour
     private readonly float closeDistance = 0.05f;
     private readonly float coverSpeed = 1f;
     private readonly float coverInterval = 0.2f;
-    private readonly float coverShootSpeed = 5f;
+    private readonly float coverAimSpeed = 3f;
 
     private readonly float aimPointY = 0.9f;
     private readonly float aimOffTime = 0.3f;
@@ -98,6 +97,7 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+        nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
 
         currentNode = _currentNode;
@@ -150,6 +150,12 @@ public class CharacterController : MonoBehaviour
                 break;
             case CommandType.LeaveCover:
                 LeaveCoverProcess(command);
+                break;
+            case CommandType.CoverAim:
+                CoverAimProcess(command);
+                break;
+            case CommandType.BackCover:
+                BackCoverProcess(command);
                 break;
             case CommandType.Shoot:
                 ShootProcess(command);
@@ -305,20 +311,76 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    private void CoverAimProcess(CharacterCommand command)
+    {
+        if (!covering && !animator.GetBool("isAim"))
+        {
+            rigBdr.enabled = true;
+            animator.SetBool("isAim", true);
+            FindCoverAimNode();
+        }
+        else
+        {
+            var targetPos = command.target.transform.position;
+            aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
+            if (transform.position != coverPos)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
+            }
+            else
+            {
+                weapon.firstShot = true;
+                animator.SetInteger("shootNum", weapon.bulletsPerShot);
+                coverPos = currentNode.transform.position + (transform.forward * coverInterval);
+                commandList.Remove(command);
+                covering = false;
+            }
+        }
+    }
+
+    private void FindCoverAimNode()
+    {
+        Vector3 dir;
+        if (animator.GetBool("isRight"))
+        {
+            dir = transform.right;
+        }
+        else
+        {
+            dir = -transform.right;
+        }
+
+        if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, nodeLayer))
+        {
+            var node = hit.collider.GetComponentInParent<FieldNode>();
+            coverPos = node.transform.position;
+            covering = true;
+        }
+        else
+        {
+            Debug.LogError("not Found Node");
+        }
+    }
+
+    private void BackCoverProcess(CharacterCommand command)
+    {
+        if (transform.position != coverPos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
+        }
+        else
+        {
+            commandList.Remove(command);
+        }
+    }
+
     private void ShootProcess(CharacterCommand command)
     {
         if (!animator.GetBool("isAim"))
         {
             weapon.firstShot = true;
-            if (!animator.GetBool("isCover"))
-            {
-                transform.LookAt(command.target.transform);
-                rigBdr.enabled = true;
-            }
-            else
-            {
-
-            }
+            transform.LookAt(command.target.transform);
+            rigBdr.enabled = true;
             var targetPos = command.target.transform.position;
             aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
             animator.SetBool("isAim", true);
@@ -326,7 +388,9 @@ public class CharacterController : MonoBehaviour
         }
 
         var shootNum = animator.GetInteger("shootNum");
-        if (animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim") && shootNum > 0)
+        if (shootNum == 0) return;
+
+        if (animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim"))
         {
             weapon.FireBullet(command.target);
             shootNum--;
@@ -369,6 +433,14 @@ public class CharacterController : MonoBehaviour
     {
         switch (type)
         {
+            case CommandType.CoverAim:
+                var coverAimCommand = new CharacterCommand
+                {
+                    type = CommandType.CoverAim,
+                    target = target,
+                };
+                commandList.Add(coverAimCommand);
+                break;
             case CommandType.Shoot:
                 var shootCommand = new CharacterCommand
                 {
