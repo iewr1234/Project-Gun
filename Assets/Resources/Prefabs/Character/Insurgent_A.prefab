@@ -7047,9 +7047,13 @@ PrefabInstance:
       value: Rig
       objectReference: {fileID: 0}
     - target: {fileID: 3580108757340563403, guid: f938a1c190f72214fbcf15310a977716, type: 3}
-      propertyPath: m_Data.m_SourceObjects.m_Item0.transform
+      propertyPath: m_Data.m_ConstrainedObject
       value: 
       objectReference: {fileID: 4808957797971223155}
+    - target: {fileID: 3580108757340563403, guid: f938a1c190f72214fbcf15310a977716, type: 3}
+      propertyPath: m_Data.m_SourceObjects.m_Item0.transform
+      value: 
+      objectReference: {fileID: 2890395825848579490}
     - target: {fileID: 4110740443896360912, guid: f938a1c190f72214fbcf15310a977716, type: 3}
       propertyPath: m_RootOrder
       value: 34
