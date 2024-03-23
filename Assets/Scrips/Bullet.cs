@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
     [HideInInspector] public TrailRenderer trail;
     [HideInInspector] public Rigidbody bulletRb;
     private Collider bulletCd;
-    private List<MeshRenderer> meshRenderers;
+    private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
     public float speed = 150f;
@@ -27,14 +27,36 @@ public class Bullet : MonoBehaviour
     {
         weapon = _weapon;
 
-        trail = GetComponent<TrailRenderer>();
-        bulletRb = GetComponent<Rigidbody>();
-        bulletCd = GetComponent<Collider>();
-        meshRenderers = GetComponentsInChildren<MeshRenderer>().ToList();
-
+        if (trail == null)
+        {
+            trail = GetComponent<TrailRenderer>();
+        }
         trail.enabled = true;
         trail.startWidth = startWidth;
         trail.endWidth = 0f;
+
+        if (bulletRb == null)
+        {
+            bulletRb = GetComponent<Rigidbody>();
+        }
+        bulletRb.constraints = RigidbodyConstraints.None;
+        bulletRb.isKinematic = false;
+
+        if (bulletCd == null)
+        {
+            bulletCd = GetComponent<Collider>();
+        }
+        bulletCd.enabled = true;
+
+        if (meshRdrs.Count == 0)
+        {
+            meshRdrs = GetComponentsInChildren<MeshRenderer>().ToList();
+        }
+        for (int i = 0; i < meshRdrs.Count; i++)
+        {
+            var meshRdr = meshRdrs[i];
+            meshRdr.enabled = true;
+        }
     }
 
     private void Update()
@@ -51,26 +73,37 @@ public class Bullet : MonoBehaviour
 
     //private void OnCollisionEnter(Collision collision)
     //{
-    //    for (int i = 0; i < meshRenderers.Count; i++)
-    //    {
-    //        meshRenderers[i].enabled = false;
-    //    }
+    //    Debug.Log("collision");
     //    bulletRb.velocity = Vector3.zero;
     //    bulletRb.constraints = RigidbodyConstraints.FreezeAll;
     //    bulletRb.isKinematic = true;
+    //    bulletCd.enabled = false;
+    //    for (int i = 0; i < meshRdrs.Count; i++)
+    //    {
+    //        var meshRdr = meshRdrs[i];
+    //        meshRdr.enabled = false;
+    //    }
     //    CheckHitObject(collision.gameObject);
     //}
 
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    for (int i = 0; i < meshRenderers.Count; i++)
-    //    {
-    //        meshRenderers[i].enabled = false;
-    //    }
-    //    bulletRb.velocity = Vector3.zero;
-    //    bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-    //    bulletRb.isKinematic = true;
-    //}
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.layer == LayerMask.NameToLayer("BodyParts"))
+        {
+            var charCtr = other.GetComponentInParent<CharacterController>();
+            charCtr.OnHit(weapon.damage);
+        }
+
+        for (int i = 0; i < meshRdrs.Count; i++)
+        {
+            var meshRdr = meshRdrs[i];
+            meshRdr.enabled = false;
+        }
+        bulletRb.velocity = Vector3.zero;
+        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+        bulletRb.isKinematic = true;
+        bulletCd.enabled = false;
+    }
 
     private void CheckHitObject(GameObject hitObject)
     {

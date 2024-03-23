@@ -100,7 +100,7 @@ public class CharacterController : MonoBehaviour
         {
             var cd = ragdollCds[i];
             cd.gameObject.layer = LayerMask.NameToLayer("BodyParts");
-            cd.enabled = false;
+            cd.isTrigger = true;
         }
         ragdollRbs = transform.Find("Root").GetComponentsInChildren<Rigidbody>().ToList();
         for (int i = 0; i < ragdollRbs.Count; i++)
@@ -121,6 +121,7 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+        health = maxHealth;
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
 
@@ -549,6 +550,23 @@ public class CharacterController : MonoBehaviour
                 };
                 commandList.Add(command);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 피격
+    /// </summary>
+    public void OnHit(int damage)
+    {
+        health -= damage;
+        if (health < 0)
+        {
+            health = 0;
+        }
+
+        if (health == 0)
+        {
+
         }
     }
 
