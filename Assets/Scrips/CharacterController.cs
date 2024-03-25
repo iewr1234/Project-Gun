@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static UnityEditor.PlayerSettings;
+using static UnityEngine.GraphicsBuffer;
 
 public enum CharacterOwner
 {
@@ -28,6 +31,13 @@ public class CharacterCommand
     public CommandType type;
     public List<FieldNode> passList;
     public CharacterController target;
+}
+
+public struct TargetInfo
+{
+    public CharacterController target;
+    public FieldNode shooterNode;
+    public FieldNode targetNode;
 }
 
 public class CharacterController : MonoBehaviour
@@ -59,7 +69,7 @@ public class CharacterController : MonoBehaviour
     public int health;
     [Space(5f)]
 
-    [SerializeField] private List<CharacterController> targetList = new List<CharacterController>();
+    [SerializeField] private List<TargetInfo> targetList = new List<TargetInfo>();
 
     private LayerMask nodeLayer;
     private LayerMask coverLayer;
@@ -314,14 +324,13 @@ public class CharacterController : MonoBehaviour
     private void FindDirectionForCover(FieldNode coverNode)
     {
         transform.LookAt(coverNode.transform);
-        RaycastHit hit;
         var rightHit = false;
         var leftHit = false;
-        if (Physics.Raycast(transform.position, transform.right, out hit, DataUtility.nodeSize, nodeLayer))
+        if (Physics.Raycast(transform.position, transform.right, DataUtility.nodeSize, nodeLayer))
         {
             rightHit = true;
         }
-        if (Physics.Raycast(transform.position, -transform.right, out hit, DataUtility.nodeSize, nodeLayer))
+        if (Physics.Raycast(transform.position, -transform.right, DataUtility.nodeSize, nodeLayer))
         {
             leftHit = true;
         }
@@ -331,12 +340,12 @@ public class CharacterController : MonoBehaviour
             var rightCover = false;
             var leftCover = false;
             var pos = transform.position + (transform.right * DataUtility.nodeSize);
-            if (Physics.Raycast(pos, transform.forward, out hit, DataUtility.nodeSize, coverLayer))
+            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, coverLayer))
             {
                 rightCover = true;
             }
             pos = transform.position + (-transform.right * DataUtility.nodeSize);
-            if (Physics.Raycast(pos, transform.forward, out hit, DataUtility.nodeSize, coverLayer))
+            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, coverLayer))
             {
                 leftCover = true;
             }
@@ -604,7 +613,266 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void FindTargets()
     {
+        var _targetList = new List<CharacterController>();
+        switch (ownerType)
+        {
+            case CharacterOwner.Player:
+                _targetList = gameMgr.enemyList;
+                break;
+            case CharacterOwner.Enemy:
+                _targetList = gameMgr.playerList;
+                break;
+            default:
+                break;
+        }
 
+        for (int i = 0; i < _targetList.Count; i++)
+        {
+            var target = _targetList[i];
+            var pos = currentNode.transform.position;
+            var targetPos = target.currentNode.transform.position;
+            var distance = DataUtility.GetDistance(pos, targetPos);
+            if (distance < weapon.range)
+            {
+                FieldNode RN = null;
+                FieldNode LN = null;
+                FieldNode targetRN = null;
+                FieldNode targetLN = null;
+                if (cover != null && target.cover != null)
+                {
+                    RN = CheckTheCanMoveNode(pos, transform.right);
+                    LN = CheckTheCanMoveNode(pos, -transform.right);
+                    if (RN == null && LN == null)
+                    {
+                        Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+                        continue;
+                    }
+                    targetRN = CheckTheCanMoveNode(targetPos, target.transform.right);
+                    targetLN = CheckTheCanMoveNode(targetPos, -target.transform.right);
+                    if (targetRN == null && targetLN == null)
+                    {
+                        Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
+                        continue;
+                    }
+
+                    FieldNode shooterNode = null;
+                    FieldNode targetNode = null;
+                    if (FindNodeOfShooterAndTarget(RN, LN, targetRN, targetLN, ref shooterNode, ref targetNode))
+                    {
+                        var targetInfo = new TargetInfo
+                        {
+                            target = target,
+                            shooterNode = shooterNode,
+                            targetNode = targetNode,
+                        };
+                        targetList.Add(targetInfo);
+                    }
+                    else
+                    {
+                        Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
+                    }
+                }
+                else if (cover != null)
+                {
+                    RN = CheckTheCanMoveNode(pos, transform.right);
+                    LN = CheckTheCanMoveNode(pos, -transform.right);
+                    if (RN == null && LN == null)
+                    {
+                        Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+                        continue;
+                    }
+
+                    FieldNode shooterNode = null;
+                    FieldNode targetNode = null;
+                    if (FindNodeOfShooterAndTarget(RN, LN, targetRN, targetLN, ref shooterNode, ref targetNode))
+                    {
+                        var targetInfo = new TargetInfo
+                        {
+                            target = target,
+                            shooterNode = shooterNode,
+                            targetNode = targetNode,
+                        };
+                        targetList.Add(targetInfo);
+                    }
+                    else
+                    {
+                        Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
+                    }
+                }
+                else if (target.cover != null)
+                {
+                    targetRN = CheckTheCanMoveNode(targetPos, target.transform.right);
+                    targetLN = CheckTheCanMoveNode(targetPos, -target.transform.right);
+                    if (targetRN == null && targetLN == null)
+                    {
+                        Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
+                        continue;
+                    }
+
+                    FieldNode shooterNode = null;
+                    FieldNode targetNode = null;
+                    if (FindNodeOfShooterAndTarget(RN, LN, targetRN, targetLN, ref shooterNode, ref targetNode))
+                    {
+                        var targetInfo = new TargetInfo
+                        {
+                            target = target,
+                            shooterNode = shooterNode,
+                            targetNode = targetNode,
+                        };
+                        targetList.Add(targetInfo);
+                    }
+                    else
+                    {
+                        Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+                Debug.Log($"{transform.name}: 사거리가 닿지 않음(=> {target.name})");
+            }
+        }
+    }
+
+    /// <summary>
+    /// 이동가능한 노드를 체크
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="dir"></param>
+    /// <returns></returns>
+    private FieldNode CheckTheCanMoveNode(Vector3 pos, Vector3 dir)
+    {
+        FieldNode node = null;
+        if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, nodeLayer))
+        {
+            node = hit.collider.GetComponentInParent<FieldNode>();
+            if (!node.canMove)
+            {
+                node = null;
+            }
+        }
+
+        return node;
+    }
+
+    /// <summary>
+    /// 사수와 표적의 노드를 찾음
+    /// </summary>
+    /// <param name="RN"></param>
+    /// <param name="LN"></param>
+    /// <param name="targetRN"></param>
+    /// <param name="targetLN"></param>
+    /// <returns></returns>
+    private bool FindNodeOfShooterAndTarget(FieldNode RN, FieldNode LN, FieldNode targetRN, FieldNode targetLN, ref FieldNode shooterNode, ref FieldNode targetNode)
+    {
+        shooterNode = null;
+        targetNode = null;
+        FieldNode _shooterNode = null;
+        FieldNode _targetNode = null;
+        Vector3 pos;
+        Vector3 targetPos;
+        var distance = 999999f;
+        if (RN != null)
+        {
+            pos = RN.transform.position;
+            if (targetRN != null)
+            {
+                targetPos = targetRN.transform.position;
+                if (CheckTheCoverAlongPath(pos, targetPos))
+                {
+                    var dist = DataUtility.GetDistance(pos, targetPos);
+                    if (dist < distance)
+                    {
+                        _shooterNode = RN;
+                        _targetNode = targetRN;
+                        distance = dist;
+                    }
+                }
+            }
+            if (targetLN != null)
+            {
+                targetPos = targetLN.transform.position;
+                if (CheckTheCoverAlongPath(pos, targetPos))
+                {
+                    var dist = DataUtility.GetDistance(pos, targetPos);
+                    if (dist < distance)
+                    {
+                        _shooterNode = RN;
+                        _targetNode = targetLN;
+                        distance = dist;
+                    }
+                }
+            }
+        }
+        if (LN != null)
+        {
+            pos = LN.transform.position;
+            if (targetRN != null)
+            {
+                targetPos = targetRN.transform.position;
+                if (CheckTheCoverAlongPath(pos, targetPos))
+                {
+                    var dist = DataUtility.GetDistance(pos, targetPos);
+                    if (dist < distance)
+                    {
+                        _shooterNode = LN;
+                        _targetNode = targetRN;
+                        distance = dist;
+                    }
+                }
+            }
+            if (targetLN != null)
+            {
+                targetPos = targetLN.transform.position;
+                if (CheckTheCoverAlongPath(pos, targetPos))
+                {
+                    var dist = DataUtility.GetDistance(pos, targetPos);
+                    if (dist < distance)
+                    {
+                        _shooterNode = LN;
+                        _targetNode = targetLN;
+                        distance = dist;
+                    }
+                }
+            }
+        }
+
+        if (_shooterNode != null && _targetNode != null)
+        {
+            shooterNode = _shooterNode;
+            targetNode = _targetNode;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 경로상의 엄폐물을 체크
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="targetPos"></param>
+    /// <returns></returns>
+    private bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
+    {
+        bool canShoot;
+        var dir = Vector3.Normalize(targetPos - pos);
+        if (Physics.Raycast(pos, dir, weapon.range, coverLayer))
+        {
+            canShoot = false;
+        }
+        else
+        {
+            canShoot = true;
+        }
+
+        return canShoot;
     }
 
     /// <summary>
