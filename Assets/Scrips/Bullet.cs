@@ -18,8 +18,10 @@ public class Bullet : MonoBehaviour
     public float speed = 150f;
     public float damage;
 
+    private bool isHit;
     private float timer;
 
+    public LayerMask targetLayer;
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
@@ -57,6 +59,33 @@ public class Bullet : MonoBehaviour
             var meshRdr = meshRdrs[i];
             meshRdr.enabled = true;
         }
+
+        isHit = false;
+    }
+
+    void FixedUpdate()
+    {
+        if (isHit) return;
+
+        var hitCds = Physics.OverlapSphere(transform.position, 0.05f, targetLayer).ToList();
+        for (int i = 0; i < hitCds.Count; i++)
+        {
+            var hitCd = hitCds[i];
+            var charCtr = hitCd.GetComponentInParent<CharacterController>();
+            charCtr.OnHit(weapon.damage);
+            for (int j = 0; j < meshRdrs.Count; j++)
+            {
+                var meshRdr = meshRdrs[j];
+                meshRdr.enabled = false;
+            }
+            bulletRb.velocity = Vector3.zero;
+            bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+            bulletRb.isKinematic = true;
+            bulletCd.enabled = false;
+            isHit = true;
+            Debug.Log("Hit");
+            break;
+        }
     }
 
     private void Update()
@@ -69,55 +98,5 @@ public class Bullet : MonoBehaviour
             trail.enabled = false;
             gameObject.SetActive(false);
         }
-    }
-
-    //private void OnCollisionEnter(Collision collision)
-    //{
-    //    Debug.Log("collision");
-    //    bulletRb.velocity = Vector3.zero;
-    //    bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-    //    bulletRb.isKinematic = true;
-    //    bulletCd.enabled = false;
-    //    for (int i = 0; i < meshRdrs.Count; i++)
-    //    {
-    //        var meshRdr = meshRdrs[i];
-    //        meshRdr.enabled = false;
-    //    }
-    //    CheckHitObject(collision.gameObject);
-    //}
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.layer == LayerMask.NameToLayer("BodyParts"))
-        {
-            var charCtr = other.GetComponentInParent<CharacterController>();
-            charCtr.OnHit(weapon.damage);
-        }
-
-        for (int i = 0; i < meshRdrs.Count; i++)
-        {
-            var meshRdr = meshRdrs[i];
-            meshRdr.enabled = false;
-        }
-        bulletRb.velocity = Vector3.zero;
-        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-        bulletRb.isKinematic = true;
-        bulletCd.enabled = false;
-    }
-
-    private void CheckHitObject(GameObject hitObject)
-    {
-        //if (hitObject.layer == LayerMask.NameToLayer("HitObject"))
-        //{
-        //    var target = hitObject.GetComponentInParent<Target>();
-        //    if (target != null && hitObject.CompareTag("WeakPoint"))
-        //    {
-        //        target.OnHit(damage, transform.position, true);
-        //    }
-        //    else if (target != null)
-        //    {
-        //        target.OnHit(damage, transform.position, false);
-        //    }
-        //}
     }
 }

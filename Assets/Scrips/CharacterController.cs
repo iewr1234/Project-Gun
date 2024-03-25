@@ -57,6 +57,9 @@ public class CharacterController : MonoBehaviour
     public int mobility;
     public int maxHealth;
     public int health;
+    [Space(5f)]
+
+    [SerializeField] private List<CharacterController> targetList = new List<CharacterController>();
 
     private LayerMask nodeLayer;
     private LayerMask coverLayer;
@@ -311,15 +314,57 @@ public class CharacterController : MonoBehaviour
     private void FindDirectionForCover(FieldNode coverNode)
     {
         transform.LookAt(coverNode.transform);
-        var pos = transform.position + (transform.right * DataUtility.nodeSize);
-        if (Physics.Raycast(pos, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+        RaycastHit hit;
+        var rightHit = false;
+        var leftHit = false;
+        if (Physics.Raycast(transform.position, transform.right, out hit, DataUtility.nodeSize, nodeLayer))
         {
-            animator.SetBool("isRight", false);
+            rightHit = true;
+        }
+        if (Physics.Raycast(transform.position, -transform.right, out hit, DataUtility.nodeSize, nodeLayer))
+        {
+            leftHit = true;
+        }
+
+        if (rightHit || leftHit)
+        {
+            var rightCover = false;
+            var leftCover = false;
+            var pos = transform.position + (transform.right * DataUtility.nodeSize);
+            if (Physics.Raycast(pos, transform.forward, out hit, DataUtility.nodeSize, coverLayer))
+            {
+                rightCover = true;
+            }
+            pos = transform.position + (-transform.right * DataUtility.nodeSize);
+            if (Physics.Raycast(pos, transform.forward, out hit, DataUtility.nodeSize, coverLayer))
+            {
+                leftCover = true;
+            }
+
+            if (rightCover && leftCover)
+            {
+                animator.SetBool("isRight", rightHit);
+            }
+            else if (rightCover && leftHit)
+            {
+                animator.SetBool("isRight", false);
+            }
+            else if (leftCover && rightHit)
+            {
+                animator.SetBool("isRight", true);
+            }
+            else
+            {
+                animator.SetBool("isRight", rightHit);
+            }
+            Debug.Log($"{transform.name}: RN={rightHit}, LN={leftHit}, RC={rightCover}, LC={leftCover}");
         }
         else
         {
-            animator.SetBool("isRight", true);
+            Debug.LogError("not Found Node");
+            return;
         }
+
         cover = coverNode.cover;
         coverPos = transform.position + (transform.forward * coverInterval);
         covering = true;
@@ -371,8 +416,8 @@ public class CharacterController : MonoBehaviour
         if (!covering && !animator.GetBool("isAim"))
         {
             rigBdr.enabled = true;
-            animator.SetBool("isAim", true);
             FindCoverAimNode();
+            animator.SetBool("isAim", true);
         }
         else
         {
@@ -417,7 +462,8 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("not Found Node");
+            //Debug.LogError("not Found Node");
+            //commandList.Clear();
         }
     }
 
@@ -464,7 +510,7 @@ public class CharacterController : MonoBehaviour
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
-                StartCoroutine(WaitAimOff(command));
+                StartCoroutine(Coroutine_AimOff(command));
             }
         }
     }
@@ -554,6 +600,14 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 사격 가능한 타겟 찾음
+    /// </summary>
+    public void FindTargets()
+    {
+
+    }
+
+    /// <summary>
     /// 캐릭터 피격
     /// </summary>
     public void OnHit(int damage)
@@ -572,11 +626,11 @@ public class CharacterController : MonoBehaviour
 
     #region Coroutine
     /// <summary>
-    /// (코루틴)조준해제 대기
+    /// (코루틴)조준해제
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    private IEnumerator WaitAimOff(CharacterCommand command)
+    private IEnumerator Coroutine_AimOff(CharacterCommand command)
     {
         yield return new WaitForSeconds(aimOffTime);
 
