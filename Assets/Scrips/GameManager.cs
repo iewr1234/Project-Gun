@@ -111,55 +111,110 @@ public class GameManager : MonoBehaviour
     {
         if (selectChar == null) return;
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        switch (camMgr.state)
         {
-            selectChar.FindTargets();
-            for (int i = 0; i < openNodes.Count; i++)
-            {
-                var openNode = openNodes[i];
-                openNode.NodeColor = Color.gray;
-            }
-            openNodes.Clear();
-            selectChar = null;
-            //if (selectChar.weapon.magAmmo > 0)
-            //{
-            //    if (selectChar.animator.GetBool("isCover"))
-            //    {
-            //        selectChar.AddCommand(CommandType.CoverAim, target);
-            //        selectChar.AddCommand(CommandType.Shoot, target);
-            //        selectChar.AddCommand(CommandType.BackCover);
-            //    }
-            //    else
-            //    {
-            //        selectChar.AddCommand(CommandType.Shoot, target);
-            //    }
-            //    for (int i = 0; i < openNodes.Count; i++)
-            //    {
-            //        var openNode = openNodes[i];
-            //        openNode.NodeColor = Color.gray;
-            //    }
-            //    openNodes.Clear();
-            //    selectChar = null;
-            //}
-            //else if (selectChar.weapon.magAmmo == 0)
-            //{
-            //    Debug.Log($"{selectChar.name}: No Ammo");
-            //}
-            //else
-            //{
-            //    Debug.Log($"{selectChar.name}: No Target");
-            //}
-        }
-        else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
-        {
-            selectChar.AddCommand(CommandType.Reload);
-            for (int i = 0; i < openNodes.Count; i++)
-            {
-                var openNode = openNodes[i];
-                openNode.NodeColor = Color.gray;
-            }
-            openNodes.Clear();
-            selectChar = null;
+            case CameraState.None:
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    selectChar.FindTargets();
+                    if (selectChar.SetTarget())
+                    {
+                        for (int i = 0; i < openNodes.Count; i++)
+                        {
+                            var openNode = openNodes[i];
+                            openNode.NodeColor = Color.gray;
+                        }
+                        openNodes.Clear();
+                    }
+
+                    #region old Code
+                    //if (selectChar.weapon.magAmmo > 0)
+                    //{
+                    //    if (selectChar.animator.GetBool("isCover"))
+                    //    {
+                    //        selectChar.AddCommand(CommandType.CoverAim, target);
+                    //        selectChar.AddCommand(CommandType.Shoot, target);
+                    //        selectChar.AddCommand(CommandType.BackCover);
+                    //    }
+                    //    else
+                    //    {
+                    //        selectChar.AddCommand(CommandType.Shoot, target);
+                    //    }
+                    //    for (int i = 0; i < openNodes.Count; i++)
+                    //    {
+                    //        var openNode = openNodes[i];
+                    //        openNode.NodeColor = Color.gray;
+                    //    }
+                    //    openNodes.Clear();
+                    //    selectChar = null;
+                    //}
+                    //else if (selectChar.weapon.magAmmo == 0)
+                    //{
+                    //    Debug.Log($"{selectChar.name}: No Ammo");
+                    //}
+                    //else
+                    //{
+                    //    Debug.Log($"{selectChar.name}: No Target");
+                    //}
+                    #endregion
+                }
+                else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
+                {
+                    selectChar.AddCommand(CommandType.Reload);
+                    for (int i = 0; i < openNodes.Count; i++)
+                    {
+                        var openNode = openNodes[i];
+                        openNode.NodeColor = Color.gray;
+                    }
+                    openNodes.Clear();
+                    selectChar = null;
+                }
+                break;
+            case CameraState.Aim:
+                if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    selectChar.SetNextTarget();
+                }
+                else if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    if (selectChar.weapon.magAmmo > 0)
+                    {
+                        if (selectChar.animator.GetBool("isCover"))
+                        {
+                            selectChar.AddCommand(CommandType.CoverAim);
+                            selectChar.AddCommand(CommandType.Shoot);
+                            selectChar.AddCommand(CommandType.BackCover);
+                        }
+                        else
+                        {
+                            selectChar.AddCommand(CommandType.Shoot);
+                        }
+                        for (int i = 0; i < openNodes.Count; i++)
+                        {
+                            var openNode = openNodes[i];
+                            openNode.NodeColor = Color.gray;
+                        }
+                        openNodes.Clear();
+                        camMgr.SetCameraState(CameraState.None);
+                        selectChar = null;
+                    }
+                    else if (selectChar.weapon.magAmmo == 0)
+                    {
+                        Debug.Log($"{selectChar.name}: No Ammo");
+                    }
+                    else
+                    {
+                        Debug.Log($"{selectChar.name}: No Target");
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    camMgr.SetCameraState(CameraState.None);
+                    selectChar = null;
+                }
+                break;
+            default:
+                break;
         }
     }
 

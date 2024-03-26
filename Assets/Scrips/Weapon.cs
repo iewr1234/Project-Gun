@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum WeaponType
@@ -41,6 +42,9 @@ public class Weapon : MonoBehaviour
         charCtr = _charCtr;
         charCtr.weapon = this;
         muzzleTf = transform.Find("Muzzle");
+
+        var mashs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
+        DataUtility.SetMeshsMaterial(charCtr.ownerType, mashs);
 
         WeaponSwitching("Right");
         magAmmo = magMax;

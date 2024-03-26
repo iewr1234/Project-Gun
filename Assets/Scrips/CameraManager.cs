@@ -1,29 +1,51 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Cinemachine;
+
+public enum CameraState
+{
+    None = -1,
+    Aim,
+}
 
 public class CameraManager : MonoBehaviour
 {
     [Header("---Access Component---")]
-    public Transform pivotPoint;
-    public Camera mainCam;
+    [HideInInspector] public Camera mainCam;
+
+    private Transform pivotPoint;
+    private List<CinemachineVirtualCamera> virCams;
 
     [Header("--- Assignment Variable---")]
-    [SerializeField] private float moveSpeed = 15f;
-    [SerializeField] private float rotSpeed = 150f;
-    [SerializeField] private float camDistance;
+    public CameraState state;
 
+    [SerializeField] private CinemachineVirtualCamera currrentActionCam;
+    [SerializeField] private bool actionCam;
+
+    private float moveSpeed = 15f;
+    private float rotSpeed = 150f;
+    private float camDistance;
     private float currentRot;
+
+    private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
 
     public void SetComponents()
     {
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
+        mainCam.transform.localPosition = defaultPos;
         mainCam.transform.LookAt(pivotPoint);
+        virCams = transform.GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
+
+        actionCam = false;
     }
 
     private void Update()
     {
+        if (actionCam) return;
+
         CameraMove();
         CameraRotate();
         camDistance = DataUtility.GetDistance(pivotPoint.position, mainCam.transform.position);
@@ -79,5 +101,43 @@ public class CameraManager : MonoBehaviour
             pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
             mainCam.transform.LookAt(pivotPoint);
         }
+    }
+
+    public void SetCameraState(CameraState _state)
+    {
+        switch (_state)
+        {
+            case CameraState.None:
+                currrentActionCam.enabled = false;
+                currrentActionCam = null;
+                mainCam.transform.localPosition = defaultPos;
+                mainCam.transform.LookAt(pivotPoint);
+                actionCam = false;
+                break;
+            default:
+                break;
+        }
+        state = _state;
+    }
+
+    public void SetCameraState(CameraState _state, Transform follow, Transform lookAt)
+    {
+        switch (_state)
+        {
+            case CameraState.Aim:
+                if (currrentActionCam != null)
+                {
+                    currrentActionCam.enabled = false;
+                }
+                currrentActionCam = virCams[(int)_state];
+                currrentActionCam.enabled = true;
+                currrentActionCam.Follow = follow;
+                currrentActionCam.LookAt = lookAt;
+                actionCam = true;
+                break;
+            default:
+                break;
+        }
+        state = _state;
     }
 }
