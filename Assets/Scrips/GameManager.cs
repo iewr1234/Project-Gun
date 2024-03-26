@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
-        CreateCharacter(CharacterOwner.Enemy, new Vector2(fieldSize.x - 1, fieldSize.y - 1), "Insurgent_A", "Rifle_02");
+        //CreateCharacter(CharacterOwner.Enemy, new Vector2(fieldSize.x - 1, fieldSize.y - 1), "Insurgent_A", "Rifle_02");
         CreateBullets();
     }
 
@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
         KeyboardInput();
         MouseInput();
         CreateCover();
+        CreateEnemy();
     }
 
     private void KeyboardInput()
@@ -112,35 +113,42 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            var target = FindTarget(selectChar);
-            if (target != null && selectChar.weapon.magAmmo > 0)
+            selectChar.FindTargets();
+            for (int i = 0; i < openNodes.Count; i++)
             {
-                if (selectChar.animator.GetBool("isCover"))
-                {
-                    selectChar.AddCommand(CommandType.CoverAim, target);
-                    selectChar.AddCommand(CommandType.Shoot, target);
-                    selectChar.AddCommand(CommandType.BackCover);
-                }
-                else
-                {
-                    selectChar.AddCommand(CommandType.Shoot, target);
-                }
-                for (int i = 0; i < openNodes.Count; i++)
-                {
-                    var openNode = openNodes[i];
-                    openNode.NodeColor = Color.gray;
-                }
-                openNodes.Clear();
-                selectChar = null;
+                var openNode = openNodes[i];
+                openNode.NodeColor = Color.gray;
             }
-            else if (target != null && selectChar.weapon.magAmmo == 0)
-            {
-                Debug.Log($"{selectChar.name}: No Ammo");
-            }
-            else
-            {
-                Debug.Log($"{selectChar.name}: No Target");
-            }
+            openNodes.Clear();
+            selectChar = null;
+            //if (selectChar.weapon.magAmmo > 0)
+            //{
+            //    if (selectChar.animator.GetBool("isCover"))
+            //    {
+            //        selectChar.AddCommand(CommandType.CoverAim, target);
+            //        selectChar.AddCommand(CommandType.Shoot, target);
+            //        selectChar.AddCommand(CommandType.BackCover);
+            //    }
+            //    else
+            //    {
+            //        selectChar.AddCommand(CommandType.Shoot, target);
+            //    }
+            //    for (int i = 0; i < openNodes.Count; i++)
+            //    {
+            //        var openNode = openNodes[i];
+            //        openNode.NodeColor = Color.gray;
+            //    }
+            //    openNodes.Clear();
+            //    selectChar = null;
+            //}
+            //else if (selectChar.weapon.magAmmo == 0)
+            //{
+            //    Debug.Log($"{selectChar.name}: No Ammo");
+            //}
+            //else
+            //{
+            //    Debug.Log($"{selectChar.name}: No Target");
+            //}
         }
         else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
         {
@@ -262,11 +270,27 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                if (node.cover == null)
+                if (node.canMove)
                 {
                     var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
                     cover.transform.SetParent(node.transform, false);
                     cover.SetComponents(node);
+                }
+            }
+        }
+    }
+
+    private void CreateEnemy()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+            {
+                var node = hit.collider.GetComponentInParent<FieldNode>();
+                if (node.canMove)
+                {
+                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02");
                 }
             }
         }

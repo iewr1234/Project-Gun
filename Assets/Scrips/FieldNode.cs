@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class FieldNode : MonoBehaviour
 {
@@ -9,6 +11,8 @@ public class FieldNode : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private MeshRenderer mesh;
+    [SerializeField] private Canvas canvas;
+    [SerializeField] private TextMeshProUGUI posText;
 
     [Header("--- Assignment Variable---")]
     public CharacterController charCtr;
@@ -27,10 +31,15 @@ public class FieldNode : MonoBehaviour
         gameMgr = _gameMgr;
         nodePos = _nodePos;
 
-        transform.name = $"Node_({nodePos.x}, {nodePos.y})";
+        transform.name = $"X{nodePos.x}/Y{nodePos.y}";
         mesh = GetComponentInChildren<MeshRenderer>();
         var material = new Material(Resources.Load<Material>("Materials/Node"));
         mesh.material = material;
+
+        canvas = transform.GetComponentInChildren<Canvas>();
+        canvas.worldCamera = Camera.main;
+        posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
+        posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
         canMove = true;
     }

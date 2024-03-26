@@ -11,6 +11,7 @@ public class CameraManager : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [SerializeField] private float moveSpeed = 15f;
     [SerializeField] private float rotSpeed = 150f;
+    [SerializeField] private float camDistance;
 
     private float currentRot;
 
@@ -18,12 +19,14 @@ public class CameraManager : MonoBehaviour
     {
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
+        mainCam.transform.LookAt(pivotPoint);
     }
 
     private void Update()
     {
         CameraMove();
         CameraRotate();
+        camDistance = DataUtility.GetDistance(pivotPoint.position, mainCam.transform.position);
     }
 
     private void CameraMove()
@@ -74,6 +77,7 @@ public class CameraManager : MonoBehaviour
                 rotStep = Mathf.Abs(rotDiff);
             }
             pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
+            mainCam.transform.LookAt(pivotPoint);
         }
     }
 }

@@ -4499,8 +4499,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
   weapon: {fileID: 0}
-  currentNode: {fileID: 0}
-  cover: {fileID: 0}
   animator: {fileID: 0}
   aimTarget: {fileID: 0}
   rightHandTf: {fileID: 0}
@@ -4509,6 +4507,9 @@ MonoBehaviour:
   mobility: 5
   maxHealth: 20
   health: 0
+  currentNode: {fileID: 0}
+  cover: {fileID: 0}
+  targetList: []
 --- !u!114 &202405771892690888
 MonoBehaviour:
   m_ObjectHideFlags: 0
