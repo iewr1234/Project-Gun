@@ -86,7 +86,7 @@ public class CharacterController : MonoBehaviour
     private readonly float coverInterval = 0.2f;
     private readonly float coverAimSpeed = 3f;
 
-    private readonly float aimPointY = 0.9f;
+    public float aimSpeed = 3f;
     private readonly float aimOffTime = 0.3f;
 
     /// <summary>
@@ -103,6 +103,7 @@ public class CharacterController : MonoBehaviour
         rigBdr = GetComponent<RigBuilder>();
         rigBdr.enabled = false;
         aimPoint = transform.Find("AimPoint");
+        aimPoint.gameObject.SetActive(false);
         aimTarget = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03");
 
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
@@ -195,7 +196,21 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
+        SetAimPosition();
         CommandApplication();
+    }
+
+    private void SetAimPosition()
+    {
+        if (aimPoint.gameObject.activeSelf)
+        {
+            var targetPos = targetList[targetIndex].target.transform.position;
+            var aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
+            if (aimPoint.position != aimPos)
+            {
+                aimPoint.position = Vector3.MoveTowards(aimPoint.position, aimPos, aimSpeed * Time.deltaTime);
+            }
+        }
     }
 
     /// <summary>
@@ -453,16 +468,18 @@ public class CharacterController : MonoBehaviour
         {
             animator.SetBool("isRight", command.targetInfo.isRight);
             animator.SetBool("coverAim", true);
-            //FindCoverAimNode(command.targetInfo);
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
+            aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
+            aimPoint.gameObject.SetActive(true);
             rigBdr.enabled = true;
             animator.SetBool("isAim", true);
-            var targetPos = command.targetInfo.target.transform.position;
-            aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
+            //var targetPos = command.targetInfo.target.transform.position;
+            //aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
+
             if (transform.position != coverPos)
             {
                 transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
@@ -476,38 +493,6 @@ public class CharacterController : MonoBehaviour
                 covering = false;
             }
         }
-    }
-
-    /// <summary>
-    /// 엄폐사격을 위해 이동할 노드를 찾음
-    /// </summary>
-    private void FindCoverAimNode(TargetInfo targetInfo)
-    {
-        coverPos = targetInfo.shooterNode.transform.position;
-        covering = true;
-
-        //Vector3 dir;
-        //if (animator.GetBool("isRight"))
-        //{
-        //    dir = transform.right;
-        //}
-        //else
-        //{
-        //    dir = -transform.right;
-        //}
-
-        //if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, nodeLayer))
-        //{
-        //    var node = hit.collider.GetComponentInParent<FieldNode>();
-        //    Debug.Log($"CoverAim: {currentNode.name} => {node.name}");
-        //    coverPos = node.transform.position;
-        //    covering = true;
-        //}
-        //else
-        //{
-        //    //Debug.LogError("not Found Node");
-        //    //commandList.Clear();
-        //}
     }
 
     /// <summary>
@@ -537,8 +522,10 @@ public class CharacterController : MonoBehaviour
             weapon.firstShot = true;
             transform.LookAt(command.targetInfo.target.transform);
             rigBdr.enabled = true;
-            var targetPos = command.targetInfo.target.transform.position;
-            aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
+            //var targetPos = command.targetInfo.target.transform.position;
+            //aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
+            aimPoint.localPosition = new Vector3(0f, DataUtility.aimPointY, DataUtility.aimPointZ);
+            aimPoint.gameObject.SetActive(true);
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
         }
@@ -1062,6 +1049,7 @@ public class CharacterController : MonoBehaviour
         yield return new WaitForSeconds(aimOffTime);
 
         rigBdr.enabled = false;
+        aimPoint.gameObject.SetActive(false);
         commandList.Remove(command);
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);

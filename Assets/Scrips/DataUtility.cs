@@ -10,6 +10,9 @@ public static class DataUtility
     public static readonly Color pMaterialColor = new Color(90 / 255f, 130 / 255f, 192 / 255f);
     public static readonly Color eMaterialColor = new Color(192 / 255f, 94 / 255f, 90 / 255f);
 
+    public static readonly float aimPointY = 0.9f;
+    public static readonly float aimPointZ = 5f;
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
@@ -64,5 +67,21 @@ public static class DataUtility
                 }
             }
         }
+    }
+
+    public static Vector3 GetAimPosition(Transform charTf, bool isRight)
+    {
+        var pos = charTf.position;
+        if (isRight)
+        {
+            pos += charTf.right * aimPointZ;
+        }
+        else
+        {
+            pos -= charTf.right * aimPointZ;
+        }
+        pos.y = aimPointY;
+
+        return pos;
     }
 }
