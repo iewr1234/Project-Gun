@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using TMPro;
 
 public enum CharacterOwner
 {
@@ -926,8 +926,21 @@ public class CharacterController : MonoBehaviour
         else
         {
             targetIndex = 0;
-            var target = targetList[targetIndex].target;
-            gameMgr.camMgr.SetCameraState(CameraState.Aim, transform, target.transform);
+            var targetInfo = targetList[targetIndex];
+            CameraState camState;
+            if (cover == null)
+            {
+                camState = CameraState.FrontAim;
+            }
+            else if (targetInfo.isRight)
+            {
+                camState = CameraState.RightAim;
+            }
+            else
+            {
+                camState = CameraState.LeftAim;
+            }
+            gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
             return true;
         }
     }
@@ -944,8 +957,22 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
         }
-        var target = targetList[targetIndex].target;
-        gameMgr.camMgr.SetCameraState(CameraState.Aim, transform, target.transform);
+
+        var targetInfo = targetList[targetIndex];
+        CameraState camState;
+        if (cover == null)
+        {
+            camState = CameraState.FrontAim;
+        }
+        else if (targetInfo.isRight)
+        {
+            camState = CameraState.RightAim;
+        }
+        else
+        {
+            camState = CameraState.LeftAim;
+        }
+        gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
     }
 
     /// <summary>
@@ -993,6 +1020,9 @@ public class CharacterController : MonoBehaviour
                     targetInfo = targetList[targetIndex],
                 };
                 commandList.Add(shootCommand);
+                Vector3 vectorFromAToB = shootCommand.targetInfo.target.transform.position - transform.position;
+                float angleInDegrees = Vector3.Angle(vectorFromAToB, transform.forward);
+                Debug.Log(angleInDegrees);
                 break;
             default:
                 var command = new CharacterCommand

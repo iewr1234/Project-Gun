@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class GameManager : MonoBehaviour
 {
@@ -111,110 +112,107 @@ public class GameManager : MonoBehaviour
     {
         if (selectChar == null) return;
 
-        switch (camMgr.state)
+        if (camMgr.state == CameraState.None)
         {
-            case CameraState.None:
-                if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                selectChar.FindTargets();
+                if (selectChar.SetTarget())
                 {
-                    selectChar.FindTargets();
-                    if (selectChar.SetTarget())
-                    {
-                        for (int i = 0; i < openNodes.Count; i++)
-                        {
-                            var openNode = openNodes[i];
-                            openNode.NodeColor = Color.gray;
-                        }
-                        openNodes.Clear();
-                    }
-
-                    #region old Code
-                    //if (selectChar.weapon.magAmmo > 0)
-                    //{
-                    //    if (selectChar.animator.GetBool("isCover"))
-                    //    {
-                    //        selectChar.AddCommand(CommandType.CoverAim, target);
-                    //        selectChar.AddCommand(CommandType.Shoot, target);
-                    //        selectChar.AddCommand(CommandType.BackCover);
-                    //    }
-                    //    else
-                    //    {
-                    //        selectChar.AddCommand(CommandType.Shoot, target);
-                    //    }
-                    //    for (int i = 0; i < openNodes.Count; i++)
-                    //    {
-                    //        var openNode = openNodes[i];
-                    //        openNode.NodeColor = Color.gray;
-                    //    }
-                    //    openNodes.Clear();
-                    //    selectChar = null;
-                    //}
-                    //else if (selectChar.weapon.magAmmo == 0)
-                    //{
-                    //    Debug.Log($"{selectChar.name}: No Ammo");
-                    //}
-                    //else
-                    //{
-                    //    Debug.Log($"{selectChar.name}: No Target");
-                    //}
-                    #endregion
-                }
-                else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
-                {
-                    selectChar.AddCommand(CommandType.Reload);
                     for (int i = 0; i < openNodes.Count; i++)
                     {
                         var openNode = openNodes[i];
                         openNode.NodeColor = Color.gray;
                     }
                     openNodes.Clear();
-                    selectChar = null;
                 }
-                break;
-            case CameraState.Aim:
-                if (Input.GetKeyDown(KeyCode.Tab))
+
+                #region old Code
+                //if (selectChar.weapon.magAmmo > 0)
+                //{
+                //    if (selectChar.animator.GetBool("isCover"))
+                //    {
+                //        selectChar.AddCommand(CommandType.CoverAim, target);
+                //        selectChar.AddCommand(CommandType.Shoot, target);
+                //        selectChar.AddCommand(CommandType.BackCover);
+                //    }
+                //    else
+                //    {
+                //        selectChar.AddCommand(CommandType.Shoot, target);
+                //    }
+                //    for (int i = 0; i < openNodes.Count; i++)
+                //    {
+                //        var openNode = openNodes[i];
+                //        openNode.NodeColor = Color.gray;
+                //    }
+                //    openNodes.Clear();
+                //    selectChar = null;
+                //}
+                //else if (selectChar.weapon.magAmmo == 0)
+                //{
+                //    Debug.Log($"{selectChar.name}: No Ammo");
+                //}
+                //else
+                //{
+                //    Debug.Log($"{selectChar.name}: No Target");
+                //}
+                #endregion
+            }
+            else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
+            {
+                selectChar.AddCommand(CommandType.Reload);
+                for (int i = 0; i < openNodes.Count; i++)
                 {
-                    selectChar.SetNextTarget();
+                    var openNode = openNodes[i];
+                    openNode.NodeColor = Color.gray;
                 }
-                else if (Input.GetKeyDown(KeyCode.Space))
+                openNodes.Clear();
+                selectChar = null;
+            }
+        }
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                selectChar.SetNextTarget();
+            }
+            else if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (selectChar.weapon.magAmmo > 0)
                 {
-                    if (selectChar.weapon.magAmmo > 0)
+                    if (selectChar.animator.GetBool("isCover"))
                     {
-                        if (selectChar.animator.GetBool("isCover"))
-                        {
-                            selectChar.AddCommand(CommandType.CoverAim);
-                            selectChar.AddCommand(CommandType.Shoot);
-                            selectChar.AddCommand(CommandType.BackCover);
-                        }
-                        else
-                        {
-                            selectChar.AddCommand(CommandType.Shoot);
-                        }
-                        for (int i = 0; i < openNodes.Count; i++)
-                        {
-                            var openNode = openNodes[i];
-                            openNode.NodeColor = Color.gray;
-                        }
-                        openNodes.Clear();
-                        camMgr.SetCameraState(CameraState.None);
-                        selectChar = null;
-                    }
-                    else if (selectChar.weapon.magAmmo == 0)
-                    {
-                        Debug.Log($"{selectChar.name}: No Ammo");
+                        selectChar.AddCommand(CommandType.CoverAim);
+                        selectChar.AddCommand(CommandType.Shoot);
+                        selectChar.AddCommand(CommandType.BackCover);
                     }
                     else
                     {
-                        Debug.Log($"{selectChar.name}: No Target");
+                        selectChar.AddCommand(CommandType.Shoot);
+                    }            
+                    for (int i = 0; i < openNodes.Count; i++)
+                    {
+                        var openNode = openNodes[i];
+                        openNode.NodeColor = Color.gray;
                     }
-                }
-                else if (Input.GetKeyDown(KeyCode.Escape))
-                {
+                    openNodes.Clear();
                     camMgr.SetCameraState(CameraState.None);
                     selectChar = null;
                 }
-                break;
-            default:
-                break;
+                else if (selectChar.weapon.magAmmo == 0)
+                {
+                    Debug.Log($"{selectChar.name}: No Ammo");
+                }
+                else
+                {
+                    Debug.Log($"{selectChar.name}: No Target");
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                camMgr.SetCameraState(CameraState.None);
+                selectChar = null;
+            }
         }
     }
 
@@ -257,7 +255,17 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                if (node.charCtr != null && selectChar == null)
+                if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
+                {
+                    for (int i = 0; i < openNodes.Count; i++)
+                    {
+                        var movableNode = openNodes[i];
+                        movableNode.NodeColor = Color.gray;
+                    }
+                    openNodes.Clear();
+                    selectChar = null;
+                }
+                else if (node.charCtr != null && selectChar == null)
                 {
                     selectChar = node.charCtr;
                     ShowMovableNodes(selectChar);

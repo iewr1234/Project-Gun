@@ -83,7 +83,6 @@ public class Bullet : MonoBehaviour
             bulletRb.isKinematic = true;
             bulletCd.enabled = false;
             isHit = true;
-            Debug.Log("Hit");
             break;
         }
     }

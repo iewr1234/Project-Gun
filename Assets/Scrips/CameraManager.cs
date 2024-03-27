@@ -7,16 +7,18 @@ using Cinemachine;
 public enum CameraState
 {
     None = -1,
-    Aim,
+    FrontAim,
+    RightAim,
+    LeftAim,
 }
 
 public class CameraManager : MonoBehaviour
 {
     [Header("---Access Component---")]
-    [HideInInspector] public Camera mainCam;
-
+    public Camera mainCam;
     private Transform pivotPoint;
-    private List<CinemachineVirtualCamera> virCams;
+    private CinemachineBrain cambrain;
+    [SerializeField] private List<CinemachineVirtualCamera> virCams;
 
     [Header("--- Assignment Variable---")]
     public CameraState state;
@@ -37,7 +39,9 @@ public class CameraManager : MonoBehaviour
         mainCam = Camera.main;
         mainCam.transform.localPosition = defaultPos;
         mainCam.transform.LookAt(pivotPoint);
-        virCams = transform.GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
+
+        cambrain = mainCam.GetComponent<CinemachineBrain>();
+        virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
 
         actionCam = false;
     }
@@ -122,22 +126,39 @@ public class CameraManager : MonoBehaviour
 
     public void SetCameraState(CameraState _state, Transform follow, Transform lookAt)
     {
+        if (_state == CameraState.None)
+        {
+            Debug.LogError($"invalid call: SetCameraState(CameraState.None), {follow}, {lookAt}");
+            return;
+        }
+
+        if (currrentActionCam != null)
+        {
+            currrentActionCam.enabled = false;
+        }
+        currrentActionCam = virCams[(int)_state];
         switch (_state)
         {
-            case CameraState.Aim:
-                if (currrentActionCam != null)
-                {
-                    currrentActionCam.enabled = false;
-                }
-                currrentActionCam = virCams[(int)_state];
-                currrentActionCam.enabled = true;
-                currrentActionCam.Follow = follow;
-                currrentActionCam.LookAt = lookAt;
-                actionCam = true;
+            case CameraState.FrontAim:
+                SetVirtualCamera(follow, lookAt);
+                break;
+            case CameraState.RightAim:
+                SetVirtualCamera(follow, lookAt);
+                break;
+            case CameraState.LeftAim:
+                SetVirtualCamera(follow, lookAt);
                 break;
             default:
                 break;
         }
         state = _state;
+    }
+
+    private void SetVirtualCamera(Transform follow, Transform lookAt)
+    {
+        currrentActionCam.enabled = true;
+        currrentActionCam.Follow = follow;
+        currrentActionCam.LookAt = lookAt;
+        actionCam = true;
     }
 }
