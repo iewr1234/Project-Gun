@@ -15,10 +15,10 @@ public class Bullet : MonoBehaviour
     private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
-    public LayerMask targetLayer;
     public float speed = 150f;
     public float damage;
 
+    [SerializeField] private LayerMask targetLayer;
     private bool isHit;
     private float timer;
 
@@ -60,6 +60,14 @@ public class Bullet : MonoBehaviour
             meshRdr.enabled = true;
         }
 
+        if (weapon.isHit && weapon.firstShot)
+        {
+            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
+        }
+        else
+        {
+            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") | LayerMask.GetMask("Cover");
+        }
         isHit = false;
     }
 

@@ -85,7 +85,8 @@ public class CharacterController : MonoBehaviour
     private readonly float coverInterval = 0.2f;
     private readonly float coverAimSpeed = 3f;
 
-    private Vector3 aimPos;
+    public Transform aimTf;
+    public Vector3 aimInterval;
     private bool endAim;
     private readonly float aimSpeed = 25f;
     private readonly float aimOffTime = 0.4f;
@@ -212,8 +213,10 @@ public class CharacterController : MonoBehaviour
 
     private void SetAimPosition()
     {
-        if (!aimPoint.gameObject.activeSelf) return;
+        var canMove = !animator.GetCurrentAnimatorStateInfo(1).IsTag("Hit") && aimPoint.gameObject.activeSelf;
+        if (!canMove) return;
 
+        var aimPos = aimTf.position + aimInterval;
         if (aimPoint.position != aimPos)
         {
             aimPoint.position = Vector3.MoveTowards(aimPoint.position, aimPos, aimSpeed * Time.deltaTime);
@@ -503,14 +506,28 @@ public class CharacterController : MonoBehaviour
             weapon.firstShot = true;
             weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
             var target = command.targetInfo.target;
-            var targetPos = target.transform.position;
+
+            aimTf = target.transform;
             if (!weapon.isHit)
             {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? aimTf.right : -aimTf.right;
                 var errorInterval = 1f;
-                targetPos += dir * errorInterval;
+                aimInterval = dir * errorInterval;
+                aimInterval.y += DataUtility.aimPointY;
             }
-            aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
+            else
+            {
+                aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+            }
+
+            //var targetPos = target.transform.position;
+            //if (!weapon.isHit)
+            //{
+            //    var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+            //    var errorInterval = 1f;
+            //    targetPos += dir * errorInterval;
+            //}
+            //aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
             aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
@@ -565,15 +582,30 @@ public class CharacterController : MonoBehaviour
 
             weapon.firstShot = true;
             weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
-            var targetPos = target.transform.position;
+
+            aimTf = target.transform;
             if (!weapon.isHit)
             {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? aimTf.right : -aimTf.right;
                 var errorInterval = 1f;
-                targetPos += dir * errorInterval;
+                aimInterval = dir * errorInterval;
+                aimInterval.y += DataUtility.aimPointY;
             }
-            aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
-            aimPoint.transform.position = aimPos;
+            else
+            {
+                aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+            }
+            aimPoint.transform.position = aimTf.position + aimInterval;
+
+            //var targetPos = target.transform.position;
+            //if (!weapon.isHit)
+            //{
+            //    var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+            //    var errorInterval = 1f;
+            //    targetPos += dir * errorInterval;
+            //}
+            //aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
+            //aimPoint.transform.position = aimPos;
             aimPoint.gameObject.SetActive(true);
         }
 
@@ -587,6 +619,8 @@ public class CharacterController : MonoBehaviour
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
+                var target = command.targetInfo.target;
+                target.SetTargeting(false);
                 StartCoroutine(Coroutine_AimOff(command));
             }
         }
@@ -1099,6 +1133,10 @@ public class CharacterController : MonoBehaviour
         {
 
         }
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit"))
+        {
+            animator.SetTrigger("isHit");
+        }
     }
 
     #region Coroutine
@@ -1118,7 +1156,9 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            aimPos = transform.position + (transform.forward * DataUtility.aimPointZ);
+            aimTf = transform;
+            aimInterval = transform.forward * DataUtility.aimPointZ;
+            aimInterval.y += DataUtility.aimPointY;
             endAim = true;
         }
         commandList.Remove(command);
