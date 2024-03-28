@@ -22,6 +22,7 @@ public class Weapon : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public WeaponType type;
     public float range;
+    public int hitAccuracy;
     public int bulletsPerShot;
     public int damage;
     [Space(5f)]
@@ -30,6 +31,7 @@ public class Weapon : MonoBehaviour
     public int magAmmo;
 
     [HideInInspector] public bool firstShot;
+    [HideInInspector] public bool isHit;
 
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
@@ -61,14 +63,13 @@ public class Weapon : MonoBehaviour
 
         bullet.gameObject.SetActive(true);
         bullet.transform.position = muzzleTf.position;
-        if (firstShot)
+        if (isHit && firstShot)
         {
-            bullet.transform.LookAt(target.aimTarget.position);
-            firstShot = false;
+            bullet.transform.LookAt(charCtr.aimPoint.position);
         }
         else
         {
-            var aimPos = target.aimTarget.position;
+            var aimPos = charCtr.aimPoint.position;
             var random = Random.Range(-shootDisparity, shootDisparity);
             aimPos += charCtr.transform.right * random;
             random = Random.Range(-shootDisparity, shootDisparity);
@@ -77,6 +78,12 @@ public class Weapon : MonoBehaviour
         }
         bullet.SetComponents(this);
         bullet.bulletRb.velocity = bullet.transform.forward * bullet.speed;
+
+        if (firstShot)
+        {
+            Debug.Log($"{charCtr.name}: isHit = {isHit}");
+        }
+        firstShot = false;
         magAmmo--;
     }
 

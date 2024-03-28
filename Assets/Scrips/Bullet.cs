@@ -15,13 +15,13 @@ public class Bullet : MonoBehaviour
     private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
+    public LayerMask targetLayer;
     public float speed = 150f;
     public float damage;
 
     private bool isHit;
     private float timer;
 
-    public LayerMask targetLayer;
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
@@ -72,7 +72,12 @@ public class Bullet : MonoBehaviour
         {
             var hitCd = hitCds[i];
             var charCtr = hitCd.GetComponentInParent<CharacterController>();
-            charCtr.OnHit(weapon.damage);
+            var node = hitCd.GetComponentInParent<FieldNode>();
+            if (charCtr != null)
+            {
+                charCtr.OnHit(weapon.damage);
+            }
+
             for (int j = 0; j < meshRdrs.Count; j++)
             {
                 var meshRdr = meshRdrs[j];

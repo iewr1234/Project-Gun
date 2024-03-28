@@ -49,7 +49,7 @@ public class CharacterController : MonoBehaviour
     public Animator animator;
 
     private RigBuilder rigBdr;
-    private Transform aimPoint;
+    public Transform aimPoint;
     [HideInInspector] public Transform aimTarget;
 
     [HideInInspector] public Transform rightHandTf;
@@ -102,7 +102,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode, Transform aimPointTf)
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
@@ -110,6 +110,8 @@ public class CharacterController : MonoBehaviour
         rigBdr = GetComponent<RigBuilder>();
         rigBdr.enabled = false;
         aimPoint = transform.Find("AimPoint");
+        aimPoint.name = $"AimPoint_{transform.name}";
+        aimPoint.SetParent(aimPointTf);
         aimPoint.gameObject.SetActive(false);
         aimTarget = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03");
 
@@ -497,9 +499,19 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("coverAim", true);
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
-            aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
-            var targetPos = targetList[targetIndex].target.transform.position;
+
+            weapon.firstShot = true;
+            weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
+            var target = command.targetInfo.target;
+            var targetPos = target.transform.position;
+            if (!weapon.isHit)
+            {
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+                var errorInterval = 1f;
+                targetPos += dir * errorInterval;
+            }
             aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
+            aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
@@ -513,7 +525,6 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                weapon.firstShot = true;
                 animator.SetInteger("shootNum", weapon.bulletsPerShot);
                 coverPos = currentNode.transform.position + (transform.forward * coverInterval);
                 commandList.Remove(command);
@@ -546,13 +557,24 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("isAim"))
         {
-            weapon.firstShot = true;
-            transform.LookAt(command.targetInfo.target.transform);
+            var target = command.targetInfo.target;
+            transform.LookAt(target.transform);
             rigBdr.enabled = true;
-            aimPoint.localPosition = new Vector3(0f, DataUtility.aimPointY, DataUtility.aimPointZ);
-            aimPoint.gameObject.SetActive(true);
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
+
+            weapon.firstShot = true;
+            weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
+            var targetPos = target.transform.position;
+            if (!weapon.isHit)
+            {
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
+                var errorInterval = 1f;
+                targetPos += dir * errorInterval;
+            }
+            aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
+            aimPoint.transform.position = aimPos;
+            aimPoint.gameObject.SetActive(true);
         }
 
         var shootNum = animator.GetInteger("shootNum");
@@ -1044,6 +1066,8 @@ public class CharacterController : MonoBehaviour
     /// <param name="value"></param>
     public void SetTargeting(bool value)
     {
+        if (!animator.GetBool("isCover")) return;
+
         switch (value)
         {
             case true:
@@ -1087,9 +1111,16 @@ public class CharacterController : MonoBehaviour
     {
         yield return new WaitForSeconds(aimOffTime);
 
-        //rigBdr.enabled = false;
-        aimPos = transform.position + (transform.forward * DataUtility.aimPointZ);
-        endAim = true;
+        if (!animator.GetBool("isCover"))
+        {
+            rigBdr.enabled = false;
+            aimPoint.gameObject.SetActive(false);
+        }
+        else
+        {
+            aimPos = transform.position + (transform.forward * DataUtility.aimPointZ);
+            endAim = true;
+        }
         commandList.Remove(command);
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);

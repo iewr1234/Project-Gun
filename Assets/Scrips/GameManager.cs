@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     //[Header("---Access Component---")]
     private Transform fieldNodeTf;
     private Transform characterTf;
+    private Transform aimPointTf;
     private Transform bulletsPoolTf;
 
     [Header("--- Assignment Variable---\n[Character]")]
@@ -38,11 +39,12 @@ public class GameManager : MonoBehaviour
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+        aimPointTf = GameObject.FindGameObjectWithTag("AimPoints").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
 
         CreateField();
-        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
+        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01", aimPointTf);
         CreateBullets();
     }
 
@@ -73,7 +75,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName)
+    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName, Transform aimPointTf)
     {
         var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charName}"));
         charCtr.transform.SetParent(characterTf, false);
@@ -83,7 +85,7 @@ public class GameManager : MonoBehaviour
         {
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        charCtr.SetComponents(this, ownerType, node);
+        charCtr.SetComponents(this, ownerType, node, aimPointTf);
 
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
         weapon.SetComponets(charCtr);
@@ -343,7 +345,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.canMove)
                 {
-                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02");
+                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02", aimPointTf);
                 }
             }
         }
