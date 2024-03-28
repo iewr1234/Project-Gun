@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public List<CharacterController> playerList;
     public List<CharacterController> enemyList;
     public CharacterController selectChar;
+    public bool targeting;
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
@@ -42,7 +43,6 @@ public class GameManager : MonoBehaviour
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
-        //CreateCharacter(CharacterOwner.Enemy, new Vector2(fieldSize.x - 1, fieldSize.y - 1), "Insurgent_A", "Rifle_02");
         CreateBullets();
     }
 
@@ -189,7 +189,7 @@ public class GameManager : MonoBehaviour
                     else
                     {
                         selectChar.AddCommand(CommandType.Shoot);
-                    }            
+                    }
                     for (int i = 0; i < openNodes.Count; i++)
                     {
                         var openNode = openNodes[i];
@@ -210,6 +210,8 @@ public class GameManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.Escape))
             {
+                var target = selectChar.targetList[selectChar.targetIndex].target;
+                target.SetTargeting(false);
                 camMgr.SetCameraState(CameraState.None);
                 selectChar = null;
             }
@@ -219,19 +221,7 @@ public class GameManager : MonoBehaviour
     private CharacterController FindTarget(CharacterController shooter)
     {
         CharacterController shootTarget = null;
-        var targetList = new List<CharacterController>();
-        switch (shooter.ownerType)
-        {
-            case CharacterOwner.Player:
-                targetList = enemyList;
-                break;
-            case CharacterOwner.Enemy:
-                targetList = playerList;
-                break;
-            default:
-                break;
-        }
-
+        var targetList = shooter.ownerType == CharacterOwner.Player ? enemyList : playerList;
         var targetDist = 999999f;
         for (int i = 0; i < targetList.Count; i++)
         {

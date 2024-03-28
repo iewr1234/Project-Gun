@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using TMPro;
 
 public enum CharacterOwner
 {
@@ -75,19 +74,27 @@ public class CharacterController : MonoBehaviour
     private LayerMask coverLayer;
 
     private List<CharacterCommand> commandList = new List<CharacterCommand>();
-    private bool moving;
-    private bool reloading;
-    private bool covering;
-    private Vector3 coverPos;
 
+    private bool moving;
     private readonly float moveSpeed = 7f;
     private readonly float closeDistance = 0.05f;
+
+    private bool covering;
+    private Vector3 coverPos;
     private readonly float coverSpeed = 1f;
     private readonly float coverInterval = 0.2f;
     private readonly float coverAimSpeed = 3f;
 
-    public float aimSpeed = 3f;
-    private readonly float aimOffTime = 0.3f;
+    private Vector3 aimPos;
+    private bool endAim;
+    private readonly float aimSpeed = 25f;
+    private readonly float aimOffTime = 0.4f;
+
+    private bool targetingMove;
+    private Vector3 targetingPos;
+    private readonly float targetingMoveSpeed = 1f;
+
+    private bool reloading;
 
     /// <summary>
     /// 구성요소 설정
@@ -197,19 +204,38 @@ public class CharacterController : MonoBehaviour
     private void Update()
     {
         SetAimPosition();
+        MoveTargetingPosition();
         CommandApplication();
     }
 
     private void SetAimPosition()
     {
-        if (aimPoint.gameObject.activeSelf)
+        if (!aimPoint.gameObject.activeSelf) return;
+
+        if (aimPoint.position != aimPos)
         {
-            var targetPos = targetList[targetIndex].target.transform.position;
-            var aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
-            if (aimPoint.position != aimPos)
-            {
-                aimPoint.position = Vector3.MoveTowards(aimPoint.position, aimPos, aimSpeed * Time.deltaTime);
-            }
+            aimPoint.position = Vector3.MoveTowards(aimPoint.position, aimPos, aimSpeed * Time.deltaTime);
+        }
+
+        if (aimPoint.position == aimPos && endAim)
+        {
+            rigBdr.enabled = false;
+            aimPoint.gameObject.SetActive(false);
+            endAim = false;
+        }
+    }
+
+    private void MoveTargetingPosition()
+    {
+        if (!targetingMove) return;
+
+        if (transform.position != targetingPos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetingPos, targetingMoveSpeed * Time.deltaTime);
+        }
+        else
+        {
+            targetingMove = false;
         }
     }
 
@@ -218,7 +244,8 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     private void CommandApplication()
     {
-        if (commandList.Count == 0) return;
+        var runCommand = commandList.Count > 0 && !targetingMove;
+        if (!runCommand) return;
 
         var command = commandList[0];
         switch (command.type)
@@ -471,14 +498,14 @@ public class CharacterController : MonoBehaviour
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
             aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
+            var targetPos = targetList[targetIndex].target.transform.position;
+            aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
-            aimPoint.gameObject.SetActive(true);
             rigBdr.enabled = true;
+            aimPoint.gameObject.SetActive(true);
             animator.SetBool("isAim", true);
-            //var targetPos = command.targetInfo.target.transform.position;
-            //aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
 
             if (transform.position != coverPos)
             {
@@ -522,8 +549,6 @@ public class CharacterController : MonoBehaviour
             weapon.firstShot = true;
             transform.LookAt(command.targetInfo.target.transform);
             rigBdr.enabled = true;
-            //var targetPos = command.targetInfo.target.transform.position;
-            //aimPoint.transform.position = new Vector3(targetPos.x, targetPos.y + aimPointY, targetPos.z);
             aimPoint.localPosition = new Vector3(0f, DataUtility.aimPointY, DataUtility.aimPointZ);
             aimPoint.gameObject.SetActive(true);
             animator.SetBool("isAim", true);
@@ -565,19 +590,7 @@ public class CharacterController : MonoBehaviour
     public void FindTargets()
     {
         targetList.Clear();
-        var _targetList = new List<CharacterController>();
-        switch (ownerType)
-        {
-            case CharacterOwner.Player:
-                _targetList = gameMgr.enemyList;
-                break;
-            case CharacterOwner.Enemy:
-                _targetList = gameMgr.playerList;
-                break;
-            default:
-                break;
-        }
-
+        var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         for (int i = 0; i < _targetList.Count; i++)
         {
             var target = _targetList[i];
@@ -914,6 +927,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
             var targetInfo = targetList[targetIndex];
+            targetInfo.target.SetTargeting(true);
             CameraState camState;
             if (cover == null)
             {
@@ -939,6 +953,8 @@ public class CharacterController : MonoBehaviour
     {
         if (targetList.Count < 2) return;
 
+        var prevTarget = targetList[targetIndex].target;
+        prevTarget.SetTargeting(false);
         targetIndex++;
         if (targetIndex == targetList.Count)
         {
@@ -946,6 +962,7 @@ public class CharacterController : MonoBehaviour
         }
 
         var targetInfo = targetList[targetIndex];
+        targetInfo.target.SetTargeting(true);
         CameraState camState;
         if (cover == null)
         {
@@ -1022,6 +1039,28 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 조준상태로 설정
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetTargeting(bool value)
+    {
+        switch (value)
+        {
+            case true:
+                var dir = animator.GetBool("isRight") ? transform.right : -transform.right;
+                var moveDist = 0.7f;
+                targetingPos = transform.position + (dir * moveDist);
+                animator.SetTrigger("targeting");
+                break;
+            case false:
+                targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
+                animator.SetTrigger("unTargeting");
+                break;
+        }
+        targetingMove = true;
+    }
+
+    /// <summary>
     /// 캐릭터 피격
     /// </summary>
     public void OnHit(int damage)
@@ -1048,8 +1087,9 @@ public class CharacterController : MonoBehaviour
     {
         yield return new WaitForSeconds(aimOffTime);
 
-        rigBdr.enabled = false;
-        aimPoint.gameObject.SetActive(false);
+        //rigBdr.enabled = false;
+        aimPos = transform.position + (transform.forward * DataUtility.aimPointZ);
+        endAim = true;
         commandList.Remove(command);
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);
