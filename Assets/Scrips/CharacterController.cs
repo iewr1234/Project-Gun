@@ -37,6 +37,7 @@ public struct TargetInfo
     public FieldNode shooterNode;
     public FieldNode targetNode;
     public bool isRight;
+    public bool targetRight;
 }
 
 public class CharacterController : MonoBehaviour
@@ -213,7 +214,9 @@ public class CharacterController : MonoBehaviour
 
     private void SetAimPosition()
     {
-        var canMove = !animator.GetCurrentAnimatorStateInfo(1).IsTag("Hit") && aimPoint.gameObject.activeSelf;
+        var canMove = animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting")
+                   && !animator.GetCurrentAnimatorStateInfo(1).IsTag("Hit")
+                   && aimPoint.gameObject.activeSelf;
         if (!canMove) return;
 
         var aimPos = aimTf.position + aimInterval;
@@ -504,13 +507,14 @@ public class CharacterController : MonoBehaviour
             covering = true;
 
             weapon.firstShot = true;
-            weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
-            var target = command.targetInfo.target;
+            var value = Random.Range(0, 100);
+            weapon.isHit = value < weapon.hitAccuracy ? true : false;
+            Debug.Log($"{transform.name}: {value}/{weapon.hitAccuracy} = {weapon.isHit}");
 
-            aimTf = target.transform;
+            aimTf = command.targetInfo.target.transform;
             if (!weapon.isHit)
             {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? aimTf.right : -aimTf.right;
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
                 var errorInterval = 1f;
                 aimInterval = dir * errorInterval;
                 aimInterval.y += DataUtility.aimPointY;
@@ -519,15 +523,6 @@ public class CharacterController : MonoBehaviour
             {
                 aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
             }
-
-            //var targetPos = target.transform.position;
-            //if (!weapon.isHit)
-            //{
-            //    var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
-            //    var errorInterval = 1f;
-            //    targetPos += dir * errorInterval;
-            //}
-            //aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
             aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
@@ -574,19 +569,20 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("isAim"))
         {
-            var target = command.targetInfo.target;
-            transform.LookAt(target.transform);
+            transform.LookAt(command.targetInfo.target.transform);
             rigBdr.enabled = true;
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
 
             weapon.firstShot = true;
-            weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy ? true : false;
+            var value = Random.Range(0, 100);
+            weapon.isHit = value < weapon.hitAccuracy ? true : false;
+            Debug.Log($"{transform.name}: {value}/{weapon.hitAccuracy} = {weapon.isHit}");
 
-            aimTf = target.transform;
+            aimTf = command.targetInfo.target.transform;
             if (!weapon.isHit)
             {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? aimTf.right : -aimTf.right;
+                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
                 var errorInterval = 1f;
                 aimInterval = dir * errorInterval;
                 aimInterval.y += DataUtility.aimPointY;
@@ -596,16 +592,6 @@ public class CharacterController : MonoBehaviour
                 aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
             }
             aimPoint.transform.position = aimTf.position + aimInterval;
-
-            //var targetPos = target.transform.position;
-            //if (!weapon.isHit)
-            //{
-            //    var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? target.transform.right : -target.transform.right;
-            //    var errorInterval = 1f;
-            //    targetPos += dir * errorInterval;
-            //}
-            //aimPos = new Vector3(targetPos.x, targetPos.y + DataUtility.aimPointY, targetPos.z);
-            //aimPoint.transform.position = aimPos;
             aimPoint.gameObject.SetActive(true);
         }
 
@@ -619,8 +605,8 @@ public class CharacterController : MonoBehaviour
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
-                var target = command.targetInfo.target;
-                target.SetTargeting(false);
+                var targetInfo = command.targetInfo;
+                targetInfo.target.SetTargeting(false, targetInfo.targetRight);
                 StartCoroutine(Coroutine_AimOff(command));
             }
         }
@@ -770,54 +756,40 @@ public class CharacterController : MonoBehaviour
         FieldNode shooterNode = null;
         FieldNode targetNode = null;
         bool isRight = false;
+        bool targetRight = false;
         Vector3 pos;
         Vector3 targetPos;
         var distance = 999999f;
         if (cover == null)
         {
             pos = currentNode.transform.position;
-            if (target.cover == null)
+            if (targetRN != null)
             {
-                targetPos = target.currentNode.transform.position;
+                targetPos = targetRN.transform.position;
                 if (CheckTheCoverAlongPath(pos, targetPos))
                 {
                     var dist = DataUtility.GetDistance(pos, targetPos);
                     if (dist < distance)
                     {
                         shooterNode = currentNode;
-                        targetNode = target.currentNode;
+                        targetNode = targetRN;
+                        targetRight = true;
                         distance = dist;
                     }
                 }
             }
-            else
+            if (targetLN != null)
             {
-                if (targetRN != null)
+                targetPos = targetLN.transform.position;
+                if (CheckTheCoverAlongPath(pos, targetPos))
                 {
-                    targetPos = targetRN.transform.position;
-                    if (CheckTheCoverAlongPath(pos, targetPos))
+                    var dist = DataUtility.GetDistance(pos, targetPos);
+                    if (dist < distance)
                     {
-                        var dist = DataUtility.GetDistance(pos, targetPos);
-                        if (dist < distance)
-                        {
-                            shooterNode = currentNode;
-                            targetNode = targetRN;
-                            distance = dist;
-                        }
-                    }
-                }
-                if (targetLN != null)
-                {
-                    targetPos = targetLN.transform.position;
-                    if (CheckTheCoverAlongPath(pos, targetPos))
-                    {
-                        var dist = DataUtility.GetDistance(pos, targetPos);
-                        if (dist < distance)
-                        {
-                            shooterNode = currentNode;
-                            targetNode = targetLN;
-                            distance = dist;
-                        }
+                        shooterNode = currentNode;
+                        targetNode = targetLN;
+                        targetRight = false;
+                        distance = dist;
                     }
                 }
             }
@@ -855,6 +827,7 @@ public class CharacterController : MonoBehaviour
                                 shooterNode = RN;
                                 targetNode = targetRN;
                                 isRight = true;
+                                targetRight = true;
                                 distance = dist;
                             }
                         }
@@ -870,6 +843,7 @@ public class CharacterController : MonoBehaviour
                                 shooterNode = RN;
                                 targetNode = targetLN;
                                 isRight = true;
+                                targetRight = false;
                                 distance = dist;
                             }
                         }
@@ -907,6 +881,7 @@ public class CharacterController : MonoBehaviour
                                 shooterNode = LN;
                                 targetNode = targetRN;
                                 isRight = false;
+                                targetRight = true;
                                 distance = dist;
                             }
                         }
@@ -922,6 +897,7 @@ public class CharacterController : MonoBehaviour
                                 shooterNode = LN;
                                 targetNode = targetLN;
                                 isRight = false;
+                                targetRight = false;
                                 distance = dist;
                             }
                         }
@@ -937,6 +913,7 @@ public class CharacterController : MonoBehaviour
                 target = target,
                 shooterNode = shooterNode,
                 targetNode = targetNode,
+                targetRight = targetRight,
                 isRight = isRight,
             };
             targetList.Add(targetInfo);
@@ -983,7 +960,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
             var targetInfo = targetList[targetIndex];
-            targetInfo.target.SetTargeting(true);
+            targetInfo.target.SetTargeting(true, targetInfo.targetRight);
             CameraState camState;
             if (cover == null)
             {
@@ -1009,8 +986,8 @@ public class CharacterController : MonoBehaviour
     {
         if (targetList.Count < 2) return;
 
-        var prevTarget = targetList[targetIndex].target;
-        prevTarget.SetTargeting(false);
+        var prevTargetInfo = targetList[targetIndex];
+        prevTargetInfo.target.SetTargeting(false, prevTargetInfo.targetRight);
         targetIndex++;
         if (targetIndex == targetList.Count)
         {
@@ -1018,7 +995,7 @@ public class CharacterController : MonoBehaviour
         }
 
         var targetInfo = targetList[targetIndex];
-        targetInfo.target.SetTargeting(true);
+        targetInfo.target.SetTargeting(true, targetInfo.targetRight);
         CameraState camState;
         if (cover == null)
         {
@@ -1098,10 +1075,11 @@ public class CharacterController : MonoBehaviour
     /// 조준상태로 설정
     /// </summary>
     /// <param name="value"></param>
-    public void SetTargeting(bool value)
+    public void SetTargeting(bool value, bool isRight)
     {
         if (!animator.GetBool("isCover")) return;
 
+        animator.SetBool("isRight", isRight);
         switch (value)
         {
             case true:

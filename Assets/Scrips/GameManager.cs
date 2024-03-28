@@ -212,8 +212,8 @@ public class GameManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.Escape))
             {
-                var target = selectChar.targetList[selectChar.targetIndex].target;
-                target.SetTargeting(false);
+                var targetInfo = selectChar.targetList[selectChar.targetIndex];
+                targetInfo.target.SetTargeting(false, targetInfo.targetRight);
                 camMgr.SetCameraState(CameraState.None);
                 selectChar = null;
             }
