@@ -14,6 +14,7 @@ public enum CharacterOwner
 public enum CommandType
 {
     None,
+    Wait,
     Move,
     TakeCover,
     LeaveCover,
@@ -33,6 +34,7 @@ public enum TargetDirection
 public class CharacterCommand
 {
     public CommandType type;
+    public float time;
     public List<FieldNode> passList;
     public FieldNode cover;
     public Transform lookAt;
@@ -86,6 +88,8 @@ public class CharacterController : MonoBehaviour
     private LayerMask coverLayer;
 
     private List<CharacterCommand> commandList = new List<CharacterCommand>();
+
+    private float timer;
 
     private bool moving;
     private readonly float moveSpeed = 7f;
@@ -262,6 +266,9 @@ public class CharacterController : MonoBehaviour
         var command = commandList[0];
         switch (command.type)
         {
+            case CommandType.Wait:
+                WaitProcess(command);
+                break;
             case CommandType.Move:
                 MoveProcess(command);
                 break;
@@ -285,6 +292,16 @@ public class CharacterController : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    private void WaitProcess(CharacterCommand command)
+    {
+        timer += Time.deltaTime;
+        if (timer > command.time)
+        {
+            commandList.Remove(command);
+            timer = 0f;
         }
     }
 
@@ -1018,6 +1035,28 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="passList"></param>
+    public void AddCommand(CommandType type, float time)
+    {
+        switch (type)
+        {
+            case CommandType.Wait:
+                var waitCommand = new CharacterCommand
+                {
+                    type = CommandType.Wait,
+                    time = time,
+                };
+                commandList.Add(waitCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="passList"></param>
     public void AddCommand(CommandType type, List<FieldNode> passList)
     {
         switch (type)
@@ -1047,7 +1086,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.TakeCover:
                 var takeCoverCommand = new CharacterCommand
                 {
-                    type = CommandType.Move,
+                    type = CommandType.TakeCover,
                     cover = cover,
                 };
                 commandList.Add(takeCoverCommand);
@@ -1069,7 +1108,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.LeaveCover:
                 var leaveCoverCommand = new CharacterCommand
                 {
-                    type = CommandType.Move,
+                    type = CommandType.LeaveCover,
                     lookAt = lookAt,
                 };
                 commandList.Add(leaveCoverCommand);

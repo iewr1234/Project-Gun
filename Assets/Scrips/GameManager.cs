@@ -218,22 +218,22 @@ public class GameManager : MonoBehaviour
             {
                 if (targetInfo.targetCover == null)
                 {
+                    shooter.AddCommand(CommandType.Wait, 0.5f);
                     target.SetTargeting(false);
                     target.AddCommand(CommandType.LeaveCover, shooter.transform);
                 }
                 else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
                 {
+                    shooter.AddCommand(CommandType.Wait, 1f);
                     target.SetTargeting(false);
                     target.AddCommand(CommandType.LeaveCover);
                     target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
                 }
             }
-            else
+            else if (targetInfo.targetCover != null)
             {
-                if (targetInfo.targetCover != null)
-                {
-                    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-                }
+                shooter.AddCommand(CommandType.Wait, 0.5f);
+                target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
             }
 
             if (shooter.cover != null)
