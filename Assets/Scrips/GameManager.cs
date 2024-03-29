@@ -182,16 +182,7 @@ public class GameManager : MonoBehaviour
             {
                 if (selectChar.weapon.magAmmo > 0)
                 {
-                    if (selectChar.animator.GetBool("isCover"))
-                    {
-                        selectChar.AddCommand(CommandType.CoverAim);
-                        selectChar.AddCommand(CommandType.Shoot);
-                        selectChar.AddCommand(CommandType.BackCover);
-                    }
-                    else
-                    {
-                        selectChar.AddCommand(CommandType.Shoot);
-                    }
+                    FindTheInputCommands(selectChar);
                     for (int i = 0; i < openNodes.Count; i++)
                     {
                         var openNode = openNodes[i];
@@ -213,30 +204,75 @@ public class GameManager : MonoBehaviour
             else if (Input.GetKeyDown(KeyCode.Escape))
             {
                 var targetInfo = selectChar.targetList[selectChar.targetIndex];
-                targetInfo.target.SetTargeting(false, targetInfo.targetRight);
+                targetInfo.target.SetTargeting(false);
                 camMgr.SetCameraState(CameraState.None);
                 selectChar = null;
             }
         }
-    }
 
-    private CharacterController FindTarget(CharacterController shooter)
-    {
-        CharacterController shootTarget = null;
-        var targetList = shooter.ownerType == CharacterOwner.Player ? enemyList : playerList;
-        var targetDist = 999999f;
-        for (int i = 0; i < targetList.Count; i++)
+        void FindTheInputCommands(CharacterController shooter)
         {
-            var target = targetList[i];
-            var dist = DataUtility.GetDistance(shooter.transform.position, target.transform.position);
-            if (dist < targetDist && dist <= shooter.weapon.range)
+            var targetInfo = shooter.targetList[shooter.targetIndex];
+            var target = targetInfo.target;
+            if (target.cover != null)
             {
-                targetDist = dist;
-                shootTarget = target;
+                if (targetInfo.targetCover == null)
+                {
+                    target.SetTargeting(false);
+                    target.AddCommand(CommandType.LeaveCover, shooter.transform);
+                }
+                else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
+                {
+                    target.SetTargeting(false);
+                    target.AddCommand(CommandType.LeaveCover);
+                    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
+                }
+            }
+            else
+            {
+                if (targetInfo.targetCover != null)
+                {
+                    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
+                }
+            }
+
+            if (shooter.cover != null)
+            {
+                if (targetInfo.shooterCover == null)
+                {
+                    shooter.AddCommand(CommandType.LeaveCover);
+                    shooter.AddCommand(CommandType.Shoot);
+                }
+                else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
+                {
+                    shooter.AddCommand(CommandType.LeaveCover);
+                    shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
+                    shooter.AddCommand(CommandType.CoverAim);
+                    shooter.AddCommand(CommandType.Shoot);
+                    shooter.AddCommand(CommandType.BackCover);
+                }
+                else
+                {
+                    shooter.AddCommand(CommandType.CoverAim);
+                    shooter.AddCommand(CommandType.Shoot);
+                    shooter.AddCommand(CommandType.BackCover);
+                }
+            }
+            else
+            {
+                if (targetInfo.shooterCover == null)
+                {
+                    shooter.AddCommand(CommandType.Shoot);
+                }
+                else
+                {
+                    shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
+                    shooter.AddCommand(CommandType.CoverAim);
+                    shooter.AddCommand(CommandType.Shoot);
+                    shooter.AddCommand(CommandType.BackCover);
+                }
             }
         }
-
-        return shootTarget;
     }
 
     private void MouseInput()
