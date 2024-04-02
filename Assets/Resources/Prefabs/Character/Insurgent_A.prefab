@@ -843,6 +843,7 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   weapon: {fileID: 0}
   animator: {fileID: 0}
+  aimPoint: {fileID: 0}
   aimTarget: {fileID: 0}
   rightHandTf: {fileID: 0}
   leftHandTf: {fileID: 0}
@@ -853,6 +854,7 @@ MonoBehaviour:
   currentNode: {fileID: 0}
   cover: {fileID: 0}
   targetList: []
+  targetIndex: 0
 --- !u!114 &6953997413582888064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7099,6 +7101,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9076251966953780421, guid: f938a1c190f72214fbcf15310a977716, type: 3}
+      propertyPath: m_Data.m_ConstrainedObject
+      value: 
+      objectReference: {fileID: 4801466173965225955}
+    - target: {fileID: 9076251966953780421, guid: f938a1c190f72214fbcf15310a977716, type: 3}
+      propertyPath: m_Data.m_SourceObjects.m_Item0.transform
+      value: 
+      objectReference: {fileID: 2890395825848579490}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f938a1c190f72214fbcf15310a977716, type: 3}
 --- !u!4 &5905752314223079503 stripped

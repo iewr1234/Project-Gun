@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public class GameManager : MonoBehaviour
 {
@@ -218,13 +217,13 @@ public class GameManager : MonoBehaviour
             {
                 if (targetInfo.targetCover == null)
                 {
-                    shooter.AddCommand(CommandType.Wait, 0.5f);
+                    shooter.AddCommand(CommandType.Wait, 1f);
                     target.SetTargeting(false);
                     target.AddCommand(CommandType.LeaveCover, shooter.transform);
                 }
-                else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
+                else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
                 {
-                    shooter.AddCommand(CommandType.Wait, 1f);
+                    shooter.AddCommand(CommandType.Wait, 2f);
                     target.SetTargeting(false);
                     target.AddCommand(CommandType.LeaveCover);
                     target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
@@ -232,7 +231,7 @@ public class GameManager : MonoBehaviour
             }
             else if (targetInfo.targetCover != null)
             {
-                shooter.AddCommand(CommandType.Wait, 0.5f);
+                shooter.AddCommand(CommandType.Wait, 1f);
                 target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
             }
 
@@ -243,7 +242,7 @@ public class GameManager : MonoBehaviour
                     shooter.AddCommand(CommandType.LeaveCover);
                     shooter.AddCommand(CommandType.Shoot);
                 }
-                else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
+                else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
                 {
                     shooter.AddCommand(CommandType.LeaveCover);
                     shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);

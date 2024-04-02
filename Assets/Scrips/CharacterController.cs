@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static Cinemachine.CinemachineOrbitalTransposer;
 
 public enum CharacterOwner
 {
@@ -62,9 +63,9 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Component---")]
     public Animator animator;
 
-    private RigBuilder rigBdr;
-    public Transform aimPoint;
-    [HideInInspector] public Transform aimTarget;
+    [HideInInspector] public Transform aimPoint;
+    private MultiAimConstraint headRig;
+    private MultiAimConstraint chestRig;
 
     [HideInInspector] public Transform rightHandTf;
     [HideInInspector] public Transform leftHandTf;
@@ -103,8 +104,9 @@ public class CharacterController : MonoBehaviour
 
     private Transform aimTf;
     private Vector3 aimInterval;
-    private bool endAim;
-    private readonly float aimSpeed = 25f;
+    private bool headAim;
+    private bool chestAim;
+    private readonly float aimSpeed = 2f;
     private readonly float aimOffTime = 0.4f;
 
     private bool targetingMove;
@@ -124,13 +126,11 @@ public class CharacterController : MonoBehaviour
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
 
-        rigBdr = GetComponent<RigBuilder>();
-        rigBdr.enabled = false;
         aimPoint = transform.Find("AimPoint");
-        aimPoint.name = $"AimPoint_{transform.name}";
-        aimPoint.SetParent(aimPointTf);
-        aimPoint.gameObject.SetActive(false);
-        aimTarget = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03");
+        headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
+        headRig.weight = 0f;
+        chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
+        chestRig.weight = 0f;
 
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
@@ -215,29 +215,38 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
-        SetAimPosition();
+        AimProcess();
         MoveTargetingPosition();
         CommandApplication();
     }
 
-    private void SetAimPosition()
+    private void AimProcess()
     {
-        var canMove = animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim")
-                   && !animator.GetCurrentAnimatorStateInfo(1).IsTag("Hit")
-                   && aimPoint.gameObject.activeSelf;
-        if (!canMove) return;
+        SetAimWeight(headRig, headAim);
+        SetAimWeight(chestRig, chestAim);
 
-        var aimPos = aimTf.position + aimInterval;
-        if (aimPoint.position != aimPos)
+        if (aimTf != null)
         {
-            aimPoint.position = Vector3.MoveTowards(aimPoint.position, aimPos, aimSpeed * Time.deltaTime);
+            aimPoint.position = aimTf.position + aimInterval;
         }
 
-        if (aimPoint.position == aimPos && endAim)
+        void SetAimWeight(MultiAimConstraint rig, bool value)
         {
-            rigBdr.enabled = false;
-            aimPoint.gameObject.SetActive(false);
-            endAim = false;
+            switch (value)
+            {
+                case true:
+                    if (rig.weight != 1f)
+                    {
+                        rig.weight += aimSpeed * Time.deltaTime;
+                    }
+                    break;
+                case false:
+                    if (rig.weight != 0f)
+                    {
+                        rig.weight -= aimSpeed * Time.deltaTime;
+                    }
+                    break;
+            }
         }
     }
 
@@ -594,29 +603,12 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("coverAim", true);
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
-            weapon.firstShot = true;
-            var value = Random.Range(0, 100);
-            weapon.isHit = value < weapon.hitAccuracy ? true : false;
-            aimTf = command.targetInfo.target.transform;
-            if (!weapon.isHit)
-            {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
-                var errorInterval = 1f;
-                aimInterval = dir * errorInterval;
-                aimInterval.y += DataUtility.aimPointY;
-            }
-            else
-            {
-                aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-            }
-            aimPoint.position = DataUtility.GetAimPosition(transform, command.targetInfo.isRight);
+            SetAiming(command.targetInfo.target.transform);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
-            rigBdr.enabled = true;
-            aimPoint.gameObject.SetActive(true);
             animator.SetBool("isAim", true);
-
+            chestAim = true;
             if (transform.position != coverPos)
             {
                 transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
@@ -655,30 +647,12 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("isAim"))
         {
-            transform.LookAt(command.targetInfo.target.transform);
-            rigBdr.enabled = true;
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.bulletsPerShot);
-
-            weapon.firstShot = true;
-            var value = Random.Range(0, 100);
-            weapon.isHit = value < weapon.hitAccuracy ? true : false;
-            Debug.Log($"{transform.name}: {value}/{weapon.hitAccuracy} = {weapon.isHit}");
-
-            aimTf = command.targetInfo.target.transform;
-            if (!weapon.isHit)
-            {
-                var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
-                var errorInterval = 1f;
-                aimInterval = dir * errorInterval;
-                aimInterval.y += DataUtility.aimPointY;
-            }
-            else
-            {
-                aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-            }
-            aimPoint.transform.position = aimTf.position + aimInterval;
-            aimPoint.gameObject.SetActive(true);
+            transform.LookAt(command.targetInfo.target.transform);
+            SetAiming(command.targetInfo.target.transform);
+            chestAim = true;
+            chestRig.weight = 1f;
         }
 
         var shootNum = animator.GetInteger("shootNum");
@@ -952,7 +926,8 @@ public class CharacterController : MonoBehaviour
         {
             bool canShoot;
             var dir = Vector3.Normalize(targetPos - pos);
-            if (Physics.Raycast(pos, dir, weapon.range, coverLayer))
+            var dist = DataUtility.GetDistance(pos, targetPos);
+            if (Physics.Raycast(pos, dir, dist, coverLayer))
             {
                 canShoot = false;
             }
@@ -1183,16 +1158,31 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("isCover")) return;
 
-        switch (value)
+        if (!value)
         {
-            case true:
-                break;
-            case false:
-                targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
-                animator.SetTrigger("unTargeting");
-                break;
+            targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
+            animator.SetTrigger("unTargeting");
+            targetingMove = true;
         }
-        targetingMove = true;
+    }
+
+    private void SetAiming(Transform _aimTf)
+    {
+        aimTf = _aimTf;
+        weapon.firstShot = true;
+        weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy;
+        if (!weapon.isHit)
+        {
+            var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
+            var errorInterval = 1f;
+            aimInterval = dir * errorInterval;
+            aimInterval.y += DataUtility.aimPointY;
+        }
+        else
+        {
+            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+        }
+        aimPoint.transform.position = aimTf.position + aimInterval;
     }
 
     /// <summary>
@@ -1226,18 +1216,20 @@ public class CharacterController : MonoBehaviour
     {
         yield return new WaitForSeconds(aimOffTime);
 
-        if (!animator.GetBool("isCover"))
-        {
-            rigBdr.enabled = false;
-            aimPoint.gameObject.SetActive(false);
-        }
-        else
-        {
-            aimTf = transform;
-            aimInterval = transform.forward * DataUtility.aimPointZ;
-            aimInterval.y += DataUtility.aimPointY;
-            endAim = true;
-        }
+        //if (!animator.GetBool("isCover"))
+        //{
+        //    rigBdr.enabled = false;
+        //    aimPoint.gameObject.SetActive(false);
+        //}
+        //else
+        //{
+        //    aimTf = transform;
+        //    aimInterval = transform.forward * DataUtility.aimPointZ;
+        //    aimInterval.y += DataUtility.aimPointY;
+        //    endAim = true;
+        //}
+        aimTf = null;
+        chestAim = false;
         commandList.Remove(command);
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);
