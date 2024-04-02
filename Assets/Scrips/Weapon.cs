@@ -52,7 +52,7 @@ public class Weapon : MonoBehaviour
         magAmmo = magMax;
     }
 
-    public void FireBullet(CharacterController target)
+    public void FireBullet()
     {
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
