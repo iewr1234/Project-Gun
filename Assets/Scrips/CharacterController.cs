@@ -21,6 +21,7 @@ public enum CommandType
     CoverAim,
     BackCover,
     Shoot,
+    Targeting,
     Reload,
 }
 
@@ -31,22 +32,26 @@ public enum TargetDirection
     Left,
 }
 
+[System.Serializable]
 public class CharacterCommand
 {
     public CommandType type;
 
-    // Wait
+    [Header("[Wait]")]
     public float time;
 
-    // Move
+    [Header("[Move]")]
     public List<FieldNode> passList;
 
-    // Cover
+    [Header("[Cover]")]
     public FieldNode cover;
     public bool isRight;
+
+    [Header("[Targeting]")]
+    public bool targeting;
     public Transform lookAt;
 
-    // Shoot
+    [Header("[Shoot]")]
     public TargetInfo targetInfo;
 }
 
@@ -104,7 +109,7 @@ public class CharacterController : MonoBehaviour
     private LayerMask nodeLayer;
     private LayerMask coverLayer;
 
-    private List<CharacterCommand> commandList = new List<CharacterCommand>();
+    [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
 
     private float timer;
 
@@ -244,7 +249,7 @@ public class CharacterController : MonoBehaviour
     private void Update()
     {
         AimProcess();
-        MoveTargetingPosition();
+        //MoveTargetingPosition();
         CommandApplication();
     }
 
@@ -297,7 +302,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     private void CommandApplication()
     {
-        var runCommand = commandList.Count > 0 && !targetingMove;
+        var runCommand = commandList.Count > 0;
         if (!runCommand) return;
 
         var command = commandList[0];
@@ -321,6 +326,9 @@ public class CharacterController : MonoBehaviour
             case CommandType.BackCover:
                 BackCoverProcess(command);
                 break;
+            case CommandType.Targeting:
+                TargetingProcess(command);
+                break;
             case CommandType.Shoot:
                 ShootProcess(command);
                 break;
@@ -332,6 +340,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 대기 처리
+    /// </summary>
+    /// <param name="command"></param>
     private void WaitProcess(CharacterCommand command)
     {
         timer += Time.deltaTime;
@@ -675,6 +687,99 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 캐릭터 조준상태 처리
+    /// </summary>
+    /// <param name="command"></param>
+    private void TargetingProcess(CharacterCommand command)
+    {
+        if (animator.GetBool("isCover"))
+        {
+            if (!targetingMove)
+            {
+                switch (command.targeting)
+                {
+                    case true:
+                        aimTf = command.lookAt;
+                        headAim = true;
+                        var moveDir = animator.GetBool("isRight") ? transform.right : -transform.right;
+                        var moveDist = 0.7f;
+                        targetingPos = transform.position + (moveDir * moveDist);
+                        animator.SetTrigger("targeting");
+                        break;
+                    case false:
+                        aimTf = null;
+                        headAim = false;
+                        targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
+                        animator.SetTrigger("unTargeting");
+                        break;
+                }
+                targetingMove = true;
+            }
+            else
+            {
+                if (transform.position != targetingPos)
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, targetingPos, targetingMoveSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    targetingMove = false;
+                    commandList.Remove(command);
+                }
+            }
+        }
+        else
+        {
+            if (command.targeting)
+            {
+                transform.LookAt(command.lookAt);
+            }
+            commandList.Remove(command);
+        }
+
+        #region Old Code
+        //var target = targetInfo.target;
+        //var dir = shooter.transform.position - target.transform.position;
+        //var angleInDegrees = Vector3.Angle(dir, target.transform.forward);
+        //var cross = Vector3.Cross(dir, transform.forward);
+        //Debug.Log($"{angleInDegrees} / {cross.y <= 0f}");
+
+        //aimTf = shooter.transform;
+        //headAim = true;
+        //if (!animator.GetBool("isCover"))
+        //{
+        //    if (targetInfo.targetCover == null)
+        //    {
+        //        transform.LookAt(shooter.transform);
+        //    }
+        //    //else
+        //    //{
+        //    //    AddCommand(CommandType.TakeCover, targetInfo.targetCover);
+        //    //    //animator.SetBool("isRight", targetInfo.targetRight);
+        //    //    //var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
+        //    //    //var moveDist = 0.7f;
+        //    //    //targetingPos = transform.position + (coverDir * moveDist);
+        //    //    //animator.SetTrigger("targeting");
+        //    //    //targetingMove = true;
+        //    //}
+        //}
+        //else if (angleInDegrees < 90f)
+        //{
+        //    animator.SetBool("isRight", targetInfo.targetRight);
+        //    var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
+        //    var moveDist = 0.7f;
+        //    targetingPos = transform.position + (coverDir * moveDist);
+        //    animator.SetTrigger("targeting");
+        //    targetingMove = true;
+        //}
+        //else if (angleInDegrees >= 90f)
+        //{
+        //    animator.SetBool("isRight", cross.y <= 0f);
+        //}
+        #endregion
+    }
+
+    /// <summary>
     /// 캐릭터 사격 처리
     /// </summary>
     /// <param name="command"></param>
@@ -701,7 +806,7 @@ public class CharacterController : MonoBehaviour
             if (shootNum == 0)
             {
                 var targetInfo = command.targetInfo;
-                targetInfo.target.SetTargeting(false);
+                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                 StartCoroutine(Coroutine_AimOff(command));
             }
         }
@@ -760,7 +865,7 @@ public class CharacterController : MonoBehaviour
                         continue;
                     }
 
-                    if (!FindNodeOfShooterAndTarget(target, cover, RN, LN, targetCover, targetRN, targetLN))
+                    if (!FindNodeOfShooterAndTarget())
                     {
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
@@ -775,7 +880,7 @@ public class CharacterController : MonoBehaviour
                         continue;
                     }
 
-                    if (!FindNodeOfShooterAndTarget(target, cover, RN, LN, targetCover, targetRN, targetLN))
+                    if (!FindNodeOfShooterAndTarget())
                     {
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
@@ -790,7 +895,7 @@ public class CharacterController : MonoBehaviour
                         continue;
                     }
 
-                    if (!FindNodeOfShooterAndTarget(target, cover, RN, LN, targetCover, targetRN, targetLN))
+                    if (!FindNodeOfShooterAndTarget())
                     {
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
@@ -812,6 +917,108 @@ public class CharacterController : MonoBehaviour
                     {
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
+                }
+
+                bool FindNodeOfShooterAndTarget()
+                {
+                    FieldNode shooterNode = null;
+                    FieldNode targetNode = null;
+                    bool isRight = false;
+                    bool targetRight = false;
+                    Vector3 pos;
+                    Vector3 targetPos;
+                    var distance = 999999f;
+
+                    if (cover == null)
+                    {
+                        if (targetRN != null)
+                        {
+                            CheckNodes(currentNode, targetRN, false, true);
+                        }
+                        if (targetLN != null)
+                        {
+                            CheckNodes(currentNode, targetLN, false, false);
+                        }
+                    }
+                    else
+                    {
+                        if (RN != null)
+                        {
+                            if (target.cover == null)
+                            {
+                                CheckNodes(RN, target.currentNode, true, false);
+                            }
+                            else
+                            {
+                                if (targetRN != null)
+                                {
+                                    CheckNodes(RN, targetRN, true, true);
+                                }
+                                if (targetLN != null)
+                                {
+                                    CheckNodes(RN, targetLN, true, false);
+                                }
+                            }
+                        }
+                        if (LN != null)
+                        {
+                            if (target.cover == null)
+                            {
+                                CheckNodes(LN, target.currentNode, false, false);
+                            }
+                            else
+                            {
+                                if (targetRN != null)
+                                {
+                                    CheckNodes(LN, targetRN, false, true);
+                                }
+                                if (targetLN != null)
+                                {
+                                    CheckNodes(LN, targetLN, false, false);
+                                }
+                            }
+                        }
+                    }
+
+                    if (shooterNode != null && targetNode != null)
+                    {
+                        var targetInfo = new TargetInfo
+                        {
+                            shooter = this,
+                            target = target,
+                            shooterNode = shooterNode,
+                            shooterCover = cover,
+                            targetNode = targetNode,
+                            targetCover = targetCover,
+                            targetRight = targetRight,
+                            isRight = isRight,
+                        };
+                        targetList.Add(targetInfo);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                    void CheckNodes(FieldNode _shooterNode, FieldNode _targetNode, bool _isRight, bool _targetRight)
+                    {
+                        pos = _shooterNode.transform.position;
+                        targetPos = _targetNode.transform.position;
+                        if (CheckTheCoverAlongPath(pos, targetPos))
+                        {
+                            var dist = DataUtility.GetDistance(pos, targetPos);
+                            if (dist < distance)
+                            {
+                                shooterNode = _shooterNode;
+                                targetNode = _targetNode;
+                                isRight = _isRight;
+                                targetRight = _targetRight;
+                                distance = dist;
+                            }
+                        }
+                    }
+
                 }
             }
             else
@@ -882,108 +1089,6 @@ public class CharacterController : MonoBehaviour
             return node;
         }
 
-        bool FindNodeOfShooterAndTarget(CharacterController target, FieldNode cover, FieldNode RN, FieldNode LN, FieldNode targetCover, FieldNode targetRN, FieldNode targetLN)
-        {
-            FieldNode shooterNode = null;
-            FieldNode targetNode = null;
-            bool isRight = false;
-            bool targetRight = false;
-            Vector3 pos;
-            Vector3 targetPos;
-            var distance = 999999f;
-
-            if (cover == null)
-            {
-                if (targetRN != null)
-                {
-                    CheckNodes(currentNode, targetRN, false, true);
-                }
-                if (targetLN != null)
-                {
-                    CheckNodes(currentNode, targetLN, false, false);
-                }
-            }
-            else
-            {
-                if (RN != null)
-                {
-                    if (target.cover == null)
-                    {
-                        CheckNodes(RN, target.currentNode, true, false);
-                    }
-                    else
-                    {
-                        if (targetRN != null)
-                        {
-                            CheckNodes(RN, targetRN, true, true);
-                        }
-                        if (targetLN != null)
-                        {
-                            CheckNodes(RN, targetLN, true, false);
-                        }
-                    }
-                }
-                if (LN != null)
-                {
-                    if (target.cover == null)
-                    {
-                        CheckNodes(LN, target.currentNode, false, false);
-                    }
-                    else
-                    {
-                        if (targetRN != null)
-                        {
-                            CheckNodes(LN, targetRN, false, true);
-                        }
-                        if (targetLN != null)
-                        {
-                            CheckNodes(LN, targetLN, false, false);
-                        }
-                    }
-                }
-            }
-
-            if (shooterNode != null && targetNode != null)
-            {
-                var targetInfo = new TargetInfo
-                {
-                    shooter = this,
-                    target = target,
-                    shooterNode = shooterNode,
-                    shooterCover = cover,
-                    targetNode = targetNode,
-                    targetCover = targetCover,
-                    targetRight = targetRight,
-                    isRight = isRight,
-                };
-                targetList.Add(targetInfo);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-            void CheckNodes(FieldNode _shooterNode, FieldNode _targetNode, bool _isRight, bool _targetRight)
-            {
-                pos = _shooterNode.transform.position;
-                targetPos = _targetNode.transform.position;
-                if (CheckTheCoverAlongPath(pos, targetPos))
-                {
-                    var dist = DataUtility.GetDistance(pos, targetPos);
-                    if (dist < distance)
-                    {
-                        shooterNode = _shooterNode;
-                        targetNode = _targetNode;
-                        isRight = _isRight;
-                        targetRight = _targetRight;
-                        distance = dist;
-                    }
-                }
-            }
-
-        }
-
         bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
         {
             bool canShoot;
@@ -1042,7 +1147,7 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count < 2) return;
 
         var prevTargetInfo = targetList[targetIndex];
-        prevTargetInfo.target.SetTargeting(false);
+        prevTargetInfo.target.AddCommand(CommandType.Targeting, false, transform);
         targetIndex++;
         if (targetIndex == targetList.Count)
         {
@@ -1138,18 +1243,20 @@ public class CharacterController : MonoBehaviour
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
-    /// <param name="passList"></param>
-    public void AddCommand(CommandType type, Transform lookAt)
+    /// <param name="targeting"></param>
+    /// <param name="lookAt"></param>
+    public void AddCommand(CommandType type, bool targeting, Transform lookAt)
     {
         switch (type)
         {
-            case CommandType.LeaveCover:
-                var leaveCoverCommand = new CharacterCommand
+            case CommandType.Targeting:
+                var targetingCommand = new CharacterCommand
                 {
-                    type = CommandType.LeaveCover,
+                    type = CommandType.Targeting,
+                    targeting = targeting,
                     lookAt = lookAt,
                 };
-                commandList.Add(leaveCoverCommand);
+                commandList.Add(targetingCommand);
                 break;
             default:
                 break;
@@ -1202,7 +1309,7 @@ public class CharacterController : MonoBehaviour
         {
             if (targetInfo.targetCover == null)
             {
-                target.AddCommand(CommandType.LeaveCover, shooter.transform);
+                target.AddCommand(CommandType.LeaveCover);
             }
             else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
             {
@@ -1222,6 +1329,7 @@ public class CharacterController : MonoBehaviour
         {
             target.transform.LookAt(shooter.transform);
         }
+        target.AddCommand(CommandType.Targeting, true, shooter.transform);
 
         if (shooter.cover != null)
         {
@@ -1247,47 +1355,6 @@ public class CharacterController : MonoBehaviour
         {
             shooter.transform.LookAt(target.transform);
         }
-
-        #region Old Code
-        //var target = targetInfo.target;
-        //var dir = shooter.transform.position - target.transform.position;
-        //var angleInDegrees = Vector3.Angle(dir, target.transform.forward);
-        //var cross = Vector3.Cross(dir, transform.forward);
-        //Debug.Log($"{angleInDegrees} / {cross.y <= 0f}");
-
-        //aimTf = shooter.transform;
-        //headAim = true;
-        //if (!animator.GetBool("isCover"))
-        //{
-        //    if (targetInfo.targetCover == null)
-        //    {
-        //        transform.LookAt(shooter.transform);
-        //    }
-        //    //else
-        //    //{
-        //    //    AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-        //    //    //animator.SetBool("isRight", targetInfo.targetRight);
-        //    //    //var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-        //    //    //var moveDist = 0.7f;
-        //    //    //targetingPos = transform.position + (coverDir * moveDist);
-        //    //    //animator.SetTrigger("targeting");
-        //    //    //targetingMove = true;
-        //    //}
-        //}
-        //else if (angleInDegrees < 90f)
-        //{
-        //    animator.SetBool("isRight", targetInfo.targetRight);
-        //    var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-        //    var moveDist = 0.7f;
-        //    targetingPos = transform.position + (coverDir * moveDist);
-        //    animator.SetTrigger("targeting");
-        //    targetingMove = true;
-        //}
-        //else if (angleInDegrees >= 90f)
-        //{
-        //    animator.SetBool("isRight", cross.y <= 0f);
-        //}
-        #endregion
     }
 
     /// <summary>
