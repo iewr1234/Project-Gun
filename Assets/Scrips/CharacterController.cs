@@ -849,10 +849,11 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 사격 가능한 타겟 찾음
     /// </summary>
-    public void FindTargets()
+    public void FindTargets(FieldNode node)
     {
         targetList.Clear();
         lineInfos.Clear();
+        var currentNode = node;
         var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         for (int i = 0; i < _targetList.Count; i++)
         {
@@ -866,8 +867,8 @@ public class CharacterController : MonoBehaviour
                 FieldNode LN = null;
                 FieldNode targetRN = null;
                 FieldNode targetLN = null;
-                var cover = FindCoverNode(this, target);
-                var targetCover = FindCoverNode(target, this);
+                var cover = FindCoverNode(node, target.currentNode);
+                var targetCover = FindCoverNode(target.currentNode, node);
                 if (cover != null && targetCover != null)
                 {
                     RN = CheckTheCanMoveNode(pos, cover, TargetDirection.Right);
@@ -1047,24 +1048,24 @@ public class CharacterController : MonoBehaviour
             }
         }
 
-        FieldNode FindCoverNode(CharacterController shooter, CharacterController target)
+        FieldNode FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
         {
             FieldNode coverNode = null;
-            var shooterPos = shooter.currentNode.transform.position;
-            var endPos = target.currentNode.transform.position;
+            var shooterPos = shooterNode.transform.position;
+            var endPos = targetNode.transform.position;
             var dir = Vector3.zero;
             RayCastOfCoverLayer();
 
             var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
             var interval = rightDir * 0.4f;
-            shooterPos = shooter.currentNode.transform.position + interval;
-            endPos = target.currentNode.transform.position + interval;
+            shooterPos = shooterNode.transform.position + interval;
+            endPos = targetNode.transform.position + interval;
             RayCastOfCoverLayer();
 
             var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
             interval = leftDir * 0.4f;
-            shooterPos = shooter.currentNode.transform.position + interval;
-            endPos = target.currentNode.transform.position + interval;
+            shooterPos = shooterNode.transform.position + interval;
+            endPos = targetNode.transform.position + interval;
             dir = Vector3.Normalize(endPos - shooterPos);
             RayCastOfCoverLayer();
 
@@ -1078,7 +1079,7 @@ public class CharacterController : MonoBehaviour
                 if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
                 {
                     var _coverNode = hit.collider.GetComponentInParent<FieldNode>();
-                    if (shooter.currentNode.onAxisNodes.Find(x => x == _coverNode) != null)
+                    if (shooterNode.onAxisNodes.Find(x => x == _coverNode) != null)
                     {
                         coverNode = _coverNode;
                     }

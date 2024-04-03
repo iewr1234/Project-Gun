@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,7 +10,7 @@ public class GameManager : MonoBehaviour
     //[Header("---Access Component---")]
     private Transform fieldNodeTf;
     private Transform characterTf;
-    //private Transform copyCharacterTf;
+    private Transform linePoolTf;
     private Transform bulletsPoolTf;
 
     [Header("--- Assignment Variable---\n[Character]")]
@@ -30,9 +28,12 @@ public class GameManager : MonoBehaviour
     private List<FieldNode> closeNodes = new List<FieldNode>();
     private FieldNode targetNode;
 
+    private LineRenderer moveLine;
+    [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
 
-    private readonly int bulletPoolMax = 50;
+    private readonly int linePoolMax = 15;
+    private readonly int bulletPoolMax = 30;
 
     public void Start()
     {
@@ -41,12 +42,13 @@ public class GameManager : MonoBehaviour
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
-        //copyCharacterTf = GameObject.FindGameObjectWithTag("CopyCharacters").transform;
+        linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
+        CreateLines();
         CreateBullets();
     }
 
@@ -91,11 +93,24 @@ public class GameManager : MonoBehaviour
 
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
         weapon.SetComponets(charCtr);
+    }
 
-        //var copyChar = Instantiate(charCtr);
-        //copyChar.transform.SetParent(copyCharacterTf);
-        //copyChar.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-        //copyChar.SetComponentsOfCopy(charCtr);
+    private void CreateLines()
+    {
+        moveLine = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
+        moveLine.transform.SetParent(linePoolTf, false);
+        moveLine.startWidth = 0.05f;
+        moveLine.material = Resources.Load<Material>("Materials/Line/DrawLine_Move");
+        moveLine.enabled = false;
+
+        for (int i = 0; i < linePoolMax; i++)
+        {
+            var line = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
+            line.transform.SetParent(linePoolTf, false);
+            line.startWidth = 0.05f;
+            line.enabled = false;
+            linePool.Add(line);
+        }
     }
 
     private void CreateBullets()
@@ -126,7 +141,7 @@ public class GameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                selectChar.FindTargets();
+                //selectChar.FindTargets();
                 if (selectChar.SetTarget())
                 {
                     for (int i = 0; i < openNodes.Count; i++)
@@ -159,7 +174,6 @@ public class GameManager : MonoBehaviour
             {
                 if (selectChar.weapon.magAmmo > 0)
                 {
-                    //InputCommands(selectChar);
                     if (selectChar.animator.GetBool("isCover"))
                     {
                         selectChar.AddCommand(CommandType.CoverAim);
@@ -224,6 +238,19 @@ public class GameManager : MonoBehaviour
                 else if (node.canMove && selectChar != null)
                 {
                     CharacterMove(selectChar, node);
+                    moveLine.enabled = false;
+                    for (int i = 0; i < linePool.Count; i++)
+                    {
+                        var line = linePool[i];
+                        if (!line.enabled)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            line.enabled = false;
+                        }
+                    }
                     selectChar = null;
                 }
             }
@@ -238,15 +265,64 @@ public class GameManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
         {
             var node = hit.collider.GetComponentInParent<FieldNode>();
-            if (targetNode != node && openNodes.Find(x => x == node) != null)
+            var find = openNodes.Find(x => x == node);
+            if (targetNode != node && find != null)
             {
                 ResultNodePass(selectChar.currentNode, node);
+                moveLine.enabled = true;
+                moveLine.positionCount = closeNodes.Count;
+                var height = 0.1f;
+                for (int i = 0; i < closeNodes.Count; i++)
+                {
+                    var pos = closeNodes[i].transform.position;
+                    pos.y += height;
+                    moveLine.SetPosition(i, pos);
+                }
+
+                selectChar.FindTargets(node);
+                height = 0.75f;
+                for (int i = 0; i < linePool.Count; i++)
+                {
+                    var line = linePool[i];
+                    if (i < selectChar.targetList.Count)
+                    {
+                        var targetInfo = selectChar.targetList[i];
+                        var pos = node.transform.position;
+                        pos.y += height;
+                        var targetPos = targetInfo.target.currentNode.transform.position;
+                        targetPos.y += height;
+                        line.enabled = true;
+                        if (targetInfo.targetCover == null)
+                        {
+                            line.material = Resources.Load<Material>("Materials/Line/DrawLine_Shoot_NonCover");
+                        }
+                        else
+                        {
+                            line.material = Resources.Load<Material>("Materials/Line/DrawLine_Shoot_Cover");
+                        }
+                        line.positionCount = 2;
+                        line.SetPosition(0, pos);
+                        line.SetPosition(1, targetPos);
+                    }
+                    else
+                    {
+                        if (!line.enabled)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            line.enabled = false;
+                        }
+                    }
+                }
                 targetNode = node;
             }
-        }
-        else
-        {
-            targetNode = null;
+            else if (find == null)
+            {
+                moveLine.enabled = false;
+                targetNode = null;
+            }
         }
     }
 
