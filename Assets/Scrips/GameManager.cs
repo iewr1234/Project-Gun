@@ -181,7 +181,17 @@ public class GameManager : MonoBehaviour
             {
                 if (selectChar.weapon.magAmmo > 0)
                 {
-                    FindTheInputCommands(selectChar);
+                    //InputCommands(selectChar);
+                    if (selectChar.animator.GetBool("isCover"))
+                    {
+                        selectChar.AddCommand(CommandType.CoverAim);
+                        selectChar.AddCommand(CommandType.Shoot);
+                        selectChar.AddCommand(CommandType.BackCover);
+                    }
+                    else
+                    {
+                        selectChar.AddCommand(CommandType.Shoot);
+                    }
                     for (int i = 0; i < openNodes.Count; i++)
                     {
                         var openNode = openNodes[i];
@@ -209,69 +219,69 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        void FindTheInputCommands(CharacterController shooter)
-        {
-            //var targetInfo = shooter.targetList[shooter.targetIndex];
-            //var target = targetInfo.target;
-            //if (target.cover != null)
-            //{
-            //    if (targetInfo.targetCover == null)
-            //    {
-            //        shooter.AddCommand(CommandType.Wait, 1f);
-            //        target.SetTargeting(false);
-            //        target.AddCommand(CommandType.LeaveCover, shooter.transform);
-            //    }
-            //    else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
-            //    {
-            //        shooter.AddCommand(CommandType.Wait, 2f);
-            //        target.SetTargeting(false);
-            //        target.AddCommand(CommandType.LeaveCover);
-            //        target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-            //    }
-            //}
-            //else if (targetInfo.targetCover != null)
-            //{
-            //    shooter.AddCommand(CommandType.Wait, 1f);
-            //    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-            //}
+        //void InputCommands(CharacterController shooter)
+        //{
+        //    var targetInfo = shooter.targetList[shooter.targetIndex];
+        //    var target = targetInfo.target;
+        //    if (target.cover != null)
+        //    {
+        //        if (targetInfo.targetCover == null)
+        //        {
+        //            shooter.AddCommand(CommandType.Wait, 1f);
+        //            target.SetTargeting(false);
+        //            target.AddCommand(CommandType.LeaveCover, shooter.transform);
+        //        }
+        //        else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
+        //        {
+        //            shooter.AddCommand(CommandType.Wait, 2f);
+        //            target.SetTargeting(false);
+        //            target.AddCommand(CommandType.LeaveCover);
+        //            target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
+        //        }
+        //    }
+        //    else if (targetInfo.targetCover != null)
+        //    {
+        //        shooter.AddCommand(CommandType.Wait, 1f);
+        //        target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
+        //    }
 
-            //if (shooter.cover != null)
-            //{
-            //    if (targetInfo.shooterCover == null)
-            //    {
-            //        shooter.AddCommand(CommandType.LeaveCover);
-            //        shooter.AddCommand(CommandType.Shoot);
-            //    }
-            //    else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
-            //    {
-            //        shooter.AddCommand(CommandType.LeaveCover);
-            //        shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
-            //        shooter.AddCommand(CommandType.CoverAim);
-            //        shooter.AddCommand(CommandType.Shoot);
-            //        shooter.AddCommand(CommandType.BackCover);
-            //    }
-            //    else
-            //    {
-            //        shooter.AddCommand(CommandType.CoverAim);
-            //        shooter.AddCommand(CommandType.Shoot);
-            //        shooter.AddCommand(CommandType.BackCover);
-            //    }
-            //}
-            //else
-            //{
-            //    if (targetInfo.shooterCover == null)
-            //    {
-            //        shooter.AddCommand(CommandType.Shoot);
-            //    }
-            //    else
-            //    {
-            //        shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
-            //        shooter.AddCommand(CommandType.CoverAim);
-            //        shooter.AddCommand(CommandType.Shoot);
-            //        shooter.AddCommand(CommandType.BackCover);
-            //    }
-            //}
-        }
+        //    if (shooter.cover != null)
+        //    {
+        //        if (targetInfo.shooterCover == null)
+        //        {
+        //            shooter.AddCommand(CommandType.LeaveCover);
+        //            shooter.AddCommand(CommandType.Shoot);
+        //        }
+        //        else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
+        //        {
+        //            shooter.AddCommand(CommandType.LeaveCover);
+        //            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
+        //            shooter.AddCommand(CommandType.CoverAim);
+        //            shooter.AddCommand(CommandType.Shoot);
+        //            shooter.AddCommand(CommandType.BackCover);
+        //        }
+        //        else
+        //        {
+        //            shooter.AddCommand(CommandType.CoverAim);
+        //            shooter.AddCommand(CommandType.Shoot);
+        //            shooter.AddCommand(CommandType.BackCover);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (targetInfo.shooterCover == null)
+        //        {
+        //            shooter.AddCommand(CommandType.Shoot);
+        //        }
+        //        else
+        //        {
+        //            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
+        //            shooter.AddCommand(CommandType.CoverAim);
+        //            shooter.AddCommand(CommandType.Shoot);
+        //            shooter.AddCommand(CommandType.BackCover);
+        //        }
+        //    }
+        //}
     }
 
     private void MouseInput()

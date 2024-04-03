@@ -80,7 +80,7 @@ public class Bullet : MonoBehaviour
         {
             var hitCd = hitCds[i];
             var charCtr = hitCd.GetComponentInParent<CharacterController>();
-            var node = hitCd.GetComponentInParent<FieldNode>();
+            //var node = hitCd.GetComponentInParent<FieldNode>();
             if (charCtr != null)
             {
                 charCtr.OnHit(weapon.damage);
