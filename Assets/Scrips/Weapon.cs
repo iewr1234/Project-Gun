@@ -19,6 +19,8 @@ public class Weapon : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private Transform muzzleTf;
 
+    [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
+
     [Header("--- Assignment Variable---")]
     public WeaponType type;
     public float range;
@@ -45,8 +47,8 @@ public class Weapon : MonoBehaviour
         charCtr.weapon = this;
         muzzleTf = transform.Find("Muzzle");
 
-        var mashs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        DataUtility.SetMeshsMaterial(charCtr.ownerType, mashs);
+        meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
+        DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
 
         WeaponSwitching("Right");
         magAmmo = magMax;

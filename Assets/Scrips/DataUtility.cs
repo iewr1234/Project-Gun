@@ -24,22 +24,18 @@ public static class DataUtility
         for (int i = 0; i < meshs.Count; i++)
         {
             var mesh = meshs[i];
-            var mtName = mesh.material.name.Split(' ')[0];
-            var mt = Resources.Load<Material>($"Materials/AlwaysVisible/{mtName}(AV)");
-            if (mt != null)
+            mesh.material = new Material(mesh.material);
+            mesh.material.shader = Shader.Find("Draw/AlwaysVisible Shader");
+            switch (ownerType)
             {
-                mesh.material = new Material(mt);
-                switch (ownerType)
-                {
-                    case CharacterOwner.Player:
-                        mesh.material.SetColor("_PhantomColor", pMaterialColor);
-                        break;
-                    case CharacterOwner.Enemy:
-                        mesh.material.SetColor("_PhantomColor", eMaterialColor);
-                        break;
-                    default:
-                        break;
-                }
+                case CharacterOwner.Player:
+                    mesh.material.SetColor("_PhantomColor", pMaterialColor);
+                    break;
+                case CharacterOwner.Enemy:
+                    mesh.material.SetColor("_PhantomColor", eMaterialColor);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -49,22 +45,18 @@ public static class DataUtility
         for (int i = 0; i < sMeshs.Count; i++)
         {
             var sMesh = sMeshs[i];
-            var mtName = sMesh.material.name.Split(' ')[0];
-            var mt = Resources.Load<Material>($"Materials/AlwaysVisible/{mtName}(AV)");
-            if (mt != null)
+            sMesh.material = new Material(sMesh.material);
+            sMesh.material.shader = Shader.Find("Draw/AlwaysVisible Shader");
+            switch (ownerType)
             {
-                sMesh.material = new Material(mt);
-                switch (ownerType)
-                {
-                    case CharacterOwner.Player:
-                        sMesh.material.SetColor("_PhantomColor", pMaterialColor);
-                        break;
-                    case CharacterOwner.Enemy:
-                        sMesh.material.SetColor("_PhantomColor", eMaterialColor);
-                        break;
-                    default:
-                        break;
-                }
+                case CharacterOwner.Player:
+                    sMesh.material.SetColor("_PhantomColor", pMaterialColor);
+                    break;
+                case CharacterOwner.Enemy:
+                    sMesh.material.SetColor("_PhantomColor", eMaterialColor);
+                    break;
+                default:
+                    break;
             }
         }
     }

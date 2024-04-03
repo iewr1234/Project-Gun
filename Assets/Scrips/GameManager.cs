@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class GameManager : MonoBehaviour
     //[Header("---Access Component---")]
     private Transform fieldNodeTf;
     private Transform characterTf;
-    private Transform aimPointTf;
+    //private Transform copyCharacterTf;
     private Transform bulletsPoolTf;
 
     [Header("--- Assignment Variable---\n[Character]")]
@@ -26,6 +28,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
+    private FieldNode targetNode;
 
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
 
@@ -38,12 +41,12 @@ public class GameManager : MonoBehaviour
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
-        aimPointTf = GameObject.FindGameObjectWithTag("AimPoints").transform;
+        //copyCharacterTf = GameObject.FindGameObjectWithTag("CopyCharacters").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
 
         CreateField();
-        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01", aimPointTf);
+        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
         CreateBullets();
     }
 
@@ -74,7 +77,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName, Transform aimPointTf)
+    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName)
     {
         var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charName}"));
         charCtr.transform.SetParent(characterTf, false);
@@ -84,10 +87,15 @@ public class GameManager : MonoBehaviour
         {
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        charCtr.SetComponents(this, ownerType, node, aimPointTf);
+        charCtr.SetComponents(this, ownerType, node);
 
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
         weapon.SetComponets(charCtr);
+
+        //var copyChar = Instantiate(charCtr);
+        //copyChar.transform.SetParent(copyCharacterTf);
+        //copyChar.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        //copyChar.SetComponentsOfCopy(charCtr);
     }
 
     private void CreateBullets()
@@ -105,6 +113,7 @@ public class GameManager : MonoBehaviour
     {
         KeyboardInput();
         MouseInput();
+        PointerUpEvent();
         CreateCover();
         CreateEnemy();
     }
@@ -127,37 +136,6 @@ public class GameManager : MonoBehaviour
                     }
                     openNodes.Clear();
                 }
-
-                #region old Code
-                //if (selectChar.weapon.magAmmo > 0)
-                //{
-                //    if (selectChar.animator.GetBool("isCover"))
-                //    {
-                //        selectChar.AddCommand(CommandType.CoverAim, target);
-                //        selectChar.AddCommand(CommandType.Shoot, target);
-                //        selectChar.AddCommand(CommandType.BackCover);
-                //    }
-                //    else
-                //    {
-                //        selectChar.AddCommand(CommandType.Shoot, target);
-                //    }
-                //    for (int i = 0; i < openNodes.Count; i++)
-                //    {
-                //        var openNode = openNodes[i];
-                //        openNode.NodeColor = Color.gray;
-                //    }
-                //    openNodes.Clear();
-                //    selectChar = null;
-                //}
-                //else if (selectChar.weapon.magAmmo == 0)
-                //{
-                //    Debug.Log($"{selectChar.name}: No Ammo");
-                //}
-                //else
-                //{
-                //    Debug.Log($"{selectChar.name}: No Target");
-                //}
-                #endregion
             }
             else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
             {
@@ -218,70 +196,6 @@ public class GameManager : MonoBehaviour
                 selectChar = null;
             }
         }
-
-        //void InputCommands(CharacterController shooter)
-        //{
-        //    var targetInfo = shooter.targetList[shooter.targetIndex];
-        //    var target = targetInfo.target;
-        //    if (target.cover != null)
-        //    {
-        //        if (targetInfo.targetCover == null)
-        //        {
-        //            shooter.AddCommand(CommandType.Wait, 1f);
-        //            target.SetTargeting(false);
-        //            target.AddCommand(CommandType.LeaveCover, shooter.transform);
-        //        }
-        //        else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
-        //        {
-        //            shooter.AddCommand(CommandType.Wait, 2f);
-        //            target.SetTargeting(false);
-        //            target.AddCommand(CommandType.LeaveCover);
-        //            target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-        //        }
-        //    }
-        //    else if (targetInfo.targetCover != null)
-        //    {
-        //        shooter.AddCommand(CommandType.Wait, 1f);
-        //        target.AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-        //    }
-
-        //    if (shooter.cover != null)
-        //    {
-        //        if (targetInfo.shooterCover == null)
-        //        {
-        //            shooter.AddCommand(CommandType.LeaveCover);
-        //            shooter.AddCommand(CommandType.Shoot);
-        //        }
-        //        else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
-        //        {
-        //            shooter.AddCommand(CommandType.LeaveCover);
-        //            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
-        //            shooter.AddCommand(CommandType.CoverAim);
-        //            shooter.AddCommand(CommandType.Shoot);
-        //            shooter.AddCommand(CommandType.BackCover);
-        //        }
-        //        else
-        //        {
-        //            shooter.AddCommand(CommandType.CoverAim);
-        //            shooter.AddCommand(CommandType.Shoot);
-        //            shooter.AddCommand(CommandType.BackCover);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (targetInfo.shooterCover == null)
-        //        {
-        //            shooter.AddCommand(CommandType.Shoot);
-        //        }
-        //        else
-        //        {
-        //            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover);
-        //            shooter.AddCommand(CommandType.CoverAim);
-        //            shooter.AddCommand(CommandType.Shoot);
-        //            shooter.AddCommand(CommandType.BackCover);
-        //        }
-        //    }
-        //}
     }
 
     private void MouseInput()
@@ -313,6 +227,26 @@ public class GameManager : MonoBehaviour
                     selectChar = null;
                 }
             }
+        }
+    }
+
+    private void PointerUpEvent()
+    {
+        if (selectChar == null) return;
+
+        var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+        {
+            var node = hit.collider.GetComponentInParent<FieldNode>();
+            if (targetNode != node && openNodes.Find(x => x == node) != null)
+            {
+                ResultNodePass(selectChar.currentNode, node);
+                targetNode = node;
+            }
+        }
+        else
+        {
+            targetNode = null;
         }
     }
 
@@ -353,7 +287,12 @@ public class GameManager : MonoBehaviour
     {
         if (charCtr.animator.GetBool("isMove")) return;
 
-        ResultNodePass(charCtr.currentNode, targetNode);
+        for (int i = 0; i < openNodes.Count; i++)
+        {
+            var openNode = openNodes[i];
+            openNode.NodeColor = Color.gray;
+        }
+        //ResultNodePass(charCtr.currentNode, targetNode);
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
         {
             charCtr.AddCommand(CommandType.LeaveCover);
@@ -390,7 +329,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.canMove)
                 {
-                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02", aimPointTf);
+                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02");
                 }
             }
         }
@@ -398,73 +337,59 @@ public class GameManager : MonoBehaviour
 
     private void ResultNodePass(FieldNode startNode, FieldNode endNode)
     {
-        for (int i = 0; i < openNodes.Count; i++)
-        {
-            var openNode = openNodes[i];
-            openNode.NodeColor = Color.gray;
-        }
         closeNodes.Clear();
+        var _openNodes = new List<FieldNode>(openNodes);
         FindNodeRoute(startNode, endNode);
 
-        openNodes.Clear();
-        for (int i = 0; i < closeNodes.Count; i++)
-        {
-            var closeNode = closeNodes[i];
-            openNodes.Add(closeNode);
-        }
-        ReverseResultNodePass(endNode, startNode);
-    }
-
-    private void ReverseResultNodePass(FieldNode startNode, FieldNode endNode)
-    {
+        _openNodes = new List<FieldNode>(closeNodes);
         closeNodes.Clear();
-        FindNodeRoute(startNode, endNode);
-    }
+        FindNodeRoute(endNode, startNode);
 
-    private void FindNodeRoute(FieldNode startNode, FieldNode endNode)
-    {
-        var currentNode = startNode;
-        closeNodes.Add(currentNode);
-        FieldNode nextNode = null;
-        while (currentNode != endNode)
+        void FindNodeRoute(FieldNode _startNode, FieldNode _endNode)
         {
-            float currentF = 999999f;
-            for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
+            var currentNode = _startNode;
+            closeNodes.Add(currentNode);
+            FieldNode nextNode = null;
+            while (currentNode != _endNode)
             {
-                var node = currentNode.allAxisNodes[i];
-                var findOpen = openNodes.Find(x => x == node);
-                var findClose = closeNodes.Find(x => x == node);
-                if (findOpen != null && findClose == null)
+                float currentF = 999999f;
+                for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
                 {
-                    var g = DataUtility.GetDistance(currentNode.transform.position, node.transform.position);
-                    var h = DataUtility.GetDistance(node.transform.position, endNode.transform.position);
-                    var f = g + h;
-                    if (f < currentF)
+                    var node = currentNode.allAxisNodes[i];
+                    var findOpen = _openNodes.Find(x => x == node);
+                    var findClose = closeNodes.Find(x => x == node);
+                    if (findOpen != null && findClose == null)
                     {
-                        currentF = f;
-                        nextNode = node;
+                        var g = DataUtility.GetDistance(currentNode.transform.position, node.transform.position);
+                        var h = DataUtility.GetDistance(node.transform.position, _endNode.transform.position);
+                        var f = g + h;
+                        if (f < currentF)
+                        {
+                            currentF = f;
+                            nextNode = node;
+                        }
                     }
                 }
-            }
 
-            if (nextNode != null)
-            {
-                currentNode = nextNode;
-                closeNodes.Add(currentNode);
-                openNodes.Remove(currentNode);
-                nextNode = null;
-            }
-            else
-            {
-                closeNodes.Remove(currentNode);
-                if (closeNodes.Count == 0)
+                if (nextNode != null)
                 {
-                    Debug.Log("not find NodePass");
-                    break;
+                    currentNode = nextNode;
+                    closeNodes.Add(currentNode);
+                    _openNodes.Remove(currentNode);
+                    nextNode = null;
                 }
                 else
                 {
-                    currentNode = closeNodes[^1];
+                    closeNodes.Remove(currentNode);
+                    if (closeNodes.Count == 0)
+                    {
+                        Debug.Log("not find NodePass");
+                        break;
+                    }
+                    else
+                    {
+                        currentNode = closeNodes[^1];
+                    }
                 }
             }
         }

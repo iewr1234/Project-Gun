@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -80,6 +79,7 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     public Weapon weapon;
+    //[HideInInspector] public CharacterController copy;
 
     [Header("---Access Component---")]
     public Animator animator;
@@ -91,6 +91,8 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Transform rightHandTf;
     [HideInInspector] public Transform leftHandTf;
 
+    [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
+    [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
     private List<Collider> ragdollCds = new List<Collider>();
     private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
@@ -103,8 +105,12 @@ public class CharacterController : MonoBehaviour
 
     public FieldNode currentNode;
     [HideInInspector] public Cover cover;
+    [HideInInspector] public bool isCopy;
+
+    [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
     [HideInInspector] public int targetIndex;
+
     private List<LineInfo> lineInfos = new List<LineInfo>();
 
     private LayerMask nodeLayer;
@@ -143,7 +149,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode, Transform aimPointTf)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
@@ -157,6 +163,11 @@ public class CharacterController : MonoBehaviour
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
 
+        ownerType = _ownerType;
+        meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
+        DataUtility.SetMeshsMaterial(ownerType, meshs);
+        sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
+        DataUtility.SetMeshsMaterial(ownerType, sMeshs);
         ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
         for (int i = 0; i < ragdollCds.Count; i++)
         {
@@ -171,13 +182,10 @@ public class CharacterController : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        ownerType = _ownerType;
         var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         var name = transform.name.Split(' ', '(', ')')[0];
         transform.name = $"{name}_{charList.Count}";
         charList.Add(this);
-        DataUtility.SetMeshsMaterial(ownerType, transform.GetComponentsInChildren<MeshRenderer>().ToList());
-        DataUtility.SetMeshsMaterial(ownerType, transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList());
 
         health = maxHealth;
         nodeLayer = LayerMask.GetMask("Node");
@@ -187,6 +195,32 @@ public class CharacterController : MonoBehaviour
         currentNode.charCtr = this;
         currentNode.canMove = false;
     }
+
+    //public void SetComponentsOfCopy(CharacterController charCtr)
+    //{
+    //    charCtr.copy = this;
+    //    animator.speed = 0f;
+    //    for (int i = 0; i < meshs.Count; i++)
+    //    {
+    //        var mesh = meshs[i];
+    //        mesh.material.shader = Shader.Find("Unlit/Color");
+    //        mesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
+    //    }
+    //    for (int i = 0; i < sMeshs.Count; i++)
+    //    {
+    //        var sMesh = sMeshs[i];
+    //        sMesh.material.shader = Shader.Find("Unlit/Color");
+    //        sMesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
+    //    }
+    //    for (int i = 0; i < weapon.meshs.Count; i++)
+    //    {
+    //        var mesh = weapon.meshs[i];
+    //        mesh.material.shader = Shader.Find("Unlit/Color");
+    //        mesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
+    //    }
+    //    isCopy = true;
+    //    gameObject.SetActive(false);
+    //}
 
     private void OnDrawGizmos()
     {
@@ -249,6 +283,8 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
+        if (isCopy) return;
+
         AimProcess();
         CommandApplication();
     }
@@ -1014,21 +1050,21 @@ public class CharacterController : MonoBehaviour
         FieldNode FindCoverNode(CharacterController shooter, CharacterController target)
         {
             FieldNode coverNode = null;
-            var shooterPos = shooter.transform.position;
-            var endPos = target.transform.position;
+            var shooterPos = shooter.currentNode.transform.position;
+            var endPos = target.currentNode.transform.position;
             var dir = Vector3.zero;
             RayCastOfCoverLayer();
 
             var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
             var interval = rightDir * 0.4f;
-            shooterPos = shooter.transform.position + interval;
-            endPos = target.transform.position + interval;
+            shooterPos = shooter.currentNode.transform.position + interval;
+            endPos = target.currentNode.transform.position + interval;
             RayCastOfCoverLayer();
 
             var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
             interval = leftDir * 0.4f;
-            shooterPos = shooter.transform.position + interval;
-            endPos = target.transform.position + interval;
+            shooterPos = shooter.currentNode.transform.position + interval;
+            endPos = target.currentNode.transform.position + interval;
             dir = Vector3.Normalize(endPos - shooterPos);
             RayCastOfCoverLayer();
 
