@@ -25,7 +25,7 @@ public class Bullet : MonoBehaviour
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
-    public void SetComponents(Weapon _weapon)
+    public void SetComponents(Weapon _weapon, bool _isHit)
     {
         weapon = _weapon;
 
@@ -43,6 +43,7 @@ public class Bullet : MonoBehaviour
         }
         bulletRb.constraints = RigidbodyConstraints.None;
         bulletRb.isKinematic = false;
+        bulletRb.velocity = transform.forward * speed;
 
         if (bulletCd == null)
         {
@@ -60,22 +61,22 @@ public class Bullet : MonoBehaviour
             meshRdr.enabled = true;
         }
 
-        if (weapon.isHit && weapon.firstShot)
-        {
-            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
-        }
-        else
+        isHit = !_isHit;
+        if (!isHit)
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") | LayerMask.GetMask("Cover");
         }
-        isHit = false;
+        else
+        {
+            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
+        }
     }
 
     void FixedUpdate()
     {
         if (isHit) return;
 
-        var hitCds = Physics.OverlapSphere(transform.position, 0.05f, targetLayer).ToList();
+        var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
         for (int i = 0; i < hitCds.Count; i++)
         {
             var hitCd = hitCds[i];

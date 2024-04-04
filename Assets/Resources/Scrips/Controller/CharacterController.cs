@@ -136,7 +136,7 @@ public class CharacterController : MonoBehaviour
     private bool headAim;
     private bool chestAim;
     private readonly float aimSpeed = 2f;
-    private readonly float aimOffTime = 0.4f;
+    private readonly float aimTime = 0.4f;
 
     private bool targetingMove;
     private Vector3 targetingPos;
@@ -467,14 +467,14 @@ public class CharacterController : MonoBehaviour
                 else if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
-                    var find = currentNode.onAxisNodes.Find(x => x == cover.node);
+                    var find = currentNode.onAxisNodes.Find(x => x != null && x == cover.node);
                     if (find != null)
                     {
                         coverNode = cover.node;
                     }
                     else
                     {
-                        var node = currentNode.onAxisNodes.Find(x => x.cover != null);
+                        var node = currentNode.onAxisNodes.Find(x => x != null && x.cover != null);
                         if (node != null)
                         {
                             coverNode = node;
@@ -483,7 +483,7 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    var node = currentNode.onAxisNodes.Find(x => x.cover != null);
+                    var node = currentNode.onAxisNodes.Find(x => x != null && x.cover != null);
                     if (node != null)
                     {
                         coverNode = node;
@@ -782,6 +782,7 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("coverAim", true);
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
+            animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
             SetAiming(command.targetInfo.target);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
@@ -794,7 +795,6 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                animator.SetInteger("shootNum", weapon.autoFireNum);
                 coverPos = currentNode.transform.position + (transform.forward * coverInterval);
                 commandList.Remove(command);
                 covering = false;
@@ -811,7 +811,7 @@ public class CharacterController : MonoBehaviour
         if (!animator.GetBool("isAim"))
         {
             animator.SetBool("isAim", true);
-            animator.SetInteger("shootNum", weapon.autoFireNum);
+            animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
             transform.LookAt(command.targetInfo.target.transform);
             SetAiming(command.targetInfo.target);
             chestAim = true;
@@ -821,13 +821,19 @@ public class CharacterController : MonoBehaviour
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0) return;
 
-        if (animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim"))
+        timer += Time.deltaTime;
+        if (timer > aimTime && animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim"))
         {
+            if (!animator.GetBool("fireTrigger"))
+            {
+                animator.SetBool("fireTrigger", true);
+            }
             weapon.FireBullet();
             shootNum--;
             animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
+                animator.SetBool("fireTrigger", false);
                 StartCoroutine(Coroutine_AimOff(command));
             }
         }
@@ -1387,9 +1393,8 @@ public class CharacterController : MonoBehaviour
     private void SetAiming(CharacterController target)
     {
         aimTf = target.transform;
-        weapon.firstShot = true;
-        weapon.isHit = Random.Range(0, 100) < weapon.hitAccuracy;
-        if (!weapon.isHit)
+        var shootNum = animator.GetInteger("shootNum");
+        if (weapon.CheckHitBullet(shootNum))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
@@ -1436,7 +1441,7 @@ public class CharacterController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator Coroutine_AimOff(CharacterCommand command)
     {
-        yield return new WaitForSeconds(aimOffTime);
+        yield return new WaitForSeconds(aimTime);
 
         aimTf = null;
         chestAim = false;
@@ -1448,6 +1453,7 @@ public class CharacterController : MonoBehaviour
         commandList.Remove(command);
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);
+        timer = 0f;
     }
     #endregion
 
