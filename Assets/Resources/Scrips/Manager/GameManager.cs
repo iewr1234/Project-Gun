@@ -148,18 +148,7 @@ public class GameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                for (int i = 0; i < linePool.Count; i++)
-                {
-                    var line = linePool[i];
-                    if (!line.enabled)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        line.enabled = false;
-                    }
-                }
+                ClearLine();
                 selectChar.FindTargets(selectChar.currentNode);
                 if (selectChar.SetTarget())
                 {
@@ -171,8 +160,9 @@ public class GameManager : MonoBehaviour
                     openNodes.Clear();
                 }
             }
-            else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.magAmmo < selectChar.weapon.magMax)
+            else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
             {
+                ClearLine();
                 selectChar.AddCommand(CommandType.Reload);
                 for (int i = 0; i < openNodes.Count; i++)
                 {
@@ -191,7 +181,7 @@ public class GameManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.Space))
             {
-                if (selectChar.weapon.magAmmo > 0)
+                if (selectChar.weapon.chamberBullet)
                 {
                     if (selectChar.animator.GetBool("isCover"))
                     {
@@ -212,13 +202,9 @@ public class GameManager : MonoBehaviour
                     camMgr.SetCameraState(CameraState.None);
                     selectChar = null;
                 }
-                else if (selectChar.weapon.magAmmo == 0)
-                {
-                    Debug.Log($"{selectChar.name}: No Ammo");
-                }
                 else
                 {
-                    Debug.Log($"{selectChar.name}: No Target");
+                    Debug.Log($"{selectChar.name}: No Ammo");
                 }
             }
             else if (Input.GetKeyDown(KeyCode.Escape))
@@ -345,7 +331,7 @@ public class GameManager : MonoBehaviour
                 {
                     openNodes.Add(onAxisNode);
                 }
-                onAxisNode.NodeColor = Color.white;
+                onAxisNode.NodeColor = new Color(0.85f, 0.85f, 0.85f);
                 ChainOfMovableNode(currentNode, onAxisNode, mobility, false);
             }
         }

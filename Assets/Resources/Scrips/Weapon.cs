@@ -10,6 +10,12 @@ public enum WeaponType
     Rifle,
 }
 
+public enum FireModeType
+{
+    SingleFire,
+    AutoFire,
+}
+
 public class Weapon : MonoBehaviour
 {
     [Header("---Access Script---")]
@@ -22,15 +28,19 @@ public class Weapon : MonoBehaviour
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
-    public WeaponType type;
-    public float range;
-    public int hitAccuracy;
-    public int bulletsPerShot;
-    public int damage;
+    [Tooltip("무기분류")] public WeaponType type;
+    [Tooltip("사거리")] public float range;
+    [Tooltip("명중률")] public int hitAccuracy;
     [Space(5f)]
 
-    public int magMax;
-    public int magAmmo;
+    [Tooltip("사격타입")] public FireModeType fireMode;
+    [Tooltip("자동사격 발사 수")] public int autoFireNum;
+    [Space(5f)]
+
+    public int damage;
+    [Tooltip("탄창용량")] public int magMax;
+    [Tooltip("장전된 탄환 수")] public int loadedAmmo;
+    [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;
 
     [HideInInspector] public bool firstShot;
     [HideInInspector] public bool isHit;
@@ -51,7 +61,29 @@ public class Weapon : MonoBehaviour
         DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
 
         WeaponSwitching("Right");
-        magAmmo = magMax;
+        Reload();
+    }
+
+    public int GetShootBulletNumber()
+    {
+        var shootNum = 0;
+        switch (fireMode)
+        {
+            case FireModeType.SingleFire:
+                shootNum = 1;
+                break;
+            case FireModeType.AutoFire:
+                if (autoFireNum > loadedAmmo + 1)
+                {
+                    autoFireNum = loadedAmmo + 1;
+                }
+                shootNum = autoFireNum;
+                break;
+            default:
+                break;
+        }
+
+        return shootNum;
     }
 
     public void FireBullet()
@@ -81,12 +113,15 @@ public class Weapon : MonoBehaviour
         bullet.SetComponents(this);
         bullet.bulletRb.velocity = bullet.transform.forward * bullet.speed;
 
-        if (firstShot)
+        if (loadedAmmo > 0)
         {
-            Debug.Log($"{charCtr.name}: isHit = {isHit}");
+            loadedAmmo--;
+        }
+        else
+        {
+            chamberBullet = false;
         }
         firstShot = false;
-        magAmmo--;
     }
 
     public void WeaponSwitching(string switchPos)
@@ -108,6 +143,12 @@ public class Weapon : MonoBehaviour
 
     public void Reload()
     {
-        magAmmo = magMax;
+        var ammoNum = magMax;
+        if (!chamberBullet)
+        {
+            ammoNum--;
+            chamberBullet = true;
+        }
+        loadedAmmo = ammoNum;
     }
 }

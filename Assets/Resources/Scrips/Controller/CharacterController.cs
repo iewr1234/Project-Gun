@@ -794,7 +794,7 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                animator.SetInteger("shootNum", weapon.bulletsPerShot);
+                animator.SetInteger("shootNum", weapon.autoFireNum);
                 coverPos = currentNode.transform.position + (transform.forward * coverInterval);
                 commandList.Remove(command);
                 covering = false;
@@ -811,7 +811,7 @@ public class CharacterController : MonoBehaviour
         if (!animator.GetBool("isAim"))
         {
             animator.SetBool("isAim", true);
-            animator.SetInteger("shootNum", weapon.bulletsPerShot);
+            animator.SetInteger("shootNum", weapon.autoFireNum);
             transform.LookAt(command.targetInfo.target.transform);
             SetAiming(command.targetInfo.target);
             chestAim = true;
@@ -1136,6 +1136,7 @@ public class CharacterController : MonoBehaviour
     {
         if (targetList.Count == 0)
         {
+            Debug.Log($"{transform.name}: No Target");
             return false;
         }
         else

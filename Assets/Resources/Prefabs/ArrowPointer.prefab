@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2616072016910589306}
   - component: {fileID: 3357426898034758357}
   - component: {fileID: 7318991918151776730}
-  m_Layer: 0
-  m_Name: Cylinder
+  m_Layer: 22
+  m_Name: LinePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 5856365604416997932}
   - component: {fileID: 1667343105551289764}
   - component: {fileID: 1667343105550290788}
-  m_Layer: 0
+  m_Layer: 22
   m_Name: ArrowPointer
   m_TagString: ArrowPointer
   m_Icon: {fileID: 0}
@@ -124,15 +124,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1667343105552486820}
-  m_LocalRotation: {x: 0.94407177, y: 0, z: -0.32974005, w: 0}
-  m_LocalPosition: {x: 5.2000003, y: 0.5, z: 1.3000001}
+  m_LocalRotation: {x: 1, y: 0, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.8, y: 1.2, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3842192082552765357}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 180, y: 38.505997, z: 0}
+  m_LocalEulerAnglesHint: {x: 180, y: 0, z: 0}
 --- !u!114 &5856365604416997932
 MonoBehaviour:
   m_ObjectHideFlags: 0

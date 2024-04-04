@@ -254,14 +254,18 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   muzzleTf: {fileID: 0}
+  meshs: []
   type: 2
   range: 10
   hitAccuracy: 70
-  bulletsPerShot: 6
-  damage: 1
+  fireMode: 0
+  autoFireNum: 6
+  chamberBullet: 0
   magMax: 30
-  magAmmo: 0
+  loadedAmmo: 0
+  damage: 1
   firstShot: 0
+  isHit: 0
 --- !u!33 &3906847497888561846
 MeshFilter:
   m_ObjectHideFlags: 0
