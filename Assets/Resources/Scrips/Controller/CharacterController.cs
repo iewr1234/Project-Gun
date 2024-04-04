@@ -27,9 +27,10 @@ public enum CommandType
 
 public enum TargetDirection
 {
-    Front,
-    Right,
     Left,
+    Front,
+    Back,
+    Right,
 }
 
 [System.Serializable]

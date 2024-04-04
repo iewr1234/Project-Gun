@@ -53,12 +53,12 @@ public class FieldNode : MonoBehaviour
                 if (i == 0 && j == 0) continue;
 
                 var node = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
-                if (node != null && i != 0 && j != 0)
+                if (i != 0 && j != 0)
                 {
                     offAxisNodes.Add(node);
                     allAxisNodes.Add(node);
                 }
-                else if (node != null)
+                else
                 {
                     onAxisNodes.Add(node);
                     allAxisNodes.Add(node);
@@ -74,9 +74,13 @@ public class FieldNode : MonoBehaviour
         {
             nodeList.Clear();
             var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null) continue;
+
             for (int j = 0; j < onAxisNode.offAxisNodes.Count; j++)
             {
                 var offAxisNode = onAxisNode.offAxisNodes[j];
+                if (offAxisNode == null) continue;
+
                 var find = onAxisNodes.Find(x => x == offAxisNode);
                 if (find != null)
                 {
@@ -89,6 +93,48 @@ public class FieldNode : MonoBehaviour
                 var node = nodeList[j];
                 onAxisNode.offAxisNodes.Remove(node);
                 onAxisNode.allAxisNodes.Remove(node);
+            }
+        }
+    }
+
+    public void CheckCoverNode(bool value)
+    {
+        if (value)
+        {
+            for (int i = 0; i < onAxisNodes.Count; i++)
+            {
+                var onAxisNode = onAxisNodes[i];
+                var isCover = onAxisNode != null && onAxisNode.cover != null;
+                if (!isCover) continue;
+
+                switch ((TargetDirection)i)
+                {
+                    case TargetDirection.Left:
+                        onAxisNode.cover.ShowCoverImage(TargetDirection.Right);
+                        break;
+                    case TargetDirection.Front:
+                        onAxisNode.cover.ShowCoverImage(TargetDirection.Back);
+                        break;
+                    case TargetDirection.Back:
+                        onAxisNode.cover.ShowCoverImage(TargetDirection.Front);
+                        break;
+                    case TargetDirection.Right:
+                        onAxisNode.cover.ShowCoverImage(TargetDirection.Left);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < onAxisNodes.Count; i++)
+            {
+                var onAxisNode = onAxisNodes[i];
+                var isCover = onAxisNode != null && onAxisNode.cover != null;
+                if (!isCover) continue;
+
+                onAxisNode.cover.ShowCoverImage();
             }
         }
     }

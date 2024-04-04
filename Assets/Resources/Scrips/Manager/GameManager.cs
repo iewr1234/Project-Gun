@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,7 +8,9 @@ public class GameManager : MonoBehaviour
     [Header("---Access Script---")]
     public CameraManager camMgr;
 
-    //[Header("---Access Component---")]
+    [Header("---Access Component---")]
+    [SerializeField] private GameObject arrowPointer;
+
     private Transform fieldNodeTf;
     private Transform characterTf;
     private Transform linePoolTf;
@@ -39,6 +42,9 @@ public class GameManager : MonoBehaviour
     {
         camMgr = FindAnyObjectByType<CameraManager>();
         camMgr.SetComponents();
+
+        arrowPointer = GameObject.FindGameObjectWithTag("ArrowPointer");
+        arrowPointer.SetActive(false);
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
@@ -97,9 +103,10 @@ public class GameManager : MonoBehaviour
 
     private void CreateLines()
     {
+        var width = 0.03f;
         moveLine = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
         moveLine.transform.SetParent(linePoolTf, false);
-        moveLine.startWidth = 0.05f;
+        moveLine.startWidth = width;
         moveLine.material = Resources.Load<Material>("Materials/Line/DrawLine_Move");
         moveLine.enabled = false;
 
@@ -107,7 +114,7 @@ public class GameManager : MonoBehaviour
         {
             var line = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
             line.transform.SetParent(linePoolTf, false);
-            line.startWidth = 0.05f;
+            line.startWidth = width;
             line.enabled = false;
             linePool.Add(line);
         }
@@ -241,6 +248,7 @@ public class GameManager : MonoBehaviour
                     }
                     openNodes.Clear();
                     ClearLine();
+                    RemoveTargetNode();
                     selectChar = null;
                 }
                 else if (node.charCtr != null && selectChar == null)
@@ -250,8 +258,9 @@ public class GameManager : MonoBehaviour
                 }
                 else if (node.canMove && selectChar != null)
                 {
-                    CharacterMove(selectChar, node);
                     ClearLine();
+                    RemoveTargetNode();
+                    CharacterMove(selectChar, node);
                     selectChar = null;
                 }
             }
@@ -268,28 +277,43 @@ public class GameManager : MonoBehaviour
             var node = hit.collider.GetComponentInParent<FieldNode>();
             if (node == selectChar.currentNode)
             {
+                arrowPointer.SetActive(false);
                 moveLine.enabled = false;
+                RemoveTargetNode();
                 selectChar.FindTargets(node);
                 DrawAimLine(node);
+                node.CheckCoverNode(true);
+                targetNode = node;
                 return;
             }
 
             var find = openNodes.Find(x => x == node);
             if (targetNode != node && find != null)
             {
+                RemoveTargetNode();
                 ResultNodePass(selectChar.currentNode, node);
                 DrawMoveLine();
 
                 selectChar.FindTargets(node);
                 DrawAimLine(node);
+                node.CheckCoverNode(true);
                 targetNode = node;
             }
             else if (find == null)
             {
                 ClearLine();
-                targetNode = null;
+                RemoveTargetNode();
             }
         }
+    }
+
+    private void RemoveTargetNode()
+    {
+        if (targetNode != null)
+        {
+            targetNode.CheckCoverNode(false);
+        }
+        targetNode = null;
     }
 
     private void ShowMovableNodes(CharacterController charCtr)
@@ -312,6 +336,8 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < node.onAxisNodes.Count; i++)
         {
             var onAxisNode = node.onAxisNodes[i];
+            if (onAxisNode == null) continue;
+
             if (onAxisNode != currentNode && onAxisNode.canMove)
             {
                 var find = openNodes.Find(x => x == onAxisNode);
@@ -413,6 +439,12 @@ public class GameManager : MonoBehaviour
             var pos = closeNodes[i].transform.position;
             pos.y += height;
             moveLine.SetPosition(i, pos);
+            if (i == 0)
+            {
+                arrowPointer.SetActive(true);
+                pos = closeNodes[i].transform.position + new Vector3(0f, 0.5f, 0f);
+                arrowPointer.transform.position = pos;
+            }
         }
     }
 
@@ -429,7 +461,15 @@ public class GameManager : MonoBehaviour
                 pos.y += height;
                 var targetPos = targetInfo.target.currentNode.transform.position;
                 targetPos.y += height;
+                var interval = 0.5f;
+                var dir = Vector3.Normalize(targetPos - pos);
+                pos += dir * interval;
+                targetPos -= dir * interval;
+
                 line.enabled = true;
+                line.positionCount = 2;
+                line.SetPosition(0, pos);
+                line.SetPosition(1, targetPos);
                 if (targetInfo.targetCover == null)
                 {
                     line.material = Resources.Load<Material>("Materials/Line/DrawLine_Shoot_NonCover");
@@ -438,9 +478,6 @@ public class GameManager : MonoBehaviour
                 {
                     line.material = Resources.Load<Material>("Materials/Line/DrawLine_Shoot_Cover");
                 }
-                line.positionCount = 2;
-                line.SetPosition(0, pos);
-                line.SetPosition(1, targetPos);
             }
             else
             {
@@ -458,6 +495,7 @@ public class GameManager : MonoBehaviour
 
     private void ClearLine()
     {
+        arrowPointer.SetActive(false);
         moveLine.enabled = false;
         for (int i = 0; i < linePool.Count; i++)
         {
