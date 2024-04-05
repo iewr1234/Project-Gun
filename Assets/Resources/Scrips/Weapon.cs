@@ -73,11 +73,7 @@ public class Weapon : MonoBehaviour
                 shootNum = 1;
                 break;
             case FireModeType.AutoFire:
-                if (autoFireNum > loadedAmmo + 1)
-                {
-                    autoFireNum = loadedAmmo + 1;
-                }
-                shootNum = autoFireNum;
+                shootNum = autoFireNum > loadedAmmo + 1 ? loadedAmmo + 1 : autoFireNum;
                 break;
             default:
                 break;

@@ -844,17 +844,20 @@ MonoBehaviour:
   weapon: {fileID: 0}
   animator: {fileID: 0}
   aimPoint: {fileID: 0}
-  aimTarget: {fileID: 0}
   rightHandTf: {fileID: 0}
   leftHandTf: {fileID: 0}
+  meshs: []
+  sMeshs: []
   ownerType: 0
   mobility: 5
-  maxHealth: 20
+  maxHealth: 5
   health: 0
   currentNode: {fileID: 0}
   cover: {fileID: 0}
+  isCopy: 0
   targetList: []
   targetIndex: 0
+  commandList: []
 --- !u!114 &6953997413582888064
 MonoBehaviour:
   m_ObjectHideFlags: 0

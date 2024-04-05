@@ -77,27 +77,19 @@ public class Bullet : MonoBehaviour
         if (isHit) return;
 
         var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
-        for (int i = 0; i < hitCds.Count; i++)
+        if (!isHit)
         {
-            var hitCd = hitCds[i];
-            var charCtr = hitCd.GetComponentInParent<CharacterController>();
-            //var node = hitCd.GetComponentInParent<FieldNode>();
-            if (charCtr != null)
+            for (int i = 0; i < hitCds.Count; i++)
             {
-                charCtr.OnHit(weapon.damage);
+                var hitCd = hitCds[i];
+                var charCtr = hitCd.GetComponentInParent<CharacterController>();
+                if (charCtr != null)
+                {
+                    charCtr.OnHit(transform.forward, weapon.damage);
+                }
+                HitBullet();
+                break;
             }
-
-            for (int j = 0; j < meshRdrs.Count; j++)
-            {
-                var meshRdr = meshRdrs[j];
-                meshRdr.enabled = false;
-            }
-            bulletRb.velocity = Vector3.zero;
-            bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-            bulletRb.isKinematic = true;
-            bulletCd.enabled = false;
-            isHit = true;
-            break;
         }
     }
 
@@ -111,5 +103,19 @@ public class Bullet : MonoBehaviour
             trail.enabled = false;
             gameObject.SetActive(false);
         }
+    }
+
+    private void HitBullet()
+    {
+        for (int j = 0; j < meshRdrs.Count; j++)
+        {
+            var meshRdr = meshRdrs[j];
+            meshRdr.enabled = false;
+        }
+        bulletRb.velocity = Vector3.zero;
+        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+        bulletRb.isKinematic = true;
+        bulletCd.enabled = false;
+        isHit = true;
     }
 }

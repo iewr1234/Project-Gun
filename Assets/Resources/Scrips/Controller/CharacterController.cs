@@ -80,7 +80,6 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     public Weapon weapon;
-    //[HideInInspector] public CharacterController copy;
 
     [Header("---Access Component---")]
     public Animator animator;
@@ -197,32 +196,6 @@ public class CharacterController : MonoBehaviour
         currentNode.canMove = false;
     }
 
-    //public void SetComponentsOfCopy(CharacterController charCtr)
-    //{
-    //    charCtr.copy = this;
-    //    animator.speed = 0f;
-    //    for (int i = 0; i < meshs.Count; i++)
-    //    {
-    //        var mesh = meshs[i];
-    //        mesh.material.shader = Shader.Find("Unlit/Color");
-    //        mesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
-    //    }
-    //    for (int i = 0; i < sMeshs.Count; i++)
-    //    {
-    //        var sMesh = sMeshs[i];
-    //        sMesh.material.shader = Shader.Find("Unlit/Color");
-    //        sMesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
-    //    }
-    //    for (int i = 0; i < weapon.meshs.Count; i++)
-    //    {
-    //        var mesh = weapon.meshs[i];
-    //        mesh.material.shader = Shader.Find("Unlit/Color");
-    //        mesh.material.color = new Color(239 / 255f, 207 / 255f, 158 / 255f);
-    //    }
-    //    isCopy = true;
-    //    gameObject.SetActive(false);
-    //}
-
     private void OnDrawGizmos()
     {
         DrawShootingPath();
@@ -290,6 +263,9 @@ public class CharacterController : MonoBehaviour
         CommandApplication();
     }
 
+    /// <summary>
+    /// 조준관련 처리
+    /// </summary>
     private void AimProcess()
     {
         SetAimWeight(headRig, headAim);
@@ -1415,7 +1391,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(int damage)
+    public void OnHit(Vector3 dir, int damage)
     {
         health -= damage;
         if (health < 0)
@@ -1425,11 +1401,37 @@ public class CharacterController : MonoBehaviour
 
         if (health == 0)
         {
-
+            CharacterDead();
         }
         else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit"))
         {
             animator.SetTrigger("isHit");
+        }
+
+        void CharacterDead()
+        {
+            animator.enabled = false;
+            headAim = false;
+            chestAim = false;
+            headRig.weight = 0f;
+            chestRig.weight = 0f;
+            currentNode.charCtr = null;
+            currentNode.canMove = true;
+            var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+            charList.Remove(this);
+
+            var force = 200f;
+            for (int i = 0; i < ragdollCds.Count; i++)
+            {
+                var cd = ragdollCds[i];
+                cd.isTrigger = false;
+            }
+            for (int i = 0; i < ragdollRbs.Count; i++)
+            {
+                var rb = ragdollRbs[i];
+                rb.isKinematic = false;
+                rb.AddForce(dir * force, ForceMode.Force);
+            }
         }
     }
 
