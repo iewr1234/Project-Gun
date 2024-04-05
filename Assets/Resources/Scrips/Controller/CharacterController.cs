@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.TextCore.Text;
 
 public enum CharacterOwner
 {
@@ -25,14 +23,6 @@ public enum CommandType
     CoverAim,
     Shoot,
     Reload,
-}
-
-public enum TargetDirection
-{
-    Left,
-    Front,
-    Back,
-    Right,
 }
 
 [System.Serializable]
@@ -390,15 +380,15 @@ public class CharacterController : MonoBehaviour
                 transform.LookAt(targetNode.transform);
                 moving = true;
             }
-            var direction = Vector3.Normalize(targetNode.transform.position - transform.position);
-            var distance = DataUtility.GetDistance(transform.position, targetNode.transform.position);
-            if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Move") && distance > closeDistance)
+
+            var pos = transform.position;
+            var targetPos = targetNode.transform.position; ;
+            if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Move") && pos != targetPos)
             {
-                transform.position += direction * (moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
             }
-            else if (distance <= closeDistance)
+            else if (pos == targetPos)
             {
-                transform.position = targetNode.transform.position;
                 moving = false;
                 command.passList.Remove(targetNode);
                 gameMgr.ShowVisibleNodes(sight, targetNode);

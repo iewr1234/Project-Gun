@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Unity.VisualScripting;
 
 public class FieldNode : MonoBehaviour
 {
@@ -13,8 +13,9 @@ public class FieldNode : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private MeshRenderer mesh;
     [SerializeField] private Canvas canvas;
-    [SerializeField] private GameObject fog;
-    [SerializeField] private TextMeshProUGUI posText;
+    private List<NodeOutline> outlines = new List<NodeOutline>();
+    private MeshRenderer fog;
+    private TextMeshProUGUI posText;
 
     [Header("--- Assignment Variable---")]
     public CharacterController charCtr;
@@ -39,9 +40,15 @@ public class FieldNode : MonoBehaviour
         var material = new Material(Resources.Load<Material>("Materials/Node"));
         mesh.material = material;
 
-        canvas = transform.GetComponentInChildren<Canvas>();
+        canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
-        fog = transform.Find("Fog").gameObject;
+        outlines = GetComponentsInChildren<NodeOutline>().ToList();
+        for (int i = 0; i < outlines.Count; i++)
+        {
+            var outline = outlines[i];
+            outline.SetComponents();
+        }
+        fog = transform.Find("Fog").GetComponent<MeshRenderer>();
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
@@ -103,8 +110,33 @@ public class FieldNode : MonoBehaviour
 
     public void SetVisibleNode(bool value)
     {
-        fog.SetActive(!value);
+        fog.enabled = !value;
         canSee = value;
+    }
+
+    public void SetMovableNode(List<FieldNode> openNodes)
+    {
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null) continue;
+
+            if (openNodes.Find(x => x == onAxisNode) == null)
+            {
+                outlines[i].SetActiveLine(true);
+            }
+        }
+    }
+
+    public void SetMovableNode()
+    {
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null) continue;
+
+            outlines[i].SetActiveLine(false);
+        }
     }
 
     public void CheckCoverNode(bool value)

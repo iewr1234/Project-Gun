@@ -2,6 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TargetDirection
+{
+    Left,
+    Front,
+    Back,
+    Right,
+}
+
 public static class DataUtility
 {
     public static readonly float nodeSize = 1.2f;

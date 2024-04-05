@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static Unity.Burst.Intrinsics.X86;
-using static UnityEditor.PlayerSettings;
+using UnityEngine.TextCore.Text;
 
 public class GameManager : MonoBehaviour
 {
@@ -177,24 +175,14 @@ public class GameManager : MonoBehaviour
                 selectChar.FindTargets(selectChar.currentNode);
                 if (selectChar.SetTarget())
                 {
-                    for (int i = 0; i < openNodes.Count; i++)
-                    {
-                        var openNode = openNodes[i];
-                        openNode.NodeColor = Color.gray;
-                    }
-                    openNodes.Clear();
+                    SwitchMovableNodes(false);
                 }
             }
             else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
             {
                 ClearLine();
                 selectChar.AddCommand(CommandType.Reload);
-                for (int i = 0; i < openNodes.Count; i++)
-                {
-                    var openNode = openNodes[i];
-                    openNode.NodeColor = Color.gray;
-                }
-                openNodes.Clear();
+                SwitchMovableNodes(false);
                 selectChar = null;
             }
         }
@@ -218,12 +206,7 @@ public class GameManager : MonoBehaviour
                     {
                         selectChar.AddCommand(CommandType.Shoot);
                     }
-                    for (int i = 0; i < openNodes.Count; i++)
-                    {
-                        var openNode = openNodes[i];
-                        openNode.NodeColor = Color.gray;
-                    }
-                    openNodes.Clear();
+                    SwitchMovableNodes(false);
                     camMgr.SetCameraState(CameraState.None);
                     selectChar = null;
                 }
@@ -255,12 +238,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
                 {
-                    for (int i = 0; i < openNodes.Count; i++)
-                    {
-                        var movableNode = openNodes[i];
-                        movableNode.NodeColor = Color.gray;
-                    }
-                    openNodes.Clear();
+                    SwitchMovableNodes(false);
                     ClearLine();
                     RemoveTargetNode();
                     selectChar = null;
@@ -336,6 +314,11 @@ public class GameManager : MonoBehaviour
         targetNode = null;
     }
 
+    /// <summary>
+    /// 시야 내의 노드들을 표시
+    /// </summary>
+    /// <param name="sight"></param>
+    /// <param name="node"></param>
     public void ShowVisibleNodes(float sight, FieldNode node)
     {
         SwitchVisibleNode(false);
@@ -355,11 +338,14 @@ public class GameManager : MonoBehaviour
             for (int j = 0; j < node.onAxisNodes.Count; j++)
             {
                 var onAxisNode = node.onAxisNodes[j];
-                pos = onAxisNode.transform.position;
-                if (onAxisNode != null && onAxisNode.canMove && !CheckSight())
+                if (onAxisNode != null && onAxisNode.canMove)
                 {
-                    visibleNodes.Add(findNode);
-                    break;
+                    pos = onAxisNode.transform.position;
+                    if (!CheckSight())
+                    {
+                        visibleNodes.Add(findNode);
+                        break;
+                    }
                 }
             }
 
@@ -401,13 +387,10 @@ public class GameManager : MonoBehaviour
     /// <param name="charCtr"></param>
     private void ShowMovableNodes(CharacterController charCtr)
     {
-        for (int i = 0; i < openNodes.Count; i++)
-        {
-            var movableNode = openNodes[i];
-            movableNode.NodeColor = Color.gray;
-        }
-        openNodes.Clear();
-        ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility, true);
+        SwitchMovableNodes(false);
+        openNodes.Add(charCtr.currentNode);
+        ChainOfMovableNode(charCtr.currentNode, charCtr.mobility, true);
+        SwitchMovableNodes(true);
     }
 
     /// <summary>
@@ -417,7 +400,7 @@ public class GameManager : MonoBehaviour
     /// <param name="node"></param>
     /// <param name="mobility"></param>
     /// <param name="isFirst"></param>
-    private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility, bool isFirst)
+    private void ChainOfMovableNode(FieldNode node, int mobility, bool isFirst)
     {
         var canChain = isFirst || (mobility > 0 && node.canMove);
         if (!canChain) return;
@@ -428,16 +411,41 @@ public class GameManager : MonoBehaviour
             var onAxisNode = node.onAxisNodes[i];
             if (onAxisNode == null) continue;
 
-            if (onAxisNode != currentNode && onAxisNode.canMove)
+            if (onAxisNode.canMove)
             {
                 var find = openNodes.Find(x => x == onAxisNode);
                 if (find == null)
                 {
                     openNodes.Add(onAxisNode);
                 }
-                onAxisNode.NodeColor = new Color(0.85f, 0.85f, 0.85f);
-                ChainOfMovableNode(currentNode, onAxisNode, mobility, false);
+                ChainOfMovableNode(onAxisNode, mobility, false);
             }
+        }
+    }
+
+    /// <summary>
+    /// 이동가능 노드 표시변경
+    /// </summary>
+    /// <param name="value"></param>
+    private void SwitchMovableNodes(bool value)
+    {
+        switch (value)
+        {
+            case true:
+                for (int i = 0; i < openNodes.Count; i++)
+                {
+                    var movableNode = openNodes[i];
+                    movableNode.SetMovableNode(openNodes);
+                }
+                break;
+            case false:
+                for (int i = 0; i < openNodes.Count; i++)
+                {
+                    var movableNode = openNodes[i];
+                    movableNode.SetMovableNode();
+                }
+                openNodes.Clear();
+                break;
         }
     }
 
@@ -452,8 +460,8 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < openNodes.Count; i++)
         {
-            var openNode = openNodes[i];
-            openNode.NodeColor = Color.gray;
+            var movableNode = openNodes[i];
+            movableNode.SetMovableNode();
         }
         //ResultNodePass(charCtr.currentNode, targetNode);
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
