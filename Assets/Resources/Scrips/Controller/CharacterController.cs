@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.TextCore.Text;
 
 public enum CharacterOwner
 {
@@ -97,8 +99,9 @@ public class CharacterController : MonoBehaviour
     private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
     [Header("--- Assignment Variable---")]
-    public CharacterOwner ownerType;
-    public int mobility;
+    [Tooltip("사용자 타입")] public CharacterOwner ownerType;
+    [Tooltip("시야")] public float sight;
+    [Tooltip("이동력")] public int mobility;
     public int maxHealth;
     public int health;
     [Space(5f)]
@@ -112,10 +115,6 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public int targetIndex;
 
     private List<LineInfo> lineInfos = new List<LineInfo>();
-
-    private LayerMask nodeLayer;
-    private LayerMask coverLayer;
-
     [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
 
     private float timer;
@@ -188,12 +187,10 @@ public class CharacterController : MonoBehaviour
         charList.Add(this);
 
         health = maxHealth;
-        nodeLayer = LayerMask.GetMask("Node");
-        coverLayer = LayerMask.GetMask("Cover");
-
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;
+        gameMgr.ShowVisibleNodes(sight, currentNode);
     }
 
     private void OnDrawGizmos()
@@ -257,7 +254,7 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
-        if (isCopy) return;
+        if (health == 0) return;
 
         AimProcess();
         CommandApplication();
@@ -404,6 +401,7 @@ public class CharacterController : MonoBehaviour
                 transform.position = targetNode.transform.position;
                 moving = false;
                 command.passList.Remove(targetNode);
+                gameMgr.ShowVisibleNodes(sight, targetNode);
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
@@ -440,7 +438,7 @@ public class CharacterController : MonoBehaviour
                 {
                     coverNode = findCover;
                 }
-                else if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+                else if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
                     var find = currentNode.onAxisNodes.Find(x => x != null && x == cover.node);
@@ -489,7 +487,7 @@ public class CharacterController : MonoBehaviour
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(transform.position, x.transform.position)).ToList()[0];
                 var dir = closeTarget.transform.position - transform.position;
-                if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+                if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
                     return currentNode.onAxisNodes.Find(x => x == cover.node) != null ? cover.node : null;
@@ -515,11 +513,11 @@ public class CharacterController : MonoBehaviour
         transform.LookAt(coverNode.transform);
         var rightHit = false;
         var leftHit = false;
-        if (Physics.Raycast(transform.position, transform.right, DataUtility.nodeSize, nodeLayer))
+        if (Physics.Raycast(transform.position, transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
             rightHit = true;
         }
-        if (Physics.Raycast(transform.position, -transform.right, DataUtility.nodeSize, nodeLayer))
+        if (Physics.Raycast(transform.position, -transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
             leftHit = true;
         }
@@ -530,12 +528,12 @@ public class CharacterController : MonoBehaviour
             var rightCover = false;
             var leftCover = false;
             var pos = transform.position + (transform.right * DataUtility.nodeSize);
-            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, coverLayer))
+            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 rightCover = true;
             }
             pos = transform.position + (-transform.right * DataUtility.nodeSize);
-            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, coverLayer))
+            if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 leftCover = true;
             }
@@ -1059,7 +1057,7 @@ public class CharacterController : MonoBehaviour
                 if (coverNode != null) return;
 
                 dir = Vector3.Normalize(endPos - shooterPos);
-                if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, coverLayer))
+                if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var _coverNode = hit.collider.GetComponentInParent<FieldNode>();
                     if (shooterNode.onAxisNodes.Find(x => x == _coverNode) != null)
@@ -1081,7 +1079,7 @@ public class CharacterController : MonoBehaviour
             FieldNode node = null;
             var frontDir = Vector3.Normalize(coverNode.transform.position - pos);
             var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
-            if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, nodeLayer))
+            if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
             {
                 node = hit.collider.GetComponentInParent<FieldNode>();
                 if (!node.canMove)
@@ -1098,7 +1096,7 @@ public class CharacterController : MonoBehaviour
             bool canShoot;
             var dir = Vector3.Normalize(targetPos - pos);
             var dist = DataUtility.GetDistance(pos, targetPos);
-            if (Physics.Raycast(pos, dir, dist, coverLayer))
+            if (Physics.Raycast(pos, dir, dist, gameMgr.coverLayer))
             {
                 canShoot = false;
             }

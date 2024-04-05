@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static Unity.Burst.Intrinsics.X86;
+using static UnityEditor.PlayerSettings;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,9 +26,9 @@ public class GameManager : MonoBehaviour
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
-    private LayerMask nodeLayer;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
+    private List<FieldNode> visibleNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
     private FieldNode targetNode;
@@ -34,6 +36,9 @@ public class GameManager : MonoBehaviour
     private LineRenderer moveLine;
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
+
+    [HideInInspector] public LayerMask nodeLayer;
+    [HideInInspector] public LayerMask coverLayer;
 
     private readonly int linePoolMax = 15;
     private readonly int bulletPoolMax = 30;
@@ -51,6 +56,7 @@ public class GameManager : MonoBehaviour
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
+        coverLayer = LayerMask.GetMask("Cover");
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
@@ -58,6 +64,9 @@ public class GameManager : MonoBehaviour
         CreateBullets();
     }
 
+    /// <summary>
+    /// 필드 생성
+    /// </summary>
     private void CreateField()
     {
         var size_X = (int)fieldSize.x;
@@ -85,6 +94,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 생성
+    /// </summary>
+    /// <param name="ownerType"></param>
+    /// <param name="nodePos"></param>
+    /// <param name="charName"></param>
+    /// <param name="weaponName"></param>
     private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName)
     {
         var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charName}"));
@@ -101,6 +117,9 @@ public class GameManager : MonoBehaviour
         weapon.SetComponets(charCtr);
     }
 
+    /// <summary>
+    /// 라인 생성
+    /// </summary>
     private void CreateLines()
     {
         var width = 0.03f;
@@ -120,6 +139,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 탄환 생성
+    /// </summary>
     private void CreateBullets()
     {
         for (int i = 0; i < bulletPoolMax; i++)
@@ -140,6 +162,9 @@ public class GameManager : MonoBehaviour
         CreateEnemy();
     }
 
+    /// <summary>
+    /// 키보드 입력
+    /// </summary>
     private void KeyboardInput()
     {
         if (selectChar == null) return;
@@ -217,6 +242,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 마우스 입력
+    /// </summary>
     private void MouseInput()
     {
         if (Input.GetMouseButtonDown(0))
@@ -253,6 +281,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 포인터 업 이벤트
+    /// </summary>
     private void PointerUpEvent()
     {
         if (selectChar == null) return;
@@ -293,6 +324,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// TargetNode 제거
+    /// </summary>
     private void RemoveTargetNode()
     {
         if (targetNode != null)
@@ -302,6 +336,69 @@ public class GameManager : MonoBehaviour
         targetNode = null;
     }
 
+    public void ShowVisibleNodes(float sight, FieldNode node)
+    {
+        SwitchVisibleNode(false);
+        visibleNodes.Clear();
+        var findNodes = fieldNodes.FindAll(x => DataUtility.GetDistance(x.transform.position, node.transform.position) < sight);
+        for (int i = 0; i < findNodes.Count; i++)
+        {
+            var findNode = findNodes[i];
+            var pos = node.transform.position;
+            var targetPos = findNode.transform.position;
+            if (!CheckSight())
+            {
+                visibleNodes.Add(findNode);
+                continue;
+            }
+
+            for (int j = 0; j < node.onAxisNodes.Count; j++)
+            {
+                var onAxisNode = node.onAxisNodes[j];
+                pos = onAxisNode.transform.position;
+                if (onAxisNode != null && onAxisNode.canMove && !CheckSight())
+                {
+                    visibleNodes.Add(findNode);
+                    break;
+                }
+            }
+
+            bool CheckSight()
+            {
+                var dir = Vector3.Normalize(targetPos - pos);
+                var dist = DataUtility.GetDistance(pos, targetPos);
+
+                if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, coverLayer))
+                {
+                    var coverNode = hit.collider.GetComponentInParent<FieldNode>();
+                    if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
+                    {
+                        visibleNodes.Add(coverNode);
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        SwitchVisibleNode(true);
+
+        void SwitchVisibleNode(bool value)
+        {
+            for (int i = 0; i < visibleNodes.Count; i++)
+            {
+                var visibleNode = visibleNodes[i];
+                visibleNode.SetVisibleNode(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 이동가능 노드 표시
+    /// </summary>
+    /// <param name="charCtr"></param>
     private void ShowMovableNodes(CharacterController charCtr)
     {
         for (int i = 0; i < openNodes.Count; i++)
@@ -313,6 +410,13 @@ public class GameManager : MonoBehaviour
         ChainOfMovableNode(charCtr.currentNode, charCtr.currentNode, charCtr.mobility, true);
     }
 
+    /// <summary>
+    /// 이동노드 연쇄적용
+    /// </summary>
+    /// <param name="currentNode"></param>
+    /// <param name="node"></param>
+    /// <param name="mobility"></param>
+    /// <param name="isFirst"></param>
     private void ChainOfMovableNode(FieldNode currentNode, FieldNode node, int mobility, bool isFirst)
     {
         var canChain = isFirst || (mobility > 0 && node.canMove);
@@ -337,6 +441,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캐릭터 이동명령
+    /// </summary>
+    /// <param name="charCtr"></param>
+    /// <param name="targetNode"></param>
     private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
     {
         if (charCtr.animator.GetBool("isMove")) return;
@@ -355,6 +464,11 @@ public class GameManager : MonoBehaviour
         charCtr.AddCommand(CommandType.TakeCover);
     }
 
+    /// <summary>
+    /// 이동경로 계산
+    /// </summary>
+    /// <param name="startNode"></param>
+    /// <param name="endNode"></param>
     private void ResultNodePass(FieldNode startNode, FieldNode endNode)
     {
         closeNodes.Clear();
@@ -415,6 +529,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 이동경로 라인 그리기
+    /// </summary>
     private void DrawMoveLine()
     {
         moveLine.enabled = true;
@@ -434,6 +551,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 조준경로 라인 그리기
+    /// </summary>
+    /// <param name="node"></param>
     private void DrawAimLine(FieldNode node)
     {
         var height = 0.75f;
@@ -479,6 +600,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 라인 제거
+    /// </summary>
     private void ClearLine()
     {
         arrowPointer.SetActive(false);
@@ -497,6 +621,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엄폐물 생성
+    /// </summary>
     private void CreateCover()
     {
         if (Input.GetKeyDown(KeyCode.C))
@@ -515,6 +642,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 적 캐릭터 생성
+    /// </summary>
     private void CreateEnemy()
     {
         if (Input.GetKeyDown(KeyCode.X))

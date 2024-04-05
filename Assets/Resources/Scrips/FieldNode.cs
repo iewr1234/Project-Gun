@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class FieldNode : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class FieldNode : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private MeshRenderer mesh;
     [SerializeField] private Canvas canvas;
+    [SerializeField] private GameObject fog;
     [SerializeField] private TextMeshProUGUI posText;
 
     [Header("--- Assignment Variable---")]
@@ -19,6 +21,7 @@ public class FieldNode : MonoBehaviour
     public Cover cover;
     [Space(5f)]
 
+    public bool canSee;
     public bool canMove;
 
     [HideInInspector] public Vector2 nodePos;
@@ -38,6 +41,7 @@ public class FieldNode : MonoBehaviour
 
         canvas = transform.GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
+        fog = transform.Find("Fog").gameObject;
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
@@ -95,6 +99,12 @@ public class FieldNode : MonoBehaviour
                 onAxisNode.allAxisNodes.Remove(node);
             }
         }
+    }
+
+    public void SetVisibleNode(bool value)
+    {
+        fog.SetActive(!value);
+        canSee = value;
     }
 
     public void CheckCoverNode(bool value)
