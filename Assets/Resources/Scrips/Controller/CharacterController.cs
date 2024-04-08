@@ -90,10 +90,22 @@ public class CharacterController : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
-    [Tooltip("시야")] public float sight;
+
+    [Header("[Status]")]
+    [Tooltip("힘")] public int strength;
+    [Tooltip("활력")] public int vitality;
+    [Tooltip("지능")] public int intellect;
+    [Tooltip("지혜")] public int wisdom;
+    [Tooltip("민첩")] public int agility;
+    [Tooltip("솜씨")] public int dexterity;
+
+    [Header("[Physical]")]
+    [Tooltip("최대 체력")] public int maxHealth;
+    [Tooltip("체력")] public int health;
+    [Tooltip("최대 기력")] public int maxStamina;
+    [Tooltip("기력")] public int stamina;
+    [Tooltip("시야")] public int sight;
     [Tooltip("이동력")] public int mobility;
-    public int maxHealth;
-    public int health;
     [Space(5f)]
 
     public FieldNode currentNode;
@@ -111,7 +123,6 @@ public class CharacterController : MonoBehaviour
 
     private bool moving;
     private readonly float moveSpeed = 7f;
-    private readonly float closeDistance = 0.05f;
 
     private bool covering;
     private Vector3 coverPos;
@@ -177,6 +188,7 @@ public class CharacterController : MonoBehaviour
         charList.Add(this);
 
         health = maxHealth;
+        stamina = maxStamina;
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;

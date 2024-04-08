@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.Windows.WebCam;
 
 public enum CameraState
 {
@@ -23,21 +24,27 @@ public class CameraManager : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public CameraState state;
 
-    [SerializeField] private CinemachineVirtualCamera currrentActionCam;
+    private CinemachineVirtualCamera currrentActionCam;
     [SerializeField] private bool actionCam;
 
     private float moveSpeed = 15f;
-    private float rotSpeed = 150f;
-    private float camDistance;
-    private float currentRot;
-
     private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
+
+    private float currentRot;
+    private float rotSpeed = 150f;
+
+    private Vector3 camDirection;
+    private float camDistance = 25f;
+    private float zoomSpeed = 20f;
+    private readonly float zoomMin = 10f;
+    private readonly float zoomMax = 45f;
 
     public void SetComponents()
     {
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
-        mainCam.transform.localPosition = defaultPos;
+        camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
+        mainCam.transform.localPosition = camDirection * camDistance;
         mainCam.transform.LookAt(pivotPoint);
 
         cambrain = mainCam.GetComponent<CinemachineBrain>();
@@ -52,7 +59,7 @@ public class CameraManager : MonoBehaviour
 
         CameraMove();
         CameraRotate();
-        camDistance = DataUtility.GetDistance(pivotPoint.position, mainCam.transform.position);
+        CameraZoom();
     }
 
     private void CameraMove()
@@ -105,6 +112,25 @@ public class CameraManager : MonoBehaviour
             pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
             mainCam.transform.LookAt(pivotPoint);
         }
+    }
+
+    private void CameraZoom()
+    {
+        var scroll = Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
+        if (scroll != 0f)
+        {
+            camDistance -= scroll;
+            if (camDistance < zoomMin)
+            {
+                camDistance = zoomMin;
+            }
+            else if (camDistance > zoomMax)
+            {
+                camDistance = zoomMax;
+            }
+        }
+
+        mainCam.transform.localPosition = camDirection * camDistance;
     }
 
     public void SetCameraState(CameraState _state)

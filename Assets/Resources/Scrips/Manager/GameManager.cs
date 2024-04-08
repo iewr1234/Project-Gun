@@ -319,7 +319,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="sight"></param>
     /// <param name="node"></param>
-    public void ShowVisibleNodes(float sight, FieldNode node)
+    public void ShowVisibleNodes(int sight, FieldNode node)
     {
         SwitchVisibleNode(false);
         visibleNodes.Clear();

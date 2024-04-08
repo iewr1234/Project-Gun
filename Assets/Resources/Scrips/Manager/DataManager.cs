@@ -31,14 +31,22 @@ public class DataManager : MonoBehaviour
 
     #region Player Data
     [HideInInspector] public PlayerData playerData;
-    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A2:F";
+    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:N";
     private enum PlayerVariable
     {
         ID,
         PrefabName,
         CharacterName,
-        Mobility,
+        Strength,
+        Vitality,
+        Intellect,
+        Wisdom,
+        Agility,
+        Dexterity,
         MaxHealth,
+        MaxStamina,
+        Sight,
+        Mobility,
         MainWeaponID,
     }
 
@@ -66,8 +74,16 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)PlayerVariable.ID],
                     prefabName = data[(int)PlayerVariable.PrefabName],
                     charName = data[(int)PlayerVariable.CharacterName],
-                    mobility = int.Parse(data[(int)PlayerVariable.Mobility]),
+                    strength = int.Parse(data[(int)PlayerVariable.Strength]),
+                    vitality = int.Parse(data[(int)PlayerVariable.Vitality]),
+                    intellect = int.Parse(data[(int)PlayerVariable.Intellect]),
+                    wisdom = int.Parse(data[(int)PlayerVariable.Wisdom]),
+                    agility = int.Parse(data[(int)PlayerVariable.Agility]),
+                    dexterity = int.Parse(data[(int)PlayerVariable.Dexterity]),
                     maxHealth = int.Parse(data[(int)PlayerVariable.MaxHealth]),
+                    maxStamina = int.Parse(data[(int)PlayerVariable.MaxStamina]),
+                    sight = int.Parse(data[(int)PlayerVariable.Sight]),
+                    mobility = int.Parse(data[(int)PlayerVariable.Mobility]),
                     mainWeaponID = data[(int)PlayerVariable.MainWeaponID],
                 };
                 playerData.playerInfos.Add(playerInfo);

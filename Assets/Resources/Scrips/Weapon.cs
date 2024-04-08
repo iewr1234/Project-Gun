@@ -30,6 +30,10 @@ public class Weapon : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     [Tooltip("무기분류")] public WeaponType type;
+    [Tooltip("피해량")] public int damage;
+    [Tooltip("관통")] public int penetrate;
+    [Tooltip("방어구 손상")] public int armorBreak;
+    [Tooltip("파편화")] public int critical;
     [Tooltip("사거리")] public float range;
     [Tooltip("명중률")] public int hitAccuracy;
     [Space(5f)]
@@ -38,7 +42,6 @@ public class Weapon : MonoBehaviour
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
-    public int damage;
     [Tooltip("탄창용량")] public int magMax;
     [Tooltip("장전된 탄환 수")] public int loadedAmmo;
     [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;

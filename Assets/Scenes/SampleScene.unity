@@ -205,7 +205,6 @@ MonoBehaviour:
   mainCam: {fileID: 0}
   virCams: []
   state: -1
-  currrentActionCam: {fileID: 0}
   actionCam: 0
 --- !u!1 &83411879
 GameObject:
@@ -1402,7 +1401,7 @@ MonoBehaviour:
   enemyList: []
   selectChar: {fileID: 0}
   targeting: 1
-  fieldSize: {x: 30, y: 30}
+  fieldSize: {x: 15, y: 15}
   fieldNodes: []
   linePool: []
   bulletPool: []
