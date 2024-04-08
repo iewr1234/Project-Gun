@@ -1,4 +1,4 @@
-Shader "Draw/Outline Shader" {
+Shader "Draw/Outline" {
 	Properties {
 		_OutlineColor ("Outline Color", Color) = (1,0,0,1)
 		_Outline ("Outline width", Range (0, 1)) = .1

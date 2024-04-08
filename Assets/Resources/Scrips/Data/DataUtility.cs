@@ -33,7 +33,7 @@ public static class DataUtility
         {
             var mesh = meshs[i];
             mesh.material = new Material(mesh.material);
-            mesh.material.shader = Shader.Find("Draw/AlwaysVisible Shader");
+            mesh.material.shader = Shader.Find("Draw/AlwaysVisible");
             switch (ownerType)
             {
                 case CharacterOwner.Player:
@@ -54,7 +54,7 @@ public static class DataUtility
         {
             var sMesh = sMeshs[i];
             sMesh.material = new Material(sMesh.material);
-            sMesh.material.shader = Shader.Find("Draw/AlwaysVisible Shader");
+            sMesh.material.shader = Shader.Find("Draw/AlwaysVisible");
             switch (ownerType)
             {
                 case CharacterOwner.Player:

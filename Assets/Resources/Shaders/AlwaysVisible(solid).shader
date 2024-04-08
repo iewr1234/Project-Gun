@@ -1,4 +1,4 @@
-Shader "Draw/AlwaysVisible"
+Shader "Draw/AlwaysVisible(solid)"
 {
     Properties
     {
@@ -10,46 +10,46 @@ Shader "Draw/AlwaysVisible"
 
     SubShader
     {
-        //Pass: character
-        stencil
+        // Pass: character
+        Stencil
         {
-            ref 20
-            comp Always
-            pass replace
+            Ref 20
+            Comp Always
+            Pass Replace
         }
 
         Tags { "Queue" = "Geometry+1" "RenderType" = "Opaque" }
 
         CGPROGRAM
-        #pragma surface surf BlinnPhong
+        #pragma surface surf Lambert
 
-        uniform float4 _Color;
-        uniform float4 _Indicator;
-        uniform sampler2D _MainTex;
+        sampler2D _MainTex;
+        fixed4 _Color;
 
         struct Input
         {
             float2 uv_MainTex;
-            float3 viewDir;
         };
 
         void surf (Input IN, inout SurfaceOutput o)
         {
-            o.Albedo = tex2D(_MainTex, IN.uv_MainTex).rgb * _Color;
+            fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+            o.Albedo = c.rgb;
+            o.Emission = c.rgb; // 여기에 Emission을 추가
         }
         ENDCG
 
-        // Pass: Phantom
-        stencil
+        // Pass: Phantom  
+        Stencil
         {
-            ref 20
-            comp notequal
-            pass replace
-            zfail incrsat
+            Ref 20
+            Comp NotEqual
+            Pass Replace
+            ZFail IncrSat
         }
 
         ZWrite On
-        ZTest Always
+        ZTest Always  
         Blend SrcAlpha OneMinusSrcAlpha
 
         CGPROGRAM
