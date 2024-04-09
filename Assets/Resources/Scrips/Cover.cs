@@ -4,6 +4,13 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum CoverType
+{
+    None,
+    Half,
+    Full,
+}
+
 public class Cover : MonoBehaviour
 {
     [Header("---Access Script---")]
@@ -12,6 +19,9 @@ public class Cover : MonoBehaviour
     [Header("---Access Component---")]
     private Canvas canvas;
     private List<Image> coverImages;
+
+    [Header("--- Assignment Variable---")]
+    public CoverType type;
 
     public void SetComponents(FieldNode _node)
     {
@@ -24,6 +34,8 @@ public class Cover : MonoBehaviour
         node.cover = this;
         node.canMove = false;
         node.ReleaseAdjacentNodes();
+
+        type = CoverType.Full;
     }
 
     public void ShowCoverImage(TargetDirection dir)

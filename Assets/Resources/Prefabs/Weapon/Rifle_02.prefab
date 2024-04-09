@@ -256,16 +256,20 @@ MonoBehaviour:
   muzzleTf: {fileID: 0}
   meshs: []
   type: 2
+  damage: 1
+  penetrate: 0
+  armorBreak: 0
+  critical: 0
   range: 10
-  hitAccuracy: 70
+  MOA: 0
+  stability: 0
+  rebound: 0
   fireMode: 0
   autoFireNum: 6
-  chamberBullet: 0
   magMax: 30
   loadedAmmo: 0
-  damage: 1
-  firstShot: 0
-  isHit: 0
+  chamberBullet: 0
+  hitList: 
 --- !u!33 &3906847497888561846
 MeshFilter:
   m_ObjectHideFlags: 0

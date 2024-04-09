@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a360d7e786f0e6b4791838e18fbcd8d6, type: 3}
-  m_Name: PlayerData
+  m_Name: CharacterData
   m_EditorClassIdentifier: 
-  playerInfos:
-  - indexName: 'P0001: Soldier_A'
-    ID: P0001
+  charInfos:
+  - indexName: 'C0001: Soldier_A'
+    ID: C0001
     prefabName: Soldier_A
     charName: Soldier_A
     strength: 5
@@ -25,6 +25,25 @@ MonoBehaviour:
     dexterity: 5
     maxHealth: 20
     maxStamina: 10
-    sight: 0
+    sight: 8
     mobility: 5
+    aiming: 100
+    reaction: 20
     mainWeaponID: W0001
+  - indexName: 'C0002: Insurgent_A'
+    ID: C0002
+    prefabName: Insurgent_A
+    charName: Insurgent_A
+    strength: 2
+    vitality: 2
+    intellect: 2
+    wisdom: 2
+    agility: 2
+    dexterity: 2
+    maxHealth: 10
+    maxStamina: 5
+    sight: 5
+    mobility: 4
+    aiming: 50
+    reaction: 10
+    mainWeaponID: W0002

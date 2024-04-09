@@ -23,16 +23,17 @@ public class DataManager : MonoBehaviour
 
     private void SetComponents()
     {
-        if (playerData == null)
-        {
-            playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
-        }
+        if (charData == null)
+            charData = Resources.Load<CharacterData>("ScriptableObjects/CharacterData");
+
+        if (weaponData == null)
+            weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
     }
 
-    #region Player Data
-    [HideInInspector] public PlayerData playerData;
-    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:N";
-    private enum PlayerVariable
+    #region Character Data
+    [HideInInspector] public CharacterData charData;
+    private readonly string charDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:P";
+    private enum CharacterVariable
     {
         ID,
         PrefabName,
@@ -47,20 +48,22 @@ public class DataManager : MonoBehaviour
         MaxStamina,
         Sight,
         Mobility,
+        Aiming,
+        Reaction,
         MainWeaponID,
     }
 
-    public void UpdatePlayerData()
+    public void UpdateCharacterData()
     {
-        if (playerData.playerInfos.Count > 0)
+        if (charData.charInfos.Count > 0)
         {
-            playerData.playerInfos.Clear();
+            charData.charInfos.Clear();
         }
-        StartCoroutine(ReadPlayerData());
+        StartCoroutine(ReadCharacterData());
 
-        IEnumerator ReadPlayerData()
+        IEnumerator ReadCharacterData()
         {
-            UnityWebRequest www = UnityWebRequest.Get(playerDB);
+            UnityWebRequest www = UnityWebRequest.Get(charDB);
             yield return www.SendWebRequest();
 
             var text = www.downloadHandler.text;
@@ -68,27 +71,91 @@ public class DataManager : MonoBehaviour
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i].Split('\t');
-                var playerInfo = new PlayerDataInfo
+                var playerInfo = new CharacterDataInfo
                 {
-                    indexName = $"{data[(int)PlayerVariable.ID]}: {data[(int)PlayerVariable.CharacterName]}",
-                    ID = data[(int)PlayerVariable.ID],
-                    prefabName = data[(int)PlayerVariable.PrefabName],
-                    charName = data[(int)PlayerVariable.CharacterName],
-                    strength = int.Parse(data[(int)PlayerVariable.Strength]),
-                    vitality = int.Parse(data[(int)PlayerVariable.Vitality]),
-                    intellect = int.Parse(data[(int)PlayerVariable.Intellect]),
-                    wisdom = int.Parse(data[(int)PlayerVariable.Wisdom]),
-                    agility = int.Parse(data[(int)PlayerVariable.Agility]),
-                    dexterity = int.Parse(data[(int)PlayerVariable.Dexterity]),
-                    maxHealth = int.Parse(data[(int)PlayerVariable.MaxHealth]),
-                    maxStamina = int.Parse(data[(int)PlayerVariable.MaxStamina]),
-                    sight = int.Parse(data[(int)PlayerVariable.Sight]),
-                    mobility = int.Parse(data[(int)PlayerVariable.Mobility]),
-                    mainWeaponID = data[(int)PlayerVariable.MainWeaponID],
+                    indexName = $"{data[(int)CharacterVariable.ID]}: {data[(int)CharacterVariable.CharacterName]}",
+                    ID = data[(int)CharacterVariable.ID],
+                    prefabName = data[(int)CharacterVariable.PrefabName],
+                    charName = data[(int)CharacterVariable.CharacterName],
+                    strength = int.Parse(data[(int)CharacterVariable.Strength]),
+                    vitality = int.Parse(data[(int)CharacterVariable.Vitality]),
+                    intellect = int.Parse(data[(int)CharacterVariable.Intellect]),
+                    wisdom = int.Parse(data[(int)CharacterVariable.Wisdom]),
+                    agility = int.Parse(data[(int)CharacterVariable.Agility]),
+                    dexterity = int.Parse(data[(int)CharacterVariable.Dexterity]),
+                    maxHealth = int.Parse(data[(int)CharacterVariable.MaxHealth]),
+                    maxStamina = int.Parse(data[(int)CharacterVariable.MaxStamina]),
+                    sight = float.Parse(data[(int)CharacterVariable.Sight]),
+                    mobility = int.Parse(data[(int)CharacterVariable.Mobility]),
+                    aiming = int.Parse(data[(int)CharacterVariable.Aiming]),
+                    reaction = int.Parse(data[(int)CharacterVariable.Reaction]),
+                    mainWeaponID = data[(int)CharacterVariable.MainWeaponID].Replace("\r", ""),
                 };
-                playerData.playerInfos.Add(playerInfo);
+                charData.charInfos.Add(playerInfo);
             }
-            Debug.Log("Update Player Data");
+            Debug.Log("Update Character Data");
+        }
+    }
+    #endregion
+
+    #region Weapon Data
+    [HideInInspector] public WeaponData weaponData;
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:M";
+    private enum WeaponVariable
+    {
+        ID,
+        PrefabName,
+        WeaponName,
+        WeaponType,
+        Damage,
+        Penetrate,
+        ArmorBreak,
+        Critical,
+        Range,
+        MOA,
+        Stability,
+        Rebound,
+        MagMax,
+    }
+
+    public void UpdateWeaponData()
+    {
+        if (weaponData.weaponInfos.Count > 0)
+        {
+            weaponData.weaponInfos.Clear();
+        }
+        StartCoroutine(ReadWeaponData());
+
+        IEnumerator ReadWeaponData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(weaponDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var weaponInfo = new WeaponDataInfo
+                {
+                    indexName = $"{data[(int)WeaponVariable.ID]}: {data[(int)WeaponVariable.WeaponName]}",
+                    ID = data[(int)WeaponVariable.ID],
+                    prefabName = data[(int)CharacterVariable.PrefabName],
+                    weaponName = data[(int)WeaponVariable.WeaponName],
+                    type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
+                    damage = int.Parse(data[(int)WeaponVariable.Damage]),
+                    penetrate = int.Parse(data[(int)WeaponVariable.Penetrate]),
+                    armorBreak = int.Parse(data[(int)WeaponVariable.ArmorBreak]),
+                    critical = int.Parse(data[(int)WeaponVariable.Critical]),
+                    range = float.Parse(data[(int)WeaponVariable.Range]),
+                    MOA = int.Parse(data[(int)WeaponVariable.MOA]),
+                    stability = int.Parse(data[(int)WeaponVariable.Stability]),
+                    rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
+                    magMax = int.Parse(data[(int)WeaponVariable.MagMax]),
+                };
+                weaponData.weaponInfos.Add(weaponInfo);
+            }
+            Debug.Log("Update Weapon Data");
         }
     }
     #endregion
@@ -108,17 +175,25 @@ public class DataManager : MonoBehaviour
         {
             base.OnInspectorGUI();
             GUILayout.Label('\n' + "---Read GoogleSheet Data---");
-            if (GUILayout.Button("Update the Player Database"))
+            if (GUILayout.Button("Update the Character Database"))
             {
                 dataMgr.SetComponents();
-                dataMgr.UpdatePlayerData();
-                EditorUtility.SetDirty(dataMgr.playerData);
+                dataMgr.UpdateCharacterData();
+                EditorUtility.SetDirty(dataMgr.charData);
+            }
+            if (GUILayout.Button("Update the Weapon Database"))
+            {
+                dataMgr.SetComponents();
+                dataMgr.UpdateWeaponData();
+                EditorUtility.SetDirty(dataMgr.weaponData);
             }
             if (GUILayout.Button("Update All Database"))
             {
                 dataMgr.SetComponents();
-                dataMgr.UpdatePlayerData();
-                EditorUtility.SetDirty(dataMgr.playerData);
+                dataMgr.UpdateCharacterData();
+                EditorUtility.SetDirty(dataMgr.charData);
+                dataMgr.UpdateWeaponData();
+                EditorUtility.SetDirty(dataMgr.weaponData);
             }
         }
     }

@@ -104,13 +104,17 @@ public class CharacterController : MonoBehaviour
     [Tooltip("체력")] public int health;
     [Tooltip("최대 기력")] public int maxStamina;
     [Tooltip("기력")] public int stamina;
-    [Tooltip("시야")] public int sight;
+    [Tooltip("시야")] public float sight;
     [Tooltip("이동력")] public int mobility;
+    [Tooltip("조준")] public int aiming;
+    [Tooltip("반응")] public int reaction;
     [Space(5f)]
 
     public FieldNode currentNode;
     [HideInInspector] public Cover cover;
     [HideInInspector] public bool isCopy;
+
+    private List<FieldNode> visibleNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
@@ -149,7 +153,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
@@ -187,12 +191,26 @@ public class CharacterController : MonoBehaviour
         transform.name = $"{name}_{charList.Count}";
         charList.Add(this);
 
+        strength = charData.strength;
+        vitality = charData.vitality;
+        intellect = charData.intellect;
+        wisdom = charData.wisdom;
+        agility = charData.agility;
+        dexterity = charData.dexterity;
+
+        maxHealth = charData.maxHealth;
         health = maxHealth;
+        maxStamina = charData.maxStamina;
         stamina = maxStamina;
+        sight = charData.sight;
+        mobility = charData.mobility;
+        aiming = charData.aiming;
+        reaction = charData.reaction;
+
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;
-        gameMgr.ShowVisibleNodes(sight, currentNode);
+        ShowVisibleNodes(sight, currentNode);
     }
 
     private void OnDrawGizmos()
@@ -403,7 +421,7 @@ public class CharacterController : MonoBehaviour
             {
                 moving = false;
                 command.passList.Remove(targetNode);
-                gameMgr.ShowVisibleNodes(sight, targetNode);
+                ShowVisibleNodes(sight, targetNode);
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
@@ -759,7 +777,7 @@ public class CharacterController : MonoBehaviour
             coverPos = command.targetInfo.shooterNode.transform.position;
             covering = true;
             animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
-            SetAiming(command.targetInfo.target);
+            SetAiming(command.targetInfo);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
         {
@@ -789,7 +807,7 @@ public class CharacterController : MonoBehaviour
             animator.SetBool("isAim", true);
             animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
             transform.LookAt(command.targetInfo.target.transform);
-            SetAiming(command.targetInfo.target);
+            SetAiming(command.targetInfo);
             chestAim = true;
             chestRig.weight = 1f;
         }
@@ -826,6 +844,75 @@ public class CharacterController : MonoBehaviour
             animator.SetTrigger("reload");
             weapon.Reload();
             reloading = true;
+        }
+    }
+
+    /// <summary>
+    /// 시야에 있는 노드를 표시
+    /// </summary>
+    /// <param name="sight"></param>
+    /// <param name="node"></param>
+    public void ShowVisibleNodes(float sight, FieldNode node)
+    {
+        if (ownerType != CharacterOwner.Player) return;
+
+        SwitchVisibleNode(false);
+        visibleNodes.Clear();
+        var findNodes = gameMgr.fieldNodes.FindAll(x => DataUtility.GetDistance(x.transform.position, node.transform.position) < sight);
+        for (int i = 0; i < findNodes.Count; i++)
+        {
+            var findNode = findNodes[i];
+            var pos = node.transform.position;
+            var targetPos = findNode.transform.position;
+            if (!CheckSight())
+            {
+                visibleNodes.Add(findNode);
+                continue;
+            }
+
+            for (int j = 0; j < node.onAxisNodes.Count; j++)
+            {
+                var onAxisNode = node.onAxisNodes[j];
+                if (onAxisNode != null && onAxisNode.canMove)
+                {
+                    pos = onAxisNode.transform.position;
+                    if (!CheckSight())
+                    {
+                        visibleNodes.Add(findNode);
+                        break;
+                    }
+                }
+            }
+
+            bool CheckSight()
+            {
+                var dir = Vector3.Normalize(targetPos - pos);
+                var dist = DataUtility.GetDistance(pos, targetPos);
+
+                if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, gameMgr.coverLayer))
+                {
+                    var coverNode = hit.collider.GetComponentInParent<FieldNode>();
+                    if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
+                    {
+                        visibleNodes.Add(coverNode);
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        SwitchVisibleNode(true);
+
+        void SwitchVisibleNode(bool value)
+        {
+            for (int i = 0; i < visibleNodes.Count; i++)
+            {
+                var visibleNode = visibleNodes[i];
+                visibleNode.SetVisibleNode(value);
+            }
         }
     }
 
@@ -1366,19 +1453,19 @@ public class CharacterController : MonoBehaviour
     /// 무기 조준
     /// </summary>
     /// <param name="target"></param>
-    private void SetAiming(CharacterController target)
+    private void SetAiming(TargetInfo targetInfo)
     {
-        aimTf = target.transform;
+        aimTf = targetInfo.target.transform;
         var shootNum = animator.GetInteger("shootNum");
-        if (weapon.CheckHitBullet(shootNum))
+        if (weapon.CheckHitBullet(targetInfo, shootNum))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
             aimInterval = dir * errorInterval;
             aimInterval.y += DataUtility.aimPointY;
-            if (target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
             {
-                target.AddCommand(CommandType.Targeting, false, transform);
+                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
             }
         }
         else

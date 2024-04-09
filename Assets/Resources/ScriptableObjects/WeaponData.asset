@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4daeeffd036532347a4207ff7eafa760, type: 3}
+  m_Name: WeaponData
+  m_EditorClassIdentifier: 
+  weaponInfos:
+  - indexName: 'W0001: Rifle_01'
+    ID: W0001
+    prefabName: Rifle_01
+    weaponName: Rifle_01
+    type: 2
+    damage: 10
+    penetrate: 20
+    armorBreak: 30
+    critical: 5
+    range: 10
+    MOA: 5
+    stability: 5
+    rebound: 5
+    magMax: 30
+  - indexName: 'W0002: Rifle_02'
+    ID: W0002
+    prefabName: Rifle_02
+    weaponName: Rifle_02
+    type: 2
+    damage: 5
+    penetrate: 10
+    armorBreak: 15
+    critical: 3
+    range: 10
+    MOA: 3
+    stability: 5
+    rebound: 5
+    magMax: 30

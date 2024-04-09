@@ -77,19 +77,16 @@ public class Bullet : MonoBehaviour
         if (isHit) return;
 
         var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
-        if (!isHit)
+        for (int i = 0; i < hitCds.Count; i++)
         {
-            for (int i = 0; i < hitCds.Count; i++)
+            var hitCd = hitCds[i];
+            var charCtr = hitCd.GetComponentInParent<CharacterController>();
+            if (charCtr != null)
             {
-                var hitCd = hitCds[i];
-                var charCtr = hitCd.GetComponentInParent<CharacterController>();
-                if (charCtr != null)
-                {
-                    charCtr.OnHit(transform.forward, weapon.damage);
-                }
-                HitBullet();
-                break;
+                charCtr.OnHit(transform.forward, weapon.damage);
             }
+            HitBullet();
+            break;
         }
     }
 

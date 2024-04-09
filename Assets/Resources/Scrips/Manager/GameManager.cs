@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     [Header("---Access Script---")]
+    public DataManager dataMgr;
     public CameraManager camMgr;
 
     [Header("---Access Component---")]
@@ -44,6 +45,7 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+        dataMgr = FindAnyObjectByType<DataManager>();
         camMgr = FindAnyObjectByType<CameraManager>();
         camMgr.SetComponents();
 
@@ -58,7 +60,7 @@ public class GameManager : MonoBehaviour
         coverLayer = LayerMask.GetMask("Cover");
 
         CreateField();
-        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "Soldier_A", "Rifle_01");
+        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
         CreateLines();
         CreateBullets();
     }
@@ -100,9 +102,10 @@ public class GameManager : MonoBehaviour
     /// <param name="nodePos"></param>
     /// <param name="charName"></param>
     /// <param name="weaponName"></param>
-    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charName, string weaponName)
+    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charID)
     {
-        var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charName}"));
+        var charData = dataMgr.charData.charInfos.Find(x => x.ID == charID);
+        var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charData.prefabName}"));
         charCtr.transform.SetParent(characterTf, false);
         var node = fieldNodes.Find(x => x.nodePos == nodePos);
         charCtr.transform.position = node.transform.position;
@@ -110,10 +113,11 @@ public class GameManager : MonoBehaviour
         {
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        charCtr.SetComponents(this, ownerType, node);
+        charCtr.SetComponents(this, ownerType, charData, node);
 
-        var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponName}"));
-        weapon.SetComponets(charCtr);
+        var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == charData.mainWeaponID);
+        var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
+        weapon.SetComponets(charCtr, weaponData);
     }
 
     /// <summary>
@@ -271,7 +275,7 @@ public class GameManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
         {
             var node = hit.collider.GetComponentInParent<FieldNode>();
-            if (node == selectChar.currentNode)
+            if (targetNode != node && node == selectChar.currentNode)
             {
                 arrowPointer.SetActive(false);
                 moveLine.enabled = false;
@@ -313,73 +317,6 @@ public class GameManager : MonoBehaviour
             targetNode.CheckCoverNode(false);
         }
         targetNode = null;
-    }
-
-    /// <summary>
-    /// 시야 내의 노드들을 표시
-    /// </summary>
-    /// <param name="sight"></param>
-    /// <param name="node"></param>
-    public void ShowVisibleNodes(int sight, FieldNode node)
-    {
-        SwitchVisibleNode(false);
-        visibleNodes.Clear();
-        var findNodes = fieldNodes.FindAll(x => DataUtility.GetDistance(x.transform.position, node.transform.position) < sight);
-        for (int i = 0; i < findNodes.Count; i++)
-        {
-            var findNode = findNodes[i];
-            var pos = node.transform.position;
-            var targetPos = findNode.transform.position;
-            if (!CheckSight())
-            {
-                visibleNodes.Add(findNode);
-                continue;
-            }
-
-            for (int j = 0; j < node.onAxisNodes.Count; j++)
-            {
-                var onAxisNode = node.onAxisNodes[j];
-                if (onAxisNode != null && onAxisNode.canMove)
-                {
-                    pos = onAxisNode.transform.position;
-                    if (!CheckSight())
-                    {
-                        visibleNodes.Add(findNode);
-                        break;
-                    }
-                }
-            }
-
-            bool CheckSight()
-            {
-                var dir = Vector3.Normalize(targetPos - pos);
-                var dist = DataUtility.GetDistance(pos, targetPos);
-
-                if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, coverLayer))
-                {
-                    var coverNode = hit.collider.GetComponentInParent<FieldNode>();
-                    if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
-                    {
-                        visibleNodes.Add(coverNode);
-                    }
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-        SwitchVisibleNode(true);
-
-        void SwitchVisibleNode(bool value)
-        {
-            for (int i = 0; i < visibleNodes.Count; i++)
-            {
-                var visibleNode = visibleNodes[i];
-                visibleNode.SetVisibleNode(value);
-            }
-        }
     }
 
     /// <summary>
@@ -664,7 +601,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.canMove)
                 {
-                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "Insurgent_A", "Rifle_02");
+                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "C0002");
                 }
             }
         }

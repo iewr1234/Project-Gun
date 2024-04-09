@@ -1,15 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
-
-public enum WeaponType
-{
-    None,
-    Pistol,
-    Rifle,
-}
 
 public enum FireModeType
 {
@@ -35,7 +27,9 @@ public class Weapon : MonoBehaviour
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
     [Tooltip("사거리")] public float range;
-    [Tooltip("명중률")] public int hitAccuracy;
+    [Tooltip("정확도")] public int MOA;
+    [Tooltip("안정성")] public int stability;
+    [Tooltip("반동")] public int rebound;
     [Space(5f)]
 
     [Tooltip("사격타입")] public FireModeType fireMode;
@@ -53,7 +47,7 @@ public class Weapon : MonoBehaviour
 
     private readonly float shootDisparity = 0.15f;
 
-    public void SetComponets(CharacterController _charCtr)
+    public void SetComponets(CharacterController _charCtr, WeaponDataInfo weaponData)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
@@ -62,8 +56,19 @@ public class Weapon : MonoBehaviour
 
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
         DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
-
         WeaponSwitching("Right");
+
+        type = weaponData.type;
+        damage = weaponData.damage;
+        penetrate = weaponData.penetrate;
+        armorBreak = weaponData.armorBreak;
+        critical = weaponData.critical;
+        range = weaponData.range;
+        MOA = weaponData.MOA;
+        stability = weaponData.stability;
+        rebound = weaponData.rebound;
+
+        magMax = weaponData.magMax;
         Reload();
     }
 
@@ -85,14 +90,27 @@ public class Weapon : MonoBehaviour
         return shootNum;
     }
 
-    public bool CheckHitBullet(int shootNum)
+    public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
     {
         hitList.Clear();
+        var pos = targetInfo.shooterNode.transform.position;
+        var targetPos = targetInfo.targetNode.transform.position;
+        var dist = DataUtility.GetDistance(pos, targetPos);
         var allMiss = true;
         for (int i = 0; i < shootNum; i++)
         {
             var value = Random.Range(0, 100);
+            var shooterHit = charCtr.aiming - (MOA * dist) + (15 / (dist / 3)) - (rebound * i);
+            if (shooterHit < 0f)
+            {
+                shooterHit = 0f;
+            }
+            var coverBonus = GetCoverBonus();
+            var reactionBonus = GetReactionBonus();
+            var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
+            var hitAccuracy = Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
             var isHit = value < hitAccuracy;
+            Debug.Log($"{charCtr.name}: {value} < {hitAccuracy} = {isHit}");
             if (isHit && allMiss)
             {
                 allMiss = false;
@@ -105,6 +123,30 @@ public class Weapon : MonoBehaviour
         Debug.Log($"{charCtr.name}: ShootNum = {shootNum}, Hit = {hit.Count}, Miss = {miss.Count}");
 
         return allMiss;
+
+        int GetCoverBonus()
+        {
+            if (targetInfo.targetCover == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return targetInfo.targetCover.cover.type == CoverType.Full ? 40 : 20;
+            }
+        }
+
+        float GetReactionBonus()
+        {
+            if (targetInfo.targetCover == null)
+            {
+                return 0.1f;
+            }
+            else
+            {
+                return targetInfo.targetCover.cover.type == CoverType.Full ? 0.4f : 0.2f;
+            }
+        }
     }
 
     public void FireBullet()
