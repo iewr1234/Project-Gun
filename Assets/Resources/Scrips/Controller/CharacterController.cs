@@ -72,6 +72,7 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     public Weapon weapon;
+    public Armor armor;
 
     [Header("---Access Component---")]
     public Animator animator;
@@ -1480,6 +1481,8 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void OnHit(Vector3 dir, int damage)
     {
+
+
         health -= damage;
         if (health < 0)
         {

@@ -26,7 +26,7 @@ public class WeaponDataInfo
     public int armorBreak;
     public int critical;
     public float range;
-    public int MOA;
+    public float MOA;
     public int stability;
     public int rebound;
     [Space(5f)]

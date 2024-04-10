@@ -30,6 +30,7 @@ public class CharacterDataInfo
     [Space(5f)]
 
     public string mainWeaponID;
+    public string armorID;
 }
 
 [CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable Object/CharacterData")]

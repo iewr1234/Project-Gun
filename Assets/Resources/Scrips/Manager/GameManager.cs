@@ -98,10 +98,6 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 캐릭터 생성
     /// </summary>
-    /// <param name="ownerType"></param>
-    /// <param name="nodePos"></param>
-    /// <param name="charName"></param>
-    /// <param name="weaponName"></param>
     private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charID)
     {
         var charData = dataMgr.charData.charInfos.Find(x => x.ID == charID);
@@ -118,6 +114,12 @@ public class GameManager : MonoBehaviour
         var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == charData.mainWeaponID);
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
         weapon.SetComponets(charCtr, weaponData);
+
+        if (charData.armorID != "None")
+        {
+            var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
+            charCtr.armor = new Armor(armorData);
+        }
     }
 
     /// <summary>
