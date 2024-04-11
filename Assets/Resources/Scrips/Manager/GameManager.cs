@@ -1,8 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+
+public enum ActionState
+{
+    None,
+    Move,
+    Shot,
+    Watch,
+}
 
 public class GameManager : MonoBehaviour
 {
@@ -18,11 +27,13 @@ public class GameManager : MonoBehaviour
     private Transform linePoolTf;
     private Transform bulletsPoolTf;
 
-    [Header("--- Assignment Variable---\n[Character]")]
+    [Header("--- Assignment Variable---")]
+    [SerializeField] private ActionState actionState;
+
+    [Header("[Character]")]
     public List<CharacterController> playerList;
     public List<CharacterController> enemyList;
     public CharacterController selectChar;
-    public bool targeting;
 
     [Header("[FieldNode]")]
     [SerializeField] private Vector2 fieldSize;
@@ -31,7 +42,7 @@ public class GameManager : MonoBehaviour
     private List<FieldNode> visibleNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
-    private FieldNode targetNode;
+    [SerializeField] private FieldNode targetNode;
 
     private LineRenderer moveLine;
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
@@ -183,6 +194,7 @@ public class GameManager : MonoBehaviour
                 if (selectChar.SetTarget())
                 {
                     SwitchMovableNodes(false);
+                    actionState = ActionState.Shot;
                 }
             }
             else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
@@ -191,6 +203,12 @@ public class GameManager : MonoBehaviour
                 selectChar.AddCommand(CommandType.Reload);
                 SwitchMovableNodes(false);
                 selectChar = null;
+            }
+            else if (Input.GetKeyDown(KeyCode.T))
+            {
+                ClearLine();
+                SwitchMovableNodes(false);
+                actionState = ActionState.Watch;
             }
         }
         else
@@ -216,6 +234,7 @@ public class GameManager : MonoBehaviour
                     SwitchMovableNodes(false);
                     camMgr.SetCameraState(CameraState.None);
                     selectChar = null;
+                    actionState = ActionState.None;
                 }
                 else
                 {
@@ -228,6 +247,7 @@ public class GameManager : MonoBehaviour
                 targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                 camMgr.SetCameraState(CameraState.None);
                 selectChar = null;
+                actionState = ActionState.None;
             }
         }
     }
@@ -243,24 +263,38 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
+                switch (actionState)
                 {
-                    SwitchMovableNodes(false);
-                    ClearLine();
-                    RemoveTargetNode();
-                    selectChar = null;
-                }
-                else if (node.charCtr != null && selectChar == null)
-                {
-                    selectChar = node.charCtr;
-                    ShowMovableNodes(selectChar);
-                }
-                else if (node.canMove && selectChar != null)
-                {
-                    ClearLine();
-                    RemoveTargetNode();
-                    CharacterMove(selectChar, node);
-                    selectChar = null;
+                    case ActionState.None:
+                        if (node.charCtr != null && selectChar == null)
+                        {
+                            selectChar = node.charCtr;
+                            ShowMovableNodes(selectChar);
+                            actionState = ActionState.Move;
+                        }
+                        break;
+                    case ActionState.Move:
+                        if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
+                        {
+                            SwitchMovableNodes(false);
+                            ClearLine();
+                            RemoveTargetNode();
+                            selectChar = null;
+                            actionState = ActionState.None;
+                        }
+                        else if (node.canMove && selectChar != null)
+                        {
+                            ClearLine();
+                            RemoveTargetNode();
+                            CharacterMove(selectChar, node);
+                            selectChar = null;
+                            actionState = ActionState.None;
+                        }
+                        break;
+                    case ActionState.Watch:
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -277,34 +311,47 @@ public class GameManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
         {
             var node = hit.collider.GetComponentInParent<FieldNode>();
-            if (targetNode != node && node == selectChar.currentNode)
+            switch (actionState)
             {
-                arrowPointer.SetActive(false);
-                moveLine.enabled = false;
-                RemoveTargetNode();
-                selectChar.FindTargets(node);
-                DrawAimLine(node);
-                node.CheckCoverNode(true);
-                targetNode = node;
-                return;
-            }
+                case ActionState.Move:
+                    if (targetNode != node && node == selectChar.currentNode)
+                    {
+                        arrowPointer.SetActive(false);
+                        moveLine.enabled = false;
+                        RemoveTargetNode();
+                        selectChar.FindTargets(node);
+                        DrawAimLine(node);
+                        node.CheckCoverNode(true);
+                        targetNode = node;
+                        return;
+                    }
 
-            var find = openNodes.Find(x => x == node);
-            if (targetNode != node && find != null)
-            {
-                RemoveTargetNode();
-                ResultNodePass(selectChar.currentNode, node);
-                DrawMoveLine();
+                    var find = openNodes.Find(x => x == node);
+                    if (targetNode != node && find != null)
+                    {
+                        RemoveTargetNode();
+                        ResultNodePass(selectChar.currentNode, node);
+                        DrawMoveLine();
 
-                selectChar.FindTargets(node);
-                DrawAimLine(node);
-                node.CheckCoverNode(true);
-                targetNode = node;
-            }
-            else if (find == null)
-            {
-                ClearLine();
-                RemoveTargetNode();
+                        selectChar.FindTargets(node);
+                        DrawAimLine(node);
+                        node.CheckCoverNode(true);
+                        targetNode = node;
+                    }
+                    else if (find == null)
+                    {
+                        ClearLine();
+                        RemoveTargetNode();
+                    }
+                    break;
+                case ActionState.Watch:
+                    if (targetNode != node)
+                    {
+                        targetNode = node;
+                    }
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -83,7 +83,7 @@ public class Bullet : MonoBehaviour
             var charCtr = hitCd.GetComponentInParent<CharacterController>();
             if (charCtr != null)
             {
-                charCtr.OnHit(transform.forward, weapon.damage);
+                charCtr.OnHit(transform.forward, weapon);
             }
             HitBullet();
             break;

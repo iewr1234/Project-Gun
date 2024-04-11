@@ -8,6 +8,7 @@ public class Armor
     [Tooltip("방어구 이름")] public string armorName;
     [Space(5f)]
 
+    [Tooltip("최대 방탄력")] public float maxBulletproof;
     [Tooltip("방탄력")] public float bulletproof;
     [Tooltip("최대 내구도")] public int maxDurability;
     [Tooltip("내구도")] public int durability;
@@ -16,7 +17,8 @@ public class Armor
     {
         armorName = armorData.armorName;
 
-        bulletproof = armorData.bulletproof;
+        maxBulletproof = armorData.maxBulletproof;
+        bulletproof = maxBulletproof;
         maxDurability = armorData.maxDurability;
         durability = maxDurability;
     }

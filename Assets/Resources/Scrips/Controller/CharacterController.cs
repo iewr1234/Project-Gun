@@ -879,7 +879,7 @@ public class CharacterController : MonoBehaviour
                     pos = onAxisNode.transform.position;
                     if (!CheckSight())
                     {
-                        visibleNodes.Add(findNode);
+                        CheckEnemy(findNode);
                         break;
                     }
                 }
@@ -889,13 +889,12 @@ public class CharacterController : MonoBehaviour
             {
                 var dir = Vector3.Normalize(targetPos - pos);
                 var dist = DataUtility.GetDistance(pos, targetPos);
-
                 if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, gameMgr.coverLayer))
                 {
                     var coverNode = hit.collider.GetComponentInParent<FieldNode>();
                     if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
                     {
-                        visibleNodes.Add(coverNode);
+                        CheckEnemy(coverNode);
                     }
                     return true;
                 }
@@ -906,6 +905,21 @@ public class CharacterController : MonoBehaviour
             }
         }
         SwitchVisibleNode(true);
+
+        void CheckEnemy(FieldNode node)
+        {
+            visibleNodes.Add(node);
+            for (int i = 0; i < node.onAxisNodes.Count; i++)
+            {
+                var onAxisNode = node.onAxisNodes[i];
+                if (onAxisNode == null) continue;
+
+                if (onAxisNode.charCtr != null && onAxisNode.charCtr.ownerType != ownerType)
+                {
+                    visibleNodes.Add(onAxisNode);
+                }
+            }
+        }
 
         void SwitchVisibleNode(bool value)
         {
@@ -1457,8 +1471,7 @@ public class CharacterController : MonoBehaviour
     private void SetAiming(TargetInfo targetInfo)
     {
         aimTf = targetInfo.target.transform;
-        var shootNum = animator.GetInteger("shootNum");
-        if (weapon.CheckHitBullet(targetInfo, shootNum))
+        if (weapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
@@ -1479,14 +1492,51 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, int damage)
+    public void OnHit(Vector3 dir, Weapon weapon)
     {
-
-
-        health -= damage;
-        if (health < 0)
+        bool isPenetrate;
+        float bulletproof;
+        if (armor != null && armor.durability > 0)
         {
-            health = 0;
+            var value = Random.Range(0, 100);
+            armor.bulletproof = Mathf.Floor(((121 - (5000 / (45 + ((float)armor.durability / armor.maxDurability) * 200))) / 100 * armor.bulletproof) * 10f) / 10f;
+            if (armor.bulletproof < 0f)
+            {
+                armor.bulletproof = 0f;
+            }
+
+            var penetrateRate = weapon.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - weapon.penetrate)) * 100f) : 95;
+            isPenetrate = value < penetrateRate;
+
+            var armorDamage = (int)Mathf.Floor(weapon.damage * (weapon.armorBreak / 100f));
+            armor.durability -= armorDamage;
+            if (armor.durability < 0)
+            {
+                armor.durability = 0;
+            }
+            bulletproof = armor.bulletproof;
+        }
+        else
+        {
+            isPenetrate = true;
+            bulletproof = 0f;
+        }
+
+        if (isPenetrate)
+        {
+            health -= (int)Mathf.Floor(weapon.damage * (weapon.penetrate / (weapon.penetrate + bulletproof)));
+            if (health < 0)
+            {
+                health = 0;
+            }
+        }
+        else
+        {
+            stamina -= (int)Mathf.Floor(weapon.damage * (weapon.penetrate / (float)weapon.penetrate + bulletproof));
+            if (stamina < 0)
+            {
+                stamina = 0;
+            }
         }
 
         if (health == 0)

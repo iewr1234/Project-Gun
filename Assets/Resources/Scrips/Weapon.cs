@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public enum FireModeType
 {
@@ -97,10 +98,17 @@ public class Weapon : MonoBehaviour
         var targetPos = targetInfo.targetNode.transform.position;
         var dist = DataUtility.GetDistance(pos, targetPos);
         var allMiss = true;
+        var reboundCheck = 0;
         for (int i = 0; i < shootNum; i++)
         {
+            charCtr.stamina -= stability;
+            if (charCtr.stamina < 0)
+            {
+                charCtr.stamina = 0;
+                reboundCheck++;
+            }
             var value = Random.Range(0, 100);
-            var shooterHit = charCtr.aiming - (MOA * dist) + (15 / (dist / 3)) - (rebound * i);
+            var shooterHit = charCtr.aiming - (MOA * dist) + (15 / (dist / 3)) - (rebound * reboundCheck);
             if (shooterHit < 0f)
             {
                 shooterHit = 0f;

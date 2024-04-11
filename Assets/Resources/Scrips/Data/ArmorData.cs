@@ -12,7 +12,7 @@ public class ArmorDataInfo
     public string armorName;
     [Space(5f)]
 
-    public float bulletproof;
+    public float maxBulletproof;
     public int maxDurability;
 }
 

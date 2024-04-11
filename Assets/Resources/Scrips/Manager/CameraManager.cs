@@ -27,15 +27,15 @@ public class CameraManager : MonoBehaviour
     private CinemachineVirtualCamera currrentActionCam;
     [SerializeField] private bool actionCam;
 
-    private float moveSpeed = 15f;
+    private readonly float moveSpeed = 15f;
     private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
 
     private float currentRot;
-    private float rotSpeed = 150f;
+    private readonly float rotSpeed = 150f;
 
     private Vector3 camDirection;
     private float camDistance = 25f;
-    private float zoomSpeed = 20f;
+    private readonly float zoomSpeed = 20f;
     private readonly float zoomMin = 10f;
     private readonly float zoomMax = 45f;
 

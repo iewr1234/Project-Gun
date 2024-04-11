@@ -172,7 +172,7 @@ public class DataManager : MonoBehaviour
     {
         ID,
         ArmorName,
-        Bulletproof,
+        MaxBulletproof,
         MaxDurability,
     }
 
@@ -199,7 +199,7 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)ArmorVariable.ID]}: {data[(int)ArmorVariable.ArmorName]}",
                     ID = data[(int)ArmorVariable.ID],
                     armorName = data[(int)ArmorVariable.ArmorName],
-                    bulletproof = float.Parse(data[(int)ArmorVariable.Bulletproof]),
+                    maxBulletproof = float.Parse(data[(int)ArmorVariable.MaxBulletproof]),
                     maxDurability = int.Parse(data[(int)ArmorVariable.MaxDurability]),
                 };
                 armorData.armorInfos.Add(armorInfo);
