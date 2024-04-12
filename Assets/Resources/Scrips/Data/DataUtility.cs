@@ -21,6 +21,8 @@ public static class DataUtility
     public static readonly float aimPointY = 0.9f;
     public static readonly float aimPointZ = 5f;
 
+    public static readonly float lineInterval = 0.5f;
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

@@ -28,6 +28,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
     [Tooltip("사거리")] public float range;
+    [Tooltip("경계각")] public int watchAngle;
     [Tooltip("정확도")] public float MOA;
     [Tooltip("안정성")] public int stability;
     [Tooltip("반동")] public int rebound;
@@ -65,6 +66,7 @@ public class Weapon : MonoBehaviour
         armorBreak = weaponData.armorBreak;
         critical = weaponData.critical;
         range = weaponData.range;
+        watchAngle = weaponData.watchAngle;
         MOA = weaponData.MOA;
         stability = weaponData.stability;
         rebound = weaponData.rebound;

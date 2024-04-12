@@ -116,6 +116,7 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public bool isCopy;
 
     private List<FieldNode> visibleNodes = new List<FieldNode>();
+    private List<FieldNode> watchNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
@@ -929,6 +930,86 @@ public class CharacterController : MonoBehaviour
                 visibleNode.SetVisibleNode(value);
             }
         }
+    }
+
+    /// <summary>
+    /// 경계사격 범위를 표시
+    /// </summary>
+    /// <param name="onPointNode"></param>
+    /// <param name="currentRange"></param>
+    public void ShowWatchNodes(FieldNode onPointNode, DrawRange currentRange)
+    {
+        SetActiveWatchNodes(false);
+        var dist = currentRange.outRadius;
+        var halfAngle = currentRange.angle / 2f;
+        var pos = currentNode.transform.position;
+        var nodeAngleRad = Mathf.Atan2(onPointNode.transform.position.x - pos.x, onPointNode.transform.position.z - pos.z);
+        var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
+        var negativeAngle = (nodeAngle - halfAngle + 360f) % 360f;
+        var positiveAngle = (nodeAngle + halfAngle) % 360f;
+        watchNodes = gameMgr.fieldNodes.FindAll(x => CheckAngle(x) == true && DataUtility.GetDistance(x.transform.position, pos) <= dist);
+        SetActiveWatchNodes(true);
+
+        bool CheckAngle(FieldNode _node)
+        {
+            var _nodeAngleRad = Mathf.Atan2(_node.transform.position.x - pos.x, _node.transform.position.z - pos.z);
+            var _nodeAngle = (_nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
+            if (_node != currentNode && IsAngleInRange(_nodeAngle, negativeAngle, positiveAngle))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        bool IsAngleInRange(float angle, float negativeAngle, float positiveAngle)
+        {
+            if (negativeAngle <= positiveAngle)
+            {
+                return angle >= negativeAngle && angle <= positiveAngle;
+            }
+            else
+            {
+                return angle >= negativeAngle || angle <= positiveAngle;
+            }
+        }
+
+        void SetActiveWatchNodes(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    for (int i = 0; i < watchNodes.Count; i++)
+                    {
+                        var watchNode = watchNodes[i];
+                        watchNode.NodeColor = Color.yellow;
+                    }
+                    break;
+                case false:
+                    for (int i = 0; i < watchNodes.Count; i++)
+                    {
+                        var watchNode = watchNodes[i];
+                        watchNode.NodeColor = Color.gray;
+                    }
+                    watchNodes.Clear();
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 경계사격 범위표시 해제
+    /// </summary>
+    public void ClearWatchNodes()
+    {
+        for (int i = 0; i < watchNodes.Count; i++)
+        {
+            var watchNode = watchNodes[i];
+            watchNode.NodeColor = Color.gray;
+        }
+        watchNodes.Clear();
     }
 
     /// <summary>

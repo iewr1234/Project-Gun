@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
 
 public enum ActionState
 {
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
     private Transform fieldNodeTf;
     private Transform characterTf;
     private Transform linePoolTf;
+    private Transform rangePoolTf;
     private Transform bulletsPoolTf;
 
     [Header("--- Assignment Variable---")]
@@ -45,7 +47,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private FieldNode targetNode;
 
     private LineRenderer moveLine;
+    private DrawRange currentRange;
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
+    [HideInInspector] public List<DrawRange> rangePool = new List<DrawRange>();
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
 
     [HideInInspector] public LayerMask nodeLayer;
@@ -66,6 +70,7 @@ public class GameManager : MonoBehaviour
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
+        rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
@@ -131,6 +136,8 @@ public class GameManager : MonoBehaviour
             var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
             charCtr.armor = new Armor(armorData);
         }
+
+        CreateRange();
     }
 
     /// <summary>
@@ -153,6 +160,18 @@ public class GameManager : MonoBehaviour
             line.enabled = false;
             linePool.Add(line);
         }
+    }
+
+    /// <summary>
+    /// 범위 생성
+    /// </summary>
+    private void CreateRange()
+    {
+        var range = Instantiate(Resources.Load<DrawRange>("Prefabs/DrawRange"));
+        range.transform.SetParent(rangePoolTf, false);
+        range.SetComponents();
+        range.gameObject.SetActive(false);
+        rangePool.Add(range);
     }
 
     /// <summary>
@@ -185,70 +204,86 @@ public class GameManager : MonoBehaviour
     {
         if (selectChar == null) return;
 
-        if (camMgr.state == CameraState.None)
+        switch (actionState)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                ClearLine();
-                selectChar.FindTargets(selectChar.currentNode);
-                if (selectChar.SetTarget())
+            case ActionState.Move:
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    SwitchMovableNodes(false);
-                    actionState = ActionState.Shot;
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
-            {
-                ClearLine();
-                selectChar.AddCommand(CommandType.Reload);
-                SwitchMovableNodes(false);
-                selectChar = null;
-            }
-            else if (Input.GetKeyDown(KeyCode.T))
-            {
-                ClearLine();
-                SwitchMovableNodes(false);
-                actionState = ActionState.Watch;
-            }
-        }
-        else
-        {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                selectChar.SetNextTarget();
-            }
-            else if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (selectChar.weapon.chamberBullet)
-                {
-                    if (selectChar.animator.GetBool("isCover"))
+                    ClearLine();
+                    selectChar.FindTargets(selectChar.currentNode);
+                    if (selectChar.SetTarget())
                     {
-                        selectChar.AddCommand(CommandType.CoverAim);
-                        selectChar.AddCommand(CommandType.Shoot);
-                        selectChar.AddCommand(CommandType.BackCover);
+                        SwitchMovableNodes(false);
+                        actionState = ActionState.Shot;
+                    }
+                }
+                else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
+                {
+                    ClearLine();
+                    selectChar.AddCommand(CommandType.Reload);
+                    SwitchMovableNodes(false);
+                    selectChar = null;
+                    actionState = ActionState.None;
+                }
+                else if (Input.GetKeyDown(KeyCode.T))
+                {
+                    ClearLine();
+                    SwitchMovableNodes(false);
+                    currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
+                    //curRange.SetRange(selectChar);
+                    actionState = ActionState.Watch;
+                }
+                break;
+            case ActionState.Shot:
+                if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    selectChar.SetNextTarget();
+                }
+                else if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    if (selectChar.weapon.chamberBullet)
+                    {
+                        if (selectChar.animator.GetBool("isCover"))
+                        {
+                            selectChar.AddCommand(CommandType.CoverAim);
+                            selectChar.AddCommand(CommandType.Shoot);
+                            selectChar.AddCommand(CommandType.BackCover);
+                        }
+                        else
+                        {
+                            selectChar.AddCommand(CommandType.Shoot);
+                        }
+                        SwitchMovableNodes(false);
+                        camMgr.SetCameraState(CameraState.None);
+                        selectChar = null;
+                        actionState = ActionState.None;
                     }
                     else
                     {
-                        selectChar.AddCommand(CommandType.Shoot);
+                        Debug.Log($"{selectChar.name}: No Ammo");
                     }
-                    SwitchMovableNodes(false);
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    var targetInfo = selectChar.targetList[selectChar.targetIndex];
+                    targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
                     selectChar = null;
                     actionState = ActionState.None;
                 }
-                else
+                break;
+            case ActionState.Watch:
+                if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    Debug.Log($"{selectChar.name}: No Ammo");
+                    currentRange.gameObject.SetActive(false);
+                    currentRange = null;
+                    selectChar.ClearWatchNodes();
+                    selectChar = null;
+                    actionState = ActionState.None;
                 }
-            }
-            else if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                var targetInfo = selectChar.targetList[selectChar.targetIndex];
-                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
-                camMgr.SetCameraState(CameraState.None);
-                selectChar = null;
-                actionState = ActionState.None;
-            }
+                break;
+            default:
+                break;
         }
     }
 
@@ -347,6 +382,12 @@ public class GameManager : MonoBehaviour
                 case ActionState.Watch:
                     if (targetNode != node)
                     {
+                        if (node != selectChar.currentNode)
+                        {
+                            currentRange.SetRange(selectChar, node);
+                            currentRange.transform.LookAt(node.transform);
+                            selectChar.ShowWatchNodes(node, currentRange);
+                        }
                         targetNode = node;
                     }
                     break;
@@ -383,7 +424,6 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 이동노드 연쇄적용
     /// </summary>
-    /// <param name="currentNode"></param>
     /// <param name="node"></param>
     /// <param name="mobility"></param>
     /// <param name="isFirst"></param>
@@ -563,10 +603,9 @@ public class GameManager : MonoBehaviour
                 pos.y += height;
                 var targetPos = targetInfo.target.currentNode.transform.position;
                 targetPos.y += height;
-                var interval = 0.5f;
                 var dir = Vector3.Normalize(targetPos - pos);
-                pos += dir * interval;
-                targetPos -= dir * interval;
+                pos += dir * DataUtility.lineInterval;
+                targetPos -= dir * DataUtility.lineInterval;
 
                 line.enabled = true;
                 line.positionCount = 2;
