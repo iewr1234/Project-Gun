@@ -86,4 +86,11 @@ public static class DataUtility
 
         return pos;
     }
+
+    public static float GetFloorValue(float value, int _decimalPoint)
+    {
+        var decimalPoint = (int)Mathf.Pow(10, _decimalPoint);
+
+        return Mathf.Floor(value * decimalPoint) / decimalPoint;
+    }
 }

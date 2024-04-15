@@ -1,14 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static UnityEditor.PlayerSettings;
 
 public enum CharacterOwner
 {
     None,
     Player,
     Enemy,
+}
+
+public enum CharacterState
+{
+    None,
+    Watch,
+    Dead,
 }
 
 public enum CommandType
@@ -61,6 +70,16 @@ public struct TargetInfo
     public bool targetRight;
 }
 
+[System.Serializable]
+public struct WatchInfo
+{
+    public DrawRange drawRang;
+    public FieldNode node;
+    public bool isRight;
+    public float minAngle;
+    public float maxAngle;
+}
+
 public struct LineInfo
 {
     public Vector3 startPos;
@@ -86,11 +105,12 @@ public class CharacterController : MonoBehaviour
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
-    private List<Collider> ragdollCds = new List<Collider>();
-    private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
+    [SerializeField] private List<Collider> ragdollCds = new List<Collider>();
+    [SerializeField] private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
+    [Tooltip("캐릭터 상태")] public CharacterState state;
 
     [Header("[Status]")]
     [Tooltip("힘")] public int strength;
@@ -116,11 +136,12 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public bool isCopy;
 
     private List<FieldNode> visibleNodes = new List<FieldNode>();
-    private List<FieldNode> watchNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
     [HideInInspector] public int targetIndex;
+
+    public WatchInfo watchInfo;
 
     private List<LineInfo> lineInfos = new List<LineInfo>();
     [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
@@ -217,7 +238,7 @@ public class CharacterController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        DrawShootingPath();
+        //DrawShootingPath();
         DrawWeaponRange();
     }
 
@@ -424,6 +445,7 @@ public class CharacterController : MonoBehaviour
                 moving = false;
                 command.passList.Remove(targetNode);
                 ShowVisibleNodes(sight, targetNode);
+                CheckWatcher(targetNode);
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
@@ -933,13 +955,149 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 경계자의 위치를 찾음
+    /// </summary>
+    /// <param name="targetNode"></param>
+    public void SetWatchInfo(FieldNode targetNode, DrawRange drawRange)
+    {
+        FieldNode watchNode;
+        var isRight = false;
+        var coverNode = FindCoverNode(currentNode, targetNode);
+        if (coverNode != null)
+        {
+            var RN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Right);
+            var LN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Left);
+            if (RN == null && LN == null)
+            {
+                watchNode = currentNode;
+            }
+            else if (LN == null)
+            {
+                watchNode = RN;
+                isRight = true;
+            }
+            else if (RN == null)
+            {
+                watchNode = LN;
+            }
+            else if (DataUtility.GetDistance(RN.transform.position, targetNode.transform.position)
+                  <= DataUtility.GetDistance(LN.transform.position, targetNode.transform.position))
+            {
+                watchNode = RN;
+                isRight = true;
+            }
+            else
+            {
+                watchNode = LN;
+            }
+
+            var dir = Vector3.Normalize(targetNode.transform.position - watchNode.transform.position);
+            if (Physics.Raycast(watchNode.transform.position, dir, DataUtility.nodeSize, gameMgr.coverLayer))
+            {
+                watchNode = currentNode;
+            }
+        }
+        else
+        {
+            watchNode = currentNode;
+        }
+
+        var pos = watchNode.transform.position;
+        var nodeAngleRad = Mathf.Atan2(targetNode.transform.position.x - pos.x, targetNode.transform.position.z - pos.z);
+        var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
+        var halfAngle = weapon.watchAngle / 2f;
+        watchInfo = new WatchInfo()
+        {
+            drawRang = drawRange,
+            node = watchNode,
+            isRight = isRight,
+            minAngle = DataUtility.GetFloorValue((nodeAngle - halfAngle + 360f) % 360f, 2),
+            maxAngle = DataUtility.GetFloorValue((nodeAngle + halfAngle) % 360f, 2),
+        };
+    }
+
+    /// <summary>
+    /// 경계자 체크
+    /// </summary>
+    /// <param name="currentNode"></param>
+    public void CheckWatcher(FieldNode currentNode)
+    {
+        var watchers = ownerType != CharacterOwner.Player
+                     ? gameMgr.playerList.FindAll(x => x.state == CharacterState.Watch)
+                     : gameMgr.enemyList.FindAll(x => x.state == CharacterState.Watch);
+        if (watchers.Count == 0) return;
+
+        var pos = currentNode.transform.position;
+        var interval = new Vector3(0f, 1f, 0f);
+        for (int i = 0; i < watchers.Count; i++)
+        {
+            var watcher = watchers[i];
+            var watchInfo = watcher.watchInfo;
+            var angle = GetAngle(watchInfo);
+            var angleRad = angle * Mathf.Deg2Rad;
+            var dir = new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad)).normalized;
+            var log = $"{angle}";
+            if (Physics.Raycast(watchInfo.node.transform.position + interval, dir, out RaycastHit hit, watcher.weapon.range, gameMgr.watchLayer))
+            {
+                var charCtr = hit.collider.GetComponent<CharacterController>();
+                if (charCtr != null && charCtr == this)
+                {
+                    log += "_Engage";
+                }
+            }
+            Debug.Log(log);
+        }
+
+        float GetAngle(WatchInfo watchInfo)
+        {
+            var watcherPos = watchInfo.node.transform.position + interval;
+            var angleRad = Mathf.Atan2(pos.x - watcherPos.x, pos.z - watcherPos.z);
+            var angle = angleRad * Mathf.Rad2Deg + 360;
+            if (watchInfo.minAngle > watchInfo.maxAngle)
+            {
+                if (angle >= watchInfo.minAngle && angle <= watchInfo.maxAngle + 360)
+                {
+                    angle %= 360;
+                }
+                else if (angle > watchInfo.maxAngle + 360)
+                {
+                    angle = watchInfo.maxAngle;
+                }
+                else
+                {
+                    angle = watchInfo.minAngle;
+                }
+            }
+            else
+            {
+                angle %= 360;
+                if (angle >= watchInfo.minAngle && angle <= watchInfo.maxAngle)
+                {
+                    return angle;
+                }
+                else if (angle > watchInfo.maxAngle)
+                {
+                    angle = watchInfo.maxAngle;
+                }
+                else
+                {
+                    angle = watchInfo.minAngle;
+                }
+            }
+
+            return angle;
+        }
+    }
+
+    /// <summary>
     /// 경계사격 범위를 표시
     /// </summary>
     /// <param name="onPointNode"></param>
     /// <param name="currentRange"></param>
     public void ShowWatchNodes(FieldNode onPointNode, DrawRange currentRange)
     {
-        SetActiveWatchNodes(false);
+        //SetActiveWatchNodes(false);
+        //watchNodes.Clear();
         var dist = currentRange.outRadius;
         var halfAngle = currentRange.angle / 2f;
         var pos = currentNode.transform.position;
@@ -947,8 +1105,8 @@ public class CharacterController : MonoBehaviour
         var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
         var negativeAngle = (nodeAngle - halfAngle + 360f) % 360f;
         var positiveAngle = (nodeAngle + halfAngle) % 360f;
-        watchNodes = gameMgr.fieldNodes.FindAll(x => CheckAngle(x) == true && DataUtility.GetDistance(x.transform.position, pos) <= dist);
-        SetActiveWatchNodes(true);
+        //watchNodes = gameMgr.fieldNodes.FindAll(x => CheckAngle(x) == true && DataUtility.GetDistance(x.transform.position, pos) <= dist);
+        //SetActiveWatchNodes(true);
 
         bool CheckAngle(FieldNode _node)
         {
@@ -976,40 +1134,27 @@ public class CharacterController : MonoBehaviour
             }
         }
 
-        void SetActiveWatchNodes(bool value)
-        {
-            switch (value)
-            {
-                case true:
-                    for (int i = 0; i < watchNodes.Count; i++)
-                    {
-                        var watchNode = watchNodes[i];
-                        watchNode.NodeColor = Color.yellow;
-                    }
-                    break;
-                case false:
-                    for (int i = 0; i < watchNodes.Count; i++)
-                    {
-                        var watchNode = watchNodes[i];
-                        watchNode.NodeColor = Color.gray;
-                    }
-                    watchNodes.Clear();
-                    break;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 경계사격 범위표시 해제
-    /// </summary>
-    public void ClearWatchNodes()
-    {
-        for (int i = 0; i < watchNodes.Count; i++)
-        {
-            var watchNode = watchNodes[i];
-            watchNode.NodeColor = Color.gray;
-        }
-        watchNodes.Clear();
+        //void SetActiveWatchNodes(bool value)
+        //{
+        //    switch (value)
+        //    {
+        //        case true:
+        //            for (int i = 0; i < watchNodes.Count; i++)
+        //            {
+        //                var watchNode = watchNodes[i];
+        //                watchNode.NodeColor = Color.yellow;
+        //            }
+        //            break;
+        //        case false:
+        //            for (int i = 0; i < watchNodes.Count; i++)
+        //            {
+        //                var watchNode = watchNodes[i];
+        //                watchNode.NodeColor = Color.gray;
+        //            }
+        //            watchNodes.Clear();
+        //            break;
+        //    }
+        //}
     }
 
     /// <summary>
@@ -1214,68 +1359,6 @@ public class CharacterController : MonoBehaviour
             }
         }
 
-        FieldNode FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
-        {
-            FieldNode coverNode = null;
-            var shooterPos = shooterNode.transform.position;
-            var endPos = targetNode.transform.position;
-            var dir = Vector3.zero;
-            RayCastOfCoverLayer();
-
-            var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
-            var interval = rightDir * 0.4f;
-            shooterPos = shooterNode.transform.position + interval;
-            endPos = targetNode.transform.position + interval;
-            RayCastOfCoverLayer();
-
-            var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
-            interval = leftDir * 0.4f;
-            shooterPos = shooterNode.transform.position + interval;
-            endPos = targetNode.transform.position + interval;
-            dir = Vector3.Normalize(endPos - shooterPos);
-            RayCastOfCoverLayer();
-
-            return coverNode;
-
-            void RayCastOfCoverLayer()
-            {
-                if (coverNode != null) return;
-
-                dir = Vector3.Normalize(endPos - shooterPos);
-                if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
-                {
-                    var _coverNode = hit.collider.GetComponentInParent<FieldNode>();
-                    if (shooterNode.onAxisNodes.Find(x => x == _coverNode) != null)
-                    {
-                        coverNode = _coverNode;
-                    }
-                }
-                var lineInfo = new LineInfo()
-                {
-                    startPos = shooterPos,
-                    endPos = endPos,
-                };
-                lineInfos.Add(lineInfo);
-            }
-        }
-
-        FieldNode CheckTheCanMoveNode(Vector3 pos, FieldNode coverNode, TargetDirection targetDir)
-        {
-            FieldNode node = null;
-            var frontDir = Vector3.Normalize(coverNode.transform.position - pos);
-            var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
-            if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
-            {
-                node = hit.collider.GetComponentInParent<FieldNode>();
-                if (!node.canMove)
-                {
-                    node = null;
-                }
-            }
-
-            return node;
-        }
-
         bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
         {
             bool canShoot;
@@ -1292,6 +1375,81 @@ public class CharacterController : MonoBehaviour
 
             return canShoot;
         }
+    }
+
+    /// <summary>
+    /// 엄폐물 노드를 찾음
+    /// </summary>
+    /// <param name="shooterNode"></param>
+    /// <param name="targetNode"></param>
+    /// <returns></returns>
+    private FieldNode FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
+    {
+        FieldNode coverNode = null;
+        var shooterPos = shooterNode.transform.position;
+        var endPos = targetNode.transform.position;
+        var dir = Vector3.zero;
+        RayCastOfCoverLayer();
+
+        var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
+        var interval = rightDir * 0.4f;
+        shooterPos = shooterNode.transform.position + interval;
+        endPos = targetNode.transform.position + interval;
+        RayCastOfCoverLayer();
+
+        var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
+        interval = leftDir * 0.4f;
+        shooterPos = shooterNode.transform.position + interval;
+        endPos = targetNode.transform.position + interval;
+        dir = Vector3.Normalize(endPos - shooterPos);
+        RayCastOfCoverLayer();
+
+        return coverNode;
+
+        void RayCastOfCoverLayer()
+        {
+            if (coverNode != null) return;
+
+            dir = Vector3.Normalize(endPos - shooterPos);
+            if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
+            {
+                var _coverNode = hit.collider.GetComponentInParent<FieldNode>();
+                if (shooterNode.onAxisNodes.Find(x => x == _coverNode) != null)
+                {
+                    coverNode = _coverNode;
+                }
+            }
+            var lineInfo = new LineInfo()
+            {
+                startPos = shooterPos,
+                endPos = endPos,
+            };
+            lineInfos.Add(lineInfo);
+        }
+    }
+
+    /// <summary>
+    /// 이동가능한 노드를 체크
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="coverNode"></param>
+    /// <param name="targetDir"></param>
+    /// <returns></returns>
+    private FieldNode CheckTheCanMoveNode(Vector3 pos, FieldNode coverNode, TargetDirection targetDir)
+    {
+        FieldNode node = null;
+        var frontDir = Vector3.Normalize(coverNode.transform.position - pos);
+        var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
+        if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
+        {
+            node = hit.collider.GetComponentInParent<FieldNode>();
+            if (!node.canMove)
+            {
+                node = null;
+            }
+        }
+
+        return node;
     }
 
     /// <summary>
@@ -1548,7 +1706,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 무기 조준
     /// </summary>
-    /// <param name="target"></param>
+    /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
         aimTf = targetInfo.target.transform;
@@ -1567,6 +1725,17 @@ public class CharacterController : MonoBehaviour
         {
             aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
         }
+        aimPoint.transform.position = aimTf.position + aimInterval;
+    }
+
+    /// <summary>
+    /// 무기 조준
+    /// </summary>
+    /// <param name="targetNode"></param>
+    private void SetAiming(FieldNode targetNode)
+    {
+        aimTf = targetNode.transform;
+        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
         aimPoint.transform.position = aimTf.position + aimInterval;
     }
 

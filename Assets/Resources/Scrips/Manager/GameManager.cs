@@ -54,6 +54,7 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public LayerMask nodeLayer;
     [HideInInspector] public LayerMask coverLayer;
+    [HideInInspector] public LayerMask watchLayer;
 
     private readonly int linePoolMax = 15;
     private readonly int bulletPoolMax = 30;
@@ -74,6 +75,7 @@ public class GameManager : MonoBehaviour
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
+        watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
 
         CreateField();
         CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
@@ -273,11 +275,17 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case ActionState.Watch:
-                if (Input.GetKeyDown(KeyCode.Escape))
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    currentRange = null;
+                    selectChar.state = CharacterState.Watch;
+                    selectChar = null;
+                    actionState = ActionState.None;
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
                 {
                     currentRange.gameObject.SetActive(false);
                     currentRange = null;
-                    selectChar.ClearWatchNodes();
                     selectChar = null;
                     actionState = ActionState.None;
                 }
@@ -304,6 +312,11 @@ public class GameManager : MonoBehaviour
                         if (node.charCtr != null && selectChar == null)
                         {
                             selectChar = node.charCtr;
+                            if (selectChar.state == CharacterState.Watch)
+                            {
+                                selectChar.watchInfo.drawRang.gameObject.SetActive(false);
+                                selectChar.state = CharacterState.None;
+                            }
                             ShowMovableNodes(selectChar);
                             actionState = ActionState.Move;
                         }
@@ -386,7 +399,7 @@ public class GameManager : MonoBehaviour
                         {
                             currentRange.SetRange(selectChar, node);
                             currentRange.transform.LookAt(node.transform);
-                            selectChar.ShowWatchNodes(node, currentRange);
+                            //selectChar.ShowWatchNodes(node, currentRange);
                         }
                         targetNode = node;
                     }

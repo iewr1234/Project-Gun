@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class DrawRange : MonoBehaviour
@@ -22,15 +23,16 @@ public class DrawRange : MonoBehaviour
         fanB.SetComponents();
     }
 
-    public void SetRange(CharacterController charCtr, FieldNode node)
+    public void SetRange(CharacterController charCtr, FieldNode targetNode)
     {
+        charCtr.SetWatchInfo(targetNode, this);
         if (!gameObject.activeSelf)
         {
             gameObject.SetActive(true);
         }
-        transform.position = charCtr.currentNode.transform.position;
+        transform.position = charCtr.watchInfo.node.transform.position;
         angle = charCtr.weapon.watchAngle;
-        var range = DataUtility.GetDistance(charCtr.currentNode.transform.position, node.transform.position);
+        var range = DataUtility.GetDistance(transform.position, targetNode.transform.position);
         if (range > charCtr.weapon.range)
         {
             range = charCtr.weapon.range;
