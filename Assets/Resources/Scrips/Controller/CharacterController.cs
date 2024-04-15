@@ -29,7 +29,8 @@ public enum CommandType
     LeaveCover,
     BackCover,
     Targeting,
-    CoverAim,
+    Aim,
+    Watch,
     Shoot,
     Reload,
 }
@@ -74,7 +75,9 @@ public struct TargetInfo
 public struct WatchInfo
 {
     public DrawRange drawRang;
-    public FieldNode node;
+    public FieldNode targetNode;
+    public FieldNode watchNode;
+    public FieldNode coverNode;
     public bool isRight;
     public float minAngle;
     public float maxAngle;
@@ -141,9 +144,10 @@ public class CharacterController : MonoBehaviour
     public List<TargetInfo> targetList = new List<TargetInfo>();
     [HideInInspector] public int targetIndex;
 
+    [Space(5f)]
     public WatchInfo watchInfo;
+    [Space(5f)]
 
-    private List<LineInfo> lineInfos = new List<LineInfo>();
     [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
 
     private float timer;
@@ -242,35 +246,32 @@ public class CharacterController : MonoBehaviour
         DrawWeaponRange();
     }
 
-    /// <summary>
-    /// 사격경로 표시
-    /// </summary>
-    private void DrawShootingPath()
-    {
-        if (lineInfos.Count == 0) return;
+    //private void DrawShootingPath()
+    //{
+    //    if (lineInfos.Count == 0) return;
 
-        Gizmos.color = Color.red;
-        var height = 1f;
-        for (int i = 0; i < lineInfos.Count; i++)
-        {
-            var lineInfo = lineInfos[i];
-            var startPos = lineInfo.startPos + new Vector3(0f, height, 0f);
-            var endPos = lineInfo.endPos + new Vector3(0f, height, 0f);
-            Gizmos.DrawLine(startPos, endPos);
-        }
+    //    Gizmos.color = Color.red;
+    //    var height = 1f;
+    //    for (int i = 0; i < lineInfos.Count; i++)
+    //    {
+    //        var lineInfo = lineInfos[i];
+    //        var startPos = lineInfo.startPos + new Vector3(0f, height, 0f);
+    //        var endPos = lineInfo.endPos + new Vector3(0f, height, 0f);
+    //        Gizmos.DrawLine(startPos, endPos);
+    //    }
 
-        //if (targetList.Count == 0) return;
+    //    //if (targetList.Count == 0) return;
 
-        //Gizmos.color = Color.red;
-        //var height = 1f;
-        //var pos = new Vector3(currentNode.transform.position.x, height, currentNode.transform.position.z);
-        //for (int i = 0; i < targetList.Count; i++)
-        //{
-        //    var target = targetList[i].target;
-        //    var targetPos = new Vector3(target.currentNode.transform.position.x, height, target.currentNode.transform.position.z);
-        //    Gizmos.DrawLine(pos, targetPos);
-        //}
-    }
+    //    //Gizmos.color = Color.red;
+    //    //var height = 1f;
+    //    //var pos = new Vector3(currentNode.transform.position.x, height, currentNode.transform.position.z);
+    //    //for (int i = 0; i < targetList.Count; i++)
+    //    //{
+    //    //    var target = targetList[i].target;
+    //    //    var targetPos = new Vector3(target.currentNode.transform.position.x, height, target.currentNode.transform.position.z);
+    //    //    Gizmos.DrawLine(pos, targetPos);
+    //    //}
+    //}
 
     /// <summary>
     /// 무기 사거리 범위 표시
@@ -365,8 +366,11 @@ public class CharacterController : MonoBehaviour
             case CommandType.Targeting:
                 TargetingProcess(command);
                 break;
-            case CommandType.CoverAim:
-                CoverAimProcess(command);
+            case CommandType.Aim:
+                AimAndWatchProcess(command);
+                break;
+            case CommandType.Watch:
+                AimAndWatchProcess(command);
                 break;
             case CommandType.Shoot:
                 ShootProcess(command);
@@ -402,7 +406,6 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count > 0)
         {
             targetList.Clear();
-            lineInfos.Clear();
         }
 
         var targetNode = command.passList[^1];
@@ -788,35 +791,134 @@ public class CharacterController : MonoBehaviour
         #endregion
     }
 
+    ///// <summary>
+    ///// 캐릭터 엄폐사격 처리
+    ///// </summary>
+    ///// <param name="command"></param>
+    //private void CoverAimProcess(CharacterCommand command)
+    //{
+    //    if (!covering && !animator.GetBool("coverAim"))
+    //    {
+    //        animator.SetBool("isRight", command.targetInfo.isRight);
+    //        animator.SetBool("coverAim", true);
+    //        coverPos = command.targetInfo.shooterNode.transform.position;
+    //        covering = true;
+    //        animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+    //        SetAiming(command.targetInfo);
+    //    }
+    //    else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+    //    {
+    //        animator.SetBool("isAim", true);
+    //        chestAim = true;
+    //        if (transform.position != coverPos)
+    //        {
+    //            transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
+    //        }
+    //        else
+    //        {
+    //            coverPos = currentNode.transform.position + (transform.forward * coverInterval);
+    //            commandList.Remove(command);
+    //            covering = false;
+    //        }
+    //    }
+    //}
+
     /// <summary>
-    /// 캐릭터 엄폐사격 처리
+    /// 조준 및 경계 처리
     /// </summary>
     /// <param name="command"></param>
-    private void CoverAimProcess(CharacterCommand command)
+    private void AimAndWatchProcess(CharacterCommand command)
     {
-        if (!covering && !animator.GetBool("coverAim"))
+        switch (command.type)
         {
-            animator.SetBool("isRight", command.targetInfo.isRight);
-            animator.SetBool("coverAim", true);
-            coverPos = command.targetInfo.shooterNode.transform.position;
-            covering = true;
-            animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
-            SetAiming(command.targetInfo);
+            case CommandType.Aim:
+                if (command.targetInfo.shooterCover != null)
+                {
+                    CoverAim();
+                }
+                else
+                {
+                    NoneCoverAim();
+                }
+                break;
+            case CommandType.Watch:
+                if (watchInfo.coverNode != null)
+                {
+                    CoverAim();
+                }
+                else
+                {
+                    NoneCoverAim();
+                }
+                break;
+            default:
+                break;
         }
-        else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+
+        void CoverAim()
+        {
+            if (!covering)
+            {
+                animator.SetBool("coverAim", true);
+                switch (command.type)
+                {
+                    case CommandType.Aim:
+                        animator.SetBool("isRight", command.targetInfo.isRight);
+                        animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                        coverPos = command.targetInfo.shooterNode.transform.position;
+                        SetAiming(command.targetInfo);
+                        break;
+                    case CommandType.Watch:
+                        animator.SetBool("isRight", watchInfo.isRight);
+                        coverPos = watchInfo.watchNode.transform.position;
+                        aimTf = watchInfo.targetNode.transform;
+                        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+                        aimPoint.transform.position = aimTf.position + aimInterval;
+                        break;
+                    default:
+                        break;
+                }
+                covering = true;
+            }
+            else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+            {
+                animator.SetBool("isAim", true);
+                chestAim = true;
+                if (transform.position != coverPos)
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    coverPos = currentNode.transform.position + (transform.forward * coverInterval);
+                    commandList.Remove(command);
+                    covering = false;
+                }
+            }
+        }
+
+        void NoneCoverAim()
         {
             animator.SetBool("isAim", true);
+            switch (command.type)
+            {
+                case CommandType.Aim:
+                    animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                    transform.LookAt(command.targetInfo.target.transform);
+                    SetAiming(command.targetInfo);
+                    break;
+                case CommandType.Watch:
+                    transform.LookAt(watchInfo.targetNode.transform);
+                    aimTf = watchInfo.targetNode.transform;
+                    break;
+                default:
+                    break;
+            }
+            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+            aimPoint.transform.position = aimTf.position + aimInterval;
             chestAim = true;
-            if (transform.position != coverPos)
-            {
-                transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
-            }
-            else
-            {
-                coverPos = currentNode.transform.position + (transform.forward * coverInterval);
-                commandList.Remove(command);
-                covering = false;
-            }
+            chestRig.weight = 1f;
+            commandList.Remove(command);
         }
     }
 
@@ -826,15 +928,15 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void ShootProcess(CharacterCommand command)
     {
-        if (!animator.GetBool("isAim"))
-        {
-            animator.SetBool("isAim", true);
-            animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
-            transform.LookAt(command.targetInfo.target.transform);
-            SetAiming(command.targetInfo);
-            chestAim = true;
-            chestRig.weight = 1f;
-        }
+        //if (!animator.GetBool("isAim"))
+        //{
+        //    animator.SetBool("isAim", true);
+        //    animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+        //    transform.LookAt(command.targetInfo.target.transform);
+        //    SetAiming(command.targetInfo);
+        //    chestAim = true;
+        //    chestRig.weight = 1f;
+        //}
 
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0) return;
@@ -1009,7 +1111,9 @@ public class CharacterController : MonoBehaviour
         watchInfo = new WatchInfo()
         {
             drawRang = drawRange,
-            node = watchNode,
+            targetNode = targetNode,
+            watchNode = watchNode,
+            coverNode = coverNode,
             isRight = isRight,
             minAngle = DataUtility.GetFloorValue((nodeAngle - halfAngle + 360f) % 360f, 2),
             maxAngle = DataUtility.GetFloorValue((nodeAngle + halfAngle) % 360f, 2),
@@ -1034,10 +1138,12 @@ public class CharacterController : MonoBehaviour
             var watcher = watchers[i];
             var watchInfo = watcher.watchInfo;
             var angle = GetAngle(watchInfo);
+            var log = $"{angle}";
             var angleRad = angle * Mathf.Deg2Rad;
             var dir = new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad)).normalized;
-            var log = $"{angle}";
-            if (Physics.Raycast(watchInfo.node.transform.position + interval, dir, out RaycastHit hit, watcher.weapon.range, gameMgr.watchLayer))
+            var watchPos = watchInfo.watchNode.transform.position + interval;
+            var range = watchInfo.drawRang.outRadius;
+            if (Physics.Raycast(watchPos, dir, out RaycastHit hit, range, gameMgr.watchLayer))
             {
                 var charCtr = hit.collider.GetComponent<CharacterController>();
                 if (charCtr != null && charCtr == this)
@@ -1050,7 +1156,7 @@ public class CharacterController : MonoBehaviour
 
         float GetAngle(WatchInfo watchInfo)
         {
-            var watcherPos = watchInfo.node.transform.position + interval;
+            var watcherPos = watchInfo.watchNode.transform.position + interval;
             var angleRad = Mathf.Atan2(pos.x - watcherPos.x, pos.z - watcherPos.z);
             var angle = angleRad * Mathf.Rad2Deg + 360;
             if (watchInfo.minAngle > watchInfo.maxAngle)
@@ -1090,80 +1196,11 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
-    /// 경계사격 범위를 표시
-    /// </summary>
-    /// <param name="onPointNode"></param>
-    /// <param name="currentRange"></param>
-    public void ShowWatchNodes(FieldNode onPointNode, DrawRange currentRange)
-    {
-        //SetActiveWatchNodes(false);
-        //watchNodes.Clear();
-        var dist = currentRange.outRadius;
-        var halfAngle = currentRange.angle / 2f;
-        var pos = currentNode.transform.position;
-        var nodeAngleRad = Mathf.Atan2(onPointNode.transform.position.x - pos.x, onPointNode.transform.position.z - pos.z);
-        var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-        var negativeAngle = (nodeAngle - halfAngle + 360f) % 360f;
-        var positiveAngle = (nodeAngle + halfAngle) % 360f;
-        //watchNodes = gameMgr.fieldNodes.FindAll(x => CheckAngle(x) == true && DataUtility.GetDistance(x.transform.position, pos) <= dist);
-        //SetActiveWatchNodes(true);
-
-        bool CheckAngle(FieldNode _node)
-        {
-            var _nodeAngleRad = Mathf.Atan2(_node.transform.position.x - pos.x, _node.transform.position.z - pos.z);
-            var _nodeAngle = (_nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-            if (_node != currentNode && IsAngleInRange(_nodeAngle, negativeAngle, positiveAngle))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        bool IsAngleInRange(float angle, float negativeAngle, float positiveAngle)
-        {
-            if (negativeAngle <= positiveAngle)
-            {
-                return angle >= negativeAngle && angle <= positiveAngle;
-            }
-            else
-            {
-                return angle >= negativeAngle || angle <= positiveAngle;
-            }
-        }
-
-        //void SetActiveWatchNodes(bool value)
-        //{
-        //    switch (value)
-        //    {
-        //        case true:
-        //            for (int i = 0; i < watchNodes.Count; i++)
-        //            {
-        //                var watchNode = watchNodes[i];
-        //                watchNode.NodeColor = Color.yellow;
-        //            }
-        //            break;
-        //        case false:
-        //            for (int i = 0; i < watchNodes.Count; i++)
-        //            {
-        //                var watchNode = watchNodes[i];
-        //                watchNode.NodeColor = Color.gray;
-        //            }
-        //            watchNodes.Clear();
-        //            break;
-        //    }
-        //}
-    }
-
-    /// <summary>
     /// 사격 가능한 타겟 찾음
     /// </summary>
     public void FindTargets(FieldNode node)
     {
         targetList.Clear();
-        lineInfos.Clear();
         var currentNode = node;
         var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         for (int i = 0; i < _targetList.Count; i++)
@@ -1419,12 +1456,6 @@ public class CharacterController : MonoBehaviour
                     coverNode = _coverNode;
                 }
             }
-            var lineInfo = new LineInfo()
-            {
-                startPos = shooterPos,
-                endPos = endPos,
-            };
-            lineInfos.Add(lineInfo);
         }
     }
 
@@ -1617,10 +1648,10 @@ public class CharacterController : MonoBehaviour
     {
         switch (type)
         {
-            case CommandType.CoverAim:
+            case CommandType.Aim:
                 var coverAimCommand = new CharacterCommand
                 {
-                    type = CommandType.CoverAim,
+                    type = CommandType.Aim,
                     targetInfo = targetList[targetIndex],
                 };
                 commandList.Add(coverAimCommand);
@@ -1825,6 +1856,15 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    public void AimOff()
+    {
+        aimTf = null;
+        chestAim = false;
+        animator.SetBool("isAim", false);
+        animator.SetBool("coverAim", false);
+        timer = 0f;
+    }
+
     #region Coroutine
     /// <summary>
     /// (코루틴)조준해제
@@ -1835,17 +1875,20 @@ public class CharacterController : MonoBehaviour
     {
         yield return new WaitForSeconds(aimTime);
 
-        aimTf = null;
-        chestAim = false;
         var target = command.targetInfo.target;
         if (target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
         {
             target.AddCommand(CommandType.Targeting, false, transform);
         }
+        AimOff();
         commandList.Remove(command);
-        animator.SetBool("isAim", false);
-        animator.SetBool("coverAim", false);
-        timer = 0f;
+    }
+
+    public IEnumerator Coroutine_AimOff()
+    {
+        yield return new WaitForSeconds(aimTime);
+
+        AimOff();
     }
     #endregion
 

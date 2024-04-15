@@ -30,7 +30,7 @@ public class DrawRange : MonoBehaviour
         {
             gameObject.SetActive(true);
         }
-        transform.position = charCtr.watchInfo.node.transform.position;
+        transform.position = charCtr.watchInfo.watchNode.transform.position;
         angle = charCtr.weapon.watchAngle;
         var range = DataUtility.GetDistance(transform.position, targetNode.transform.position);
         if (range > charCtr.weapon.range)

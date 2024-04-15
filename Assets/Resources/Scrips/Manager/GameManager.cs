@@ -1,10 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
 
 public enum ActionState
 {
@@ -232,7 +228,6 @@ public class GameManager : MonoBehaviour
                     ClearLine();
                     SwitchMovableNodes(false);
                     currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
-                    //curRange.SetRange(selectChar);
                     actionState = ActionState.Watch;
                 }
                 break;
@@ -247,12 +242,13 @@ public class GameManager : MonoBehaviour
                     {
                         if (selectChar.animator.GetBool("isCover"))
                         {
-                            selectChar.AddCommand(CommandType.CoverAim);
+                            selectChar.AddCommand(CommandType.Aim);
                             selectChar.AddCommand(CommandType.Shoot);
                             selectChar.AddCommand(CommandType.BackCover);
                         }
                         else
                         {
+                            selectChar.AddCommand(CommandType.Aim);
                             selectChar.AddCommand(CommandType.Shoot);
                         }
                         SwitchMovableNodes(false);
@@ -277,6 +273,7 @@ public class GameManager : MonoBehaviour
             case ActionState.Watch:
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
+                    selectChar.AddCommand(CommandType.Watch);
                     currentRange = null;
                     selectChar.state = CharacterState.Watch;
                     selectChar = null;
@@ -314,6 +311,15 @@ public class GameManager : MonoBehaviour
                             selectChar = node.charCtr;
                             if (selectChar.state == CharacterState.Watch)
                             {
+                                if (selectChar.animator.GetBool("isCover"))
+                                {
+                                    StartCoroutine(selectChar.Coroutine_AimOff());
+                                    selectChar.AddCommand(CommandType.BackCover);
+                                }
+                                else
+                                {
+                                    selectChar.AimOff();
+                                }
                                 selectChar.watchInfo.drawRang.gameObject.SetActive(false);
                                 selectChar.state = CharacterState.None;
                             }
@@ -399,7 +405,6 @@ public class GameManager : MonoBehaviour
                         {
                             currentRange.SetRange(selectChar, node);
                             currentRange.transform.LookAt(node.transform);
-                            //selectChar.ShowWatchNodes(node, currentRange);
                         }
                         targetNode = node;
                     }
