@@ -172,7 +172,8 @@ public class CharacterController : MonoBehaviour
 
     private bool targetingMove;
     private Vector3 targetingPos;
-    private readonly float targetingMoveSpeed = 1f;
+    private readonly float targetingMoveSpeed_Pistol = 1.5f;
+    private readonly float targetingMoveSpeed_Rifle = 1f;
 
     private bool reloading;
 
@@ -732,7 +733,7 @@ public class CharacterController : MonoBehaviour
                         aimTf = command.lookAt;
                         headAim = true;
                         var moveDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-                        var moveDist = 0.7f;
+                        var moveDist = GetDistance();
                         targetingPos = transform.position + (moveDir * moveDist);
                         animator.SetTrigger("targeting");
                         break;
@@ -749,7 +750,8 @@ public class CharacterController : MonoBehaviour
             {
                 if (transform.position != targetingPos)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, targetingPos, targetingMoveSpeed * Time.deltaTime);
+                    var speed = GetSpeed();
+                    transform.position = Vector3.MoveTowards(transform.position, targetingPos, speed * Time.deltaTime);
                 }
                 else
                 {
@@ -767,46 +769,31 @@ public class CharacterController : MonoBehaviour
             commandList.Remove(command);
         }
 
-        #region Old Code
-        //var target = targetInfo.target;
-        //var dir = shooter.transform.position - target.transform.position;
-        //var angleInDegrees = Vector3.Angle(dir, target.transform.forward);
-        //var cross = Vector3.Cross(dir, transform.forward);
-        //Debug.Log($"{angleInDegrees} / {cross.y <= 0f}");
+        float GetDistance()
+        {
+            switch (weapon.type)
+            {
+                case WeaponType.Pistol:
+                    return 0.45f;
+                case WeaponType.Rifle:
+                    return 0.7f;
+                default:
+                    return 0f;
+            }
+        }
 
-        //aimTf = shooter.transform;
-        //headAim = true;
-        //if (!animator.GetBool("isCover"))
-        //{
-        //    if (targetInfo.targetCover == null)
-        //    {
-        //        transform.LookAt(shooter.transform);
-        //    }
-        //    //else
-        //    //{
-        //    //    AddCommand(CommandType.TakeCover, targetInfo.targetCover);
-        //    //    //animator.SetBool("isRight", targetInfo.targetRight);
-        //    //    //var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-        //    //    //var moveDist = 0.7f;
-        //    //    //targetingPos = transform.position + (coverDir * moveDist);
-        //    //    //animator.SetTrigger("targeting");
-        //    //    //targetingMove = true;
-        //    //}
-        //}
-        //else if (angleInDegrees < 90f)
-        //{
-        //    animator.SetBool("isRight", targetInfo.targetRight);
-        //    var coverDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-        //    var moveDist = 0.7f;
-        //    targetingPos = transform.position + (coverDir * moveDist);
-        //    animator.SetTrigger("targeting");
-        //    targetingMove = true;
-        //}
-        //else if (angleInDegrees >= 90f)
-        //{
-        //    animator.SetBool("isRight", cross.y <= 0f);
-        //}
-        #endregion
+        float GetSpeed()
+        {
+            switch (weapon.type)
+            {
+                case WeaponType.Pistol:
+                    return targetingMoveSpeed_Pistol;
+                case WeaponType.Rifle:
+                    return targetingMoveSpeed_Rifle;
+                default:
+                    return 0f;
+            }
+        }
     }
 
     /// <summary>

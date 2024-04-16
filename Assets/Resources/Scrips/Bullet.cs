@@ -19,7 +19,8 @@ public class Bullet : MonoBehaviour
     public float damage;
 
     [SerializeField] private LayerMask targetLayer;
-    private bool isHit;
+    [SerializeField] private bool isHit;
+    [SerializeField] private bool isCheck;
     private float timer;
 
     private readonly float startWidth = 0.01f;
@@ -61,32 +62,45 @@ public class Bullet : MonoBehaviour
             meshRdr.enabled = true;
         }
 
-        isHit = !_isHit;
-        if (!isHit)
-        {
-            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") | LayerMask.GetMask("Cover");
-        }
-        else
+        isHit = _isHit;
+        if (isHit)
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
         }
+        else
+        {
+            targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
+        }
+        isCheck = false;
     }
 
     void FixedUpdate()
     {
-        if (isHit) return;
+        if (isCheck) return;
 
-        var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
-        for (int i = 0; i < hitCds.Count; i++)
+        //var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
+        //for (int i = 0; i < hitCds.Count; i++)
+        //{
+        //    var hitCd = hitCds[i];
+        //    var charCtr = hitCd.GetComponentInParent<CharacterController>();
+        //    if (charCtr != null && isHit)
+        //    {
+        //        charCtr.OnHit(transform.forward, weapon);
+        //    }
+        //    HitBullet();
+        //    break;
+        //}
+
+        var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0f, targetLayer);
+        for (int i = 0; i < hits.Length; i++)
         {
-            var hitCd = hitCds[i];
-            var charCtr = hitCd.GetComponentInParent<CharacterController>();
-            if (charCtr != null)
+            var hit = hits[i];
+            var charCtr = hit.collider.GetComponentInParent<CharacterController>();
+            if (charCtr != null && isHit)
             {
                 charCtr.OnHit(transform.forward, weapon);
             }
             HitBullet();
-            break;
         }
     }
 
@@ -104,6 +118,8 @@ public class Bullet : MonoBehaviour
 
     private void HitBullet()
     {
+        if (isCheck) return;
+
         for (int j = 0; j < meshRdrs.Count; j++)
         {
             var meshRdr = meshRdrs[j];
@@ -113,6 +129,6 @@ public class Bullet : MonoBehaviour
         bulletRb.constraints = RigidbodyConstraints.FreezeAll;
         bulletRb.isKinematic = true;
         bulletCd.enabled = false;
-        isHit = true;
+        isCheck = true;
     }
 }
