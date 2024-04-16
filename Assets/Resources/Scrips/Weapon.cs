@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public enum FireModeType
 {
@@ -44,6 +43,10 @@ public class Weapon : MonoBehaviour
 
     [SerializeField] private List<bool> hitList = new List<bool>();
 
+    private Vector3 defaultPos;
+    private Vector3 defaultRot;
+    private readonly Vector3 weaponPos_Pistol = new Vector3(0.082f, 0.034f, -0.037f);
+    private readonly Vector3 weaponRot_Pistol = new Vector3(-8.375f, 89f, -90.246f);
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
 
@@ -58,9 +61,25 @@ public class Weapon : MonoBehaviour
 
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
         DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
+        type = weaponData.type;
+        switch (type)
+        {
+            case WeaponType.Pistol:
+                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
+                defaultPos = weaponPos_Pistol;
+                defaultRot = weaponRot_Pistol;
+                break;
+            case WeaponType.Rifle:
+                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
+                defaultPos = weaponPos_Rifle;
+                defaultRot = weaponRot_Rifle;
+                break;
+            default:
+                break;
+        }
+        charCtr.SetRig(type);
         WeaponSwitching("Right");
 
-        type = weaponData.type;
         damage = weaponData.damage;
         penetrate = weaponData.penetrate;
         armorBreak = weaponData.armorBreak;
@@ -196,8 +215,8 @@ public class Weapon : MonoBehaviour
         {
             case "Right":
                 transform.SetParent(charCtr.rightHandTf, false);
-                transform.localPosition = weaponPos_Rifle;
-                transform.localRotation = Quaternion.Euler(weaponRot_Rifle);
+                transform.localPosition = defaultPos;
+                transform.localRotation = Quaternion.Euler(defaultRot);
                 break;
             case "Left":
                 transform.SetParent(charCtr.leftHandTf);
@@ -216,5 +235,11 @@ public class Weapon : MonoBehaviour
             chamberBullet = true;
         }
         loadedAmmo = ammoNum;
+    }
+
+    public CharacterController CharCtr
+    {
+        private set { charCtr = value; }
+        get { return charCtr; }
     }
 }

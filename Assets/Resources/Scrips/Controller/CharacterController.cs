@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static Cinemachine.CinemachineOrbitalTransposer;
 
 public enum CharacterOwner
 {
@@ -99,6 +100,7 @@ public class CharacterController : MonoBehaviour
     public Animator animator;
 
     [HideInInspector] public Transform aimPoint;
+    private RigBuilder rigBd;
     private MultiAimConstraint headRig;
     private MultiAimConstraint chestRig;
 
@@ -186,6 +188,7 @@ public class CharacterController : MonoBehaviour
         animator = GetComponent<Animator>();
 
         aimPoint = transform.Find("AimPoint");
+        rigBd = GetComponent<RigBuilder>();
         headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
         headRig.weight = 0f;
         chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
@@ -238,6 +241,21 @@ public class CharacterController : MonoBehaviour
         currentNode.charCtr = this;
         currentNode.canMove = false;
         ShowVisibleNodes(sight, currentNode);
+    }
+
+    public void SetRig(WeaponType type)
+    {
+        switch (type)
+        {
+            case WeaponType.Pistol:
+                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+                break;
+            case WeaponType.Rifle:
+                chestRig.data.offset = new Vector3(-40f, 0f, 0f);
+                break;
+            default:
+                break;
+        }
     }
 
     private void OnDrawGizmos()
@@ -931,12 +949,11 @@ public class CharacterController : MonoBehaviour
             {
                 animator.SetBool("fireTrigger", true);
             }
-            weapon.FireBullet();
+            //weapon.FireBullet();
             shootNum--;
-            animator.SetInteger("shootNum", shootNum);
             if (shootNum == 0)
             {
-                animator.SetBool("fireTrigger", false);
+                //animator.SetBool("fireTrigger", false);
                 StartCoroutine(Coroutine_AimOff(command));
             }
         }
@@ -1846,7 +1863,7 @@ public class CharacterController : MonoBehaviour
         {
             CharacterDead();
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && !animator.GetBool("isMove"))
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && weapon.CharCtr.state != CharacterState.Watch)
         {
             animator.SetTrigger("isHit");
         }
@@ -1900,6 +1917,7 @@ public class CharacterController : MonoBehaviour
     {
         yield return new WaitForSeconds(aimTime);
 
+        animator.SetBool("fireTrigger", false);
         var target = command.targetInfo.target;
         switch (state)
         {
@@ -1912,8 +1930,19 @@ public class CharacterController : MonoBehaviour
                 break;
             case CharacterState.Watch:
                 aimTf = command.targetInfo.targetNode.transform;
-                target.animator.speed = 1f;
-                target.pause = false;
+                var find = commandList.Find(x => x.type == CommandType.Shoot && x != command);
+                if (find == null)
+                {
+                    var charList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+                    for (int i = 0; i < charList.Count; i++)
+                    {
+                        var charCtr = charList[i];
+                        if (!charCtr.pause) continue;
+
+                        charCtr.animator.speed = 1f;
+                        charCtr.pause = false;
+                    }
+                }
                 break;
             default:
                 break;
@@ -1930,6 +1959,14 @@ public class CharacterController : MonoBehaviour
     public void Event_WeaponSwitching(string switchPos)
     {
         weapon.WeaponSwitching(switchPos);
+    }
+
+    public void Event_FireWeapon()
+    {
+        weapon.FireBullet();
+        var shootNum = animator.GetInteger("shootNum");
+        shootNum--;
+        animator.SetInteger("shootNum", shootNum);
     }
 
     /// <summary>

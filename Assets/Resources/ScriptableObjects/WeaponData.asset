@@ -24,7 +24,7 @@ MonoBehaviour:
     critical: 5
     range: 10
     watchAngle: 30
-    MOA: 10
+    MOA: 3
     stability: 5
     rebound: 5
     magMax: 30
@@ -43,3 +43,18 @@ MonoBehaviour:
     stability: 5
     rebound: 5
     magMax: 30
+  - indexName: 'W0003: Pistol_01'
+    ID: W0003
+    prefabName: Pistol_01
+    weaponName: Pistol_01
+    type: 1
+    damage: 1
+    penetrate: 5
+    armorBreak: 10
+    critical: 1
+    range: 7.5
+    watchAngle: 30
+    MOA: 3
+    stability: 5
+    rebound: 5
+    magMax: 12
