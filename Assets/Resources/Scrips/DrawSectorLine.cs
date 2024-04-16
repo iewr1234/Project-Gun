@@ -1,14 +1,15 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
-public class FanMesh : MonoBehaviour
+public class DrawSectorLine : MonoBehaviour
 {
+    public int numPoints = 20;
     public float radius = 5f;
     public float angle = 90f;
-    private readonly int numPoints = 20;
 
     private LineRenderer lineRdr;
 
-    public void SetComponents()
+    void Start()
     {
         lineRdr = gameObject.AddComponent<LineRenderer>();
         lineRdr.startWidth = 0.03f;
@@ -17,7 +18,7 @@ public class FanMesh : MonoBehaviour
         DrawSector();
     }
 
-    private void DrawSector()
+    void DrawSector()
     {
         float angleStep = angle / numPoints;
         Vector3 origin = Vector3.zero;
@@ -35,5 +36,10 @@ public class FanMesh : MonoBehaviour
 
         // 원호 끝점에서 원점까지 선 그리기
         lineRdr.SetPosition(numPoints + 2, origin);
+    }
+
+    void Update()
+    {
+        DrawSector();
     }
 }

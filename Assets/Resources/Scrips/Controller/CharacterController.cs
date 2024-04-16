@@ -4,7 +4,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using static UnityEditor.PlayerSettings;
 
 public enum CharacterOwner
 {
@@ -791,38 +790,6 @@ public class CharacterController : MonoBehaviour
         #endregion
     }
 
-    ///// <summary>
-    ///// 캐릭터 엄폐사격 처리
-    ///// </summary>
-    ///// <param name="command"></param>
-    //private void CoverAimProcess(CharacterCommand command)
-    //{
-    //    if (!covering && !animator.GetBool("coverAim"))
-    //    {
-    //        animator.SetBool("isRight", command.targetInfo.isRight);
-    //        animator.SetBool("coverAim", true);
-    //        coverPos = command.targetInfo.shooterNode.transform.position;
-    //        covering = true;
-    //        animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
-    //        SetAiming(command.targetInfo);
-    //    }
-    //    else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
-    //    {
-    //        animator.SetBool("isAim", true);
-    //        chestAim = true;
-    //        if (transform.position != coverPos)
-    //        {
-    //            transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
-    //        }
-    //        else
-    //        {
-    //            coverPos = currentNode.transform.position + (transform.forward * coverInterval);
-    //            commandList.Remove(command);
-    //            covering = false;
-    //        }
-    //    }
-    //}
-
     /// <summary>
     /// 조준 및 경계 처리
     /// </summary>
@@ -1142,7 +1109,7 @@ public class CharacterController : MonoBehaviour
             var angleRad = angle * Mathf.Deg2Rad;
             var dir = new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad)).normalized;
             var watchPos = watchInfo.watchNode.transform.position + interval;
-            var range = watchInfo.drawRang.outRadius;
+            var range = watchInfo.drawRang.radius;
             if (Physics.Raycast(watchPos, dir, out RaycastHit hit, range, gameMgr.watchLayer))
             {
                 var charCtr = hit.collider.GetComponent<CharacterController>();
@@ -1550,6 +1517,91 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 조준상태로 설정
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetTargeting(TargetInfo targetInfo)
+    {
+        var shooter = targetInfo.shooter;
+        var target = targetInfo.target;
+        if (target.cover != null)
+        {
+            if (targetInfo.targetCover == null)
+            {
+                target.AddCommand(CommandType.LeaveCover);
+            }
+            else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
+            {
+                target.AddCommand(CommandType.LeaveCover);
+                target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
+            }
+            else
+            {
+                target.animator.SetBool("isRight", targetInfo.targetRight);
+            }
+        }
+        else if (targetInfo.targetCover != null)
+        {
+            target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
+        }
+        else
+        {
+            target.transform.LookAt(shooter.transform);
+        }
+        target.AddCommand(CommandType.Targeting, true, shooter.transform);
+
+        if (shooter.cover != null)
+        {
+            if (targetInfo.shooterCover == null)
+            {
+                shooter.AddCommand(CommandType.LeaveCover);
+            }
+            else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
+            {
+                shooter.AddCommand(CommandType.LeaveCover);
+                shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
+            }
+            else
+            {
+                shooter.animator.SetBool("isRight", targetInfo.isRight);
+            }
+        }
+        else if (targetInfo.shooterCover != null)
+        {
+            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
+        }
+        else
+        {
+            shooter.transform.LookAt(target.transform);
+        }
+    }
+
+    public void SetWatch()
+    {
+        if (animator.GetBool("isCover"))
+        {
+            if (watchInfo.coverNode == null)
+            {
+                AddCommand(CommandType.LeaveCover);
+            }
+            else if (watchInfo.coverNode != null && watchInfo.coverNode.cover != cover)
+            {
+                AddCommand(CommandType.LeaveCover);
+                AddCommand(CommandType.TakeCover, watchInfo.coverNode, watchInfo.isRight);
+            }
+            AddCommand(CommandType.Watch);
+        }
+        else
+        {
+            if (watchInfo.coverNode != null)
+            {
+                AddCommand(CommandType.TakeCover, watchInfo.coverNode, watchInfo.isRight);
+            }
+            AddCommand(CommandType.Watch);
+        }
+    }
+
+    /// <summary>
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
@@ -1671,66 +1723,6 @@ public class CharacterController : MonoBehaviour
                 };
                 commandList.Add(command);
                 break;
-        }
-    }
-
-    /// <summary>
-    /// 조준상태로 설정
-    /// </summary>
-    /// <param name="value"></param>
-    public void SetTargeting(TargetInfo targetInfo)
-    {
-        var shooter = targetInfo.shooter;
-        var target = targetInfo.target;
-        if (target.cover != null)
-        {
-            if (targetInfo.targetCover == null)
-            {
-                target.AddCommand(CommandType.LeaveCover);
-            }
-            else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
-            {
-                target.AddCommand(CommandType.LeaveCover);
-                target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
-            }
-            else
-            {
-                target.animator.SetBool("isRight", targetInfo.targetRight);
-            }
-        }
-        else if (targetInfo.targetCover != null)
-        {
-            target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
-        }
-        else
-        {
-            target.transform.LookAt(shooter.transform);
-        }
-        target.AddCommand(CommandType.Targeting, true, shooter.transform);
-
-        if (shooter.cover != null)
-        {
-            if (targetInfo.shooterCover == null)
-            {
-                shooter.AddCommand(CommandType.LeaveCover);
-            }
-            else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
-            {
-                shooter.AddCommand(CommandType.LeaveCover);
-                shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
-            }
-            else
-            {
-                shooter.animator.SetBool("isRight", targetInfo.isRight);
-            }
-        }
-        else if (targetInfo.shooterCover != null)
-        {
-            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
-        }
-        else
-        {
-            shooter.transform.LookAt(target.transform);
         }
     }
 
@@ -1882,13 +1874,6 @@ public class CharacterController : MonoBehaviour
         }
         AimOff();
         commandList.Remove(command);
-    }
-
-    public IEnumerator Coroutine_AimOff()
-    {
-        yield return new WaitForSeconds(aimTime);
-
-        AimOff();
     }
     #endregion
 

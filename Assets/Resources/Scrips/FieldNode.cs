@@ -141,43 +141,44 @@ public class FieldNode : MonoBehaviour
 
     public void CheckCoverNode(bool value)
     {
-        if (value)
+        switch (value)
         {
-            for (int i = 0; i < onAxisNodes.Count; i++)
-            {
-                var onAxisNode = onAxisNodes[i];
-                var isCover = onAxisNode != null && onAxisNode.cover != null;
-                if (!isCover) continue;
-
-                switch ((TargetDirection)i)
+            case true:
+                for (int i = 0; i < onAxisNodes.Count; i++)
                 {
-                    case TargetDirection.Left:
-                        onAxisNode.cover.ShowCoverImage(TargetDirection.Right);
-                        break;
-                    case TargetDirection.Front:
-                        onAxisNode.cover.ShowCoverImage(TargetDirection.Back);
-                        break;
-                    case TargetDirection.Back:
-                        onAxisNode.cover.ShowCoverImage(TargetDirection.Front);
-                        break;
-                    case TargetDirection.Right:
-                        onAxisNode.cover.ShowCoverImage(TargetDirection.Left);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < onAxisNodes.Count; i++)
-            {
-                var onAxisNode = onAxisNodes[i];
-                var isCover = onAxisNode != null && onAxisNode.cover != null;
-                if (!isCover) continue;
+                    var onAxisNode = onAxisNodes[i];
+                    var isCover = onAxisNode != null && onAxisNode.cover != null;
+                    if (!isCover) continue;
 
-                onAxisNode.cover.ShowCoverImage();
-            }
+                    switch ((TargetDirection)i)
+                    {
+                        case TargetDirection.Left:
+                            onAxisNode.cover.ShowCoverImage(TargetDirection.Right);
+                            break;
+                        case TargetDirection.Front:
+                            onAxisNode.cover.ShowCoverImage(TargetDirection.Back);
+                            break;
+                        case TargetDirection.Back:
+                            onAxisNode.cover.ShowCoverImage(TargetDirection.Front);
+                            break;
+                        case TargetDirection.Right:
+                            onAxisNode.cover.ShowCoverImage(TargetDirection.Left);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case false:
+                for (int i = 0; i < onAxisNodes.Count; i++)
+                {
+                    var onAxisNode = onAxisNodes[i];
+                    var isCover = onAxisNode != null && onAxisNode.cover != null;
+                    if (!isCover) continue;
+
+                    onAxisNode.cover.ShowCoverImage();
+                }
+                break;
         }
     }
 

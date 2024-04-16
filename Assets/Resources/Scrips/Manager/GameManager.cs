@@ -225,6 +225,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.T))
                 {
+                    RemoveTargetNode();
                     ClearLine();
                     SwitchMovableNodes(false);
                     currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
@@ -273,7 +274,7 @@ public class GameManager : MonoBehaviour
             case ActionState.Watch:
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    selectChar.AddCommand(CommandType.Watch);
+                    selectChar.SetWatch();
                     currentRange = null;
                     selectChar.state = CharacterState.Watch;
                     selectChar = null;
@@ -311,14 +312,10 @@ public class GameManager : MonoBehaviour
                             selectChar = node.charCtr;
                             if (selectChar.state == CharacterState.Watch)
                             {
+                                selectChar.AimOff();
                                 if (selectChar.animator.GetBool("isCover"))
                                 {
-                                    StartCoroutine(selectChar.Coroutine_AimOff());
                                     selectChar.AddCommand(CommandType.BackCover);
-                                }
-                                else
-                                {
-                                    selectChar.AimOff();
                                 }
                                 selectChar.watchInfo.drawRang.gameObject.SetActive(false);
                                 selectChar.state = CharacterState.None;
