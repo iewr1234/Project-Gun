@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -37,6 +36,7 @@ public enum CommandType
 [System.Serializable]
 public class CharacterCommand
 {
+    public string indexName;
     public CommandType type;
 
     [Header("[Wait]")]
@@ -149,6 +149,7 @@ public class CharacterController : MonoBehaviour
 
     [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
 
+    [HideInInspector] public bool pause;
     private float timer;
 
     private bool moving;
@@ -341,7 +342,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     private void CommandApplication()
     {
-        var runCommand = commandList.Count > 0;
+        var runCommand = commandList.Count > 0 && !pause;
         if (!runCommand) return;
 
         var command = commandList[0];
@@ -890,21 +891,36 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
+    /// 조준점 설정
+    /// </summary>
+    /// <param name="targetInfo"></param>
+    private void SetAiming(TargetInfo targetInfo)
+    {
+        aimTf = targetInfo.target.transform;
+        if (weapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
+        {
+            var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
+            var errorInterval = 1f;
+            aimInterval = dir * errorInterval;
+            aimInterval.y += DataUtility.aimPointY;
+            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+            {
+                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
+            }
+        }
+        else
+        {
+            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+        }
+        aimPoint.transform.position = aimTf.position + aimInterval;
+    }
+
+    /// <summary>
     /// 캐릭터 사격 처리
     /// </summary>
     /// <param name="command"></param>
     private void ShootProcess(CharacterCommand command)
     {
-        //if (!animator.GetBool("isAim"))
-        //{
-        //    animator.SetBool("isAim", true);
-        //    animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
-        //    transform.LookAt(command.targetInfo.target.transform);
-        //    SetAiming(command.targetInfo);
-        //    chestAim = true;
-        //    chestRig.weight = 1f;
-        //}
-
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0) return;
 
@@ -1105,7 +1121,6 @@ public class CharacterController : MonoBehaviour
             var watcher = watchers[i];
             var watchInfo = watcher.watchInfo;
             var angle = GetAngle(watchInfo);
-            var log = $"{angle}";
             var angleRad = angle * Mathf.Deg2Rad;
             var dir = new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad)).normalized;
             var watchPos = watchInfo.watchNode.transform.position + interval;
@@ -1115,10 +1130,9 @@ public class CharacterController : MonoBehaviour
                 var charCtr = hit.collider.GetComponent<CharacterController>();
                 if (charCtr != null && charCtr == this)
                 {
-                    log += "_Engage";
+                    watcher.AddCommand(CommandType.Shoot, this, currentNode);
                 }
             }
-            Debug.Log(log);
         }
 
         float GetAngle(WatchInfo watchInfo)
@@ -1576,6 +1590,9 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 경계상태로 설정
+    /// </summary>
     public void SetWatch()
     {
         if (animator.GetBool("isCover"))
@@ -1613,6 +1630,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.Wait:
                 var waitCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.Wait,
                     time = time,
                 };
@@ -1633,8 +1651,14 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Move:
+                if (animator.GetBool("isCover"))
+                {
+                    AddCommand(CommandType.LeaveCover);
+                }
+
                 var moveCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.Move,
                     passList = new List<FieldNode>(passList),
                 };
@@ -1657,6 +1681,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.TakeCover:
                 var takeCoverCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.TakeCover,
                     cover = cover,
                     isRight = isRight,
@@ -1681,11 +1706,49 @@ public class CharacterController : MonoBehaviour
             case CommandType.Targeting:
                 var targetingCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.Targeting,
                     targeting = targeting,
                     lookAt = lookAt,
                 };
                 commandList.Add(targetingCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="target"></param>
+    public void AddCommand(CommandType type, CharacterController target, FieldNode targetNode)
+    {
+        switch (type)
+        {
+            case CommandType.Shoot:
+                target.animator.speed = 0f;
+                target.pause = true;
+                var targetInfo = new TargetInfo()
+                {
+                    shooter = this,
+                    target = target,
+                    shooterNode = watchInfo.watchNode,
+                    shooterCover = watchInfo.coverNode,
+                    targetNode = targetNode,
+                    targetCover = null,
+                    isRight = watchInfo.isRight,
+                };
+                animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                SetAiming(targetInfo);
+
+                var shootCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Shoot,
+                    targetInfo = targetInfo,
+                };
+                commandList.Add(shootCommand);
                 break;
             default:
                 break;
@@ -1703,6 +1766,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.Aim:
                 var coverAimCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.Aim,
                     targetInfo = targetList[targetIndex],
                 };
@@ -1711,6 +1775,7 @@ public class CharacterController : MonoBehaviour
             case CommandType.Shoot:
                 var shootCommand = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = CommandType.Shoot,
                     targetInfo = targetList[targetIndex],
                 };
@@ -1719,47 +1784,12 @@ public class CharacterController : MonoBehaviour
             default:
                 var command = new CharacterCommand
                 {
+                    indexName = $"{type}",
                     type = type,
                 };
                 commandList.Add(command);
                 break;
         }
-    }
-
-    /// <summary>
-    /// 무기 조준
-    /// </summary>
-    /// <param name="targetInfo"></param>
-    private void SetAiming(TargetInfo targetInfo)
-    {
-        aimTf = targetInfo.target.transform;
-        if (weapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
-        {
-            var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
-            var errorInterval = 1f;
-            aimInterval = dir * errorInterval;
-            aimInterval.y += DataUtility.aimPointY;
-            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
-            {
-                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
-            }
-        }
-        else
-        {
-            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-        }
-        aimPoint.transform.position = aimTf.position + aimInterval;
-    }
-
-    /// <summary>
-    /// 무기 조준
-    /// </summary>
-    /// <param name="targetNode"></param>
-    private void SetAiming(FieldNode targetNode)
-    {
-        aimTf = targetNode.transform;
-        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-        aimPoint.transform.position = aimTf.position + aimInterval;
     }
 
     /// <summary>
@@ -1816,7 +1846,7 @@ public class CharacterController : MonoBehaviour
         {
             CharacterDead();
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit"))
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && !animator.GetBool("isMove"))
         {
             animator.SetTrigger("isHit");
         }
@@ -1848,6 +1878,9 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 조준 해제
+    /// </summary>
     public void AimOff()
     {
         aimTf = null;
@@ -1859,7 +1892,7 @@ public class CharacterController : MonoBehaviour
 
     #region Coroutine
     /// <summary>
-    /// (코루틴)조준해제
+    /// (코루틴)조준 해제
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
@@ -1868,11 +1901,23 @@ public class CharacterController : MonoBehaviour
         yield return new WaitForSeconds(aimTime);
 
         var target = command.targetInfo.target;
-        if (target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+        switch (state)
         {
-            target.AddCommand(CommandType.Targeting, false, transform);
+            case CharacterState.None:
+                if (target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+                {
+                    target.AddCommand(CommandType.Targeting, false, transform);
+                }
+                AimOff();
+                break;
+            case CharacterState.Watch:
+                aimTf = command.targetInfo.targetNode.transform;
+                target.animator.speed = 1f;
+                target.pause = false;
+                break;
+            default:
+                break;
         }
-        AimOff();
         commandList.Remove(command);
     }
     #endregion
