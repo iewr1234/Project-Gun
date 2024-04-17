@@ -14,7 +14,7 @@ public class FieldNode : MonoBehaviour
     [SerializeField] private MeshRenderer mesh;
     [SerializeField] private Canvas canvas;
     private List<NodeOutline> outlines = new List<NodeOutline>();
-    private MeshRenderer fog;
+    //private MeshRenderer fog;
     private TextMeshProUGUI posText;
 
     [Header("--- Assignment Variable---")]
@@ -48,7 +48,7 @@ public class FieldNode : MonoBehaviour
             var outline = outlines[i];
             outline.SetComponents();
         }
-        fog = transform.Find("Fog").GetComponent<MeshRenderer>();
+        //fog = transform.Find("Fog").GetComponent<MeshRenderer>();
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
@@ -108,11 +108,11 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetVisibleNode(bool value)
-    {
-        fog.enabled = !value;
-        canSee = value;
-    }
+    //public void SetVisibleNode(bool value)
+    //{
+    //    fog.enabled = !value;
+    //    canSee = value;
+    //}
 
     public void SetMovableNode(List<FieldNode> openNodes)
     {

@@ -241,7 +241,7 @@ public class CharacterController : MonoBehaviour
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;
-        ShowVisibleNodes(sight, currentNode);
+        //ShowVisibleNodes(sight, currentNode);
     }
 
     public void SetRig(WeaponType type)
@@ -466,7 +466,7 @@ public class CharacterController : MonoBehaviour
             {
                 moving = false;
                 command.passList.Remove(targetNode);
-                ShowVisibleNodes(sight, targetNode);
+                //ShowVisibleNodes(sight, targetNode);
                 CheckWatcher(targetNode);
                 if (command.passList.Count == 0)
                 {
@@ -979,83 +979,83 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="sight"></param>
     /// <param name="node"></param>
-    public void ShowVisibleNodes(float sight, FieldNode node)
-    {
-        if (ownerType != CharacterOwner.Player) return;
+    //public void ShowVisibleNodes(float sight, FieldNode node)
+    //{
+    //    if (ownerType != CharacterOwner.Player) return;
 
-        SwitchVisibleNode(false);
-        visibleNodes.Clear();
-        var findNodes = gameMgr.fieldNodes.FindAll(x => DataUtility.GetDistance(x.transform.position, node.transform.position) < sight);
-        for (int i = 0; i < findNodes.Count; i++)
-        {
-            var findNode = findNodes[i];
-            var pos = node.transform.position;
-            var targetPos = findNode.transform.position;
-            if (!CheckSight())
-            {
-                visibleNodes.Add(findNode);
-                continue;
-            }
+    //    SwitchVisibleNode(false);
+    //    visibleNodes.Clear();
+    //    var findNodes = gameMgr.fieldNodes.FindAll(x => DataUtility.GetDistance(x.transform.position, node.transform.position) < sight);
+    //    for (int i = 0; i < findNodes.Count; i++)
+    //    {
+    //        var findNode = findNodes[i];
+    //        var pos = node.transform.position;
+    //        var targetPos = findNode.transform.position;
+    //        if (!CheckSight())
+    //        {
+    //            visibleNodes.Add(findNode);
+    //            continue;
+    //        }
 
-            for (int j = 0; j < node.onAxisNodes.Count; j++)
-            {
-                var onAxisNode = node.onAxisNodes[j];
-                if (onAxisNode != null && onAxisNode.canMove)
-                {
-                    pos = onAxisNode.transform.position;
-                    if (!CheckSight())
-                    {
-                        CheckEnemy(findNode);
-                        break;
-                    }
-                }
-            }
+    //        for (int j = 0; j < node.onAxisNodes.Count; j++)
+    //        {
+    //            var onAxisNode = node.onAxisNodes[j];
+    //            if (onAxisNode != null && onAxisNode.canMove)
+    //            {
+    //                pos = onAxisNode.transform.position;
+    //                if (!CheckSight())
+    //                {
+    //                    CheckEnemy(findNode);
+    //                    break;
+    //                }
+    //            }
+    //        }
 
-            bool CheckSight()
-            {
-                var dir = Vector3.Normalize(targetPos - pos);
-                var dist = DataUtility.GetDistance(pos, targetPos);
-                if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, gameMgr.coverLayer))
-                {
-                    var coverNode = hit.collider.GetComponentInParent<FieldNode>();
-                    if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
-                    {
-                        CheckEnemy(coverNode);
-                    }
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-        SwitchVisibleNode(true);
+    //        bool CheckSight()
+    //        {
+    //            var dir = Vector3.Normalize(targetPos - pos);
+    //            var dist = DataUtility.GetDistance(pos, targetPos);
+    //            if (Physics.Raycast(pos, dir, out RaycastHit hit, dist, gameMgr.coverLayer))
+    //            {
+    //                var coverNode = hit.collider.GetComponentInParent<FieldNode>();
+    //                if (coverNode != null && visibleNodes.Find(x => x == coverNode) == null)
+    //                {
+    //                    CheckEnemy(coverNode);
+    //                }
+    //                return true;
+    //            }
+    //            else
+    //            {
+    //                return false;
+    //            }
+    //        }
+    //    }
+    //    SwitchVisibleNode(true);
 
-        void CheckEnemy(FieldNode node)
-        {
-            visibleNodes.Add(node);
-            for (int i = 0; i < node.onAxisNodes.Count; i++)
-            {
-                var onAxisNode = node.onAxisNodes[i];
-                if (onAxisNode == null) continue;
+    //    void CheckEnemy(FieldNode node)
+    //    {
+    //        visibleNodes.Add(node);
+    //        for (int i = 0; i < node.onAxisNodes.Count; i++)
+    //        {
+    //            var onAxisNode = node.onAxisNodes[i];
+    //            if (onAxisNode == null) continue;
 
-                if (onAxisNode.charCtr != null && onAxisNode.charCtr.ownerType != ownerType)
-                {
-                    visibleNodes.Add(onAxisNode);
-                }
-            }
-        }
+    //            if (onAxisNode.charCtr != null && onAxisNode.charCtr.ownerType != ownerType)
+    //            {
+    //                visibleNodes.Add(onAxisNode);
+    //            }
+    //        }
+    //    }
 
-        void SwitchVisibleNode(bool value)
-        {
-            for (int i = 0; i < visibleNodes.Count; i++)
-            {
-                var visibleNode = visibleNodes[i];
-                visibleNode.SetVisibleNode(value);
-            }
-        }
-    }
+    //    void SwitchVisibleNode(bool value)
+    //    {
+    //        for (int i = 0; i < visibleNodes.Count; i++)
+    //        {
+    //            var visibleNode = visibleNodes[i];
+    //            visibleNode.SetVisibleNode(value);
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// 경계자의 위치를 찾음
