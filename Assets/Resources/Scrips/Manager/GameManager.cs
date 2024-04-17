@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum ActionState
@@ -675,19 +676,34 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void CreateCover()
     {
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            var node = GetEmptyNode();
+            var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
+            cover.transform.SetParent(node.transform, false);
+            cover.SetComponents(node, CoverType.Half);
+        }
+        else if (Input.GetKeyDown(KeyCode.F2))
+        {
+            var node = GetEmptyNode();
+            var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
+            cover.transform.SetParent(node.transform, false);
+            cover.SetComponents(node, CoverType.Full);
+        }
+
+        FieldNode GetEmptyNode()
         {
             var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                if (node.canMove)
+                if (node != null && node.canMove)
                 {
-                    var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
-                    cover.transform.SetParent(node.transform, false);
-                    cover.SetComponents(node);
+                    return node;
                 }
             }
+
+            return null;
         }
     }
 

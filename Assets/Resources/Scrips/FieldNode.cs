@@ -153,16 +153,16 @@ public class FieldNode : MonoBehaviour
                     switch ((TargetDirection)i)
                     {
                         case TargetDirection.Left:
-                            onAxisNode.cover.ShowCoverImage(TargetDirection.Right);
+                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Right);
                             break;
                         case TargetDirection.Front:
-                            onAxisNode.cover.ShowCoverImage(TargetDirection.Back);
+                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Back);
                             break;
                         case TargetDirection.Back:
-                            onAxisNode.cover.ShowCoverImage(TargetDirection.Front);
+                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Front);
                             break;
                         case TargetDirection.Right:
-                            onAxisNode.cover.ShowCoverImage(TargetDirection.Left);
+                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Left);
                             break;
                         default:
                             break;
@@ -176,7 +176,7 @@ public class FieldNode : MonoBehaviour
                     var isCover = onAxisNode != null && onAxisNode.cover != null;
                     if (!isCover) continue;
 
-                    onAxisNode.cover.ShowCoverImage();
+                    onAxisNode.cover.SetActiveCoverImage(TargetDirection.None);
                 }
                 break;
         }

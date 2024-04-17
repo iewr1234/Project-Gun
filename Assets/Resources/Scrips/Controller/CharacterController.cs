@@ -533,7 +533,20 @@ public class CharacterController : MonoBehaviour
 
             if (coverNode != null)
             {
-                FindDirectionForCover(coverNode);
+                switch (coverNode.cover.type)
+                {
+                    case CoverType.Half:
+                        transform.LookAt(coverNode.transform);
+                        animator.SetBool("isCover", true);
+                        animator.SetBool("fullCover", false);
+                        commandList.Remove(command);
+                        break;
+                    case CoverType.Full:
+                        FindDirectionForCover(coverNode);
+                        break;
+                    default:
+                        break;
+                }
             }
             else
             {
@@ -641,6 +654,7 @@ public class CharacterController : MonoBehaviour
         coverPos = transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);
+        animator.SetBool("fullCover", true);
 
         TargetDirection FindCloseTargetDirection()
         {

@@ -9,18 +9,17 @@ public class Bullet : MonoBehaviour
     [SerializeField] private Weapon weapon;
 
     [Header("---Access Component---")]
-    [HideInInspector] public TrailRenderer trail;
-    [HideInInspector] public Rigidbody bulletRb;
+    private TrailRenderer trail;
+    private Rigidbody bulletRb;
     private Collider bulletCd;
     private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
-    public float speed = 150f;
-    public float damage;
+    [SerializeField] private float speed = 30f;
 
-    [SerializeField] private LayerMask targetLayer;
-    [SerializeField] private bool isHit;
-    [SerializeField] private bool isCheck;
+    private LayerMask targetLayer;
+    private bool isHit;
+    private bool isCheck;
     private float timer;
 
     private readonly float startWidth = 0.01f;
@@ -77,19 +76,6 @@ public class Bullet : MonoBehaviour
     void FixedUpdate()
     {
         if (isCheck) return;
-
-        //var hitCds = Physics.OverlapSphere(transform.position, 0.1f, targetLayer).ToList();
-        //for (int i = 0; i < hitCds.Count; i++)
-        //{
-        //    var hitCd = hitCds[i];
-        //    var charCtr = hitCd.GetComponentInParent<CharacterController>();
-        //    if (charCtr != null && isHit)
-        //    {
-        //        charCtr.OnHit(transform.forward, weapon);
-        //    }
-        //    HitBullet();
-        //    break;
-        //}
 
         var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0f, targetLayer);
         for (int i = 0; i < hits.Length; i++)

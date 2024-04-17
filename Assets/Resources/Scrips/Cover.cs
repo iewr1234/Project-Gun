@@ -17,38 +17,72 @@ public class Cover : MonoBehaviour
     [HideInInspector] public FieldNode node;
 
     [Header("---Access Component---")]
+    private GameObject coverObject;
     private Canvas canvas;
     private List<Image> coverImages;
 
     [Header("--- Assignment Variable---")]
     public CoverType type;
 
-    public void SetComponents(FieldNode _node)
+    private readonly Vector3 halfCover_Pos = new Vector3(0f, 0.5f, 0f);
+    private readonly Vector3 halfCover_Scale = new Vector3(1.31f, 1f, 1.31f);
+    private readonly Vector3 fullCover_Pos = new Vector3(0f, 1f, 0f);
+    private readonly Vector3 fullCover_Scale = new Vector3(1.31f, 2f, 1.31f);
+
+    public void SetComponents(FieldNode _node, CoverType _type)
     {
         node = _node;
-        canvas = GetComponentInChildren<Canvas>();
-        canvas.worldCamera = Camera.main;
-        coverImages = canvas.transform.GetComponentsInChildren<Image>().ToList();
-        ShowCoverImage();
-
         node.cover = this;
         node.canMove = false;
         node.ReleaseAdjacentNodes();
 
-        type = CoverType.Full;
-    }
+        coverObject = transform.Find("CoverObject").gameObject;
+        canvas = GetComponentInChildren<Canvas>();
+        canvas.worldCamera = Camera.main;
+        coverImages = canvas.transform.GetComponentsInChildren<Image>().ToList();
 
-    public void ShowCoverImage(TargetDirection dir)
-    {
-        coverImages[(int)dir].enabled = true;
-    }
-
-    public void ShowCoverImage()
-    {
-        for (int i = 0; i < coverImages.Count; i++)
+        type = _type;
+        switch (type)
         {
-            var coverImage = coverImages[i];
-            coverImage.enabled = false;
+            case CoverType.Half:
+                coverObject.transform.localPosition = halfCover_Pos;
+                coverObject.transform.localScale = halfCover_Scale;
+                for (int i = 0; i < coverImages.Count; i++)
+                {
+                    var coverImage = coverImages[i];
+                    coverImage.sprite = Resources.Load<Sprite>("Sprites/Icon_HalfCover");
+                    coverImage.enabled = false;
+                }
+                break;
+            case CoverType.Full:
+                coverObject.transform.localPosition = fullCover_Pos;
+                coverObject.transform.localScale = fullCover_Scale;
+                for (int i = 0; i < coverImages.Count; i++)
+                {
+                    var coverImage = coverImages[i];
+                    coverImage.sprite = Resources.Load<Sprite>("Sprites/Icon_FullCover");
+                    coverImage.enabled = false;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void SetActiveCoverImage(TargetDirection dir)
+    {
+        switch (dir)
+        {
+            case TargetDirection.None:
+                for (int i = 0; i < coverImages.Count; i++)
+                {
+                    var coverImage = coverImages[i];
+                    coverImage.enabled = false;
+                }
+                break;
+            default:
+                coverImages[(int)dir].enabled = true;
+                break;
         }
     }
 }
