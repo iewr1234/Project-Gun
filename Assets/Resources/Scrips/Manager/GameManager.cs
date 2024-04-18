@@ -38,7 +38,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Vector2 fieldSize;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
-    private List<FieldNode> visibleNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
     [SerializeField] private FieldNode targetNode;
@@ -212,6 +211,7 @@ public class GameManager : MonoBehaviour
                     selectChar.FindTargets(selectChar.currentNode);
                     if (selectChar.SetTarget())
                     {
+                        RemoveTargetNode();
                         SwitchMovableNodes(false);
                         actionState = ActionState.Shot;
                     }

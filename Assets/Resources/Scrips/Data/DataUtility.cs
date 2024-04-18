@@ -30,11 +30,22 @@ public static class DataUtility
         return Mathf.Round(distance * 100) / 100;
     }
 
+    public static void SetMeshsMaterial(List<MeshRenderer> meshs)
+    {
+        for (int i = 0; i < meshs.Count; i++)
+        {
+            var mesh = meshs[i];
+            mesh.material.shader = Shader.Find("Standard");
+        }
+    }
+
     public static void SetMeshsMaterial(CharacterOwner ownerType, List<MeshRenderer> meshs)
     {
         for (int i = 0; i < meshs.Count; i++)
         {
             var mesh = meshs[i];
+            if (mesh.CompareTag("Glass")) continue;
+
             mesh.material = new Material(mesh.material);
             mesh.material.shader = Shader.Find("Draw/AlwaysVisible");
             switch (ownerType)
@@ -48,6 +59,15 @@ public static class DataUtility
                 default:
                     break;
             }
+        }
+    }
+
+    public static void SetMeshsMaterial(List<SkinnedMeshRenderer> sMeshs)
+    {
+        for (int i = 0; i < sMeshs.Count; i++)
+        {
+            var sMesh = sMeshs[i];
+            sMesh.material.shader = Shader.Find("Standard");
         }
     }
 

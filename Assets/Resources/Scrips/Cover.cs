@@ -24,10 +24,10 @@ public class Cover : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public CoverType type;
 
-    private readonly Vector3 halfCover_Pos = new Vector3(0f, 0.5f, 0f);
-    private readonly Vector3 halfCover_Scale = new Vector3(1.31f, 1f, 1.31f);
+    private readonly Vector3 halfCover_Pos = new Vector3(0f, 0.4f, 0f);
+    private readonly Vector3 halfCover_Scale = new Vector3(1.30f, 0.8f, 1.30f);
     private readonly Vector3 fullCover_Pos = new Vector3(0f, 1f, 0f);
-    private readonly Vector3 fullCover_Scale = new Vector3(1.31f, 2f, 1.31f);
+    private readonly Vector3 fullCover_Scale = new Vector3(1.30f, 2f, 1.30f);
 
     public void SetComponents(FieldNode _node, CoverType _type)
     {

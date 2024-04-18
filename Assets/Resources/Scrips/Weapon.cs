@@ -139,7 +139,7 @@ public class Weapon : MonoBehaviour
             var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
             var hitAccuracy = Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
             var isHit = value < hitAccuracy;
-            Debug.Log($"{charCtr.name}: {value} < {hitAccuracy} = {isHit}");
+            //Debug.Log($"{charCtr.name}: {value} < {hitAccuracy} = {isHit}");
             if (isHit && allMiss)
             {
                 allMiss = false;

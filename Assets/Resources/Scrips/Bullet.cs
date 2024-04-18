@@ -17,8 +17,8 @@ public class Bullet : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [SerializeField] private float speed = 30f;
 
-    private LayerMask targetLayer;
-    private bool isHit;
+    [SerializeField] private LayerMask targetLayer;
+    [SerializeField] private bool isHit;
     private bool isCheck;
     private float timer;
 
@@ -85,6 +85,8 @@ public class Bullet : MonoBehaviour
             if (charCtr != null && isHit)
             {
                 charCtr.OnHit(transform.forward, weapon);
+                isHit = false;
+                Debug.Log("Hit");
             }
             HitBullet();
         }

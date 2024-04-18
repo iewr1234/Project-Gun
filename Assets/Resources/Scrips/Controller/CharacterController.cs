@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using static Cinemachine.CinemachineOrbitalTransposer;
 
 public enum CharacterOwner
 {
@@ -100,7 +99,6 @@ public class CharacterController : MonoBehaviour
     public Animator animator;
 
     [HideInInspector] public Transform aimPoint;
-    private RigBuilder rigBd;
     private MultiAimConstraint headRig;
     private MultiAimConstraint chestRig;
 
@@ -109,8 +107,8 @@ public class CharacterController : MonoBehaviour
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
-    [SerializeField] private List<Collider> ragdollCds = new List<Collider>();
-    [SerializeField] private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
+    private List<Collider> ragdollCds = new List<Collider>();
+    private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
@@ -139,7 +137,7 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Cover cover;
     [HideInInspector] public bool isCopy;
 
-    private List<FieldNode> visibleNodes = new List<FieldNode>();
+    //private List<FieldNode> visibleNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
@@ -189,7 +187,6 @@ public class CharacterController : MonoBehaviour
         animator = GetComponent<Animator>();
 
         aimPoint = transform.Find("AimPoint");
-        rigBd = GetComponent<RigBuilder>();
         headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
         headRig.weight = 0f;
         chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
@@ -483,6 +480,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void TakeCoverProcess(CharacterCommand command)
     {
+        var pos = currentNode.transform.position;
         if (!covering)
         {
             FieldNode coverNode = null;
@@ -491,10 +489,22 @@ public class CharacterController : MonoBehaviour
                 coverNode = command.cover;
                 transform.LookAt(coverNode.transform);
                 cover = coverNode.cover;
-                coverPos = transform.position + (transform.forward * coverInterval);
-                covering = true;
-                animator.SetBool("isRight", command.isRight);
                 animator.SetBool("isCover", true);
+                switch (coverNode.cover.type)
+                {
+                    case CoverType.Half:
+                        animator.SetBool("fullCover", false);
+                        commandList.Remove(command);
+                        break;
+                    case CoverType.Full:
+                        animator.SetBool("fullCover", true);
+                        animator.SetBool("isRight", command.isRight);
+                        coverPos = pos + (transform.forward * coverInterval);
+                        covering = true;
+                        break;
+                    default:
+                        break;
+                }
                 return;
             }
             else
@@ -504,7 +514,7 @@ public class CharacterController : MonoBehaviour
                 {
                     coverNode = findCover;
                 }
-                else if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
+                else if (Physics.Raycast(pos, transform.forward, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
                     var find = currentNode.onAxisNodes.Find(x => x != null && x == cover.node);
@@ -561,12 +571,12 @@ public class CharacterController : MonoBehaviour
         FieldNode FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(transform.position, x.transform.position) < weapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < weapon.range);
             if (closeList.Count > 0)
             {
-                var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(transform.position, x.transform.position)).ToList()[0];
-                var dir = closeTarget.transform.position - transform.position;
-                if (Physics.Raycast(transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
+                var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
+                var dir = closeTarget.currentNode.transform.position - pos;
+                if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
                     return currentNode.onAxisNodes.Find(x => x == cover.node) != null ? cover.node : null;
@@ -590,13 +600,14 @@ public class CharacterController : MonoBehaviour
     private void FindDirectionForCover(FieldNode coverNode)
     {
         transform.LookAt(coverNode.transform);
+        var pos = currentNode.transform.position;
         var rightHit = false;
         var leftHit = false;
-        if (Physics.Raycast(transform.position, transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
+        if (Physics.Raycast(pos, transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
             rightHit = true;
         }
-        if (Physics.Raycast(transform.position, -transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
+        if (Physics.Raycast(pos, -transform.right, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
             leftHit = true;
         }
@@ -606,12 +617,12 @@ public class CharacterController : MonoBehaviour
         {
             var rightCover = false;
             var leftCover = false;
-            var pos = transform.position + (transform.right * DataUtility.nodeSize);
+            pos = currentNode.transform.position + (transform.right * DataUtility.nodeSize);
             if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 rightCover = true;
             }
-            pos = transform.position + (-transform.right * DataUtility.nodeSize);
+            pos = currentNode.transform.position + (-transform.right * DataUtility.nodeSize);
             if (Physics.Raycast(pos, transform.forward, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 leftCover = true;
@@ -651,7 +662,7 @@ public class CharacterController : MonoBehaviour
         }
 
         cover = coverNode.cover;
-        coverPos = transform.position + (transform.forward * coverInterval);
+        coverPos = currentNode.transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);
         animator.SetBool("fullCover", true);
@@ -659,11 +670,11 @@ public class CharacterController : MonoBehaviour
         TargetDirection FindCloseTargetDirection()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(transform.position, x.transform.position) < weapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < weapon.range);
             if (closeList.Count > 0)
             {
-                var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(transform.position, x.transform.position)).ToList()[0];
-                var dir = closeTarget.transform.position - transform.position;
+                var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
+                var dir = closeTarget.currentNode.transform.position - pos;
                 var cross = Vector3.Cross(dir, transform.forward);
 
                 return cross.y <= 0f ? TargetDirection.Right : TargetDirection.Left;
@@ -721,6 +732,12 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
+        if (cover.type != CoverType.Full)
+        {
+            commandList.Remove(command);
+            return;
+        }
+
         if (transform.position != coverPos)
         {
             transform.position = Vector3.MoveTowards(transform.position, coverPos, coverAimSpeed * Time.deltaTime);
@@ -737,7 +754,25 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void TargetingProcess(CharacterCommand command)
     {
-        if (animator.GetBool("isCover"))
+        if (animator.GetBool("isCover") && !animator.GetBool("fullCover"))
+        {
+            switch (command.targeting)
+            {
+                case true:
+                    aimTf = command.lookAt;
+                    headAim = true;
+                    animator.SetTrigger("targeting");
+                    commandList.Remove(command);
+                    break;
+                case false:
+                    aimTf = null;
+                    headAim = false;
+                    animator.SetTrigger("unTargeting");
+                    commandList.Remove(command);
+                    break;
+            }
+        }
+        else if (animator.GetBool("isCover"))
         {
             if (!targetingMove)
             {
@@ -974,11 +1009,12 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 시야에 있는 노드를 표시
-    /// </summary>
-    /// <param name="sight"></param>
-    /// <param name="node"></param>
+    #region 시야 코드
+    ///// <summary>
+    ///// 시야에 있는 노드를 표시
+    ///// </summary>
+    ///// <param name="sight"></param>
+    ///// <param name="node"></param>
     //public void ShowVisibleNodes(float sight, FieldNode node)
     //{
     //    if (ownerType != CharacterOwner.Player) return;
@@ -1056,6 +1092,7 @@ public class CharacterController : MonoBehaviour
     //        }
     //    }
     //}
+    #endregion
 
     /// <summary>
     /// 경계자의 위치를 찾음
@@ -1066,7 +1103,7 @@ public class CharacterController : MonoBehaviour
         FieldNode watchNode;
         var isRight = false;
         var coverNode = FindCoverNode(currentNode, targetNode);
-        if (coverNode != null)
+        if (coverNode != null && coverNode.cover.type == CoverType.Full)
         {
             var RN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Right);
             var LN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Left);
@@ -1214,19 +1251,20 @@ public class CharacterController : MonoBehaviour
                 FieldNode LN = null;
                 FieldNode targetRN = null;
                 FieldNode targetLN = null;
-                var cover = FindCoverNode(node, target.currentNode);
-                var targetCover = FindCoverNode(target.currentNode, node);
-                if (cover != null && targetCover != null)
+                var coverNode = FindCoverNode(node, target.currentNode);
+                var targetCoverNode = FindCoverNode(target.currentNode, node);
+                if (coverNode != null && coverNode.cover.type == CoverType.Full
+                 && targetCoverNode != null && targetCoverNode.cover.type == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, cover, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, cover, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
                         continue;
                     }
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1238,10 +1276,10 @@ public class CharacterController : MonoBehaviour
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
                 }
-                else if (cover != null)
+                else if (coverNode != null && coverNode.cover.type == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, cover, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, cover, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
@@ -1253,10 +1291,10 @@ public class CharacterController : MonoBehaviour
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
                 }
-                else if (targetCover != null)
+                else if (targetCoverNode != null && targetCoverNode.cover.type == CoverType.Full)
                 {
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1277,7 +1315,9 @@ public class CharacterController : MonoBehaviour
                             shooter = this,
                             target = target,
                             shooterNode = currentNode,
+                            shooterCover = coverNode,
                             targetNode = target.currentNode,
+                            targetCover = targetCoverNode,
                         };
                         targetList.Add(targetInfo);
                     }
@@ -1297,7 +1337,7 @@ public class CharacterController : MonoBehaviour
                     Vector3 targetPos;
                     var distance = 999999f;
 
-                    if (cover == null)
+                    if (coverNode == null)
                     {
                         if (targetRN != null)
                         {
@@ -1312,7 +1352,7 @@ public class CharacterController : MonoBehaviour
                     {
                         if (RN != null)
                         {
-                            if (targetCover == null)
+                            if (targetCoverNode == null)
                             {
                                 CheckNodes(RN, target.currentNode, true, false);
                             }
@@ -1330,7 +1370,7 @@ public class CharacterController : MonoBehaviour
                         }
                         if (LN != null)
                         {
-                            if (targetCover == null)
+                            if (targetCoverNode == null)
                             {
                                 CheckNodes(LN, target.currentNode, false, false);
                             }
@@ -1355,9 +1395,9 @@ public class CharacterController : MonoBehaviour
                             shooter = this,
                             target = target,
                             shooterNode = shooterNode,
-                            shooterCover = cover,
+                            shooterCover = coverNode,
                             targetNode = targetNode,
-                            targetCover = targetCover,
+                            targetCover = targetCoverNode,
                             targetRight = targetRight,
                             isRight = isRight,
                         };
@@ -1398,6 +1438,9 @@ public class CharacterController : MonoBehaviour
         bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
         {
             bool canShoot;
+            var interval = new Vector3(0f, 1f, 0f);
+            pos += interval;
+            targetPos += interval;
             var dir = Vector3.Normalize(targetPos - pos);
             var dist = DataUtility.GetDistance(pos, targetPos);
             if (Physics.Raycast(pos, dir, dist, gameMgr.coverLayer))
@@ -1813,7 +1856,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, Weapon weapon)
+    public void OnHit(Vector3 dir, Weapon _weapon)
     {
         bool isPenetrate;
         float bulletproof;
@@ -1826,10 +1869,10 @@ public class CharacterController : MonoBehaviour
                 armor.bulletproof = 0f;
             }
 
-            var penetrateRate = weapon.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - weapon.penetrate)) * 100f) : 95;
+            var penetrateRate = _weapon.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _weapon.penetrate)) * 100f) : 95;
             isPenetrate = value < penetrateRate;
 
-            var armorDamage = (int)Mathf.Floor(weapon.damage * (weapon.armorBreak / 100f));
+            var armorDamage = (int)Mathf.Floor(_weapon.damage * (_weapon.armorBreak / 100f));
             armor.durability -= armorDamage;
             if (armor.durability < 0)
             {
@@ -1845,7 +1888,7 @@ public class CharacterController : MonoBehaviour
 
         if (isPenetrate)
         {
-            health -= (int)Mathf.Floor(weapon.damage * (weapon.penetrate / (weapon.penetrate + bulletproof)));
+            health -= (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (_weapon.penetrate + bulletproof)));
             if (health < 0)
             {
                 health = 0;
@@ -1853,7 +1896,7 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            stamina -= (int)Mathf.Floor(weapon.damage * (weapon.penetrate / (float)weapon.penetrate + bulletproof));
+            stamina -= (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (float)_weapon.penetrate + bulletproof));
             if (stamina < 0)
             {
                 stamina = 0;
@@ -1864,13 +1907,16 @@ public class CharacterController : MonoBehaviour
         {
             CharacterDead();
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && weapon.CharCtr.state != CharacterState.Watch)
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && _weapon.CharCtr.state != CharacterState.Watch)
         {
             animator.SetTrigger("isHit");
         }
 
         void CharacterDead()
         {
+            DataUtility.SetMeshsMaterial(meshs);
+            DataUtility.SetMeshsMaterial(sMeshs);
+            DataUtility.SetMeshsMaterial(weapon.meshs);
             animator.enabled = false;
             headAim = false;
             chestAim = false;
@@ -1893,6 +1939,7 @@ public class CharacterController : MonoBehaviour
                 rb.isKinematic = false;
                 rb.AddForce(dir * force, ForceMode.Force);
             }
+            state = CharacterState.Dead;
         }
     }
 
