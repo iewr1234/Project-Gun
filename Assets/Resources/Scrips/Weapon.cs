@@ -178,7 +178,7 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void FireBullet()
+    public void FireBullet(CharacterController target)
     {
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
@@ -197,7 +197,7 @@ public class Weapon : MonoBehaviour
         bullet.transform.LookAt(aimPos);
 
         var isHit = hitList[0];
-        bullet.SetComponents(this, isHit);
+        bullet.SetComponents(this, target, isHit);
         hitList.RemoveAt(0);
         if (loadedAmmo > 0)
         {

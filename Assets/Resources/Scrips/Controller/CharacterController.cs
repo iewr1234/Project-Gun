@@ -258,6 +258,8 @@ public class CharacterController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (state == CharacterState.Dead) return;
+
         //DrawShootingPath();
         DrawWeaponRange();
     }
@@ -314,7 +316,7 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
-        if (health == 0) return;
+        if (state == CharacterState.Dead) return;
 
         AimProcess();
         CommandApplication();
@@ -1858,6 +1860,8 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void OnHit(Vector3 dir, Weapon _weapon)
     {
+        if (state == CharacterState.Dead) return;
+
         bool isPenetrate;
         float bulletproof;
         if (armor != null && armor.durability > 0)
@@ -1927,7 +1931,7 @@ public class CharacterController : MonoBehaviour
             var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
             charList.Remove(this);
 
-            var force = 200f;
+            var force = 500f;
             for (int i = 0; i < ragdollCds.Count; i++)
             {
                 var cd = ragdollCds[i];
@@ -2011,7 +2015,15 @@ public class CharacterController : MonoBehaviour
 
     public void Event_FireWeapon()
     {
-        weapon.FireBullet();
+        var shootCommand = commandList[0];
+        if (shootCommand.type != CommandType.Shoot)
+        {
+            Debug.LogError("Event_FireWeapon: shootCommand is not [CommandType.Shoot]");
+            return;
+        }
+
+        var target = shootCommand.targetInfo.target;
+        weapon.FireBullet(target);
         var shootNum = animator.GetInteger("shootNum");
         shootNum--;
         animator.SetInteger("shootNum", shootNum);

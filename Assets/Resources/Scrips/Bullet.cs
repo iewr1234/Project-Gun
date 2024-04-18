@@ -7,6 +7,7 @@ public class Bullet : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private Weapon weapon;
+    private CharacterController target;
 
     [Header("---Access Component---")]
     private TrailRenderer trail;
@@ -25,9 +26,10 @@ public class Bullet : MonoBehaviour
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
-    public void SetComponents(Weapon _weapon, bool _isHit)
+    public void SetComponents(Weapon _weapon, CharacterController _target, bool _isHit)
     {
         weapon = _weapon;
+        target = _target;
 
         if (trail == null)
         {
@@ -82,11 +84,11 @@ public class Bullet : MonoBehaviour
         {
             var hit = hits[i];
             var charCtr = hit.collider.GetComponentInParent<CharacterController>();
-            if (charCtr != null && isHit)
+            if (charCtr != null && charCtr == target && isHit)
             {
                 charCtr.OnHit(transform.forward, weapon);
                 isHit = false;
-                Debug.Log("Hit");
+                Debug.Log($"{charCtr.name}: Hit");
             }
             HitBullet();
         }
