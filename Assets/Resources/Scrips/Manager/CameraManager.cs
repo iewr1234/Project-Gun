@@ -15,8 +15,11 @@ public enum CameraState
 
 public class CameraManager : MonoBehaviour
 {
+    [Header("---Access Script---")]
+    private GameManager gameMgr;
+
     [Header("---Access Component---")]
-    public Camera mainCam;
+    [HideInInspector] public Camera mainCam;
     private Transform pivotPoint;
     private CinemachineBrain cambrain;
     [SerializeField] private List<CinemachineVirtualCamera> virCams;
@@ -39,8 +42,10 @@ public class CameraManager : MonoBehaviour
     private readonly float zoomMin = 10f;
     private readonly float zoomMax = 45f;
 
-    public void SetComponents()
+    public void SetComponents(GameManager _gameMgr)
     {
+        gameMgr = _gameMgr;
+
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
         camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
@@ -55,7 +60,8 @@ public class CameraManager : MonoBehaviour
 
     private void Update()
     {
-        if (actionCam) return;
+        var canOperation = !actionCam && gameMgr.fieldNodes.Count > 0;
+        if (!canOperation) return;
 
         CameraMove();
         CameraRotate();

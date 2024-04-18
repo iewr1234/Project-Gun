@@ -1542,7 +1542,7 @@ public class CharacterController : MonoBehaviour
         else
         {
             targetIndex = 0;
-            ChangeTagetShader();
+            ChangeTargetShader();
             var targetInfo = targetList[targetIndex];
             SetTargeting(targetInfo);
             CameraState camState;
@@ -1577,7 +1577,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
         }
-        ChangeTagetShader();
+        ChangeTargetShader();
 
         var targetInfo = targetList[targetIndex];
         SetTargeting(targetInfo);
@@ -1597,7 +1597,10 @@ public class CharacterController : MonoBehaviour
         gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
     }
 
-    private void ChangeTagetShader()
+    /// <summary>
+    /// ≈∏∞Ÿ Ω¶¿Ã¥ı ∫Ø∞Ê
+    /// </summary>
+    private void ChangeTargetShader()
     {
         var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         for (int i = 0; i < targetList.Count; i++)

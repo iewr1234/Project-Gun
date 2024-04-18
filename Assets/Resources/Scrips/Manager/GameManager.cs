@@ -16,11 +16,11 @@ public class GameManager : MonoBehaviour
     [Header("---Access Script---")]
     public DataManager dataMgr;
     public CameraManager camMgr;
+    public MapEditor mapEdt;
 
     [Header("---Access Component---")]
     [SerializeField] private GameObject arrowPointer;
 
-    private Transform fieldNodeTf;
     private Transform characterTf;
     private Transform linePoolTf;
     private Transform rangePoolTf;
@@ -35,12 +35,11 @@ public class GameManager : MonoBehaviour
     public CharacterController selectChar;
 
     [Header("[FieldNode]")]
-    [SerializeField] private Vector2 fieldSize;
+    [SerializeField] private FieldNode targetNode;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     private List<FieldNode> closeNodes = new List<FieldNode>();
-    [SerializeField] private FieldNode targetNode;
 
     private LineRenderer moveLine;
     private DrawRange currentRange;
@@ -59,12 +58,13 @@ public class GameManager : MonoBehaviour
     {
         dataMgr = FindAnyObjectByType<DataManager>();
         camMgr = FindAnyObjectByType<CameraManager>();
-        camMgr.SetComponents();
+        camMgr.SetComponents(this);
+        mapEdt = FindAnyObjectByType<MapEditor>();
+        mapEdt.SetComponents(this);
 
         arrowPointer = GameObject.FindGameObjectWithTag("ArrowPointer");
         arrowPointer.SetActive(false);
 
-        fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
         rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
@@ -73,40 +73,9 @@ public class GameManager : MonoBehaviour
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
 
-        CreateField();
-        CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
+        //CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
         CreateLines();
         CreateBullets();
-    }
-
-    /// <summary>
-    /// 필드 생성
-    /// </summary>
-    private void CreateField()
-    {
-        var size_X = (int)fieldSize.x;
-        var size_Y = (int)fieldSize.y;
-        var size = DataUtility.nodeSize;
-        var interval = DataUtility.nodeInterval;
-        for (int i = 0; i < size_Y; i++)
-        {
-            for (int j = 0; j < size_X; j++)
-            {
-                var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
-                fieldNode.transform.SetParent(fieldNodeTf, false);
-                var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
-                fieldNode.transform.position = pos;
-                fieldNode.SetComponents(this, new Vector2(j, i));
-                fieldNode.NodeColor = Color.gray;
-                fieldNodes.Add(fieldNode);
-            }
-        }
-
-        for (int i = 0; i < fieldNodes.Count; i++)
-        {
-            var node = fieldNodes[i];
-            node.AddAdjacentNodes();
-        }
     }
 
     /// <summary>

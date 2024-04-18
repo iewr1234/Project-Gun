@@ -119,9 +119,11 @@ public class FieldNode : MonoBehaviour
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
             var onAxisNode = onAxisNodes[i];
-            if (onAxisNode == null) continue;
-
-            if (openNodes.Find(x => x == onAxisNode) == null)
+            if (onAxisNode == null)
+            {
+                outlines[i].SetActiveLine(true);
+            }
+            else if (openNodes.Find(x => x == onAxisNode) == null)
             {
                 outlines[i].SetActiveLine(true);
             }
@@ -132,9 +134,6 @@ public class FieldNode : MonoBehaviour
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
-            var onAxisNode = onAxisNodes[i];
-            if (onAxisNode == null) continue;
-
             outlines[i].SetActiveLine(false);
         }
     }
