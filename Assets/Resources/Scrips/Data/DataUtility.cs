@@ -30,12 +30,12 @@ public static class DataUtility
         return Mathf.Round(distance * 100) / 100;
     }
 
-    public static void SetMeshsMaterial(List<MeshRenderer> meshs)
+    public static void SetMeshsMaterial(List<MeshRenderer> meshs, string shaderName)
     {
         for (int i = 0; i < meshs.Count; i++)
         {
             var mesh = meshs[i];
-            mesh.material.shader = Shader.Find("Standard");
+            mesh.material.shader = Shader.Find(shaderName);
         }
     }
 
@@ -62,12 +62,12 @@ public static class DataUtility
         }
     }
 
-    public static void SetMeshsMaterial(List<SkinnedMeshRenderer> sMeshs)
+    public static void SetMeshsMaterial(List<SkinnedMeshRenderer> sMeshs, string shaderName)
     {
         for (int i = 0; i < sMeshs.Count; i++)
         {
             var sMesh = sMeshs[i];
-            sMesh.material.shader = Shader.Find("Standard");
+            sMesh.material.shader = Shader.Find(shaderName);
         }
     }
 

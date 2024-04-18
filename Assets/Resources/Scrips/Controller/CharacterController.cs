@@ -97,6 +97,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
+    [SerializeField] private Collider cd;
 
     [HideInInspector] public Transform aimPoint;
     private MultiAimConstraint headRig;
@@ -185,6 +186,7 @@ public class CharacterController : MonoBehaviour
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
+        cd = GetComponent<Collider>();
 
         aimPoint = transform.Find("AimPoint");
         headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
@@ -1185,7 +1187,7 @@ public class CharacterController : MonoBehaviour
             if (Physics.Raycast(watchPos, dir, out RaycastHit hit, range, gameMgr.watchLayer))
             {
                 var charCtr = hit.collider.GetComponent<CharacterController>();
-                if (charCtr != null && charCtr == this)
+                if (charCtr != null && charCtr == this && watcher.weapon.chamberBullet)
                 {
                     watcher.AddCommand(CommandType.Shoot, this, currentNode);
                 }
@@ -1530,7 +1532,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 타겟을 설정
     /// </summary>
-    public bool SetTarget()
+    public bool SetTargetOn()
     {
         if (targetList.Count == 0)
         {
@@ -1540,6 +1542,7 @@ public class CharacterController : MonoBehaviour
         else
         {
             targetIndex = 0;
+            ChangeTagetShader();
             var targetInfo = targetList[targetIndex];
             SetTargeting(targetInfo);
             CameraState camState;
@@ -1563,7 +1566,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 다음 타겟을 설정
     /// </summary>
-    public void SetNextTarget()
+    public void SetNextTargetOn()
     {
         if (targetList.Count < 2) return;
 
@@ -1574,6 +1577,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
         }
+        ChangeTagetShader();
 
         var targetInfo = targetList[targetIndex];
         SetTargeting(targetInfo);
@@ -1591,6 +1595,27 @@ public class CharacterController : MonoBehaviour
             camState = CameraState.LeftAim;
         }
         gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+    }
+
+    private void ChangeTagetShader()
+    {
+        var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            var target = targetList[i];
+            if (target == this.targetList[targetIndex].target)
+            {
+                DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
+                DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
+                DataUtility.SetMeshsMaterial(target.weapon.meshs, "Draw/AlwaysVisible");
+            }
+            else
+            {
+                DataUtility.SetMeshsMaterial(target.meshs, "Standard");
+                DataUtility.SetMeshsMaterial(target.sMeshs, "Standard");
+                DataUtility.SetMeshsMaterial(target.weapon.meshs, "Standard");
+            }
+        }
     }
 
     /// <summary>
@@ -1650,6 +1675,18 @@ public class CharacterController : MonoBehaviour
         else
         {
             shooter.transform.LookAt(target.transform);
+        }
+    }
+
+    public void SetTargetOff()
+    {
+        var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            var target = targetList[i];
+            DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
+            DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
+            DataUtility.SetMeshsMaterial(target.weapon.meshs, "Draw/AlwaysVisible");
         }
     }
 
@@ -1918,10 +1955,11 @@ public class CharacterController : MonoBehaviour
 
         void CharacterDead()
         {
-            DataUtility.SetMeshsMaterial(meshs);
-            DataUtility.SetMeshsMaterial(sMeshs);
-            DataUtility.SetMeshsMaterial(weapon.meshs);
+            DataUtility.SetMeshsMaterial(meshs, "Standard");
+            DataUtility.SetMeshsMaterial(sMeshs, "Standard");
+            DataUtility.SetMeshsMaterial(weapon.meshs, "Standard");
             animator.enabled = false;
+            cd.enabled = false;
             headAim = false;
             chestAim = false;
             headRig.weight = 0f;

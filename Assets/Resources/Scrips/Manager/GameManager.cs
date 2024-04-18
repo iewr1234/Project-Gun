@@ -209,7 +209,7 @@ public class GameManager : MonoBehaviour
                 {
                     ClearLine();
                     selectChar.FindTargets(selectChar.currentNode);
-                    if (selectChar.SetTarget())
+                    if (selectChar.SetTargetOn())
                     {
                         RemoveTargetNode();
                         SwitchMovableNodes(false);
@@ -236,7 +236,7 @@ public class GameManager : MonoBehaviour
             case ActionState.Shot:
                 if (Input.GetKeyDown(KeyCode.Tab))
                 {
-                    selectChar.SetNextTarget();
+                    selectChar.SetNextTargetOn();
                 }
                 else if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -265,6 +265,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    selectChar.SetTargetOff();
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
