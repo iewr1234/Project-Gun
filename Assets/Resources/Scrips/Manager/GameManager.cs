@@ -455,7 +455,7 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < openNodes.Count; i++)
                 {
                     var movableNode = openNodes[i];
-                    movableNode.SetMovableNode();
+                    movableNode.SetNodeOutLine(false);
                 }
                 openNodes.Clear();
                 break;
@@ -474,7 +474,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < openNodes.Count; i++)
         {
             var movableNode = openNodes[i];
-            movableNode.SetMovableNode();
+            movableNode.SetNodeOutLine(false);
         }
         //ResultNodePass(charCtr.currentNode, targetNode);
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))

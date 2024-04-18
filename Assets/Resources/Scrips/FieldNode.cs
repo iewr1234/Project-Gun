@@ -15,6 +15,11 @@ public class FieldNode : MonoBehaviour
     [SerializeField] private Canvas canvas;
     private List<NodeOutline> outlines = new List<NodeOutline>();
     //private MeshRenderer fog;
+
+    private GameObject marker;
+    private Image markerOutline;
+    private TextMeshProUGUI markerText;
+
     private TextMeshProUGUI posText;
 
     [Header("--- Assignment Variable---")]
@@ -49,6 +54,12 @@ public class FieldNode : MonoBehaviour
             outline.SetComponents();
         }
         //fog = transform.Find("Fog").GetComponent<MeshRenderer>();
+
+        marker = transform.Find("Canvas/Marker").gameObject;
+        markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
+        markerText = marker.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        marker.SetActive(false);
+
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
@@ -114,6 +125,21 @@ public class FieldNode : MonoBehaviour
     //    canSee = value;
     //}
 
+    public void SetMarker(CharacterOwner type, int index)
+    {
+        marker.SetActive(true);
+        markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
+        markerText.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
+        markerText.text = type == CharacterOwner.Player ? $"P{index}" : $"E{index}";
+        canMove = false;
+    }
+
+    public void SetMarker()
+    {
+        marker.SetActive(false);
+        canMove = true;
+    }
+
     public void SetMovableNode(List<FieldNode> openNodes)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
@@ -130,11 +156,12 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetMovableNode()
+    public void SetNodeOutLine(bool value)
     {
-        for (int i = 0; i < onAxisNodes.Count; i++)
+        for (int i = 0; i < outlines.Count; i++)
         {
-            outlines[i].SetActiveLine(false);
+            var outline = outlines[i];
+            outline.SetActiveLine(value);
         }
     }
 
