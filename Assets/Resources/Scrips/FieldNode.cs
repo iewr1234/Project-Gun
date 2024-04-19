@@ -41,9 +41,10 @@ public class FieldNode : MonoBehaviour
         nodePos = _nodePos;
 
         transform.name = $"X{nodePos.x}/Y{nodePos.y}";
-        mesh = GetComponentInChildren<MeshRenderer>();
-        var material = new Material(Resources.Load<Material>("Materials/Node"));
-        mesh.material = material;
+        mesh = transform.Find("Mesh").GetComponent<MeshRenderer>();
+        mesh.enabled = false;
+        //var material = new Material(Resources.Load<Material>("Materials/Node"));
+        //mesh.material = material;
 
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
@@ -63,7 +64,7 @@ public class FieldNode : MonoBehaviour
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
 
-        canMove = true;
+        //canMove = true;
     }
 
     public void AddAdjacentNodes()

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using System.Net.Sockets;
+using Mono.Cecil;
 
 public enum MapEditorState
 {
@@ -10,6 +10,8 @@ public enum MapEditorState
     Node,
     Player,
     Enemy,
+    Floor,
+    Object,
 }
 
 public enum FindNodeType
@@ -21,40 +23,79 @@ public enum FindNodeType
 
 public class MapEditor : MonoBehaviour
 {
+    private enum InterfaceType
+    {
+        None,
+        Top,
+        Side,
+    }
+
     [Header("---Access Script---")]
     private GameManager gameMgr;
 
     [Header("---Access Component---")]
     [SerializeField] private MapEditorState state;
+    private InterfaceType activeType;
     private GameObject activeUI;
 
     private FindNodeType findType;
     private FieldNode selectNode;
 
-    [Header("[Set Node]")]
+    #region Top
+    [Header("[Node]")]
     private Transform fieldNodeTf;
     private GameObject nodeUI;
     private TMP_InputField xSize;
     private TMP_InputField ySize;
 
-    [Header("[Create Player]")]
+    [Header("[Player]")]
     private Transform characterTf;
     private GameObject playerUI;
     private List<FieldNode> pMarkerNodes = new List<FieldNode>();
+    #endregion
+
+    #region Side
+    private GameObject sideButtons;
+    private GameObject sideUI;
+
+    [Header("[Floor]")]
+    private GameObject floorUI;
+
+    [Header("[Object]")]
+    private GameObject objectUI;
+    #endregion
+
+    [Header("--- Assignment Variable---")]
+    private Vector3 sidePos_On;
+    private Vector3 sidePos_Off;
 
     public void SetComponents(GameManager _gameMgr)
     {
         gameMgr = _gameMgr;
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
-        nodeUI = transform.Find("UI/Node").gameObject;
-        xSize = transform.Find("UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
-        ySize = transform.Find("UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
+        nodeUI = transform.Find("Top/UI/Node").gameObject;
+        xSize = transform.Find("Top/UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
+        ySize = transform.Find("Top/UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
         nodeUI.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
-        playerUI = transform.Find("UI/Player").gameObject;
+        playerUI = transform.Find("Top/UI/Player").gameObject;
         playerUI.SetActive(false);
+
+        sideButtons = transform.Find("Side/Buttons").gameObject;
+        sideUI = transform.Find("Side/UI").gameObject;
+        sidePos_On = sideButtons.transform.localPosition;
+        var width = sideUI.GetComponent<RectTransform>().rect.width;
+        sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
+        sideButtons.transform.localPosition = sidePos_Off;
+        sideUI.transform.localPosition = sidePos_Off;
+
+        floorUI = transform.Find("Side/UI/Floor").gameObject;
+        floorUI.SetActive(false);
+
+        objectUI = transform.Find("Side/UI/Object").gameObject;
+        objectUI.SetActive(false);
     }
 
     private void Update()
@@ -239,7 +280,7 @@ public class MapEditor : MonoBehaviour
                 var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(gameMgr, new Vector2(j, i));
-                fieldNode.NodeColor = Color.gray;
+                //fieldNode.NodeColor = Color.gray;
                 gameMgr.fieldNodes.Add(fieldNode);
             }
         }
@@ -251,31 +292,54 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    private void OnInterface(MapEditorState _state, GameObject _activeUI)
+    private void OnInterface(InterfaceType _type, MapEditorState _state, GameObject _activeUI)
     {
         switch (_activeUI.activeSelf)
         {
             case true:
-                _activeUI.SetActive(false);
-                activeUI = null;
+                SetUI(false);
                 state = MapEditorState.None;
+                activeType = InterfaceType.None;
+                activeUI = null;
                 break;
             case false:
                 if (activeUI != null)
                 {
-                    activeUI.SetActive(false);
+                    SetUI(false);
                 }
-                activeUI = _activeUI;
-                activeUI.SetActive(true);
                 state = _state;
+                activeType = _type;
+                activeUI = _activeUI;
+                SetUI(true);
                 break;
+        }
+
+        void SetUI(bool value)
+        {
+            if (activeType == InterfaceType.Side)
+            {
+                switch (value)
+                {
+                    case true:
+                        sideButtons.transform.localPosition = sidePos_On;
+                        sideUI.transform.localPosition = sidePos_On;
+                        break;
+                    case false:
+                        sideButtons.transform.localPosition = sidePos_Off;
+                        sideUI.transform.localPosition = sidePos_Off;
+                        break;
+                }
+            }
+            activeUI.SetActive(value);
         }
     }
 
     #region Button Event
+
+    #region Top
     public void Button_Node()
     {
-        OnInterface(MapEditorState.Node, nodeUI);
+        OnInterface(InterfaceType.Top, MapEditorState.Node, nodeUI);
     }
 
     public void Button_Node_Create()
@@ -284,12 +348,13 @@ public class MapEditor : MonoBehaviour
 
         CreateField(int.Parse(xSize.text), int.Parse(ySize.text));
         activeUI.gameObject.SetActive(false);
+        activeType = InterfaceType.None;
         activeUI = null;
     }
 
     public void Button_Player()
     {
-        OnInterface(MapEditorState.Player, playerUI);
+        OnInterface(InterfaceType.Top, MapEditorState.Player, playerUI);
     }
 
     public void Button_Player_CreateMarker()
@@ -301,5 +366,19 @@ public class MapEditor : MonoBehaviour
     {
         findType = FindNodeType.Delete;
     }
+    #endregion
+
+    #region Side
+    public void Button_Floor()
+    {
+        OnInterface(InterfaceType.Side, MapEditorState.Floor, floorUI);
+    }
+
+    public void Button_Object()
+    {
+        OnInterface(InterfaceType.Side, MapEditorState.Object, objectUI);
+    }
+    #endregion
+
     #endregion
 }
