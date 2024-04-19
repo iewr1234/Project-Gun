@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Mono.Cecil;
+using UnityEditor.Experimental.GraphView;
 
 public enum MapEditorState
 {
@@ -17,8 +18,10 @@ public enum MapEditorState
 public enum FindNodeType
 {
     None,
-    Create,
-    Delete,
+    CreateMarker,
+    DeleteMarker,
+    SetFloor,
+    SetObject,
 }
 
 public class MapEditor : MonoBehaviour
@@ -34,24 +37,22 @@ public class MapEditor : MonoBehaviour
     private GameManager gameMgr;
 
     [Header("---Access Component---")]
-    [SerializeField] private MapEditorState state;
-    private InterfaceType activeType;
-    private GameObject activeUI;
-
-    private FindNodeType findType;
-    private FieldNode selectNode;
+    private Transform fieldNodeTf;
+    private Transform characterTf;
 
     #region Top
     [Header("[Node]")]
-    private Transform fieldNodeTf;
     private GameObject nodeUI;
     private TMP_InputField xSize;
     private TMP_InputField ySize;
 
     [Header("[Player]")]
-    private Transform characterTf;
     private GameObject playerUI;
     private List<FieldNode> pMarkerNodes = new List<FieldNode>();
+
+    [Header("[Enemy]")]
+    private GameObject enemyUI;
+    private List<FieldNode> eMarkerNodes = new List<FieldNode>();
     #endregion
 
     #region Side
@@ -66,6 +67,15 @@ public class MapEditor : MonoBehaviour
     #endregion
 
     [Header("--- Assignment Variable---")]
+    [SerializeField] private MapEditorState state;
+    private InterfaceType activeType;
+    private GameObject activeUI;
+
+    private FindNodeType findType;
+    private FieldNode selectNode;
+
+    [Space(5f)]
+    public MapItem selectItem;
     private Vector3 sidePos_On;
     private Vector3 sidePos_Off;
 
@@ -74,14 +84,18 @@ public class MapEditor : MonoBehaviour
         gameMgr = _gameMgr;
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
+        characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+
         nodeUI = transform.Find("Top/UI/Node").gameObject;
         xSize = transform.Find("Top/UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
         ySize = transform.Find("Top/UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
         nodeUI.SetActive(false);
 
-        characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         playerUI = transform.Find("Top/UI/Player").gameObject;
         playerUI.SetActive(false);
+
+        enemyUI = transform.Find("Top/UI/Enemy").gameObject;
+        enemyUI.SetActive(false);
 
         sideButtons = transform.Find("Side/Buttons").gameObject;
         sideUI = transform.Find("Side/UI").gameObject;
@@ -105,6 +119,12 @@ public class MapEditor : MonoBehaviour
         switch (state)
         {
             case MapEditorState.Player:
+                InputEvent();
+                break;
+            case MapEditorState.Enemy:
+                InputEvent();
+                break;
+            case MapEditorState.Floor:
                 InputEvent();
                 break;
             default:
@@ -151,6 +171,9 @@ public class MapEditor : MonoBehaviour
                 case MapEditorState.Player:
                     SetMarker();
                     break;
+                case MapEditorState.Enemy:
+                    SetMarker();
+                    break;
                 default:
                     break;
             }
@@ -161,14 +184,14 @@ public class MapEditor : MonoBehaviour
         void SetMarker()
         {
             var charType = state == MapEditorState.Player ? CharacterOwner.Player : CharacterOwner.Enemy;
-            var markerNodes = state == MapEditorState.Player ? pMarkerNodes : null;
+            var markerNodes = state == MapEditorState.Player ? pMarkerNodes : eMarkerNodes;
             switch (findType)
             {
-                case FindNodeType.Create:
-                    selectNode.SetMarker(charType, pMarkerNodes.Count);
+                case FindNodeType.CreateMarker:
+                    selectNode.SetMarker(charType, markerNodes.Count);
                     markerNodes.Add(selectNode);
                     break;
-                case FindNodeType.Delete:
+                case FindNodeType.DeleteMarker:
                     selectNode.SetMarker();
                     markerNodes.Remove(selectNode);
                     for (int i = 0; i < markerNodes.Count; i++)
@@ -197,13 +220,17 @@ public class MapEditor : MonoBehaviour
             {
                 selectNode.SetNodeOutLine(false);
             }
+
             switch (findType)
             {
-                case FindNodeType.Create:
+                case FindNodeType.CreateMarker:
                     CreateMarker(node);
                     break;
-                case FindNodeType.Delete:
+                case FindNodeType.DeleteMarker:
                     DeleteMarker(node);
+                    break;
+                case FindNodeType.SetFloor:
+                    HighlightNode(node);
                     break;
                 default:
                     break;
@@ -237,7 +264,7 @@ public class MapEditor : MonoBehaviour
 
         void DeleteMarker(FieldNode node)
         {
-            var markerNodes = state == MapEditorState.Player ? pMarkerNodes : null;
+            var markerNodes = state == MapEditorState.Player ? pMarkerNodes : eMarkerNodes;
             var find = markerNodes.Find(x => x == node);
             if (find != null)
             {
@@ -249,6 +276,12 @@ public class MapEditor : MonoBehaviour
                 selectNode.SetNodeOutLine(false);
                 selectNode = null;
             }
+        }
+
+        void HighlightNode(FieldNode node)
+        {
+            node.SetNodeOutLine(true);
+            selectNode = node;
         }
     }
 
@@ -334,6 +367,34 @@ public class MapEditor : MonoBehaviour
         }
     }
 
+    public void SelectMapItem(MapItem item)
+    {
+        if (selectItem == item)
+        {
+            selectItem.outline.enabled = false;
+            selectItem = null;
+            return;
+        }
+        else if (selectItem != null)
+        {
+            selectItem.outline.enabled = false;
+        }
+
+        selectItem = item;
+        selectItem.outline.enabled = true;
+        switch (item.type)
+        {
+            case MapItemType.Floor:
+                findType = FindNodeType.SetFloor;
+                break;
+            case MapItemType.Object:
+                findType = FindNodeType.SetObject;
+                break;
+            default:
+                break;
+        }
+    }
+
     #region Button Event
 
     #region Top
@@ -357,14 +418,19 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Top, MapEditorState.Player, playerUI);
     }
 
-    public void Button_Player_CreateMarker()
+    public void Button_Enemy()
     {
-        findType = FindNodeType.Create;
+        OnInterface(InterfaceType.Top, MapEditorState.Enemy, enemyUI);
     }
 
-    public void Button_Player_DeleteMarker()
+    public void Button_Character_CreateMarker()
     {
-        findType = FindNodeType.Delete;
+        findType = FindNodeType.CreateMarker;
+    }
+
+    public void Button_Character_DeleteMarker()
+    {
+        findType = FindNodeType.DeleteMarker;
     }
     #endregion
 
