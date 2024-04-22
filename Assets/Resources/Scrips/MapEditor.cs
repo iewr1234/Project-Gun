@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Mono.Cecil;
-using UnityEditor.Experimental.GraphView;
 
 public enum MapEditorState
 {
@@ -58,9 +56,13 @@ public class MapEditor : MonoBehaviour
     #region Side
     private GameObject sideButtons;
     private GameObject sideUI;
+    private TextMeshProUGUI floorRandomText;
+    private TextMeshProUGUI gridSwitchText;
 
     [Header("[Floor]")]
     private GameObject floorUI;
+    private bool floorDirRandom;
+    private List<FieldNode> setFloorNodes = new List<FieldNode>();
 
     [Header("[Object]")]
     private GameObject objectUI;
@@ -99,16 +101,18 @@ public class MapEditor : MonoBehaviour
 
         sideButtons = transform.Find("Side/Buttons").gameObject;
         sideUI = transform.Find("Side/UI").gameObject;
+        floorRandomText = sideUI.transform.Find("FloorRandom/Text").GetComponent<TextMeshProUGUI>();
+        gridSwitchText = sideUI.transform.Find("GridSwitch/Text").GetComponent<TextMeshProUGUI>();
         sidePos_On = sideButtons.transform.localPosition;
         var width = sideUI.GetComponent<RectTransform>().rect.width;
         sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
         sideButtons.transform.localPosition = sidePos_Off;
         sideUI.transform.localPosition = sidePos_Off;
 
-        floorUI = transform.Find("Side/UI/Floor").gameObject;
+        floorUI = transform.Find("Side/UI/FloorItem").gameObject;
         floorUI.SetActive(false);
 
-        objectUI = transform.Find("Side/UI/Object").gameObject;
+        objectUI = transform.Find("Side/UI/ObjectItem").gameObject;
         objectUI.SetActive(false);
     }
 
@@ -125,6 +129,9 @@ public class MapEditor : MonoBehaviour
                 InputEvent();
                 break;
             case MapEditorState.Floor:
+                InputEvent();
+                break;
+            case MapEditorState.Object:
                 InputEvent();
                 break;
             default:
@@ -161,11 +168,15 @@ public class MapEditor : MonoBehaviour
 
     private void MouseInput()
     {
-        if (findType == FindNodeType.None) return;
+        var canInput = findType != FindNodeType.None && selectNode != null;
+        if (!canInput) return;
 
-        if (Input.GetMouseButtonDown(0) && selectNode != null)
+        if (Input.GetMouseButtonUp(0))
         {
-            selectNode.SetNodeOutLine(false);
+            setFloorNodes.Clear();
+        }
+        else if (Input.GetMouseButtonDown(0))
+        {
             switch (state)
             {
                 case MapEditorState.Player:
@@ -177,12 +188,50 @@ public class MapEditor : MonoBehaviour
                 default:
                     break;
             }
-            selectNode = null;
-            findType = FindNodeType.None;
+        }
+        else if (Input.GetMouseButton(0))
+        {
+            switch (state)
+            {
+                case MapEditorState.Floor:
+                    SetFloor(true);
+                    break;
+                case MapEditorState.Object:
+                    SetObject(true);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (Input.GetMouseButton(1))
+        {
+            switch (state)
+            {
+                case MapEditorState.Floor:
+                    SetFloor(false);
+                    break;
+                case MapEditorState.Object:
+                    SetObject(false);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (Input.GetMouseButtonDown(2))
+        {
+            switch (state)
+            {
+                case MapEditorState.Object:
+                    RotateObject();
+                    break;
+                default:
+                    break;
+            }
         }
 
         void SetMarker()
         {
+            selectNode.SetNodeOutLine(false);
             var charType = state == MapEditorState.Player ? CharacterOwner.Player : CharacterOwner.Enemy;
             var markerNodes = state == MapEditorState.Player ? pMarkerNodes : eMarkerNodes;
             switch (findType)
@@ -202,6 +251,52 @@ public class MapEditor : MonoBehaviour
                     break;
                 default:
                     break;
+            }
+            selectNode = null;
+            findType = FindNodeType.None;
+        }
+
+        void SetFloor(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    if (selectItem != null && setFloorNodes.Find(x => x == selectNode) == null)
+                    {
+                        selectNode.SetOnNodeMesh(selectItem, floorDirRandom);
+                        setFloorNodes.Add(selectNode);
+                    }
+                    break;
+                case false:
+                    selectNode.SetOffNodeMesh();
+                    break;
+            }
+        }
+
+        void SetObject(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    if (selectItem != null)
+                    {
+                        selectNode.SetOnObject(selectItem);
+                    }
+                    break;
+                case false:
+                    selectNode.SetOffObject();
+                    break;
+            }
+        }
+
+        void RotateObject()
+        {
+            if (selectNode.cover != null)
+            {
+                var coverObject = selectNode.cover.coverObject;
+                var rot = coverObject.transform.localRotation.eulerAngles;
+                rot.y += 90f;
+                coverObject.transform.localRotation = Quaternion.Euler(rot);
             }
         }
     }
@@ -232,6 +327,9 @@ public class MapEditor : MonoBehaviour
                 case FindNodeType.SetFloor:
                     HighlightNode(node);
                     break;
+                case FindNodeType.SetObject:
+                    HighlightNode(node);
+                    break;
                 default:
                     break;
             }
@@ -249,6 +347,9 @@ public class MapEditor : MonoBehaviour
                 switch (state)
                 {
                     case MapEditorState.Player:
+                        node.SetNodeOutLine(true);
+                        break;
+                    case MapEditorState.Enemy:
                         node.SetNodeOutLine(true);
                         break;
                     default:
@@ -280,8 +381,24 @@ public class MapEditor : MonoBehaviour
 
         void HighlightNode(FieldNode node)
         {
-            node.SetNodeOutLine(true);
-            selectNode = node;
+            if (selectItem == null) return;
+
+            switch (findType)
+            {
+                case FindNodeType.SetFloor:
+                    node.SetNodeOutLine(true);
+                    selectNode = node;
+                    break;
+                case FindNodeType.SetObject:
+                    if (node.Mesh.enabled)
+                    {
+                        node.SetNodeOutLine(true);
+                        selectNode = node;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -358,6 +475,11 @@ public class MapEditor : MonoBehaviour
                         sideUI.transform.localPosition = sidePos_On;
                         break;
                     case false:
+                        if (selectItem != null)
+                        {
+                            selectItem.outline.enabled = false;
+                            selectItem = null;
+                        }
                         sideButtons.transform.localPosition = sidePos_Off;
                         sideUI.transform.localPosition = sidePos_Off;
                         break;
@@ -446,5 +568,40 @@ public class MapEditor : MonoBehaviour
     }
     #endregion
 
+
+    public void Button_FloorRandom()
+    {
+        floorDirRandom = !floorDirRandom;
+        switch (floorDirRandom)
+        {
+            case true:
+                floorRandomText.text = "바닥방향 무작위 OFF";
+                break;
+            case false:
+                floorRandomText.text = "바닥방향 무작위 ON";
+                break;
+        }
+    }
+
+    public void Button_GridSwitch()
+    {
+        for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+        {
+            var node = gameMgr.fieldNodes[i];
+            node.frame.SetActive(!node.frame.activeSelf);
+            if (i == 0)
+            {
+                switch (node.frame.activeSelf)
+                {
+                    case true:
+                        gridSwitchText.text = "그리드 OFF";
+                        break;
+                    case false:
+                        gridSwitchText.text = "그리드 ON";
+                        break;
+                }
+            }
+        }
+    }
     #endregion
 }

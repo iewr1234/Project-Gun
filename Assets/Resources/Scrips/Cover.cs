@@ -17,7 +17,7 @@ public class Cover : MonoBehaviour
     [HideInInspector] public FieldNode node;
 
     [Header("---Access Component---")]
-    private GameObject coverObject;
+    [HideInInspector] public GameObject coverObject;
     private Canvas canvas;
     private List<Image> coverImages;
 
@@ -45,8 +45,8 @@ public class Cover : MonoBehaviour
         switch (type)
         {
             case CoverType.Half:
-                coverObject.transform.localPosition = halfCover_Pos;
-                coverObject.transform.localScale = halfCover_Scale;
+                //coverObject.transform.localPosition = halfCover_Pos;
+                //coverObject.transform.localScale = halfCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)
                 {
                     var coverImage = coverImages[i];
@@ -55,8 +55,8 @@ public class Cover : MonoBehaviour
                 }
                 break;
             case CoverType.Full:
-                coverObject.transform.localPosition = fullCover_Pos;
-                coverObject.transform.localScale = fullCover_Scale;
+                //coverObject.transform.localPosition = fullCover_Pos;
+                //coverObject.transform.localScale = fullCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)
                 {
                     var coverImage = coverImages[i];

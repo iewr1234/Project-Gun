@@ -18,13 +18,13 @@ public class MapItem : MonoBehaviour
 
     [Header("---Access Component---")]
     [HideInInspector] public Image outline;
-    private Image image;
+    [HideInInspector] public Image image;
 
     [Header("--- Assignment Variable---")]
     public MapItemType type;
 
-    [Header("[Floor]")]
-    public Color floorColor;
+    [Header("[Object]")]
+    public CoverType coverType;
 
     private void Start()
     {
@@ -32,12 +32,12 @@ public class MapItem : MonoBehaviour
 
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;
-        image = transform.Find("Image").GetComponent<Image>();
-
         switch (type)
         {
             case MapItemType.Floor:
-                image.color = floorColor;
+                image = transform.Find("Image").GetComponent<Image>();
+                break;
+            case MapItemType.Object:
                 break;
             default:
                 break;

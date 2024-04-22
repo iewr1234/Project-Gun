@@ -13,6 +13,7 @@ public class FieldNode : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private MeshRenderer mesh;
     [SerializeField] private Canvas canvas;
+    [HideInInspector] public GameObject frame;
     private List<NodeOutline> outlines = new List<NodeOutline>();
     //private MeshRenderer fog;
 
@@ -48,6 +49,7 @@ public class FieldNode : MonoBehaviour
 
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
+        frame = transform.Find("Frame").gameObject;
         outlines = GetComponentsInChildren<NodeOutline>().ToList();
         for (int i = 0; i < outlines.Count; i++)
         {
@@ -120,27 +122,6 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    //public void SetVisibleNode(bool value)
-    //{
-    //    fog.enabled = !value;
-    //    canSee = value;
-    //}
-
-    public void SetMarker(CharacterOwner type, int index)
-    {
-        marker.SetActive(true);
-        markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
-        markerText.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
-        markerText.text = type == CharacterOwner.Player ? $"P{index}" : $"E{index}";
-        canMove = false;
-    }
-
-    public void SetMarker()
-    {
-        marker.SetActive(false);
-        canMove = true;
-    }
-
     public void SetMovableNode(List<FieldNode> openNodes)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
@@ -154,15 +135,6 @@ public class FieldNode : MonoBehaviour
             {
                 outlines[i].SetActiveLine(true);
             }
-        }
-    }
-
-    public void SetNodeOutLine(bool value)
-    {
-        for (int i = 0; i < outlines.Count; i++)
-        {
-            var outline = outlines[i];
-            outline.SetActiveLine(value);
         }
     }
 
@@ -209,9 +181,103 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public Color NodeColor
+    public void SetNodeOutLine(bool value)
     {
-        set { mesh.material.color = value; }
-        get { return mesh.material.color; }
+        for (int i = 0; i < outlines.Count; i++)
+        {
+            var outline = outlines[i];
+            outline.SetActiveLine(value);
+        }
+    }
+
+    public void SetMarker(CharacterOwner type, int index)
+    {
+        marker.SetActive(true);
+        markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
+        markerText.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
+        markerText.text = type == CharacterOwner.Player ? $"P{index}" : $"E{index}";
+        canMove = false;
+    }
+
+    public void SetMarker()
+    {
+        marker.SetActive(false);
+        canMove = true;
+    }
+
+    public void SetOnNodeMesh(MapItem item, bool random)
+    {
+        mesh.enabled = true;
+        if (random)
+        {
+            var dirs = new float[] { 0f, 90f, 180f, 270f };
+            var index = Random.Range(0, dirs.Length);
+            var dir = dirs[index];
+            mesh.transform.localRotation = Quaternion.Euler(0f, dir, 0f);
+        }
+        else
+        {
+            mesh.transform.localRotation = Quaternion.identity;
+        }
+        mesh.material = item.image.material;
+        canMove = true;
+    }
+
+    public void SetOffNodeMesh()
+    {
+        if (!mesh.enabled) return;
+
+        mesh.enabled = false;
+        canMove = false;
+    }
+
+    public void SetOnObject(MapItem item)
+    {
+        switch (item.coverType)
+        {
+            case CoverType.None:
+                break;
+            case CoverType.Half:
+                if (cover != null)
+                {
+                    Destroy(cover.gameObject);
+                }
+                var halfObject = Instantiate(Resources.Load<Cover>($"Prefabs/Object/{item.name}"));
+                halfObject.transform.SetParent(transform, false);
+                halfObject.SetComponents(this, CoverType.Half);
+                break;
+            case CoverType.Full:
+                if (cover != null)
+                {
+                    Destroy(cover.gameObject);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void SetOffObject()
+    {
+        if (cover == null) return;
+
+        switch (cover.type)
+        {
+            case CoverType.Half:
+                canMove = true;
+                break;
+            case CoverType.Full:
+                canMove = true;
+                break;
+            default:
+                break;
+        }
+        Destroy(cover.gameObject);
+    }
+
+    public MeshRenderer Mesh
+    {
+        private set { mesh = value; }
+        get { return mesh; }
     }
 }
