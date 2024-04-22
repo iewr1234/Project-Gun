@@ -10,7 +10,8 @@ public enum MapEditorState
     Player,
     Enemy,
     Floor,
-    Object,
+    HalfCover,
+    FullCover,
 }
 
 public enum FindNodeType
@@ -64,8 +65,11 @@ public class MapEditor : MonoBehaviour
     private bool floorDirRandom;
     private List<FieldNode> setFloorNodes = new List<FieldNode>();
 
-    [Header("[Object]")]
-    private GameObject objectUI;
+    [Header("[HalfCover]")]
+    private GameObject halfCoverUI;
+
+    [Header("[FullCover]")]
+    private GameObject fullCoverUI;
     #endregion
 
     [Header("--- Assignment Variable---")]
@@ -109,11 +113,14 @@ public class MapEditor : MonoBehaviour
         sideButtons.transform.localPosition = sidePos_Off;
         sideUI.transform.localPosition = sidePos_Off;
 
-        floorUI = transform.Find("Side/UI/FloorItem").gameObject;
+        floorUI = transform.Find("Side/UI/Floor").gameObject;
         floorUI.SetActive(false);
 
-        objectUI = transform.Find("Side/UI/ObjectItem").gameObject;
-        objectUI.SetActive(false);
+        halfCoverUI = transform.Find("Side/UI/HalfCover").gameObject;
+        halfCoverUI.SetActive(false);
+
+        fullCoverUI = transform.Find("Side/UI/FullCover").gameObject;
+        fullCoverUI.SetActive(false);
     }
 
     private void Update()
@@ -131,7 +138,10 @@ public class MapEditor : MonoBehaviour
             case MapEditorState.Floor:
                 InputEvent();
                 break;
-            case MapEditorState.Object:
+            case MapEditorState.HalfCover:
+                InputEvent();
+                break;
+            case MapEditorState.FullCover:
                 InputEvent();
                 break;
             default:
@@ -196,7 +206,10 @@ public class MapEditor : MonoBehaviour
                 case MapEditorState.Floor:
                     SetFloor(true);
                     break;
-                case MapEditorState.Object:
+                case MapEditorState.HalfCover:
+                    SetObject(true);
+                    break;
+                case MapEditorState.FullCover:
                     SetObject(true);
                     break;
                 default:
@@ -210,7 +223,10 @@ public class MapEditor : MonoBehaviour
                 case MapEditorState.Floor:
                     SetFloor(false);
                     break;
-                case MapEditorState.Object:
+                case MapEditorState.HalfCover:
+                    SetObject(false);
+                    break;
+                case MapEditorState.FullCover:
                     SetObject(false);
                     break;
                 default:
@@ -221,7 +237,10 @@ public class MapEditor : MonoBehaviour
         {
             switch (state)
             {
-                case MapEditorState.Object:
+                case MapEditorState.HalfCover:
+                    RotateObject();
+                    break;
+                case MapEditorState.FullCover:
                     RotateObject();
                     break;
                 default:
@@ -562,9 +581,14 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Side, MapEditorState.Floor, floorUI);
     }
 
-    public void Button_Object()
+    public void Button_HalfCover()
     {
-        OnInterface(InterfaceType.Side, MapEditorState.Object, objectUI);
+        OnInterface(InterfaceType.Side, MapEditorState.HalfCover, halfCoverUI);
+    }
+
+    public void Button_FullCover()
+    {
+        OnInterface(InterfaceType.Side, MapEditorState.FullCover, fullCoverUI);
     }
     #endregion
 
@@ -585,22 +609,20 @@ public class MapEditor : MonoBehaviour
 
     public void Button_GridSwitch()
     {
+        var value = gridSwitchText.text == "그리드 ON" ? true : false;
         for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
         {
             var node = gameMgr.fieldNodes[i];
-            node.frame.SetActive(!node.frame.activeSelf);
-            if (i == 0)
-            {
-                switch (node.frame.activeSelf)
-                {
-                    case true:
-                        gridSwitchText.text = "그리드 OFF";
-                        break;
-                    case false:
-                        gridSwitchText.text = "그리드 ON";
-                        break;
-                }
-            }
+            node.SetActiveNodeFrame(value);
+        }
+        switch (value)
+        {
+            case true:
+                gridSwitchText.text = "그리드 OFF";
+                break;
+            case false:
+                gridSwitchText.text = "그리드 ON";
+                break;
         }
     }
     #endregion

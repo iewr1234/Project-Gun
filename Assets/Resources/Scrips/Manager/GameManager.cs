@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
         rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
-        nodeLayer = LayerMask.GetMask("Node");
+        nodeLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("UI");
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
 

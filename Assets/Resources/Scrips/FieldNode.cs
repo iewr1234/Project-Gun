@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 
 public class FieldNode : MonoBehaviour
 {
@@ -11,9 +12,9 @@ public class FieldNode : MonoBehaviour
     [SerializeField] private GameManager gameMgr;
 
     [Header("---Access Component---")]
-    [SerializeField] private MeshRenderer mesh;
-    [SerializeField] private Canvas canvas;
-    [HideInInspector] public GameObject frame;
+    private MeshRenderer mesh;
+    private Canvas canvas;
+    private GameObject frame;
     private List<NodeOutline> outlines = new List<NodeOutline>();
     //private MeshRenderer fog;
 
@@ -228,6 +229,11 @@ public class FieldNode : MonoBehaviour
         if (!mesh.enabled) return;
 
         mesh.enabled = false;
+        marker.SetActive(false);
+        if (cover != null)
+        {
+            Destroy(cover.gameObject);
+        }
         canMove = false;
     }
 
@@ -238,22 +244,27 @@ public class FieldNode : MonoBehaviour
             case CoverType.None:
                 break;
             case CoverType.Half:
-                if (cover != null)
-                {
-                    Destroy(cover.gameObject);
-                }
-                var halfObject = Instantiate(Resources.Load<Cover>($"Prefabs/Object/{item.name}"));
-                halfObject.transform.SetParent(transform, false);
-                halfObject.SetComponents(this, CoverType.Half);
+                SetCover(CoverType.Half);
                 break;
             case CoverType.Full:
-                if (cover != null)
-                {
-                    Destroy(cover.gameObject);
-                }
+                SetCover(CoverType.Full);
                 break;
             default:
                 break;
+        }
+
+        void SetCover(CoverType coverType)
+        {
+            if (cover != null)
+            {
+                Destroy(cover.gameObject);
+            }
+
+            var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/Cover_{item.size.x}x{item.size.y}"));
+            _cover.transform.SetParent(transform, false);
+            _cover.SetComponents(this, coverType);
+            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/Cover/{coverType}/{item.name}"));
+            _object.transform.SetParent(_cover.transform, false);
         }
     }
 
@@ -273,6 +284,12 @@ public class FieldNode : MonoBehaviour
                 break;
         }
         Destroy(cover.gameObject);
+    }
+
+    public void SetActiveNodeFrame(bool value)
+    {
+        frame.SetActive(value);
+        posText.enabled = value;
     }
 
     public MeshRenderer Mesh

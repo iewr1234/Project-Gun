@@ -25,6 +25,7 @@ public class MapItem : MonoBehaviour
 
     [Header("[Object]")]
     public CoverType coverType;
+    public Vector2 size;
 
     private void Start()
     {
