@@ -8,6 +8,9 @@ public enum MapItemType
 {
     None,
     Floor,
+    HalfCover,
+    FullCover,
+    FloorObject,
     Object,
 }
 
@@ -21,11 +24,10 @@ public class MapItem : MonoBehaviour
     [HideInInspector] public Image maskImage;
 
     [Header("--- Assignment Variable---")]
-    public MapItemType type;
+    public MapEditorType type;
 
     [Header("[Object]")]
-    public CoverType coverType;
-    public Vector2 size;
+    public Vector2 size = new Vector2(1f, 1f);
 
     private void Start()
     {

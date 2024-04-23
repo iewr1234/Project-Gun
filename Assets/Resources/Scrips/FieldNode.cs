@@ -5,6 +5,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[System.Serializable]
+public class SetObject
+{
+    public MapEditorType type;
+    public Vector2 size;
+    public FieldNode setNode;
+    public List<FieldNode> subNodes = new List<FieldNode>();
+    public GameObject setObject;
+}
+
 public class FieldNode : MonoBehaviour
 {
     [Header("---Access Script---")]
@@ -30,11 +40,15 @@ public class FieldNode : MonoBehaviour
 
     public bool canSee;
     public bool canMove;
+    [Space(5f)]
+
+    public List<SetObject> setObjects = new List<SetObject>();
 
     [HideInInspector] public Vector2 nodePos;
     [HideInInspector] public List<FieldNode> onAxisNodes;
     [HideInInspector] public List<FieldNode> offAxisNodes;
     [HideInInspector] public List<FieldNode> allAxisNodes = new List<FieldNode>();
+
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
     {
@@ -71,6 +85,10 @@ public class FieldNode : MonoBehaviour
 
     public void AddAdjacentNodes()
     {
+        onAxisNodes.Clear();
+        offAxisNodes.Clear();
+        allAxisNodes.Clear();
+
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -118,22 +136,6 @@ public class FieldNode : MonoBehaviour
                 var node = nodeList[j];
                 onAxisNode.offAxisNodes.Remove(node);
                 onAxisNode.allAxisNodes.Remove(node);
-            }
-        }
-    }
-
-    public void SetMovableNode(List<FieldNode> openNodes)
-    {
-        for (int i = 0; i < onAxisNodes.Count; i++)
-        {
-            var onAxisNode = onAxisNodes[i];
-            if (onAxisNode == null)
-            {
-                outlines[i].SetActiveLine(true);
-            }
-            else if (openNodes.Find(x => x == onAxisNode) == null)
-            {
-                outlines[i].SetActiveLine(true);
             }
         }
     }
@@ -206,6 +208,52 @@ public class FieldNode : MonoBehaviour
         }
     }
 
+    public void SetNodeOutLine(List<FieldNode> openNodes)
+    {
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null)
+            {
+                outlines[i].SetActiveLine(true);
+            }
+            else if (openNodes.Find(x => x == onAxisNode) == null)
+            {
+                outlines[i].SetActiveLine(true);
+            }
+        }
+    }
+
+    public void SetNodeOutLine(List<FieldNode> openNodes, TargetDirection targetDir)
+    {
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null)
+            {
+                if (i == (int)targetDir)
+                {
+                    outlines[i].SetActiveLine(true, Color.red);
+                }
+                else
+                {
+                    outlines[i].SetActiveLine(true);
+                }
+            }
+            else if (openNodes.Find(x => x == onAxisNode) == null)
+            {
+                if (i == (int)targetDir)
+                {
+                    outlines[i].SetActiveLine(true, Color.red);
+                }
+                else
+                {
+                    outlines[i].SetActiveLine(true);
+                }
+            }
+        }
+    }
+
     public void SetMarker(CharacterOwner type, int index)
     {
         marker.SetActive(true);
@@ -258,51 +306,138 @@ public class FieldNode : MonoBehaviour
 
     public void SetOnObject(MapItem item, TargetDirection setDirection)
     {
-        switch (item.coverType)
+        var find = setObjects.Find(x => x.type == item.type);
+        if (find != null) return;
+
+        switch (item.type)
         {
-            case CoverType.None:
+            case MapEditorType.HalfCover:
+                SetCover(item, CoverType.Half, setDirection);
                 break;
-            case CoverType.Half:
-                SetCover(CoverType.Half);
+            case MapEditorType.FullCover:
+                SetCover(item, CoverType.Full, setDirection);
                 break;
-            case CoverType.Full:
-                SetCover(CoverType.Full);
+            case MapEditorType.FloorObject:
+                SetObject(item);
                 break;
             default:
                 break;
-        }
-
-        void SetCover(CoverType coverType)
-        {
-            if (cover != null)
-            {
-                Destroy(cover.gameObject);
-            }
-
-            var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/Cover_{item.size.x}x{item.size.y}"));
-            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
-            _cover.transform.SetParent(transform, false);
-            _object.transform.SetParent(_cover.transform, false);
-            _cover.SetComponents(this, coverType, _object, setDirection);
         }
     }
 
-    public void SetOffObject()
+    public void SetOnObject(List<FieldNode> setNodes, MapItem item, TargetDirection setDirection)
     {
-        if (cover == null) return;
-
-        switch (cover.type)
+        var subNodes = new List<FieldNode>(setNodes);
+        subNodes.Remove(this);
+        SetObject setObject = null;
+        switch (item.type)
         {
-            case CoverType.Half:
-                canMove = true;
+            case MapEditorType.HalfCover:
+                setObject = SetCover(item, CoverType.Half, setDirection);
                 break;
-            case CoverType.Full:
-                canMove = true;
+            case MapEditorType.FullCover:
+                setObject = SetCover(item, CoverType.Full, setDirection);
+                break;
+            case MapEditorType.FloorObject:
+                setObject = SetObject(item);
                 break;
             default:
                 break;
         }
-        Destroy(cover.gameObject);
+
+        for (int i = 0; i < subNodes.Count; i++)
+        {
+            var subNode = subNodes[i];
+            switch (item.type)
+            {
+                case MapEditorType.HalfCover:
+                    var subCover_Half = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+                    subCover_Half.transform.SetParent(subNode.transform, false);
+                    subCover_Half.SetComponents(subNode, CoverType.Half);
+                    break;
+                case MapEditorType.FullCover:
+                    var subCover_Full = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+                    subCover_Full.transform.SetParent(subNode.transform, false);
+                    subCover_Full.SetComponents(subNode, CoverType.Full);
+                    break;
+                default:
+                    break;
+            }
+            subNode.setObjects.Add(setObject);
+        }
+    }
+
+    private SetObject SetCover(MapItem item, CoverType coverType, TargetDirection setDirection)
+    {
+        var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
+        _cover.transform.SetParent(transform, false);
+        _object.transform.SetParent(_cover.transform, false);
+        _cover.SetComponents(this, coverType, _object, setDirection);
+
+        var setObject = new SetObject()
+        {
+            type = item.type,
+            size = item.size,
+            setNode = this,
+            setObject = _object,
+        };
+        setObjects.Add(setObject);
+        return setObject;
+    }
+
+    private SetObject SetObject(MapItem item)
+    {
+        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/FloorObject/{item.name}"));
+        _object.transform.SetParent(transform, false);
+
+        var setObject = new SetObject()
+        {
+            type = item.type,
+            size = item.size,
+            setNode = this,
+            setObject = _object,
+        };
+        setObjects.Add(setObject);
+        return setObject;
+    }
+
+    public void SetOffObject(MapEditorType type)
+    {
+        if (setObjects.Count == 0) return;
+
+        var setObject = setObjects.Find(x => x.type == type);
+        if (setObject != null)
+        {
+            RemoveSetObject(type);
+            for (int i = 0; i < setObject.subNodes.Count; i++)
+            {
+                var subNode = setObject.subNodes[i];
+                subNode.RemoveSetObject(type);
+                subNode.setObjects.Remove(setObject);
+            }
+            Destroy(setObject.setObject);
+            setObjects.Remove(setObject);
+        }
+    }
+
+    private void RemoveSetObject(MapEditorType type)
+    {
+        switch (type)
+        {
+            case MapEditorType.HalfCover:
+                canMove = true;
+                AddAdjacentNodes();
+                Destroy(cover.gameObject);
+                break;
+            case MapEditorType.FullCover:
+                canMove = true;
+                AddAdjacentNodes();
+                Destroy(cover.gameObject);
+                break;
+            default:
+                break;
+        }
     }
 
     public void SetActiveNodeFrame(bool value)

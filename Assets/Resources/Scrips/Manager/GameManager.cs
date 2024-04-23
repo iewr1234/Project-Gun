@@ -448,7 +448,7 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < openNodes.Count; i++)
                 {
                     var movableNode = openNodes[i];
-                    movableNode.SetMovableNode(openNodes);
+                    movableNode.SetNodeOutLine(openNodes);
                 }
                 break;
             case false:

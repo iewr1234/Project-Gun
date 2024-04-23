@@ -73,6 +73,46 @@ public class Cover : MonoBehaviour
         }
     }
 
+    public void SetComponents(FieldNode _node, CoverType _type)
+    {
+        node = _node;
+        node.cover = this;
+        node.canMove = false;
+        node.ReleaseAdjacentNodes();
+
+        coverMesh = transform.Find("CoverObject").gameObject;
+        canvas = GetComponentInChildren<Canvas>();
+        canvas.worldCamera = Camera.main;
+        coverImages = canvas.transform.GetComponentsInChildren<Image>().ToList();
+
+        type = _type;
+        switch (type)
+        {
+            case CoverType.Half:
+                coverMesh.transform.localPosition = halfCover_Pos;
+                coverMesh.transform.localScale = halfCover_Scale;
+                for (int i = 0; i < coverImages.Count; i++)
+                {
+                    var coverImage = coverImages[i];
+                    coverImage.sprite = Resources.Load<Sprite>("Sprites/Icon_HalfCover");
+                    coverImage.enabled = false;
+                }
+                break;
+            case CoverType.Full:
+                coverMesh.transform.localPosition = fullCover_Pos;
+                coverMesh.transform.localScale = fullCover_Scale;
+                for (int i = 0; i < coverImages.Count; i++)
+                {
+                    var coverImage = coverImages[i];
+                    coverImage.sprite = Resources.Load<Sprite>("Sprites/Icon_FullCover");
+                    coverImage.enabled = false;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     public void SetActiveCoverImage(TargetDirection dir)
     {
         switch (dir)
