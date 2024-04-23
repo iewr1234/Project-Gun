@@ -24,6 +24,17 @@ public class NodeOutline : MonoBehaviour
         {
             var mesh = meshs[i];
             mesh.enabled = value;
+            mesh.material.color = Color.white;
+        }
+    }
+
+    public void SetActiveLine(bool value, Color color)
+    {
+        for (int i = 0; i < meshs.Count; i++)
+        {
+            var mesh = meshs[i];
+            mesh.enabled = value;
+            mesh.material.color = color;
         }
     }
 }

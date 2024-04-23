@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cinemachine;
-using UnityEngine.Windows.WebCam;
 
 public enum CameraState
 {

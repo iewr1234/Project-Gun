@@ -24,6 +24,30 @@ public static class DataUtility
 
     public static readonly float lineInterval = 0.5f;
 
+    public static Quaternion GetSetRotation(TargetDirection setDirection)
+    {
+        var rot = Vector3.zero;
+        switch (setDirection)
+        {
+            case TargetDirection.Left:
+                rot = new Vector3(0f, 90f, 0f);
+                break;
+            case TargetDirection.Front:
+                rot = new Vector3(0f, 0f, 0f);
+                break;
+            case TargetDirection.Back:
+                rot = new Vector3(0f, 180f, 0f);
+                break;
+            case TargetDirection.Right:
+                rot = new Vector3(0f, 270f, 0f);
+                break;
+            default:
+                break;
+        }
+
+        return Quaternion.Euler(rot);
+    }
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
 
 public class FieldNode : MonoBehaviour
 {
@@ -191,6 +190,22 @@ public class FieldNode : MonoBehaviour
         }
     }
 
+    public void SetNodeOutLine(TargetDirection targetDir)
+    {
+        for (int i = 0; i < outlines.Count; i++)
+        {
+            var outline = outlines[i];
+            if (i == (int)targetDir)
+            {
+                outline.SetActiveLine(true, Color.red);
+            }
+            else
+            {
+                outline.SetActiveLine(true);
+            }
+        }
+    }
+
     public void SetMarker(CharacterOwner type, int index)
     {
         marker.SetActive(true);
@@ -220,8 +235,12 @@ public class FieldNode : MonoBehaviour
         {
             mesh.transform.localRotation = Quaternion.identity;
         }
-        mesh.material = item.image.material;
-        canMove = true;
+        mesh.material = item.maskImage.material;
+
+        if (cover == null)
+        {
+            canMove = true;
+        }
     }
 
     public void SetOffNodeMesh()
@@ -237,7 +256,7 @@ public class FieldNode : MonoBehaviour
         canMove = false;
     }
 
-    public void SetOnObject(MapItem item)
+    public void SetOnObject(MapItem item, TargetDirection setDirection)
     {
         switch (item.coverType)
         {
@@ -261,10 +280,10 @@ public class FieldNode : MonoBehaviour
             }
 
             var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/Cover_{item.size.x}x{item.size.y}"));
+            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
             _cover.transform.SetParent(transform, false);
-            _cover.SetComponents(this, coverType);
-            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/Cover/{coverType}/{item.name}"));
             _object.transform.SetParent(_cover.transform, false);
+            _cover.SetComponents(this, coverType, _object, setDirection);
         }
     }
 

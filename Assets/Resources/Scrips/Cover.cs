@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,8 @@ public class Cover : MonoBehaviour
     [HideInInspector] public FieldNode node;
 
     [Header("---Access Component---")]
-    [HideInInspector] public GameObject coverObject;
+    private GameObject coverMesh;
+    private GameObject coverObject;
     private Canvas canvas;
     private List<Image> coverImages;
 
@@ -29,14 +31,16 @@ public class Cover : MonoBehaviour
     private readonly Vector3 fullCover_Pos = new Vector3(0f, 1f, 0f);
     private readonly Vector3 fullCover_Scale = new Vector3(1.30f, 2f, 1.30f);
 
-    public void SetComponents(FieldNode _node, CoverType _type)
+    public void SetComponents(FieldNode _node, CoverType _type, GameObject _object, TargetDirection _setDirention)
     {
         node = _node;
         node.cover = this;
         node.canMove = false;
         node.ReleaseAdjacentNodes();
 
-        coverObject = transform.Find("CoverObject").gameObject;
+        coverMesh = transform.Find("CoverObject").gameObject;
+        coverObject = _object;
+        coverObject.transform.localRotation = DataUtility.GetSetRotation(_setDirention);
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
         coverImages = canvas.transform.GetComponentsInChildren<Image>().ToList();
@@ -45,8 +49,8 @@ public class Cover : MonoBehaviour
         switch (type)
         {
             case CoverType.Half:
-                coverObject.transform.localPosition = halfCover_Pos;
-                coverObject.transform.localScale = halfCover_Scale;
+                coverMesh.transform.localPosition = halfCover_Pos;
+                coverMesh.transform.localScale = halfCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)
                 {
                     var coverImage = coverImages[i];
@@ -55,8 +59,8 @@ public class Cover : MonoBehaviour
                 }
                 break;
             case CoverType.Full:
-                coverObject.transform.localPosition = fullCover_Pos;
-                coverObject.transform.localScale = fullCover_Scale;
+                coverMesh.transform.localPosition = fullCover_Pos;
+                coverMesh.transform.localScale = fullCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)
                 {
                     var coverImage = coverImages[i];
@@ -84,5 +88,12 @@ public class Cover : MonoBehaviour
                 coverImages[(int)dir].enabled = true;
                 break;
         }
+    }
+
+    public void RotateCoverObject()
+    {
+        var rot = coverObject.transform.localRotation.eulerAngles;
+        rot.y += 90f;
+        coverObject.transform.localRotation = Quaternion.Euler(rot);
     }
 }

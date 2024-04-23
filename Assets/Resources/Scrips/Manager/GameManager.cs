@@ -651,14 +651,14 @@ public class GameManager : MonoBehaviour
             var node = GetEmptyNode();
             var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
             cover.transform.SetParent(node.transform, false);
-            cover.SetComponents(node, CoverType.Half);
+            //cover.SetComponents(node, CoverType.Half);
         }
         else if (Input.GetKeyDown(KeyCode.F2))
         {
             var node = GetEmptyNode();
             var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
             cover.transform.SetParent(node.transform, false);
-            cover.SetComponents(node, CoverType.Full);
+            //cover.SetComponents(node, CoverType.Full);
         }
 
         FieldNode GetEmptyNode()

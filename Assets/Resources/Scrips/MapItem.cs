@@ -18,7 +18,7 @@ public class MapItem : MonoBehaviour
 
     [Header("---Access Component---")]
     [HideInInspector] public Image outline;
-    [HideInInspector] public Image image;
+    [HideInInspector] public Image maskImage;
 
     [Header("--- Assignment Variable---")]
     public MapItemType type;
@@ -33,16 +33,7 @@ public class MapItem : MonoBehaviour
 
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;
-        switch (type)
-        {
-            case MapItemType.Floor:
-                image = transform.Find("Image").GetComponent<Image>();
-                break;
-            case MapItemType.Object:
-                break;
-            default:
-                break;
-        }
+        maskImage = transform.Find("Mask").GetComponent<Image>();
     }
 
     public void PointerEnter_MapItem()

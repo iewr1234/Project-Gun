@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,6 +83,8 @@ public class MapEditor : MonoBehaviour
 
     [Space(5f)]
     public MapItem selectItem;
+    [SerializeField] private TargetDirection setDirection;
+
     private Vector3 sidePos_On;
     private Vector3 sidePos_Off;
 
@@ -233,18 +236,29 @@ public class MapEditor : MonoBehaviour
                     break;
             }
         }
-        else if (Input.GetMouseButtonDown(2))
+        else if (Input.GetMouseButtonDown(2) && findType == FindNodeType.SetObject)
         {
-            switch (state)
+            switch (setDirection)
             {
-                case MapEditorState.HalfCover:
-                    RotateObject();
+                case TargetDirection.Left:
+                    setDirection = TargetDirection.Front;
                     break;
-                case MapEditorState.FullCover:
-                    RotateObject();
+                case TargetDirection.Front:
+                    setDirection = TargetDirection.Right;
+                    break;
+                case TargetDirection.Back:
+                    setDirection = TargetDirection.Left;
+                    break;
+                case TargetDirection.Right:
+                    setDirection = TargetDirection.Back;
                     break;
                 default:
                     break;
+            }
+
+            if (selectNode != null)
+            {
+                selectNode.SetNodeOutLine(setDirection);
             }
         }
 
@@ -299,23 +313,12 @@ public class MapEditor : MonoBehaviour
                 case true:
                     if (selectItem != null)
                     {
-                        selectNode.SetOnObject(selectItem);
+                        selectNode.SetOnObject(selectItem, setDirection);
                     }
                     break;
                 case false:
                     selectNode.SetOffObject();
                     break;
-            }
-        }
-
-        void RotateObject()
-        {
-            if (selectNode.cover != null)
-            {
-                var coverObject = selectNode.cover.coverObject;
-                var rot = coverObject.transform.localRotation.eulerAngles;
-                rot.y += 90f;
-                coverObject.transform.localRotation = Quaternion.Euler(rot);
             }
         }
     }
@@ -411,7 +414,7 @@ public class MapEditor : MonoBehaviour
                 case FindNodeType.SetObject:
                     if (node.Mesh.enabled)
                     {
-                        node.SetNodeOutLine(true);
+                        node.SetNodeOutLine(setDirection);
                         selectNode = node;
                     }
                     break;
