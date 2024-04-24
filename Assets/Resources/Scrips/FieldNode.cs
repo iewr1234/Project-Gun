@@ -309,42 +309,14 @@ public class FieldNode : MonoBehaviour
         var find = setObjects.Find(x => x.type == item.type);
         if (find != null) return;
 
-        switch (item.type)
-        {
-            case MapEditorType.HalfCover:
-                SetCover(item, CoverType.Half, setDirection);
-                break;
-            case MapEditorType.FullCover:
-                SetCover(item, CoverType.Full, setDirection);
-                break;
-            case MapEditorType.FloorObject:
-                SetObject(item);
-                break;
-            default:
-                break;
-        }
+        SwitchOfMapItemType(item, setDirection);
     }
 
     public void SetOnObject(List<FieldNode> setNodes, MapItem item, TargetDirection setDirection)
     {
         var subNodes = new List<FieldNode>(setNodes);
         subNodes.Remove(this);
-        SetObject setObject = null;
-        switch (item.type)
-        {
-            case MapEditorType.HalfCover:
-                setObject = SetCover(item, CoverType.Half, setDirection);
-                break;
-            case MapEditorType.FullCover:
-                setObject = SetCover(item, CoverType.Full, setDirection);
-                break;
-            case MapEditorType.FloorObject:
-                setObject = SetObject(item);
-                break;
-            default:
-                break;
-        }
-
+        var setObject = SwitchOfMapItemType(item, setDirection);
         for (int i = 0; i < subNodes.Count; i++)
         {
             var subNode = subNodes[i];
@@ -367,6 +339,23 @@ public class FieldNode : MonoBehaviour
         }
     }
 
+    private SetObject SwitchOfMapItemType(MapItem item, TargetDirection setDirection)
+    {
+        switch (item.type)
+        {
+            case MapEditorType.HalfCover:
+                return SetCover(item, CoverType.Half, setDirection);
+            case MapEditorType.FullCover:
+                return SetCover(item, CoverType.Full, setDirection);
+            case MapEditorType.FloorObject:
+                return SetObject(item, setDirection);
+            case MapEditorType.SideObject:
+                return SetObject(item, setDirection);
+            default:
+                return null;
+        }
+    }
+
     private SetObject SetCover(MapItem item, CoverType coverType, TargetDirection setDirection)
     {
         var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
@@ -386,10 +375,11 @@ public class FieldNode : MonoBehaviour
         return setObject;
     }
 
-    private SetObject SetObject(MapItem item)
+    private SetObject SetObject(MapItem item, TargetDirection setDirection)
     {
-        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/FloorObject/{item.name}"));
+        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{item.type}/{item.name}"));
         _object.transform.SetParent(transform, false);
+        _object.transform.localRotation = DataUtility.GetSetRotation(setDirection);
 
         var setObject = new SetObject()
         {

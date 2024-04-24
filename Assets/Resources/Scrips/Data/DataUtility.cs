@@ -13,6 +13,8 @@ public enum TargetDirection
 
 public static class DataUtility
 {
+    public static readonly string mapDataPath = "/MapData/";
+
     public static readonly float nodeSize = 1.2f;
     public static readonly float nodeInterval = 0.1f;
 

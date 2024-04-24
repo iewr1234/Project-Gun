@@ -42,6 +42,7 @@ public class MapItem : MonoBehaviour
     {
         if (mapEdt.selectItem == this) return;
 
+        mapEdt.onSideButton = true;
         outline.enabled = true;
     }
 
@@ -49,6 +50,7 @@ public class MapItem : MonoBehaviour
     {
         if (mapEdt.selectItem == this) return;
 
+        mapEdt.onSideButton = false;
         outline.enabled = false;
     }
 

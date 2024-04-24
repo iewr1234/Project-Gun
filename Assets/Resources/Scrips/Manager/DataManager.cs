@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+
+[System.Serializable]
+public class MapData
+{
+    public Vector2 mapSize;
+    public FieldNode[] fieldNodes;
+}
 
 public class DataManager : MonoBehaviour
 {
@@ -32,6 +39,41 @@ public class DataManager : MonoBehaviour
         if (armorData == null)
             armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
     }
+
+    #region MapEditor
+    public void SaveMapData(string saveName, Vector2 _mapSize, List<FieldNode> _fieldNodes)
+    {
+        var mapData = new MapData
+        {
+            mapSize = _mapSize,
+            fieldNodes = _fieldNodes.ToArray(),
+        };
+        var saveData = JsonUtility.ToJson(mapData);
+
+        var folderPath = Application.dataPath + DataUtility.mapDataPath;
+        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+        var filePath = Path.Combine(folderPath, $"{saveName}.json");
+        File.WriteAllText(filePath, saveData);
+    }
+
+    public MapData LoadMapData(string loadName)
+    {
+        var folderPath = Application.dataPath + DataUtility.mapDataPath;
+        var filePath = Path.Combine(folderPath, $"{loadName}.json");
+        if (File.Exists(filePath))
+        {
+            var jsonData = File.ReadAllText(filePath);
+            var mapData = JsonUtility.FromJson<MapData>(jsonData);
+            return mapData;
+        }
+        else
+        {
+            Debug.Log("Not Found");
+            return null;
+        }
+    }
+    #endregion
 
     #region Character Data
     [HideInInspector] public CharacterData charData;

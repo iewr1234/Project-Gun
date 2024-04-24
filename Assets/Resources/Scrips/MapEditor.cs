@@ -1,13 +1,14 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+using TMPro;
+using static UnityEngine.Timeline.TimelineAsset;
 
 public enum MapEditorType
 {
     None,
+    Data,
     Node,
     Player,
     Enemy,
@@ -15,6 +16,7 @@ public enum MapEditorType
     HalfCover,
     FullCover,
     FloorObject,
+    SideObject,
 }
 
 public enum FindNodeType
@@ -43,10 +45,15 @@ public class MapEditor : MonoBehaviour
     private Transform characterTf;
 
     #region Top
+    [Header("[Data]")]
+    private GameObject dataUI;
+    private TMP_InputField saveInput;
+    private TMP_InputField loadInput;
+
     [Header("[Node]")]
     private GameObject nodeUI;
-    private TMP_InputField xSize;
-    private TMP_InputField ySize;
+    private TMP_InputField xSizeInput;
+    private TMP_InputField ySizeInput;
 
     [Header("[Player]")]
     private GameObject playerUI;
@@ -61,12 +68,14 @@ public class MapEditor : MonoBehaviour
     private GameObject sideButtons;
     private GameObject sideUI;
     private TextMeshProUGUI setDirText;
+    private TextMeshProUGUI allFloorText;
     private TextMeshProUGUI floorRandomText;
     private TextMeshProUGUI gridSwitchText;
-    private bool onSideButton;
+    public bool onSideButton;
 
     [Header("[Floor]")]
     private GameObject floorUI;
+    private bool allFloor;
     private bool floorDirRandom;
     private List<FieldNode> setFloorNodes = new List<FieldNode>();
 
@@ -78,14 +87,19 @@ public class MapEditor : MonoBehaviour
 
     [Header("[FloorObject]")]
     private GameObject floorObjectUI;
+
+    [Header("[SideObject]")]
+    private GameObject sideObjectUI;
     #endregion
 
     [Header("--- Assignment Variable---")]
+    public MapData loadData;
+    public Vector2 mapSize;
     [SerializeField] private MapEditorType editType;
     private InterfaceType activeType;
     private GameObject activeUI;
 
-    private FindNodeType findType;
+    [SerializeField] private FindNodeType findType;
     private FieldNode selectNode;
     private List<FieldNode> selectNodes = new List<FieldNode>();
 
@@ -103,9 +117,14 @@ public class MapEditor : MonoBehaviour
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
 
+        dataUI = transform.Find("Top/UI/Data").gameObject;
+        saveInput = transform.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
+        loadInput = transform.Find("Top/UI/Data/InputField_Load").GetComponent<TMP_InputField>();
+        dataUI.SetActive(false);
+
         nodeUI = transform.Find("Top/UI/Node").gameObject;
-        xSize = transform.Find("Top/UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
-        ySize = transform.Find("Top/UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
+        xSizeInput = transform.Find("Top/UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
+        ySizeInput = transform.Find("Top/UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
         nodeUI.SetActive(false);
 
         playerUI = transform.Find("Top/UI/Player").gameObject;
@@ -117,8 +136,10 @@ public class MapEditor : MonoBehaviour
         sideButtons = transform.Find("Side/Buttons").gameObject;
         sideUI = transform.Find("Side/UI").gameObject;
         setDirText = sideUI.transform.Find("SetDirectionText").GetComponent<TextMeshProUGUI>();
-        floorRandomText = sideUI.transform.Find("FloorRandom/Text").GetComponent<TextMeshProUGUI>();
-        gridSwitchText = sideUI.transform.Find("GridSwitch/Text").GetComponent<TextMeshProUGUI>();
+        allFloorText = sideUI.transform.Find("SubButtons/AllFloor/Text").GetComponent<TextMeshProUGUI>();
+        floorRandomText = sideUI.transform.Find("SubButtons/FloorRandom/Text").GetComponent<TextMeshProUGUI>();
+        gridSwitchText = sideUI.transform.Find("SubButtons/GridSwitch/Text").GetComponent<TextMeshProUGUI>();
+
         sidePos_On = sideButtons.transform.localPosition;
         var width = sideUI.GetComponent<RectTransform>().rect.width;
         sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
@@ -136,6 +157,9 @@ public class MapEditor : MonoBehaviour
 
         floorObjectUI = transform.Find("Side/UI/FloorObject").gameObject;
         floorObjectUI.SetActive(false);
+
+        sideObjectUI = transform.Find("Side/UI/SideObject").gameObject;
+        sideObjectUI.SetActive(false);
     }
 
     private void Update()
@@ -144,25 +168,12 @@ public class MapEditor : MonoBehaviour
 
         switch (editType)
         {
-            case MapEditorType.Player:
-                InputEvent();
+            case MapEditorType.None:
                 break;
-            case MapEditorType.Enemy:
-                InputEvent();
-                break;
-            case MapEditorType.Floor:
-                InputEvent();
-                break;
-            case MapEditorType.HalfCover:
-                InputEvent();
-                break;
-            case MapEditorType.FullCover:
-                InputEvent();
-                break;
-            case MapEditorType.FloorObject:
-                InputEvent();
+            case MapEditorType.Data:
                 break;
             default:
+                InputEvent();
                 break;
         }
 
@@ -219,7 +230,6 @@ public class MapEditor : MonoBehaviour
         }
         else if (Input.GetMouseButton(0))
         {
-            Debug.Log("Click");
             switch (editType)
             {
                 case MapEditorType.Floor:
@@ -232,6 +242,9 @@ public class MapEditor : MonoBehaviour
                     SetObject(true);
                     break;
                 case MapEditorType.FloorObject:
+                    SetObject(true);
+                    break;
+                case MapEditorType.SideObject:
                     SetObject(true);
                     break;
                 default:
@@ -252,6 +265,9 @@ public class MapEditor : MonoBehaviour
                     SetObject(false);
                     break;
                 case MapEditorType.FloorObject:
+                    SetObject(false);
+                    break;
+                case MapEditorType.SideObject:
                     SetObject(false);
                     break;
                 default:
@@ -327,8 +343,20 @@ public class MapEditor : MonoBehaviour
                 case true:
                     if (selectItem != null && setFloorNodes.Find(x => x == selectNode) == null)
                     {
-                        selectNode.SetOnNodeMesh(selectItem, floorDirRandom);
-                        setFloorNodes.Add(selectNode);
+                        if (allFloor)
+                        {
+                            for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+                            {
+                                var node = gameMgr.fieldNodes[i];
+                                node.SetOnNodeMesh(selectItem, floorDirRandom);
+                                setFloorNodes.Add(node);
+                            }
+                        }
+                        else
+                        {
+                            selectNode.SetOnNodeMesh(selectItem, floorDirRandom);
+                            setFloorNodes.Add(selectNode);
+                        }
                     }
                     break;
                 case false:
@@ -538,7 +566,7 @@ public class MapEditor : MonoBehaviour
     /// </summary>
     /// <param name="size_X"></param>
     /// <param name="size_Y"></param>
-    private void CreateField(int size_X, int size_Y)
+    private void CreateField()
     {
         if (gameMgr.fieldNodes.Count > 0)
         {
@@ -552,9 +580,9 @@ public class MapEditor : MonoBehaviour
 
         var size = DataUtility.nodeSize;
         var interval = DataUtility.nodeInterval;
-        for (int i = 0; i < size_Y; i++)
+        for (int i = 0; i < mapSize.y; i++)
         {
-            for (int j = 0; j < size_X; j++)
+            for (int j = 0; j < mapSize.x; j++)
             {
                 var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
                 fieldNode.transform.SetParent(fieldNodeTf, false);
@@ -575,7 +603,6 @@ public class MapEditor : MonoBehaviour
 
     private void OnInterface(InterfaceType _type, MapEditorType _state, GameObject _activeUI)
     {
-        Debug.Log("Button");
         switch (_activeUI.activeSelf)
         {
             case true:
@@ -650,6 +677,9 @@ public class MapEditor : MonoBehaviour
             case MapEditorType.FloorObject:
                 findType = FindNodeType.SetObject;
                 break;
+            case MapEditorType.SideObject:
+                findType = FindNodeType.SetObject;
+                break;
             default:
                 break;
         }
@@ -658,6 +688,27 @@ public class MapEditor : MonoBehaviour
     #region Button Event
 
     #region Top
+    public void Button_Data()
+    {
+        OnInterface(InterfaceType.Top, MapEditorType.Data, dataUI);
+    }
+
+    public void Button_Data_Save()
+    {
+        if (saveInput.text.Length == 0) return;
+
+        gameMgr.dataMgr.SaveMapData(saveInput.text, mapSize, gameMgr.fieldNodes);
+        saveInput.text = "";
+    }
+
+    public void Button_Data_Load()
+    {
+        if (loadInput.text.Length == 0) return;
+
+        loadData = gameMgr.dataMgr.LoadMapData(loadInput.text);
+        loadInput.text = "";
+    }
+
     public void Button_Node()
     {
         OnInterface(InterfaceType.Top, MapEditorType.Node, nodeUI);
@@ -665,10 +716,12 @@ public class MapEditor : MonoBehaviour
 
     public void Button_Node_Create()
     {
-        if (xSize.text.Length == 0 || ySize.text.Length == 0) return;
+        if (xSizeInput.text.Length == 0 || ySizeInput.text.Length == 0) return;
 
-        CreateField(int.Parse(xSize.text), int.Parse(ySize.text));
+        mapSize = new Vector2(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
+        CreateField();
         activeUI.gameObject.SetActive(false);
+        editType = MapEditorType.None;
         activeType = InterfaceType.None;
         activeUI = null;
     }
@@ -724,8 +777,27 @@ public class MapEditor : MonoBehaviour
     {
         OnInterface(InterfaceType.Side, MapEditorType.FloorObject, floorObjectUI);
     }
+
+    public void Button_SideObject()
+    {
+        OnInterface(InterfaceType.Side, MapEditorType.SideObject, sideObjectUI);
+    }
     #endregion
 
+    #region Sub
+    public void Button_AllFloor()
+    {
+        allFloor = !allFloor;
+        switch (allFloor)
+        {
+            case true:
+                allFloorText.text = "바닥 일괄적용 ON";
+                break;
+            case false:
+                allFloorText.text = "바닥 일괄적용 OFF";
+                break;
+        }
+    }
 
     public void Button_FloorRandom()
     {
@@ -733,17 +805,17 @@ public class MapEditor : MonoBehaviour
         switch (floorDirRandom)
         {
             case true:
-                floorRandomText.text = "바닥방향 무작위 OFF";
+                floorRandomText.text = "바닥방향 무작위 ON";
                 break;
             case false:
-                floorRandomText.text = "바닥방향 무작위 ON";
+                floorRandomText.text = "바닥방향 무작위 OFF";
                 break;
         }
     }
 
     public void Button_GridSwitch()
     {
-        var value = gridSwitchText.text == "그리드 ON" ? true : false;
+        var value = gridSwitchText.text == "그리드 OFF" ? true : false;
         for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
         {
             var node = gameMgr.fieldNodes[i];
@@ -752,12 +824,14 @@ public class MapEditor : MonoBehaviour
         switch (value)
         {
             case true:
-                gridSwitchText.text = "그리드 OFF";
+                gridSwitchText.text = "그리드 ON";
                 break;
             case false:
-                gridSwitchText.text = "그리드 ON";
+                gridSwitchText.text = "그리드 OFF";
                 break;
         }
     }
+    #endregion
+
     #endregion
 }

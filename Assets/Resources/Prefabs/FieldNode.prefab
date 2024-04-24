@@ -715,7 +715,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6269177500379384077
 Transform:
   m_ObjectHideFlags: 0
@@ -849,6 +849,7 @@ MonoBehaviour:
   cover: {fileID: 0}
   canSee: 0
   canMove: 0
+  setObjects: []
   nodePos: {x: 0, y: 0}
   onAxisNodes: []
   offAxisNodes: []
