@@ -1,15 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
 [System.Serializable]
+public struct ObjectData
+{
+    public MapEditorType objectType;
+    public string itemName;
+    public TargetDirection setDir;
+}
+
+[System.Serializable]
+public class NodeData
+{
+    public Vector2 pos;
+
+    [Header("[Floor]")]
+    public bool isMesh;
+    public string floorItemName;
+    public Quaternion floorRot;
+
+    [Header("[Marker]")]
+    public bool isMarker;
+    public CharacterOwner markerType;
+    public int markerIndex;
+
+    [Header("[Object]")]
+    public bool isObject;
+    public ObjectData[] objectDatas;
+}
+
+[System.Serializable]
 public class MapData
 {
     public Vector2 mapSize;
-    public FieldNode[] fieldNodes;
+    public NodeData[] nodeDatas;
 }
 
 public class DataManager : MonoBehaviour
@@ -43,13 +72,61 @@ public class DataManager : MonoBehaviour
     #region MapEditor
     public void SaveMapData(string saveName, Vector2 _mapSize, List<FieldNode> _fieldNodes)
     {
-        var mapData = new MapData
+        var mapData = new MapData();
+        mapData.mapSize = _mapSize;
+        var nodeDatas = new List<NodeData>();
+        for (int i = 0; i < _fieldNodes.Count; i++)
         {
-            mapSize = _mapSize,
-            fieldNodes = _fieldNodes.ToArray(),
-        };
-        var saveData = JsonUtility.ToJson(mapData);
+            var node = _fieldNodes[i];
+            var nodeData = new NodeData();
+            nodeData.pos = node.nodePos;
 
+            nodeData.isMesh = node.Mesh.enabled;
+            if (nodeData.isMesh)
+            {
+                nodeData.floorItemName = node.Mesh.material.name.Split(' ')[0];
+                nodeData.floorRot = node.Mesh.transform.localRotation;
+            }
+
+            nodeData.isMarker = node.Marker.activeSelf;
+            if (nodeData.isMarker)
+            {
+                nodeData.markerType = node.MarkerOutline.color == DataUtility.color_Player ? CharacterOwner.Player : CharacterOwner.Enemy;
+                var indexText = node.MarkerText.text;
+                var match = Regex.Match(indexText, @"\d+");
+                if (match.Success)
+                {
+                    if (int.TryParse(match.Value, out int index))
+                    {
+                        nodeData.markerIndex = index;
+                    }
+                }
+            }
+
+            nodeData.isObject = node.setObjects.Count > 0 && node.setObjects.Find(x => x.setNode == node) != null;
+            if (nodeData.isObject)
+            {
+                var objectDatas = new List<ObjectData>();
+                for (int j = 0; j < node.setObjects.Count; j++)
+                {
+                    var _object = node.setObjects[j];
+                    if (_object.setNode != node) continue;
+
+                    var objectData = new ObjectData
+                    {
+                        objectType = _object.type,
+                        itemName = _object.setObject.name,
+                        setDir = _object.setDir,
+                    };
+                    objectDatas.Add(objectData);
+                }
+                nodeData.objectDatas = objectDatas.ToArray();
+            }
+            nodeDatas.Add(nodeData);
+        }
+        mapData.nodeDatas = nodeDatas.ToArray();
+
+        var saveData = JsonUtility.ToJson(mapData, true);
         var folderPath = Application.dataPath + DataUtility.mapDataPath;
         if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 

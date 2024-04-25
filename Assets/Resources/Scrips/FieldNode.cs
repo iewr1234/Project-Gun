@@ -13,6 +13,7 @@ public class SetObject
     public FieldNode setNode;
     public List<FieldNode> subNodes = new List<FieldNode>();
     public GameObject setObject;
+    public TargetDirection setDir;
 }
 
 public class FieldNode : MonoBehaviour
@@ -269,7 +270,7 @@ public class FieldNode : MonoBehaviour
         canMove = true;
     }
 
-    public void SetOnNodeMesh(MapItem item, bool random)
+    public void SetOnFloor(MapItem item, bool random)
     {
         mesh.enabled = true;
         if (random)
@@ -291,7 +292,19 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetOffNodeMesh()
+    public void SetOnFloor(MapItem item, Quaternion rot)
+    {
+        mesh.enabled = true;
+        mesh.transform.localRotation = rot;
+        mesh.material = item.maskImage.material;
+
+        if (cover == null)
+        {
+            canMove = true;
+        }
+    }
+
+    public void SetOffFloor()
     {
         if (!mesh.enabled) return;
 
@@ -344,52 +357,56 @@ public class FieldNode : MonoBehaviour
         switch (item.type)
         {
             case MapEditorType.HalfCover:
-                return SetCover(item, CoverType.Half, setDirection);
+                return SetCover(CoverType.Half);
             case MapEditorType.FullCover:
-                return SetCover(item, CoverType.Full, setDirection);
+                return SetCover(CoverType.Full);
             case MapEditorType.FloorObject:
-                return SetObject(item, setDirection);
+                return SetObject();
             case MapEditorType.SideObject:
-                return SetObject(item, setDirection);
+                return SetObject();
             default:
                 return null;
         }
-    }
 
-    private SetObject SetCover(MapItem item, CoverType coverType, TargetDirection setDirection)
-    {
-        var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
-        _cover.transform.SetParent(transform, false);
-        _object.transform.SetParent(_cover.transform, false);
-        _cover.SetComponents(this, coverType, _object, setDirection);
-
-        var setObject = new SetObject()
+        SetObject SetCover(CoverType coverType)
         {
-            type = item.type,
-            size = item.size,
-            setNode = this,
-            setObject = _object,
-        };
-        setObjects.Add(setObject);
-        return setObject;
-    }
+            var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
+            _object.name = item.name;
+            _cover.transform.SetParent(transform, false);
+            _object.transform.SetParent(_cover.transform, false);
+            _cover.SetComponents(this, coverType, _object, setDirection);
 
-    private SetObject SetObject(MapItem item, TargetDirection setDirection)
-    {
-        var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{item.type}/{item.name}"));
-        _object.transform.SetParent(transform, false);
-        _object.transform.localRotation = DataUtility.GetSetRotation(setDirection);
+            var setObject = new SetObject()
+            {
+                type = item.type,
+                size = item.size,
+                setNode = this,
+                setObject = _object,
+                setDir = setDirection,
+            };
+            setObjects.Add(setObject);
+            return setObject;
+        }
 
-        var setObject = new SetObject()
+        SetObject SetObject()
         {
-            type = item.type,
-            size = item.size,
-            setNode = this,
-            setObject = _object,
-        };
-        setObjects.Add(setObject);
-        return setObject;
+            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{item.type}/{item.name}"));
+            _object.name = item.name;
+            _object.transform.SetParent(transform, false);
+            _object.transform.localRotation = DataUtility.GetSetRotation(setDirection);
+
+            var setObject = new SetObject()
+            {
+                type = item.type,
+                size = item.size,
+                setNode = this,
+                setObject = _object,
+                setDir = setDirection,
+            };
+            setObjects.Add(setObject);
+            return setObject;
+        }
     }
 
     public void SetOffObject(MapEditorType type)
@@ -440,5 +457,23 @@ public class FieldNode : MonoBehaviour
     {
         private set { mesh = value; }
         get { return mesh; }
+    }
+
+    public GameObject Marker
+    {
+        private set { marker = value; }
+        get { return marker; }
+    }
+
+    public Image MarkerOutline
+    {
+        private set { markerOutline = value; }
+        get { return markerOutline; }
+    }
+
+    public TextMeshProUGUI MarkerText
+    {
+        private set { markerText = value; }
+        get { return markerText; }
     }
 }

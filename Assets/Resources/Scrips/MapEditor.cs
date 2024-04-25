@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEngine.Timeline.TimelineAsset;
 
 public enum MapEditorType
 {
@@ -93,7 +92,6 @@ public class MapEditor : MonoBehaviour
     #endregion
 
     [Header("--- Assignment Variable---")]
-    public MapData loadData;
     public Vector2 mapSize;
     [SerializeField] private MapEditorType editType;
     private InterfaceType activeType;
@@ -348,19 +346,19 @@ public class MapEditor : MonoBehaviour
                             for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
                             {
                                 var node = gameMgr.fieldNodes[i];
-                                node.SetOnNodeMesh(selectItem, floorDirRandom);
+                                node.SetOnFloor(selectItem, floorDirRandom);
                                 setFloorNodes.Add(node);
                             }
                         }
                         else
                         {
-                            selectNode.SetOnNodeMesh(selectItem, floorDirRandom);
+                            selectNode.SetOnFloor(selectItem, floorDirRandom);
                             setFloorNodes.Add(selectNode);
                         }
                     }
                     break;
                 case false:
-                    selectNode.SetOffNodeMesh();
+                    selectNode.SetOffFloor();
                     break;
             }
         }
@@ -396,7 +394,6 @@ public class MapEditor : MonoBehaviour
         var ray = gameMgr.camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, gameMgr.nodeLayer))
         {
-            Debug.Log(hit.collider.name);
             var node = hit.collider.GetComponentInParent<FieldNode>();
             if (node == null) return;
 
@@ -566,7 +563,7 @@ public class MapEditor : MonoBehaviour
     /// </summary>
     /// <param name="size_X"></param>
     /// <param name="size_Y"></param>
-    private void CreateField()
+    private void CreateField(float xSize, float ySize)
     {
         if (gameMgr.fieldNodes.Count > 0)
         {
@@ -578,6 +575,7 @@ public class MapEditor : MonoBehaviour
             gameMgr.fieldNodes.Clear();
         }
 
+        mapSize = new Vector2(xSize, ySize);
         var size = DataUtility.nodeSize;
         var interval = DataUtility.nodeInterval;
         for (int i = 0; i < mapSize.y; i++)
@@ -650,6 +648,7 @@ public class MapEditor : MonoBehaviour
 
     public void SelectMapItem(MapItem item)
     {
+        setFloorNodes.Clear();
         if (selectItem == item)
         {
             selectItem.outline.enabled = false;
@@ -705,8 +704,57 @@ public class MapEditor : MonoBehaviour
     {
         if (loadInput.text.Length == 0) return;
 
-        loadData = gameMgr.dataMgr.LoadMapData(loadInput.text);
-        loadInput.text = "";
+        var mapData = gameMgr.dataMgr.LoadMapData(loadInput.text);
+        if (mapData != null)
+        {
+            CreateField(mapData.mapSize.x, mapData.mapSize.y);
+            for (int i = 0; i < mapData.nodeDatas.Length; i++)
+            {
+                var nodeData = mapData.nodeDatas[i];
+                var node = gameMgr.fieldNodes[i];
+                if (nodeData.isMesh)
+                {
+                    var floorItem = floorUI.transform.Find($"{nodeData.floorItemName}").GetComponent<MapItem>();
+                    node.SetOnFloor(floorItem, nodeData.floorRot);
+                }
+
+                if (nodeData.isMarker)
+                {
+                    var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
+                    markerNodes.Add(node);
+                    node.SetMarker(nodeData.markerType, nodeData.markerIndex);
+                }
+
+                if (nodeData.isObject)
+                {
+                    for (int j = 0; j < nodeData.objectDatas.Length; j++)
+                    {
+                        var objectData = nodeData.objectDatas[j];
+                        var objectUI = GetObjectUI(objectData.objectType);
+                        var objectItem = objectUI.transform.Find($"{objectData.itemName}").GetComponent<MapItem>();
+                        node.SetOnObject(objectItem, objectData.setDir);
+                    }
+                }
+            }
+            loadInput.text = "";
+        }
+
+        GameObject GetObjectUI(MapEditorType type)
+        {
+            switch (type)
+            {
+                case MapEditorType.HalfCover:
+                    return halfCoverUI;
+                case MapEditorType.FullCover:
+                    return fullCoverUI;
+                case MapEditorType.FloorObject:
+                    return floorObjectUI;
+                case MapEditorType.SideObject:
+                    return sideObjectUI;
+                default:
+                    return null;
+            }
+        }
     }
 
     public void Button_Node()
@@ -718,8 +766,7 @@ public class MapEditor : MonoBehaviour
     {
         if (xSizeInput.text.Length == 0 || ySizeInput.text.Length == 0) return;
 
-        mapSize = new Vector2(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
-        CreateField();
+        CreateField(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
         activeUI.gameObject.SetActive(false);
         editType = MapEditorType.None;
         activeType = InterfaceType.None;

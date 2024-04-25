@@ -20,8 +20,8 @@ public class MapItem : MonoBehaviour
     private MapEditor mapEdt;
 
     [Header("---Access Component---")]
-    [HideInInspector] public Image outline;
-    [HideInInspector] public Image maskImage;
+    public Image outline;
+    public Image maskImage;
 
     [Header("--- Assignment Variable---")]
     public MapEditorType type;
@@ -33,9 +33,9 @@ public class MapItem : MonoBehaviour
     {
         mapEdt = FindAnyObjectByType<MapEditor>();
 
-        outline = transform.Find("Outline").GetComponent<Image>();
-        outline.enabled = false;
-        maskImage = transform.Find("Mask").GetComponent<Image>();
+        //outline = transform.Find("Outline").GetComponent<Image>();
+        //outline.enabled = false;
+        //maskImage = transform.Find("Mask").GetComponent<Image>();
     }
 
     public void PointerEnter_MapItem()
