@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public enum MapEditorType
 {
@@ -12,9 +14,11 @@ public enum MapEditorType
     Player,
     Enemy,
     Floor,
+    FloorObject,
+    Hurdle,
+    Box,
     HalfCover,
     FullCover,
-    FloorObject,
     SideObject,
 }
 
@@ -47,7 +51,7 @@ public class MapEditor : MonoBehaviour
     [Header("[Data]")]
     private GameObject dataUI;
     private TMP_InputField saveInput;
-    private TMP_InputField loadInput;
+    private TMP_Dropdown loadDropdown;
 
     [Header("[Node]")]
     private GameObject nodeUI;
@@ -78,31 +82,35 @@ public class MapEditor : MonoBehaviour
     private bool floorDirRandom;
     private List<FieldNode> setFloorNodes = new List<FieldNode>();
 
+    [Header("[FloorObject]")]
+    private GameObject floorObjectUI;
+
+    [Header("[Hurdle]")]
+    private GameObject hurdleUI;
+
     [Header("[HalfCover]")]
     private GameObject halfCoverUI;
 
     [Header("[FullCover]")]
     private GameObject fullCoverUI;
 
-    [Header("[FloorObject]")]
-    private GameObject floorObjectUI;
-
     [Header("[SideObject]")]
     private GameObject sideObjectUI;
     #endregion
 
     [Header("--- Assignment Variable---")]
-    public Vector2 mapSize;
     [SerializeField] private MapEditorType editType;
+    private Vector2 mapSize;
     private InterfaceType activeType;
     private GameObject activeUI;
 
-    [SerializeField] private FindNodeType findType;
+    private FindNodeType findType;
     private FieldNode selectNode;
-    private List<FieldNode> selectNodes = new List<FieldNode>();
+    [SerializeField] private List<FieldNode> selectNodes = new List<FieldNode>();
 
     [Space(5f)]
     public MapItem selectItem;
+    private List<MapItem> mapItems = new List<MapItem>();
     [SerializeField] private TargetDirection setDirection;
 
     private Vector3 sidePos_On;
@@ -117,7 +125,8 @@ public class MapEditor : MonoBehaviour
 
         dataUI = transform.Find("Top/UI/Data").gameObject;
         saveInput = transform.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
-        loadInput = transform.Find("Top/UI/Data/InputField_Load").GetComponent<TMP_InputField>();
+        loadDropdown = transform.Find("Top/UI/Data/Dropdown_Load").GetComponent<TMP_Dropdown>();
+        gameMgr.dataMgr.ReadMapLoadIndex(loadDropdown);
         dataUI.SetActive(false);
 
         nodeUI = transform.Find("Top/UI/Node").gameObject;
@@ -145,19 +154,29 @@ public class MapEditor : MonoBehaviour
         sideUI.transform.localPosition = sidePos_Off;
 
         floorUI = transform.Find("Side/UI/Floor").gameObject;
-        floorUI.SetActive(false);
-
-        halfCoverUI = transform.Find("Side/UI/HalfCover").gameObject;
-        halfCoverUI.SetActive(false);
-
-        fullCoverUI = transform.Find("Side/UI/FullCover").gameObject;
-        fullCoverUI.SetActive(false);
-
         floorObjectUI = transform.Find("Side/UI/FloorObject").gameObject;
-        floorObjectUI.SetActive(false);
-
+        hurdleUI = transform.Find("Side/UI/Hurdle").gameObject;
+        halfCoverUI = transform.Find("Side/UI/HalfCover").gameObject;
+        fullCoverUI = transform.Find("Side/UI/FullCover").gameObject;
         sideObjectUI = transform.Find("Side/UI/SideObject").gameObject;
-        sideObjectUI.SetActive(false);
+        SetActiveAllSideUI(true);
+        mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
+        for (int i = 0; i < mapItems.Count; i++)
+        {
+            var mapItem = mapItems[i];
+            mapItem.SetComponents(this);
+        }
+        SetActiveAllSideUI(false);
+
+        void SetActiveAllSideUI(bool value)
+        {
+            floorUI.SetActive(value);
+            floorObjectUI.SetActive(value);
+            hurdleUI.SetActive(value);
+            halfCoverUI.SetActive(value);
+            fullCoverUI.SetActive(value);
+            sideObjectUI.SetActive(value);
+        }
     }
 
     private void Update()
@@ -198,6 +217,17 @@ public class MapEditor : MonoBehaviour
                     findType = FindNodeType.None;
                 }
                 break;
+            case MapEditorType.Enemy:
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    if (selectNode != null)
+                    {
+                        selectNode.SetNodeOutLine(false);
+                        selectNode = null;
+                    }
+                    findType = FindNodeType.None;
+                }
+                break;
             default:
                 break;
         }
@@ -222,6 +252,21 @@ public class MapEditor : MonoBehaviour
                 case MapEditorType.Enemy:
                     SetMarker();
                     break;
+                case MapEditorType.FloorObject:
+                    SetObject(true);
+                    break;
+                case MapEditorType.Hurdle:
+                    SetObject(true);
+                    break;
+                case MapEditorType.HalfCover:
+                    SetObject(true);
+                    break;
+                case MapEditorType.FullCover:
+                    SetObject(true);
+                    break;
+                case MapEditorType.SideObject:
+                    SetObject(true);
+                    break;
                 default:
                     break;
             }
@@ -232,18 +277,6 @@ public class MapEditor : MonoBehaviour
             {
                 case MapEditorType.Floor:
                     SetFloor(true);
-                    break;
-                case MapEditorType.HalfCover:
-                    SetObject(true);
-                    break;
-                case MapEditorType.FullCover:
-                    SetObject(true);
-                    break;
-                case MapEditorType.FloorObject:
-                    SetObject(true);
-                    break;
-                case MapEditorType.SideObject:
-                    SetObject(true);
                     break;
                 default:
                     break;
@@ -256,13 +289,16 @@ public class MapEditor : MonoBehaviour
                 case MapEditorType.Floor:
                     SetFloor(false);
                     break;
+                case MapEditorType.FloorObject:
+                    SetObject(false);
+                    break;
+                case MapEditorType.Hurdle:
+                    SetObject(false);
+                    break;
                 case MapEditorType.HalfCover:
                     SetObject(false);
                     break;
                 case MapEditorType.FullCover:
-                    SetObject(false);
-                    break;
-                case MapEditorType.FloorObject:
                     SetObject(false);
                     break;
                 case MapEditorType.SideObject:
@@ -469,8 +505,6 @@ public class MapEditor : MonoBehaviour
 
         void HighlightNode(FieldNode node)
         {
-            if (selectItem == null) return;
-
             switch (findType)
             {
                 case FindNodeType.SetFloor:
@@ -480,7 +514,11 @@ public class MapEditor : MonoBehaviour
                 case FindNodeType.SetObject:
                     if (node.Mesh.enabled)
                     {
-                        if (selectItem.size.x == 1 && selectItem.size.y == 1)
+                        if (selectItem == null)
+                        {
+                            node.SetNodeOutLine(setDirection);
+                        }
+                        else if (selectItem.size.x == 1 && selectItem.size.y == 1)
                         {
                             node.SetNodeOutLine(setDirection);
                         }
@@ -630,6 +668,29 @@ public class MapEditor : MonoBehaviour
                     case true:
                         sideButtons.transform.localPosition = sidePos_On;
                         sideUI.transform.localPosition = sidePos_On;
+                        switch (editType)
+                        {
+                            case MapEditorType.Floor:
+                                findType = FindNodeType.SetFloor;
+                                break;
+                            case MapEditorType.FloorObject:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.Hurdle:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.HalfCover:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.FullCover:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.SideObject:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     case false:
                         if (selectItem != null)
@@ -639,6 +700,7 @@ public class MapEditor : MonoBehaviour
                         }
                         sideButtons.transform.localPosition = sidePos_Off;
                         sideUI.transform.localPosition = sidePos_Off;
+                        findType = FindNodeType.None;
                         break;
                 }
             }
@@ -659,29 +721,8 @@ public class MapEditor : MonoBehaviour
         {
             selectItem.outline.enabled = false;
         }
-
         selectItem = item;
         selectItem.outline.enabled = true;
-        switch (item.type)
-        {
-            case MapEditorType.Floor:
-                findType = FindNodeType.SetFloor;
-                break;
-            case MapEditorType.HalfCover:
-                findType = FindNodeType.SetObject;
-                break;
-            case MapEditorType.FullCover:
-                findType = FindNodeType.SetObject;
-                break;
-            case MapEditorType.FloorObject:
-                findType = FindNodeType.SetObject;
-                break;
-            case MapEditorType.SideObject:
-                findType = FindNodeType.SetObject;
-                break;
-            default:
-                break;
-        }
     }
 
     #region Button Event
@@ -697,14 +738,16 @@ public class MapEditor : MonoBehaviour
         if (saveInput.text.Length == 0) return;
 
         gameMgr.dataMgr.SaveMapData(saveInput.text, mapSize, gameMgr.fieldNodes);
+        gameMgr.dataMgr.ReadMapLoadIndex(loadDropdown);
         saveInput.text = "";
     }
 
     public void Button_Data_Load()
     {
-        if (loadInput.text.Length == 0) return;
+        if (saveInput.text.Length > 0) return;
 
-        var mapData = gameMgr.dataMgr.LoadMapData(loadInput.text);
+        var loadName = loadDropdown.options[loadDropdown.value].text;
+        var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
             CreateField(mapData.mapSize.x, mapData.mapSize.y);
@@ -714,7 +757,7 @@ public class MapEditor : MonoBehaviour
                 var node = gameMgr.fieldNodes[i];
                 if (nodeData.isMesh)
                 {
-                    var floorItem = floorUI.transform.Find($"{nodeData.floorItemName}").GetComponent<MapItem>();
+                    var floorItem = mapItems.Find(x => x.name == $"{nodeData.floorItemName}");
                     node.SetOnFloor(floorItem, nodeData.floorRot);
                 }
 
@@ -731,24 +774,23 @@ public class MapEditor : MonoBehaviour
                     {
                         var objectData = nodeData.objectDatas[j];
                         var objectUI = GetObjectUI(objectData.objectType);
-                        var objectItem = objectUI.transform.Find($"{objectData.itemName}").GetComponent<MapItem>();
+                        var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
                         node.SetOnObject(objectItem, objectData.setDir);
                     }
                 }
             }
-            loadInput.text = "";
         }
 
         GameObject GetObjectUI(MapEditorType type)
         {
             switch (type)
             {
+                case MapEditorType.FloorObject:
+                    return floorObjectUI;
                 case MapEditorType.HalfCover:
                     return halfCoverUI;
                 case MapEditorType.FullCover:
                     return fullCoverUI;
-                case MapEditorType.FloorObject:
-                    return floorObjectUI;
                 case MapEditorType.SideObject:
                     return sideObjectUI;
                 default:
@@ -810,6 +852,16 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Side, MapEditorType.Floor, floorUI);
     }
 
+    public void Button_FloorObject()
+    {
+        OnInterface(InterfaceType.Side, MapEditorType.FloorObject, floorObjectUI);
+    }
+
+    public void Button_Hurdle()
+    {
+        OnInterface(InterfaceType.Side, MapEditorType.Hurdle, hurdleUI);
+    }
+
     public void Button_HalfCover()
     {
         OnInterface(InterfaceType.Side, MapEditorType.HalfCover, halfCoverUI);
@@ -818,11 +870,6 @@ public class MapEditor : MonoBehaviour
     public void Button_FullCover()
     {
         OnInterface(InterfaceType.Side, MapEditorType.FullCover, fullCoverUI);
-    }
-
-    public void Button_FloorObject()
-    {
-        OnInterface(InterfaceType.Side, MapEditorType.FloorObject, floorObjectUI);
     }
 
     public void Button_SideObject()

@@ -327,9 +327,13 @@ public class FieldNode : MonoBehaviour
 
     public void SetOnObject(List<FieldNode> setNodes, MapItem item, TargetDirection setDirection)
     {
+        var findAll = setNodes.Find(x => x.setObjects.Find(x => x.type == item.type) != null);
+        if (findAll != null) return;
+
         var subNodes = new List<FieldNode>(setNodes);
         subNodes.Remove(this);
         var setObject = SwitchOfMapItemType(item, setDirection);
+        setObject.subNodes = subNodes;
         for (int i = 0; i < subNodes.Count; i++)
         {
             var subNode = subNodes[i];
@@ -356,12 +360,12 @@ public class FieldNode : MonoBehaviour
     {
         switch (item.type)
         {
+            case MapEditorType.FloorObject:
+                return SetObject();
             case MapEditorType.HalfCover:
                 return SetCover(CoverType.Half);
             case MapEditorType.FullCover:
                 return SetCover(CoverType.Full);
-            case MapEditorType.FloorObject:
-                return SetObject();
             case MapEditorType.SideObject:
                 return SetObject();
             default:
@@ -374,7 +378,7 @@ public class FieldNode : MonoBehaviour
             var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
             _object.name = item.name;
             _cover.transform.SetParent(transform, false);
-            _object.transform.SetParent(_cover.transform, false);
+            _object.transform.SetParent(transform, false);
             _cover.SetComponents(this, coverType, _object, setDirection);
 
             var setObject = new SetObject()
@@ -416,15 +420,17 @@ public class FieldNode : MonoBehaviour
         var setObject = setObjects.Find(x => x.type == type);
         if (setObject != null)
         {
-            RemoveSetObject(type);
+            var setNode = setObject.setNode;
+            setNode.RemoveSetObject(type);
+            setNode.setObjects.Remove(setObject);
             for (int i = 0; i < setObject.subNodes.Count; i++)
             {
                 var subNode = setObject.subNodes[i];
+                var _setObject = subNode.setObjects.Find(x => x.type == type);
                 subNode.RemoveSetObject(type);
-                subNode.setObjects.Remove(setObject);
+                subNode.setObjects.Remove(_setObject);
             }
             Destroy(setObject.setObject);
-            setObjects.Remove(setObject);
         }
     }
 

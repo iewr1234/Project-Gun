@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEditor;
+using TMPro;
 
 [System.Serializable]
 public struct ObjectData
@@ -132,6 +134,24 @@ public class DataManager : MonoBehaviour
 
         var filePath = Path.Combine(folderPath, $"{saveName}.json");
         File.WriteAllText(filePath, saveData);
+    }
+
+    public void ReadMapLoadIndex(TMP_Dropdown dropdown)
+    {
+        dropdown.ClearOptions();
+        var folderPath = Application.dataPath + DataUtility.mapDataPath;
+        if (Directory.Exists(folderPath))
+        {
+            string[] fileNames = Directory.GetFiles(folderPath, "*.json");
+            var options = new List<TMP_Dropdown.OptionData>();
+            for (int i = 0; i < fileNames.Length; i++)
+            {
+                var fileName = Path.GetFileName(fileNames[i]).Split('.')[0];
+                var option = new TMP_Dropdown.OptionData(fileName);
+                options.Add(option);
+            }
+            dropdown.AddOptions(options);
+        }
     }
 
     public MapData LoadMapData(string loadName)

@@ -1,17 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public enum MapItemType
 {
     None,
     Floor,
+    FloorObject,
+    Hurdle,
+    Box,
     HalfCover,
     FullCover,
-    FloorObject,
-    Object,
+    SideObject,
 }
 
 public class MapItem : MonoBehaviour
@@ -20,8 +22,9 @@ public class MapItem : MonoBehaviour
     private MapEditor mapEdt;
 
     [Header("---Access Component---")]
-    public Image outline;
-    public Image maskImage;
+    [HideInInspector] public Image outline;
+    [HideInInspector] public Image maskImage;
+    private TextMeshProUGUI sizeText;
 
     [Header("--- Assignment Variable---")]
     public MapEditorType type;
@@ -29,29 +32,66 @@ public class MapItem : MonoBehaviour
     [Header("[Object]")]
     public Vector2 size = new Vector2(1f, 1f);
 
-    private void Start()
+    public void SetComponents(MapEditor _mapEdt)
     {
-        mapEdt = FindAnyObjectByType<MapEditor>();
+        mapEdt = _mapEdt;
 
-        //outline = transform.Find("Outline").GetComponent<Image>();
-        //outline.enabled = false;
-        //maskImage = transform.Find("Mask").GetComponent<Image>();
+        outline = transform.Find("Outline").GetComponent<Image>();
+        outline.enabled = false;
+        maskImage = transform.Find("Mask").GetComponent<Image>();
+        sizeText = transform.Find("SizeText").GetComponent<TextMeshProUGUI>();
+
+        var typeText = transform.name.Split('_')[0];
+        switch (typeText)
+        {
+            case "Floor":
+                type = MapEditorType.Floor;
+                break;
+            case "FloorObject":
+                type = MapEditorType.FloorObject;
+                break;
+            case "Hurdle":
+                type = MapEditorType.Hurdle;
+                break;
+            case "Box":
+                type = MapEditorType.Box;
+                break;
+            case "Half":
+                type = MapEditorType.HalfCover;
+                break;
+            case "Full":
+                type = MapEditorType.FullCover;
+                break;
+            case "SideObject":
+                type = MapEditorType.SideObject;
+                break;
+            default:
+                break;
+        }
+
+        if (type == MapEditorType.Floor)
+        {
+            sizeText.enabled = false;
+        }
+        else
+        {
+            sizeText.text = $"{size.x} x {size.y}";
+        }
     }
 
     public void PointerEnter_MapItem()
     {
-        if (mapEdt.selectItem == this) return;
-
         mapEdt.onSideButton = true;
         outline.enabled = true;
     }
 
     public void PointerExit_MapItem()
     {
-        if (mapEdt.selectItem == this) return;
-
         mapEdt.onSideButton = false;
-        outline.enabled = false;
+        if (mapEdt.selectItem != this)
+        {
+            outline.enabled = false;
+        }
     }
 
     public void Button_MapItem()
