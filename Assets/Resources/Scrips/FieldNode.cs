@@ -26,7 +26,7 @@ public class FieldNode : MonoBehaviour
     private Canvas canvas;
     private GameObject frame;
     private List<NodeOutline> outlines = new List<NodeOutline>();
-    //private MeshRenderer fog;
+    private MeshRenderer unableMove;
 
     private GameObject marker;
     private Image markerOutline;
@@ -59,8 +59,6 @@ public class FieldNode : MonoBehaviour
         transform.name = $"X{nodePos.x}/Y{nodePos.y}";
         mesh = transform.Find("Mesh").GetComponent<MeshRenderer>();
         mesh.enabled = false;
-        //var material = new Material(Resources.Load<Material>("Materials/Node"));
-        //mesh.material = material;
 
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
@@ -71,7 +69,7 @@ public class FieldNode : MonoBehaviour
             var outline = outlines[i];
             outline.SetComponents();
         }
-        //fog = transform.Find("Fog").GetComponent<MeshRenderer>();
+        unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
 
         marker = transform.Find("Canvas/Marker").gameObject;
         markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
@@ -80,8 +78,6 @@ public class FieldNode : MonoBehaviour
 
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
-
-        //canMove = true;
     }
 
     public void AddAdjacentNodes()
@@ -255,7 +251,48 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetMarker(CharacterOwner type, int index)
+    public void SetOnArea(FindNodeType findType)
+    {
+        if (unableMove.enabled || cover != null) return;
+
+        if (findType == FindNodeType.SetUnableMove)
+        {
+            unableMove.enabled = true;
+            canMove = false;
+            ReleaseAdjacentNodes();
+        }
+        else
+        {
+            var cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+            cover.transform.SetParent(transform, false);
+            cover.SetComponents(this, findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half);
+        }
+    }
+
+    public void SetOffArea()
+    {
+        if (cover == null && !unableMove.enabled) return;
+
+        if (cover != null)
+        {
+            Destroy(cover.gameObject);
+        }
+        else
+        {
+            unableMove.enabled = false;
+        }
+
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null) continue;
+
+            onAxisNode.AddAdjacentNodes();
+        }
+        canMove = true;
+    }
+
+    public void SetOnMarker(CharacterOwner type, int index)
     {
         marker.SetActive(true);
         markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
@@ -264,7 +301,7 @@ public class FieldNode : MonoBehaviour
         canMove = false;
     }
 
-    public void SetMarker()
+    public void SetOffMarker()
     {
         marker.SetActive(false);
         canMove = true;
@@ -337,21 +374,21 @@ public class FieldNode : MonoBehaviour
         for (int i = 0; i < subNodes.Count; i++)
         {
             var subNode = subNodes[i];
-            switch (item.type)
-            {
-                case MapEditorType.HalfCover:
-                    var subCover_Half = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-                    subCover_Half.transform.SetParent(subNode.transform, false);
-                    subCover_Half.SetComponents(subNode, CoverType.Half);
-                    break;
-                case MapEditorType.FullCover:
-                    var subCover_Full = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-                    subCover_Full.transform.SetParent(subNode.transform, false);
-                    subCover_Full.SetComponents(subNode, CoverType.Full);
-                    break;
-                default:
-                    break;
-            }
+            //switch (item.type)
+            //{
+            //    case MapEditorType.HalfCover:
+            //        var subCover_Half = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+            //        subCover_Half.transform.SetParent(subNode.transform, false);
+            //        subCover_Half.SetComponents(subNode, CoverType.Half);
+            //        break;
+            //    case MapEditorType.FullCover:
+            //        var subCover_Full = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+            //        subCover_Full.transform.SetParent(subNode.transform, false);
+            //        subCover_Full.SetComponents(subNode, CoverType.Full);
+            //        break;
+            //    default:
+            //        break;
+            //}
             subNode.setObjects.Add(setObject);
         }
     }
@@ -363,35 +400,35 @@ public class FieldNode : MonoBehaviour
             case MapEditorType.FloorObject:
                 return SetObject();
             case MapEditorType.HalfCover:
-                return SetCover(CoverType.Half);
+                return SetObject();
             case MapEditorType.FullCover:
-                return SetCover(CoverType.Full);
+                return SetObject();
             case MapEditorType.SideObject:
                 return SetObject();
             default:
                 return null;
         }
 
-        SetObject SetCover(CoverType coverType)
-        {
-            var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-            var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
-            _object.name = item.name;
-            _cover.transform.SetParent(transform, false);
-            _object.transform.SetParent(transform, false);
-            _cover.SetComponents(this, coverType, _object, setDirection);
+        //SetObject SetCover(CoverType coverType)
+        //{
+        //    var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
+        //    var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
+        //    _cover.transform.SetParent(transform, false);
+        //    _cover.SetComponents(this, coverType);
+        //    _object.name = item.name;
+        //    _object.transform.SetParent(transform, false);
 
-            var setObject = new SetObject()
-            {
-                type = item.type,
-                size = item.size,
-                setNode = this,
-                setObject = _object,
-                setDir = setDirection,
-            };
-            setObjects.Add(setObject);
-            return setObject;
-        }
+        //    var setObject = new SetObject()
+        //    {
+        //        type = item.type,
+        //        size = item.size,
+        //        setNode = this,
+        //        setObject = _object,
+        //        setDir = setDirection,
+        //    };
+        //    setObjects.Add(setObject);
+        //    return setObject;
+        //}
 
         SetObject SetObject()
         {

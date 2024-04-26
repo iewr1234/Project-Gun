@@ -4,13 +4,13 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEditor.Progress;
 
 public enum MapEditorType
 {
     None,
     Data,
-    Node,
+    CreateNode,
+    SetArea,
     Player,
     Enemy,
     Floor,
@@ -25,6 +25,9 @@ public enum MapEditorType
 public enum FindNodeType
 {
     None,
+    SetUnableMove,
+    SetHalfCover,
+    SetFullCover,
     CreateMarker,
     DeleteMarker,
     SetFloor,
@@ -53,10 +56,14 @@ public class MapEditor : MonoBehaviour
     private TMP_InputField saveInput;
     private TMP_Dropdown loadDropdown;
 
-    [Header("[Node]")]
-    private GameObject nodeUI;
+    [Header("[CreateNode]")]
+    private GameObject createNodeUI;
     private TMP_InputField xSizeInput;
     private TMP_InputField ySizeInput;
+
+    [Header("[SetArea]")]
+    private GameObject setAreaUI;
+    private List<Image> setTypeOutlines = new List<Image>();
 
     [Header("[Player]")]
     private GameObject playerUI;
@@ -80,7 +87,6 @@ public class MapEditor : MonoBehaviour
     private GameObject floorUI;
     private bool allFloor;
     private bool floorDirRandom;
-    private List<FieldNode> setFloorNodes = new List<FieldNode>();
 
     [Header("[FloorObject]")]
     private GameObject floorObjectUI;
@@ -106,7 +112,7 @@ public class MapEditor : MonoBehaviour
 
     private FindNodeType findType;
     private FieldNode selectNode;
-    [SerializeField] private List<FieldNode> selectNodes = new List<FieldNode>();
+    private List<FieldNode> selectNodes = new List<FieldNode>();
 
     [Space(5f)]
     public MapItem selectItem;
@@ -129,10 +135,16 @@ public class MapEditor : MonoBehaviour
         gameMgr.dataMgr.ReadMapLoadIndex(loadDropdown);
         dataUI.SetActive(false);
 
-        nodeUI = transform.Find("Top/UI/Node").gameObject;
-        xSizeInput = transform.Find("Top/UI/Node/InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
-        ySizeInput = transform.Find("Top/UI/Node/InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
-        nodeUI.SetActive(false);
+        createNodeUI = transform.Find("Top/UI/CreateNode").gameObject;
+        xSizeInput = createNodeUI.transform.Find("InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
+        ySizeInput = createNodeUI.transform.Find("InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
+        createNodeUI.SetActive(false);
+
+        setAreaUI = transform.Find("Top/UI/SetArea").gameObject;
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetUnableMove/Outline").GetComponent<Image>());
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetHalfCover/Outline").GetComponent<Image>());
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetFullCover/Outline").GetComponent<Image>());
+        setAreaUI.SetActive(false);
 
         playerUI = transform.Find("Top/UI/Player").gameObject;
         playerUI.SetActive(false);
@@ -189,6 +201,8 @@ public class MapEditor : MonoBehaviour
                 break;
             case MapEditorType.Data:
                 break;
+            case MapEditorType.CreateNode:
+                break;
             default:
                 InputEvent();
                 break;
@@ -240,7 +254,7 @@ public class MapEditor : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            setFloorNodes.Clear();
+            selectNodes.Clear();
         }
         else if (Input.GetMouseButtonDown(0))
         {
@@ -275,6 +289,9 @@ public class MapEditor : MonoBehaviour
         {
             switch (editType)
             {
+                case MapEditorType.SetArea:
+                    SetArea(true);
+                    break;
                 case MapEditorType.Floor:
                     SetFloor(true);
                     break;
@@ -286,6 +303,9 @@ public class MapEditor : MonoBehaviour
         {
             switch (editType)
             {
+                case MapEditorType.SetArea:
+                    SetArea(false);
+                    break;
                 case MapEditorType.Floor:
                     SetFloor(false);
                     break;
@@ -343,6 +363,23 @@ public class MapEditor : MonoBehaviour
             }
         }
 
+        void SetArea(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    if (selectNodes.Find(x => x == selectNode) == null)
+                    {
+                        selectNode.SetOnArea(findType);
+                        selectNodes.Add(selectNode);
+                    }
+                    break;
+                case false:
+                    selectNode.SetOffArea();
+                    break;
+            }
+        }
+
         void SetMarker()
         {
             selectNode.SetNodeOutLine(false);
@@ -351,16 +388,16 @@ public class MapEditor : MonoBehaviour
             switch (findType)
             {
                 case FindNodeType.CreateMarker:
-                    selectNode.SetMarker(charType, markerNodes.Count);
+                    selectNode.SetOnMarker(charType, markerNodes.Count);
                     markerNodes.Add(selectNode);
                     break;
                 case FindNodeType.DeleteMarker:
-                    selectNode.SetMarker();
+                    selectNode.SetOffMarker();
                     markerNodes.Remove(selectNode);
                     for (int i = 0; i < markerNodes.Count; i++)
                     {
                         var markerNode = markerNodes[i];
-                        markerNode.SetMarker(charType, i);
+                        markerNode.SetOnMarker(charType, i);
                     }
                     break;
                 default:
@@ -375,7 +412,7 @@ public class MapEditor : MonoBehaviour
             switch (value)
             {
                 case true:
-                    if (selectItem != null && setFloorNodes.Find(x => x == selectNode) == null)
+                    if (selectItem != null && selectNodes.Find(x => x == selectNode) == null)
                     {
                         if (allFloor)
                         {
@@ -383,13 +420,13 @@ public class MapEditor : MonoBehaviour
                             {
                                 var node = gameMgr.fieldNodes[i];
                                 node.SetOnFloor(selectItem, floorDirRandom);
-                                setFloorNodes.Add(node);
+                                selectNodes.Add(node);
                             }
                         }
                         else
                         {
                             selectNode.SetOnFloor(selectItem, floorDirRandom);
-                            setFloorNodes.Add(selectNode);
+                            selectNodes.Add(selectNode);
                         }
                     }
                     break;
@@ -441,6 +478,15 @@ public class MapEditor : MonoBehaviour
 
             switch (findType)
             {
+                case FindNodeType.SetUnableMove:
+                    HighlightNode(node);
+                    break;
+                case FindNodeType.SetHalfCover:
+                    HighlightNode(node);
+                    break;
+                case FindNodeType.SetFullCover:
+                    HighlightNode(node);
+                    break;
                 case FindNodeType.CreateMarker:
                     CreateMarker(node);
                     break;
@@ -507,6 +553,18 @@ public class MapEditor : MonoBehaviour
         {
             switch (findType)
             {
+                case FindNodeType.SetUnableMove:
+                    node.SetNodeOutLine(true);
+                    selectNode = node;
+                    break;
+                case FindNodeType.SetHalfCover:
+                    node.SetNodeOutLine(true);
+                    selectNode = node;
+                    break;
+                case FindNodeType.SetFullCover:
+                    node.SetNodeOutLine(true);
+                    selectNode = node;
+                    break;
                 case FindNodeType.SetFloor:
                     node.SetNodeOutLine(true);
                     selectNode = node;
@@ -596,12 +654,7 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 필드 생성
-    /// </summary>
-    /// <param name="size_X"></param>
-    /// <param name="size_Y"></param>
-    private void CreateField(float xSize, float ySize)
+    private void CreateNodes(float xSize, float ySize)
     {
         if (gameMgr.fieldNodes.Count > 0)
         {
@@ -637,80 +690,9 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    private void OnInterface(InterfaceType _type, MapEditorType _state, GameObject _activeUI)
-    {
-        switch (_activeUI.activeSelf)
-        {
-            case true:
-                SetUI(false);
-                editType = MapEditorType.None;
-                activeType = InterfaceType.None;
-                activeUI = null;
-                break;
-            case false:
-                if (activeUI != null)
-                {
-                    SetUI(false);
-                }
-                editType = _state;
-                activeType = _type;
-                activeUI = _activeUI;
-                SetUI(true);
-                break;
-        }
-
-        void SetUI(bool value)
-        {
-            if (activeType == InterfaceType.Side)
-            {
-                switch (value)
-                {
-                    case true:
-                        sideButtons.transform.localPosition = sidePos_On;
-                        sideUI.transform.localPosition = sidePos_On;
-                        switch (editType)
-                        {
-                            case MapEditorType.Floor:
-                                findType = FindNodeType.SetFloor;
-                                break;
-                            case MapEditorType.FloorObject:
-                                findType = FindNodeType.SetObject;
-                                break;
-                            case MapEditorType.Hurdle:
-                                findType = FindNodeType.SetObject;
-                                break;
-                            case MapEditorType.HalfCover:
-                                findType = FindNodeType.SetObject;
-                                break;
-                            case MapEditorType.FullCover:
-                                findType = FindNodeType.SetObject;
-                                break;
-                            case MapEditorType.SideObject:
-                                findType = FindNodeType.SetObject;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    case false:
-                        if (selectItem != null)
-                        {
-                            selectItem.outline.enabled = false;
-                            selectItem = null;
-                        }
-                        sideButtons.transform.localPosition = sidePos_Off;
-                        sideUI.transform.localPosition = sidePos_Off;
-                        findType = FindNodeType.None;
-                        break;
-                }
-            }
-            activeUI.SetActive(value);
-        }
-    }
-
     public void SelectMapItem(MapItem item)
     {
-        setFloorNodes.Clear();
+        selectNodes.Clear();
         if (selectItem == item)
         {
             selectItem.outline.enabled = false;
@@ -726,6 +708,15 @@ public class MapEditor : MonoBehaviour
     }
 
     #region Button Event
+    public void PointerEnter_MapEditorButton()
+    {
+        onSideButton = true;
+    }
+
+    public void PointerExit_MapEditorButton()
+    {
+        onSideButton = false;
+    }
 
     #region Top
     public void Button_Data()
@@ -750,7 +741,7 @@ public class MapEditor : MonoBehaviour
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
-            CreateField(mapData.mapSize.x, mapData.mapSize.y);
+            CreateNodes(mapData.mapSize.x, mapData.mapSize.y);
             for (int i = 0; i < mapData.nodeDatas.Length; i++)
             {
                 var nodeData = mapData.nodeDatas[i];
@@ -765,7 +756,7 @@ public class MapEditor : MonoBehaviour
                 {
                     var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
                     markerNodes.Add(node);
-                    node.SetMarker(nodeData.markerType, nodeData.markerIndex);
+                    node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
                 }
 
                 if (nodeData.isObject)
@@ -799,20 +790,40 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    public void Button_Node()
+    public void Button_CreateNode()
     {
-        OnInterface(InterfaceType.Top, MapEditorType.Node, nodeUI);
+        OnInterface(InterfaceType.Top, MapEditorType.CreateNode, createNodeUI);
     }
 
-    public void Button_Node_Create()
+    public void Button_CreateNode_Create()
     {
         if (xSizeInput.text.Length == 0 || ySizeInput.text.Length == 0) return;
 
-        CreateField(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
+        CreateNodes(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
         activeUI.gameObject.SetActive(false);
         editType = MapEditorType.None;
         activeType = InterfaceType.None;
         activeUI = null;
+    }
+
+    public void Button_SetArea()
+    {
+        OnInterface(InterfaceType.Top, MapEditorType.SetArea, setAreaUI);
+    }
+
+    public void Button_SetArea_SetUnableMove()
+    {
+        SwitchSetArea(FindNodeType.SetUnableMove);
+    }
+
+    public void Button_SetArea_SetHalfCover()
+    {
+        SwitchSetArea(FindNodeType.SetHalfCover);
+    }
+
+    public void Button_SetArea_SetFullCover()
+    {
+        SwitchSetArea(FindNodeType.SetFullCover);
     }
 
     public void Button_Player()
@@ -837,16 +848,6 @@ public class MapEditor : MonoBehaviour
     #endregion
 
     #region Side
-    public void PointerEnter_SideButton()
-    {
-        onSideButton = true;
-    }
-
-    public void PointerExit_SideButton()
-    {
-        onSideButton = false;
-    }
-
     public void Button_Floor()
     {
         OnInterface(InterfaceType.Side, MapEditorType.Floor, floorUI);
@@ -927,5 +928,124 @@ public class MapEditor : MonoBehaviour
     }
     #endregion
 
+    private void OnInterface(InterfaceType _type, MapEditorType _state, GameObject _activeUI)
+    {
+        switch (_activeUI.activeSelf)
+        {
+            case true:
+                SetUI(false);
+                editType = MapEditorType.None;
+                activeType = InterfaceType.None;
+                activeUI = null;
+                break;
+            case false:
+                if (activeUI != null)
+                {
+                    SetUI(false);
+                }
+                editType = _state;
+                activeType = _type;
+                activeUI = _activeUI;
+                SetUI(true);
+                break;
+        }
+
+        void SetUI(bool value)
+        {
+            if (activeType == InterfaceType.Side)
+            {
+                switch (value)
+                {
+                    case true:
+                        sideButtons.transform.localPosition = sidePos_On;
+                        sideUI.transform.localPosition = sidePos_On;
+                        switch (editType)
+                        {
+                            case MapEditorType.Floor:
+                                findType = FindNodeType.SetFloor;
+                                break;
+                            case MapEditorType.FloorObject:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.Hurdle:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.HalfCover:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.FullCover:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.SideObject:
+                                findType = FindNodeType.SetObject;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case false:
+                        if (selectItem != null)
+                        {
+                            selectItem.outline.enabled = false;
+                            selectItem = null;
+                        }
+                        sideButtons.transform.localPosition = sidePos_Off;
+                        sideUI.transform.localPosition = sidePos_Off;
+                        findType = FindNodeType.None;
+                        break;
+                }
+            }
+            activeUI.SetActive(value);
+        }
+    }
+
+    private void SwitchSetArea(FindNodeType _findType)
+    {
+        var index = (int)_findType - 1;
+        switch (findType)
+        {
+            case FindNodeType.None:
+                setTypeOutlines[index].enabled = true;
+                findType = _findType;
+                break;
+            case FindNodeType.SetUnableMove:
+                SetFindType();
+                break;
+            case FindNodeType.SetHalfCover:
+                SetFindType();
+                break;
+            case FindNodeType.SetFullCover:
+                SetFindType();
+                break;
+            default:
+
+                break;
+        }
+
+        void SetFindType()
+        {
+            if (findType == _findType)
+            {
+                setTypeOutlines[index].enabled = false;
+                findType = FindNodeType.None;
+            }
+            else
+            {
+                for (int i = 0; i < setTypeOutlines.Count; i++)
+                {
+                    var outline = setTypeOutlines[i];
+                    if (i == index)
+                    {
+                        outline.enabled = true;
+                    }
+                    else
+                    {
+                        outline.enabled = false;
+                    }
+                }
+                findType = _findType;
+            }
+        }
+    }
     #endregion
 }
