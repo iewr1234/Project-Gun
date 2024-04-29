@@ -25,7 +25,7 @@ public class FieldNode : MonoBehaviour
     private MeshRenderer mesh;
     private Canvas canvas;
     private GameObject frame;
-    private List<NodeOutline> outlines = new List<NodeOutline>();
+    private NodeOutline[] outlines;
     private MeshRenderer unableMove;
 
     private GameObject marker;
@@ -39,17 +39,15 @@ public class FieldNode : MonoBehaviour
     public Cover cover;
     [Space(5f)]
 
-    public bool canSee;
+    //public bool canSee;
     public bool canMove;
-    [Space(5f)]
-
-    public List<SetObject> setObjects = new List<SetObject>();
-
     [HideInInspector] public Vector2 nodePos;
-    [HideInInspector] public List<FieldNode> onAxisNodes;
+    public List<FieldNode> onAxisNodes;
     [HideInInspector] public List<FieldNode> offAxisNodes;
     [HideInInspector] public List<FieldNode> allAxisNodes = new List<FieldNode>();
 
+    [Space(5f)]
+    public List<SetObject> setObjects = new List<SetObject>();
 
     public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
     {
@@ -63,12 +61,7 @@ public class FieldNode : MonoBehaviour
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
         frame = transform.Find("Frame").gameObject;
-        outlines = GetComponentsInChildren<NodeOutline>().ToList();
-        for (int i = 0; i < outlines.Count; i++)
-        {
-            var outline = outlines[i];
-            outline.SetComponents();
-        }
+        outlines = new NodeOutline[4];
         unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
 
         marker = transform.Find("Canvas/Marker").gameObject;
@@ -85,7 +78,6 @@ public class FieldNode : MonoBehaviour
         onAxisNodes.Clear();
         offAxisNodes.Clear();
         allAxisNodes.Clear();
-
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -180,18 +172,79 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetNodeOutLine(bool value)
+    public void AddNodeOutline(Transform nodeOutlineTf)
     {
-        for (int i = 0; i < outlines.Count; i++)
+        for (int i = 0; i < onAxisNodes.Count; i++)
+        {
+            var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == null)
+            {
+                CreateNodeOutline(i, onAxisNode);
+            }
+            else
+            {
+                var dir = (TargetDirection)i;
+                var symmetricDir = TargetDirection.None;
+                switch (dir)
+                {
+                    case TargetDirection.Left:
+                        symmetricDir = TargetDirection.Right;
+                        break;
+                    case TargetDirection.Front:
+                        symmetricDir = TargetDirection.Back;
+                        break;
+                    case TargetDirection.Back:
+                        symmetricDir = TargetDirection.Front;
+                        break;
+                    case TargetDirection.Right:
+                        symmetricDir = TargetDirection.Left;
+                        break;
+                    default:
+                        Debug.LogError("SetNodeOutline: inappropriate direction");
+                        break;
+                }
+
+                if (onAxisNode.outlines[(int)symmetricDir] == null)
+                {
+                    onAxisNode.outlines[(int)symmetricDir] = CreateNodeOutline(i, onAxisNode);
+                }
+            }
+        }
+
+        NodeOutline CreateNodeOutline(int index, FieldNode onAxisNode)
+        {
+            var outline = Instantiate(Resources.Load<NodeOutline>("Prefabs/NodeOutline"));
+            outline.transform.SetParent(nodeOutlineTf, false);
+            outline.SetComponents();
+            var dir = (TargetDirection)index;
+            outline.transform.position = transform.position + DataUtility.GetPositionOfNodeOutline(dir);
+            outline.transform.rotation = DataUtility.GetRotationOfNodeOutline(dir);
+            outlines[index] = outline;
+
+            if (onAxisNode == null)
+            {
+                outline.name = $"NodeOutline({transform.name})";
+            }
+            else
+            {
+                outline.name = $"NodeOutline({transform.name} - {onAxisNode.name})";
+            }
+            return outline;
+        }
+    }
+
+    public void SetNodeOutline(bool value)
+    {
+        for (int i = 0; i < outlines.Length; i++)
         {
             var outline = outlines[i];
             outline.SetActiveLine(value);
         }
     }
 
-    public void SetNodeOutLine(TargetDirection targetDir)
+    public void SetNodeOutline(TargetDirection targetDir)
     {
-        for (int i = 0; i < outlines.Count; i++)
+        for (int i = 0; i < outlines.Length; i++)
         {
             var outline = outlines[i];
             if (i == (int)targetDir)
@@ -205,7 +258,7 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetNodeOutLine(List<FieldNode> openNodes)
+    public void SetNodeOutline(List<FieldNode> openNodes)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
@@ -221,7 +274,7 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetNodeOutLine(List<FieldNode> openNodes, TargetDirection targetDir)
+    public void SetNodeOutline(List<FieldNode> openNodes, TargetDirection targetDir)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
@@ -374,21 +427,6 @@ public class FieldNode : MonoBehaviour
         for (int i = 0; i < subNodes.Count; i++)
         {
             var subNode = subNodes[i];
-            //switch (item.type)
-            //{
-            //    case MapEditorType.HalfCover:
-            //        var subCover_Half = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-            //        subCover_Half.transform.SetParent(subNode.transform, false);
-            //        subCover_Half.SetComponents(subNode, CoverType.Half);
-            //        break;
-            //    case MapEditorType.FullCover:
-            //        var subCover_Full = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-            //        subCover_Full.transform.SetParent(subNode.transform, false);
-            //        subCover_Full.SetComponents(subNode, CoverType.Full);
-            //        break;
-            //    default:
-            //        break;
-            //}
             subNode.setObjects.Add(setObject);
         }
     }
@@ -409,33 +447,12 @@ public class FieldNode : MonoBehaviour
                 return null;
         }
 
-        //SetObject SetCover(CoverType coverType)
-        //{
-        //    var _cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-        //    var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{coverType}Cover/{item.name}"));
-        //    _cover.transform.SetParent(transform, false);
-        //    _cover.SetComponents(this, coverType);
-        //    _object.name = item.name;
-        //    _object.transform.SetParent(transform, false);
-
-        //    var setObject = new SetObject()
-        //    {
-        //        type = item.type,
-        //        size = item.size,
-        //        setNode = this,
-        //        setObject = _object,
-        //        setDir = setDirection,
-        //    };
-        //    setObjects.Add(setObject);
-        //    return setObject;
-        //}
-
         SetObject SetObject()
         {
             var _object = Instantiate(Resources.Load<GameObject>($"Prefabs/Object/{item.type}/{item.name}"));
             _object.name = item.name;
             _object.transform.SetParent(transform, false);
-            _object.transform.localRotation = DataUtility.GetSetRotation(setDirection);
+            _object.transform.localRotation = DataUtility.GetSetRotationOfObject(setDirection);
 
             var setObject = new SetObject()
             {

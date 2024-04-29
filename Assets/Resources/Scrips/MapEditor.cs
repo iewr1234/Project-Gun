@@ -48,6 +48,7 @@ public class MapEditor : MonoBehaviour
 
     [Header("---Access Component---")]
     private Transform fieldNodeTf;
+    private Transform nodeOutlineTf;
     private Transform characterTf;
 
     #region Top
@@ -127,6 +128,7 @@ public class MapEditor : MonoBehaviour
         gameMgr = _gameMgr;
 
         fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
+        nodeOutlineTf = GameObject.FindGameObjectWithTag("NodeOutlines").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
 
         dataUI = transform.Find("Top/UI/Data").gameObject;
@@ -225,7 +227,7 @@ public class MapEditor : MonoBehaviour
                 {
                     if (selectNode != null)
                     {
-                        selectNode.SetNodeOutLine(false);
+                        selectNode.SetNodeOutline(false);
                         selectNode = null;
                     }
                     findType = FindNodeType.None;
@@ -236,7 +238,7 @@ public class MapEditor : MonoBehaviour
                 {
                     if (selectNode != null)
                     {
-                        selectNode.SetNodeOutLine(false);
+                        selectNode.SetNodeOutline(false);
                         selectNode = null;
                     }
                     findType = FindNodeType.None;
@@ -353,7 +355,7 @@ public class MapEditor : MonoBehaviour
             {
                 if (selectItem.size.x == 1 && selectItem.size.y == 1)
                 {
-                    selectNode.SetNodeOutLine(setDirection);
+                    selectNode.SetNodeOutline(setDirection);
                 }
                 else
                 {
@@ -382,7 +384,7 @@ public class MapEditor : MonoBehaviour
 
         void SetMarker()
         {
-            selectNode.SetNodeOutLine(false);
+            selectNode.SetNodeOutline(false);
             var charType = editType == MapEditorType.Player ? CharacterOwner.Player : CharacterOwner.Enemy;
             var markerNodes = editType == MapEditorType.Player ? pMarkerNodes : eMarkerNodes;
             switch (findType)
@@ -472,7 +474,7 @@ public class MapEditor : MonoBehaviour
 
             if (selectNode != null && node != selectNode)
             {
-                selectNode.SetNodeOutLine(false);
+                selectNode.SetNodeOutline(false);
                 ClearSelectNodes();
             }
 
@@ -505,7 +507,7 @@ public class MapEditor : MonoBehaviour
         }
         else if (selectNode != null)
         {
-            selectNode.SetNodeOutLine(false);
+            selectNode.SetNodeOutline(false);
             selectNode = null;
             ClearSelectNodes();
         }
@@ -517,10 +519,10 @@ public class MapEditor : MonoBehaviour
                 switch (editType)
                 {
                     case MapEditorType.Player:
-                        node.SetNodeOutLine(true);
+                        node.SetNodeOutline(true);
                         break;
                     case MapEditorType.Enemy:
-                        node.SetNodeOutLine(true);
+                        node.SetNodeOutline(true);
                         break;
                     default:
                         break;
@@ -539,12 +541,12 @@ public class MapEditor : MonoBehaviour
             var find = markerNodes.Find(x => x == node);
             if (find != null)
             {
-                node.SetNodeOutLine(true);
+                node.SetNodeOutline(true);
                 selectNode = node;
             }
             else if (selectNode != null)
             {
-                selectNode.SetNodeOutLine(false);
+                selectNode.SetNodeOutline(false);
                 selectNode = null;
             }
         }
@@ -554,19 +556,19 @@ public class MapEditor : MonoBehaviour
             switch (findType)
             {
                 case FindNodeType.SetUnableMove:
-                    node.SetNodeOutLine(true);
+                    node.SetNodeOutline(true);
                     selectNode = node;
                     break;
                 case FindNodeType.SetHalfCover:
-                    node.SetNodeOutLine(true);
+                    node.SetNodeOutline(true);
                     selectNode = node;
                     break;
                 case FindNodeType.SetFullCover:
-                    node.SetNodeOutLine(true);
+                    node.SetNodeOutline(true);
                     selectNode = node;
                     break;
                 case FindNodeType.SetFloor:
-                    node.SetNodeOutLine(true);
+                    node.SetNodeOutline(true);
                     selectNode = node;
                     break;
                 case FindNodeType.SetObject:
@@ -574,11 +576,11 @@ public class MapEditor : MonoBehaviour
                     {
                         if (selectItem == null)
                         {
-                            node.SetNodeOutLine(setDirection);
+                            node.SetNodeOutline(setDirection);
                         }
                         else if (selectItem.size.x == 1 && selectItem.size.y == 1)
                         {
-                            node.SetNodeOutLine(setDirection);
+                            node.SetNodeOutline(setDirection);
                         }
                         else
                         {
@@ -636,7 +638,7 @@ public class MapEditor : MonoBehaviour
             for (int i = 0; i < selectNodes.Count; i++)
             {
                 var selectNode = selectNodes[i];
-                selectNode.SetNodeOutLine(selectNodes, setDirection);
+                selectNode.SetNodeOutline(selectNodes, setDirection);
             }
         }
     }
@@ -648,7 +650,7 @@ public class MapEditor : MonoBehaviour
             for (int i = 0; i < selectNodes.Count; i++)
             {
                 var selectNode = selectNodes[i];
-                selectNode.SetNodeOutLine(false);
+                selectNode.SetNodeOutline(false);
             }
             selectNodes.Clear();
         }
@@ -687,6 +689,7 @@ public class MapEditor : MonoBehaviour
         {
             var node = gameMgr.fieldNodes[i];
             node.AddAdjacentNodes();
+            node.AddNodeOutline(nodeOutlineTf);
         }
     }
 

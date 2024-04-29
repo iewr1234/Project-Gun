@@ -17,6 +17,14 @@ public static class DataUtility
 
     public static readonly float nodeSize = 1.2f;
     public static readonly float nodeInterval = 0.1f;
+    private static readonly Vector3 outlinePos_Left = new Vector3(-0.65f, 0f, 0f);
+    private static readonly Quaternion outlineRot_Left = Quaternion.identity;
+    private static readonly Vector3 outlinePos_Front = new Vector3(0f, 0f, -0.65f);
+    private static readonly Quaternion outlineRot_Front = Quaternion.Euler(0f, 90f, 0f);
+    private static readonly Vector3 outlinePos_Back = new Vector3(0f, 0f, 0.65f);
+    private static readonly Quaternion outlineRot_Back = Quaternion.Euler(0f, 90f, 0f);
+    private static readonly Vector3 outlinePos_Right = new Vector3(0.65f, 0f, 0f);
+    private static readonly Quaternion outlineRot_Right = Quaternion.identity;
 
     public static readonly Color color_Player = new Color(90 / 255f, 130 / 255f, 192 / 255f);
     public static readonly Color color_Enemy = new Color(192 / 255f, 94 / 255f, 90 / 255f);
@@ -26,7 +34,41 @@ public static class DataUtility
 
     public static readonly float lineInterval = 0.5f;
 
-    public static Quaternion GetSetRotation(TargetDirection setDirection)
+    public static Vector3 GetPositionOfNodeOutline(TargetDirection setDirection)
+    {
+        switch (setDirection)
+        {
+            case TargetDirection.Left:
+                return outlinePos_Left;
+            case TargetDirection.Front:
+                return outlinePos_Front;
+            case TargetDirection.Back:
+                return outlinePos_Back;
+            case TargetDirection.Right:
+                return outlinePos_Right;
+            default:
+                return Vector3.zero;
+        }
+    }
+
+    public static Quaternion GetRotationOfNodeOutline(TargetDirection setDirection)
+    {
+        switch (setDirection)
+        {
+            case TargetDirection.Left:
+                return outlineRot_Left;
+            case TargetDirection.Front:
+                return outlineRot_Front;
+            case TargetDirection.Back:
+                return outlineRot_Back;
+            case TargetDirection.Right:
+                return outlineRot_Right;
+            default:
+                return Quaternion.identity;
+        }
+    }
+
+    public static Quaternion GetSetRotationOfObject(TargetDirection setDirection)
     {
         var rot = Vector3.zero;
         switch (setDirection)

@@ -448,14 +448,14 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < openNodes.Count; i++)
                 {
                     var movableNode = openNodes[i];
-                    movableNode.SetNodeOutLine(openNodes);
+                    movableNode.SetNodeOutline(openNodes);
                 }
                 break;
             case false:
                 for (int i = 0; i < openNodes.Count; i++)
                 {
                     var movableNode = openNodes[i];
-                    movableNode.SetNodeOutLine(false);
+                    movableNode.SetNodeOutline(false);
                 }
                 openNodes.Clear();
                 break;
@@ -474,7 +474,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < openNodes.Count; i++)
         {
             var movableNode = openNodes[i];
-            movableNode.SetNodeOutLine(false);
+            movableNode.SetNodeOutline(false);
         }
         //ResultNodePass(charCtr.currentNode, targetNode);
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
