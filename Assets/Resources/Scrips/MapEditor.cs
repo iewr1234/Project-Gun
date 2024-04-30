@@ -64,7 +64,9 @@ public class MapEditor : MonoBehaviour
 
     [Header("[SetArea]")]
     private GameObject setAreaUI;
+    private TextMeshProUGUI coverFormText;
     private List<Image> setTypeOutlines = new List<Image>();
+    private bool lineForm;
 
     [Header("[Player]")]
     private GameObject playerUI;
@@ -143,6 +145,7 @@ public class MapEditor : MonoBehaviour
         createNodeUI.SetActive(false);
 
         setAreaUI = transform.Find("Top/UI/SetArea").gameObject;
+        coverFormText = setAreaUI.transform.Find("CoverForm/Text").GetComponent<TextMeshProUGUI>();
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetUnableMove/Outline").GetComponent<Image>());
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetHalfCover/Outline").GetComponent<Image>());
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetFullCover/Outline").GetComponent<Image>());
@@ -156,12 +159,12 @@ public class MapEditor : MonoBehaviour
 
         sideButtons = transform.Find("Side/Buttons").gameObject;
         sideUI = transform.Find("Side/UI").gameObject;
-        setDirText = sideUI.transform.Find("SetDirectionText").GetComponent<TextMeshProUGUI>();
+        setDirText = sideUI.transform.Find("SetDirection/Text").GetComponent<TextMeshProUGUI>();
         allFloorText = sideUI.transform.Find("SubButtons/AllFloor/Text").GetComponent<TextMeshProUGUI>();
         floorRandomText = sideUI.transform.Find("SubButtons/FloorRandom/Text").GetComponent<TextMeshProUGUI>();
         gridSwitchText = sideUI.transform.Find("SubButtons/GridSwitch/Text").GetComponent<TextMeshProUGUI>();
 
-        sidePos_On = sideButtons.transform.localPosition;
+        sidePos_On = sideUI.transform.localPosition;
         var width = sideUI.GetComponent<RectTransform>().rect.width;
         sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
         sideButtons.transform.localPosition = sidePos_Off;
@@ -330,7 +333,7 @@ public class MapEditor : MonoBehaviour
                     break;
             }
         }
-        else if (Input.GetMouseButtonDown(2) && findType == FindNodeType.SetObject)
+        else if (Input.GetMouseButtonDown(2))
         {
             switch (setDirection)
             {
@@ -349,11 +352,15 @@ public class MapEditor : MonoBehaviour
                 default:
                     break;
             }
-            setDirText.text = $"배치방향 : {setDirection}";
+            setDirText.text = $"배치방향\n{setDirection}";
 
             if (selectNode != null)
             {
-                if (selectItem.size.x == 1 && selectItem.size.y == 1)
+                if (selectItem == null)
+                {
+                    selectNode.SetNodeOutline(setDirection);
+                }
+                else if (selectItem.size.x == 1 && selectItem.size.y == 1)
                 {
                     selectNode.SetNodeOutline(setDirection);
                 }
@@ -372,7 +379,7 @@ public class MapEditor : MonoBehaviour
                 case true:
                     if (selectNodes.Find(x => x == selectNode) == null)
                     {
-                        selectNode.SetOnArea(findType);
+                        selectNode.SetOnArea(lineForm, setDirection, findType);
                         selectNodes.Add(selectNode);
                     }
                     break;
@@ -556,15 +563,36 @@ public class MapEditor : MonoBehaviour
             switch (findType)
             {
                 case FindNodeType.SetUnableMove:
-                    node.SetNodeOutline(true);
+                    if (lineForm)
+                    {
+                        node.SetNodeOutline(setDirection);
+                    }
+                    else
+                    {
+                        node.SetNodeOutline(true);
+                    }
                     selectNode = node;
                     break;
                 case FindNodeType.SetHalfCover:
-                    node.SetNodeOutline(true);
+                    if (lineForm)
+                    {
+                        node.SetNodeOutline(setDirection);
+                    }
+                    else
+                    {
+                        node.SetNodeOutline(true);
+                    }
                     selectNode = node;
                     break;
                 case FindNodeType.SetFullCover:
-                    node.SetNodeOutline(true);
+                    if (lineForm)
+                    {
+                        node.SetNodeOutline(setDirection);
+                    }
+                    else
+                    {
+                        node.SetNodeOutline(true);
+                    }
                     selectNode = node;
                     break;
                 case FindNodeType.SetFloor:
@@ -814,6 +842,20 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Top, MapEditorType.SetArea, setAreaUI);
     }
 
+    public void Button_SetArea_CoverForm()
+    {
+        lineForm = !lineForm;
+        switch (lineForm)
+        {
+            case true:
+                coverFormText.text = "라인";
+                break;
+            case false:
+                coverFormText.text = "노드";
+                break;
+        }
+    }
+
     public void Button_SetArea_SetUnableMove()
     {
         SwitchSetArea(FindNodeType.SetUnableMove);
@@ -998,6 +1040,15 @@ public class MapEditor : MonoBehaviour
                         break;
                 }
             }
+            else if (!value)
+            {
+                for (int i = 0; i < setTypeOutlines.Count; i++)
+                {
+                    var outline = setTypeOutlines[i];
+                    outline.enabled = false;
+                }
+                findType = FindNodeType.None;
+            }
             activeUI.SetActive(value);
         }
     }
@@ -1021,7 +1072,6 @@ public class MapEditor : MonoBehaviour
                 SetFindType();
                 break;
             default:
-
                 break;
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 
 [System.Serializable]
 public class SetObject
@@ -25,7 +26,7 @@ public class FieldNode : MonoBehaviour
     private MeshRenderer mesh;
     private Canvas canvas;
     private GameObject frame;
-    private NodeOutline[] outlines;
+    [HideInInspector] public List<NodeOutline> outlines;
     private MeshRenderer unableMove;
 
     private GameObject marker;
@@ -43,8 +44,8 @@ public class FieldNode : MonoBehaviour
     public bool canMove;
     [HideInInspector] public Vector2 nodePos;
     public List<FieldNode> onAxisNodes;
-    [HideInInspector] public List<FieldNode> offAxisNodes;
-    [HideInInspector] public List<FieldNode> allAxisNodes = new List<FieldNode>();
+    public List<FieldNode> offAxisNodes;
+    public List<FieldNode> allAxisNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<SetObject> setObjects = new List<SetObject>();
@@ -61,7 +62,7 @@ public class FieldNode : MonoBehaviour
         canvas = GetComponentInChildren<Canvas>();
         canvas.worldCamera = Camera.main;
         frame = transform.Find("Frame").gameObject;
-        outlines = new NodeOutline[4];
+        outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
         unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
 
         marker = transform.Find("Canvas/Marker").gameObject;
@@ -129,6 +130,30 @@ public class FieldNode : MonoBehaviour
         }
     }
 
+    public void ReleaseAdjacentNodes(FieldNode nextNode)
+    {
+        CheckAndRemoveNode(this, nextNode);
+        CheckAndRemoveNode(nextNode, this);
+
+        void CheckAndRemoveNode(FieldNode node, FieldNode nextNode)
+        {
+            for (int i = 0; i < node.onAxisNodes.Count; i++)
+            {
+                var onAxisNode = node.onAxisNodes[i];
+                if (onAxisNode == null) continue;
+
+                var find = nextNode.offAxisNodes.Find(x => x == onAxisNode);
+                if (find != null)
+                {
+                    find.offAxisNodes.Remove(nextNode);
+                    find.allAxisNodes.Remove(nextNode);
+                    nextNode.offAxisNodes.Remove(find);
+                    nextNode.allAxisNodes.Remove(find);
+                }
+            }
+        }
+    }
+
     public void CheckCoverNode(bool value)
     {
         switch (value)
@@ -137,25 +162,31 @@ public class FieldNode : MonoBehaviour
                 for (int i = 0; i < onAxisNodes.Count; i++)
                 {
                     var onAxisNode = onAxisNodes[i];
-                    var isCover = onAxisNode != null && onAxisNode.cover != null;
-                    if (!isCover) continue;
+                    if (onAxisNode == null) continue;
 
-                    switch ((TargetDirection)i)
+                    if (onAxisNode.cover != null)
                     {
-                        case TargetDirection.Left:
-                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Right);
-                            break;
-                        case TargetDirection.Front:
-                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Back);
-                            break;
-                        case TargetDirection.Back:
-                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Front);
-                            break;
-                        case TargetDirection.Right:
-                            onAxisNode.cover.SetActiveCoverImage(TargetDirection.Left);
-                            break;
-                        default:
-                            break;
+                        switch ((TargetDirection)i)
+                        {
+                            case TargetDirection.Left:
+                                onAxisNode.cover.SetActiveCoverImage(TargetDirection.Right);
+                                break;
+                            case TargetDirection.Front:
+                                onAxisNode.cover.SetActiveCoverImage(TargetDirection.Back);
+                                break;
+                            case TargetDirection.Back:
+                                onAxisNode.cover.SetActiveCoverImage(TargetDirection.Front);
+                                break;
+                            case TargetDirection.Right:
+                                onAxisNode.cover.SetActiveCoverImage(TargetDirection.Left);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else if (outlines[i].lineCover != null)
+                    {
+                        outlines[i].lineCover.SetActiveCoverImage(onAxisNode);
                     }
                 }
                 break;
@@ -163,10 +194,16 @@ public class FieldNode : MonoBehaviour
                 for (int i = 0; i < onAxisNodes.Count; i++)
                 {
                     var onAxisNode = onAxisNodes[i];
-                    var isCover = onAxisNode != null && onAxisNode.cover != null;
-                    if (!isCover) continue;
+                    if (onAxisNode == null) continue;
 
-                    onAxisNode.cover.SetActiveCoverImage(TargetDirection.None);
+                    if (onAxisNode.cover != null)
+                    {
+                        onAxisNode.cover.SetActiveCoverImage(TargetDirection.None);
+                    }
+                    else if (outlines[i].lineCover != null)
+                    {
+                        outlines[i].lineCover.SetActiveCoverImage(TargetDirection.None);
+                    }
                 }
                 break;
         }
@@ -235,7 +272,7 @@ public class FieldNode : MonoBehaviour
 
     public void SetNodeOutline(bool value)
     {
-        for (int i = 0; i < outlines.Length; i++)
+        for (int i = 0; i < outlines.Count; i++)
         {
             var outline = outlines[i];
             outline.SetActiveLine(value);
@@ -244,7 +281,7 @@ public class FieldNode : MonoBehaviour
 
     public void SetNodeOutline(TargetDirection targetDir)
     {
-        for (int i = 0; i < outlines.Length; i++)
+        for (int i = 0; i < outlines.Count; i++)
         {
             var outline = outlines[i];
             if (i == (int)targetDir)
@@ -304,21 +341,60 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetOnArea(FindNodeType findType)
+    public void SetOnArea(bool lineForm, TargetDirection setDirection, FindNodeType findType)
     {
         if (unableMove.enabled || cover != null) return;
 
+        var outline = outlines[(int)setDirection];
         if (findType == FindNodeType.SetUnableMove)
         {
-            unableMove.enabled = true;
-            canMove = false;
-            ReleaseAdjacentNodes();
+            if (lineForm)
+            {
+                outline.unableMove.enabled = true;
+                var nextNode = onAxisNodes[(int)setDirection];
+                ReleaseAdjacentNodes(nextNode);
+                allAxisNodes.Remove(nextNode);
+                nextNode.allAxisNodes.Remove(this);
+            }
+            else
+            {
+                unableMove.enabled = true;
+                canMove = false;
+                ReleaseAdjacentNodes();
+            }
         }
         else
         {
-            var cover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover"));
-            cover.transform.SetParent(transform, false);
-            cover.SetComponents(this, findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half);
+            var coverType = findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half;
+            if (lineForm)
+            {
+                if (onAxisNodes[(int)setDirection] != null && outline.lineCover == null)
+                {
+                    var lineCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/LineCover"));
+                    lineCover.transform.SetParent(outline.transform, false);
+                    lineCover.SetComponents(outline, this, setDirection, coverType);
+                    switch (setDirection)
+                    {
+                        case TargetDirection.Front:
+                            lineCover.transform.rotation = Quaternion.Euler(0f, 270f, 0f);
+                            break;
+                        case TargetDirection.Back:
+                            lineCover.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                            break;
+                        case TargetDirection.Right:
+                            lineCover.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                var nodeCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/NodeCover"));
+                nodeCover.transform.SetParent(transform, false);
+                nodeCover.SetComponents(this, coverType);
+            }
         }
     }
 

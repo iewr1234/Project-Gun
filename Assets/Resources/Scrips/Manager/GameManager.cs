@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum ActionState
@@ -39,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     private List<FieldNode> openNodes = new List<FieldNode>();
-    private List<FieldNode> closeNodes = new List<FieldNode>();
+    [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
 
     private LineRenderer moveLine;
     private DrawRange currentRange;
@@ -160,7 +159,8 @@ public class GameManager : MonoBehaviour
         KeyboardInput();
         MouseInput();
         PointerUpEvent();
-        CreateCover();
+        //CreateCover();
+        CreatePlayer();
         CreateEnemy();
     }
 
@@ -352,7 +352,7 @@ public class GameManager : MonoBehaviour
                     if (targetNode != node && find != null)
                     {
                         RemoveTargetNode();
-                        ResultNodePass(selectChar.currentNode, node);
+                        ResultNodePass(selectChar, node);
                         DrawMoveLine();
 
                         selectChar.FindTargets(node);
@@ -424,7 +424,7 @@ public class GameManager : MonoBehaviour
             var onAxisNode = node.onAxisNodes[i];
             if (onAxisNode == null) continue;
 
-            if (onAxisNode.canMove)
+            if (CheckMoveOfNextNode(node, onAxisNode))
             {
                 var find = openNodes.Find(x => x == onAxisNode);
                 if (find == null)
@@ -432,6 +432,31 @@ public class GameManager : MonoBehaviour
                     openNodes.Add(onAxisNode);
                 }
                 ChainOfMovableNode(onAxisNode, mobility, false);
+            }
+        }
+    }
+
+    private bool CheckMoveOfNextNode(FieldNode node, FieldNode nextNode)
+    {
+        if (!nextNode.canMove)
+        {
+            return false;
+        }
+        else
+        {
+            var outline = node.outlines.Find(x => nextNode.outlines.Find(y => x == y));
+            if (outline == null)
+            {
+                Debug.LogError("Not Found outline");
+            }
+
+            if ((outline.lineCover != null && outline.lineCover.coverType == CoverType.Full) || outline.unableMove.enabled)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
     }
@@ -490,9 +515,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="startNode"></param>
     /// <param name="endNode"></param>
-    private void ResultNodePass(FieldNode startNode, FieldNode endNode)
+    private void ResultNodePass(CharacterController cherCtr, FieldNode endNode)
     {
         closeNodes.Clear();
+        var startNode = cherCtr.currentNode;
         var _openNodes = new List<FieldNode>(openNodes);
         FindNodeRoute(startNode, endNode);
 
@@ -677,12 +703,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void CreatePlayer()
+    {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+            {
+                var node = hit.collider.GetComponentInParent<FieldNode>();
+                if (node.canMove)
+                {
+                    CreateCharacter(CharacterOwner.Player, node.nodePos, "C0001");
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// 적 캐릭터 생성
     /// </summary>
     private void CreateEnemy()
     {
-        if (Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.F2))
         {
             var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))

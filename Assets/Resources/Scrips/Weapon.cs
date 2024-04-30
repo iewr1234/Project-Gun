@@ -161,7 +161,7 @@ public class Weapon : MonoBehaviour
             }
             else
             {
-                return targetInfo.targetCover.cover.type == CoverType.Full ? 40 : 20;
+                return targetInfo.targetCover.coverType == CoverType.Full ? 40 : 20;
             }
         }
 
@@ -173,7 +173,7 @@ public class Weapon : MonoBehaviour
             }
             else
             {
-                return targetInfo.targetCover.cover.type == CoverType.Full ? 0.4f : 0.2f;
+                return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
             }
         }
     }

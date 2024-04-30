@@ -46,7 +46,7 @@ public class CharacterCommand
     public List<FieldNode> passList;
 
     [Header("[Cover]")]
-    public FieldNode cover;
+    public Cover cover;
     public bool isRight;
 
     [Header("[Targeting]")]
@@ -63,9 +63,9 @@ public struct TargetInfo
     public CharacterController shooter;
     public CharacterController target;
     public FieldNode shooterNode;
-    public FieldNode shooterCover;
+    public Cover shooterCover;
     public FieldNode targetNode;
-    public FieldNode targetCover;
+    public Cover targetCover;
     public bool isRight;
     public bool targetRight;
 }
@@ -76,7 +76,7 @@ public struct WatchInfo
     public DrawRange drawRang;
     public FieldNode targetNode;
     public FieldNode watchNode;
-    public FieldNode coverNode;
+    public Cover shooterCover;
     public bool isRight;
     public float minAngle;
     public float maxAngle;
@@ -487,14 +487,14 @@ public class CharacterController : MonoBehaviour
         var pos = currentNode.transform.position;
         if (!covering)
         {
-            FieldNode coverNode = null;
+            Cover cover = null;
             if (command.cover != null)
             {
-                coverNode = command.cover;
-                transform.LookAt(coverNode.transform);
-                cover = coverNode.cover;
+                cover = command.cover;
+                transform.LookAt(cover.transform);
+                this.cover = cover;
                 animator.SetBool("isCover", true);
-                switch (coverNode.cover.type)
+                switch (cover.coverType)
                 {
                     case CoverType.Half:
                         animator.SetBool("fullCover", false);
@@ -516,47 +516,34 @@ public class CharacterController : MonoBehaviour
                 var findCover = FindTargetDirectionCover();
                 if (findCover != null)
                 {
-                    coverNode = findCover;
+                    cover = findCover;
                 }
                 else if (Physics.Raycast(pos, transform.forward, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
-                    var cover = hit.collider.GetComponentInParent<Cover>();
-                    var find = currentNode.onAxisNodes.Find(x => x != null && x == cover.node);
-                    if (find != null)
+                    cover = hit.collider.GetComponentInParent<Cover>();
+                    if (cover == null)
                     {
-                        coverNode = cover.node;
-                    }
-                    else
-                    {
-                        var node = currentNode.onAxisNodes.Find(x => x != null && x.cover != null);
-                        if (node != null)
-                        {
-                            coverNode = node;
-                        }
+                        cover = SearchCoverOfOnAxisNode();
                     }
                 }
                 else
                 {
-                    var node = currentNode.onAxisNodes.Find(x => x != null && x.cover != null);
-                    if (node != null)
-                    {
-                        coverNode = node;
-                    }
+                    cover = SearchCoverOfOnAxisNode();
                 }
             }
 
-            if (coverNode != null)
+            if (cover != null)
             {
-                switch (coverNode.cover.type)
+                switch (cover.coverType)
                 {
                     case CoverType.Half:
-                        transform.LookAt(coverNode.transform);
+                        transform.LookAt(cover.transform);
                         animator.SetBool("isCover", true);
                         animator.SetBool("fullCover", false);
                         commandList.Remove(command);
                         break;
                     case CoverType.Full:
-                        FindDirectionForCover(coverNode);
+                        FindDirectionForCover(cover);
                         break;
                     default:
                         break;
@@ -572,7 +559,7 @@ public class CharacterController : MonoBehaviour
             MoveCoverPosition(command);
         }
 
-        FieldNode FindTargetDirectionCover()
+        Cover FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
             var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < weapon.range);
@@ -583,7 +570,7 @@ public class CharacterController : MonoBehaviour
                 if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
-                    return currentNode.onAxisNodes.Find(x => x == cover.node) != null ? cover.node : null;
+                    return cover;
                 }
                 else
                 {
@@ -595,15 +582,38 @@ public class CharacterController : MonoBehaviour
                 return null;
             }
         }
+
+        Cover SearchCoverOfOnAxisNode()
+        {
+            Cover cover = null;
+            for (int i = 0; i < currentNode.onAxisNodes.Count; i++)
+            {
+                var onAxisNode = currentNode.onAxisNodes[i];
+                if (onAxisNode == null) continue;
+
+                if (onAxisNode.cover != null)
+                {
+                    cover = onAxisNode.cover;
+                    break;
+                }
+                else if (currentNode.outlines[i].lineCover != null)
+                {
+                    cover = currentNode.outlines[i].lineCover;
+                    break;
+                }
+            }
+
+            return cover;
+        }
     }
 
     /// <summary>
     /// 엄폐 후 캐릭터 방향 찾기
     /// </summary>
     /// <param name="coverNode"></param>
-    private void FindDirectionForCover(FieldNode coverNode)
+    private void FindDirectionForCover(Cover _cover)
     {
-        transform.LookAt(coverNode.transform);
+        transform.LookAt(_cover.transform);
         var pos = currentNode.transform.position;
         var rightHit = false;
         var leftHit = false;
@@ -665,7 +675,7 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        cover = coverNode.cover;
+        cover = _cover;
         coverPos = currentNode.transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);
@@ -736,7 +746,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
-        if (cover.type != CoverType.Full)
+        if (cover.coverType != CoverType.Full)
         {
             commandList.Remove(command);
             return;
@@ -868,7 +878,7 @@ public class CharacterController : MonoBehaviour
                 }
                 break;
             case CommandType.Watch:
-                if (watchInfo.coverNode != null)
+                if (watchInfo.shooterCover != null)
                 {
                     CoverAim();
                 }
@@ -1106,11 +1116,11 @@ public class CharacterController : MonoBehaviour
     {
         FieldNode watchNode;
         var isRight = false;
-        var coverNode = FindCoverNode(currentNode, targetNode);
-        if (coverNode != null && coverNode.cover.type == CoverType.Full)
+        var shooterCover = FindCoverNode(currentNode, targetNode);
+        if (shooterCover != null && shooterCover.coverType == CoverType.Full)
         {
-            var RN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Right);
-            var LN = CheckTheCanMoveNode(currentNode.transform.position, coverNode, TargetDirection.Left);
+            var RN = CheckTheCanMoveNode(currentNode.transform.position, shooterCover, TargetDirection.Right);
+            var LN = CheckTheCanMoveNode(currentNode.transform.position, shooterCover, TargetDirection.Left);
             if (RN == null && LN == null)
             {
                 watchNode = currentNode;
@@ -1155,7 +1165,7 @@ public class CharacterController : MonoBehaviour
             drawRang = drawRange,
             targetNode = targetNode,
             watchNode = watchNode,
-            coverNode = coverNode,
+            shooterCover = shooterCover,
             isRight = isRight,
             minAngle = DataUtility.GetFloorValue((nodeAngle - halfAngle + 360f) % 360f, 2),
             maxAngle = DataUtility.GetFloorValue((nodeAngle + halfAngle) % 360f, 2),
@@ -1255,20 +1265,20 @@ public class CharacterController : MonoBehaviour
                 FieldNode LN = null;
                 FieldNode targetRN = null;
                 FieldNode targetLN = null;
-                var coverNode = FindCoverNode(node, target.currentNode);
-                var targetCoverNode = FindCoverNode(target.currentNode, node);
-                if (coverNode != null && coverNode.cover.type == CoverType.Full
-                 && targetCoverNode != null && targetCoverNode.cover.type == CoverType.Full)
+                var shooterCover = FindCoverNode(node, target.currentNode);
+                var targetCover = FindCoverNode(target.currentNode, node);
+                if (shooterCover != null && shooterCover.coverType == CoverType.Full
+                 && targetCover != null && targetCover.coverType == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
                         continue;
                     }
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1280,10 +1290,10 @@ public class CharacterController : MonoBehaviour
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
                 }
-                else if (coverNode != null && coverNode.cover.type == CoverType.Full)
+                else if (shooterCover != null && shooterCover.coverType == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, coverNode, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
@@ -1295,10 +1305,10 @@ public class CharacterController : MonoBehaviour
                         Debug.Log($"{transform.name}: 사격 경로가 막힘(=> {target.name})");
                     }
                 }
-                else if (targetCoverNode != null && targetCoverNode.cover.type == CoverType.Full)
+                else if (targetCover != null && targetCover.coverType == CoverType.Full)
                 {
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCoverNode, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1319,9 +1329,9 @@ public class CharacterController : MonoBehaviour
                             shooter = this,
                             target = target,
                             shooterNode = currentNode,
-                            shooterCover = coverNode,
+                            shooterCover = shooterCover,
                             targetNode = target.currentNode,
-                            targetCover = targetCoverNode,
+                            targetCover = targetCover,
                         };
                         targetList.Add(targetInfo);
                     }
@@ -1341,7 +1351,7 @@ public class CharacterController : MonoBehaviour
                     Vector3 targetPos;
                     var distance = 999999f;
 
-                    if (coverNode == null)
+                    if (shooterCover == null)
                     {
                         if (targetRN != null)
                         {
@@ -1356,7 +1366,7 @@ public class CharacterController : MonoBehaviour
                     {
                         if (RN != null)
                         {
-                            if (targetCoverNode == null)
+                            if (targetCover == null)
                             {
                                 CheckNodes(RN, target.currentNode, true, false);
                             }
@@ -1374,7 +1384,7 @@ public class CharacterController : MonoBehaviour
                         }
                         if (LN != null)
                         {
-                            if (targetCoverNode == null)
+                            if (targetCover == null)
                             {
                                 CheckNodes(LN, target.currentNode, false, false);
                             }
@@ -1399,9 +1409,9 @@ public class CharacterController : MonoBehaviour
                             shooter = this,
                             target = target,
                             shooterNode = shooterNode,
-                            shooterCover = coverNode,
+                            shooterCover = shooterCover,
                             targetNode = targetNode,
-                            targetCover = targetCoverNode,
+                            targetCover = targetCover,
                             targetRight = targetRight,
                             isRight = isRight,
                         };
@@ -1466,9 +1476,9 @@ public class CharacterController : MonoBehaviour
     /// <param name="shooterNode"></param>
     /// <param name="targetNode"></param>
     /// <returns></returns>
-    private FieldNode FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
+    private Cover FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
     {
-        FieldNode coverNode = null;
+        Cover cover = null;
         var shooterPos = shooterNode.transform.position;
         var endPos = targetNode.transform.position;
         var dir = Vector3.zero;
@@ -1487,19 +1497,19 @@ public class CharacterController : MonoBehaviour
         dir = Vector3.Normalize(endPos - shooterPos);
         RayCastOfCoverLayer();
 
-        return coverNode;
+        return cover;
 
         void RayCastOfCoverLayer()
         {
-            if (coverNode != null) return;
+            if (cover != null) return;
 
             dir = Vector3.Normalize(endPos - shooterPos);
             if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
             {
-                var _coverNode = hit.collider.GetComponentInParent<FieldNode>();
-                if (shooterNode.onAxisNodes.Find(x => x == _coverNode) != null)
+                var _cover = hit.collider.GetComponentInParent<Cover>();
+                if (shooterNode.onAxisNodes.Find(x => x == _cover) != null || shooterNode.outlines.Find(x => x.lineCover == _cover))
                 {
-                    coverNode = _coverNode;
+                    cover = _cover;
                 }
             }
         }
@@ -1512,10 +1522,10 @@ public class CharacterController : MonoBehaviour
     /// <param name="coverNode"></param>
     /// <param name="targetDir"></param>
     /// <returns></returns>
-    private FieldNode CheckTheCanMoveNode(Vector3 pos, FieldNode coverNode, TargetDirection targetDir)
+    private FieldNode CheckTheCanMoveNode(Vector3 pos, Cover cover, TargetDirection targetDir)
     {
         FieldNode node = null;
-        var frontDir = Vector3.Normalize(coverNode.transform.position - pos);
+        var frontDir = Vector3.Normalize(cover.transform.position - pos);
         var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
         if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
@@ -1635,7 +1645,7 @@ public class CharacterController : MonoBehaviour
             {
                 target.AddCommand(CommandType.LeaveCover);
             }
-            else if (targetInfo.targetCover != null && targetInfo.targetCover.cover != target.cover)
+            else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
             {
                 target.AddCommand(CommandType.LeaveCover);
                 target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
@@ -1661,7 +1671,7 @@ public class CharacterController : MonoBehaviour
             {
                 shooter.AddCommand(CommandType.LeaveCover);
             }
-            else if (targetInfo.shooterCover != null && targetInfo.shooterCover.cover != shooter.cover)
+            else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
             {
                 shooter.AddCommand(CommandType.LeaveCover);
                 shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
@@ -1700,22 +1710,22 @@ public class CharacterController : MonoBehaviour
     {
         if (animator.GetBool("isCover"))
         {
-            if (watchInfo.coverNode == null)
+            if (watchInfo.shooterCover == null)
             {
                 AddCommand(CommandType.LeaveCover);
             }
-            else if (watchInfo.coverNode != null && watchInfo.coverNode.cover != cover)
+            else if (watchInfo.shooterCover != null && watchInfo.shooterCover != cover)
             {
                 AddCommand(CommandType.LeaveCover);
-                AddCommand(CommandType.TakeCover, watchInfo.coverNode, watchInfo.isRight);
+                AddCommand(CommandType.TakeCover, watchInfo.shooterCover, watchInfo.isRight);
             }
             AddCommand(CommandType.Watch);
         }
         else
         {
-            if (watchInfo.coverNode != null)
+            if (watchInfo.shooterCover != null)
             {
-                AddCommand(CommandType.TakeCover, watchInfo.coverNode, watchInfo.isRight);
+                AddCommand(CommandType.TakeCover, watchInfo.shooterCover, watchInfo.isRight);
             }
             AddCommand(CommandType.Watch);
         }
@@ -1777,7 +1787,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="passList"></param>
-    public void AddCommand(CommandType type, FieldNode cover, bool isRight)
+    public void AddCommand(CommandType type, Cover cover, bool isRight)
     {
         switch (type)
         {
@@ -1837,7 +1847,7 @@ public class CharacterController : MonoBehaviour
                     shooter = this,
                     target = target,
                     shooterNode = watchInfo.watchNode,
-                    shooterCover = watchInfo.coverNode,
+                    shooterCover = watchInfo.shooterCover,
                     targetNode = targetNode,
                     targetCover = null,
                     isRight = watchInfo.isRight,
