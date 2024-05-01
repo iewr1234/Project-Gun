@@ -518,23 +518,27 @@ public class GameManager : MonoBehaviour
     private void ResultNodePass(CharacterController cherCtr, FieldNode endNode)
     {
         closeNodes.Clear();
-        for (int i = 0; i < cherCtr.currentNode.onAxisNodes.Count; i++)
+        var moveDist = 0f;
+        float newMoveDist;
+        for (int i = 0; i < cherCtr.currentNode.allAxisNodes.Count; i++)
         {
+            newMoveDist = 0f;
             var newCloseNodes = new List<FieldNode>();
             var startNode = cherCtr.currentNode;
             newCloseNodes.Add(startNode);
-            var onAxisNode = cherCtr.currentNode.onAxisNodes[i];
-            if (onAxisNode == null) continue;
+            var allAxisNode = cherCtr.currentNode.allAxisNodes[i];
+            if (!allAxisNode.canMove) continue;
 
             var _openNodes = new List<FieldNode>(openNodes);
-            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, onAxisNode, endNode)) continue;
+            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, allAxisNode, endNode)) continue;
 
             _openNodes = new List<FieldNode>(newCloseNodes);
             newCloseNodes.Clear();
             if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, endNode, startNode)) continue;
 
-            if (closeNodes.Count == 0 || closeNodes.Count > newCloseNodes.Count)
+            if (closeNodes.Count == 0 || moveDist > newMoveDist)
             {
+                moveDist = newMoveDist;
                 closeNodes = newCloseNodes;
             }
         }
@@ -569,6 +573,7 @@ public class GameManager : MonoBehaviour
                         }
                     }
                 }
+                newMoveDist += currentF;
 
                 if (nextNode != null)
                 {
