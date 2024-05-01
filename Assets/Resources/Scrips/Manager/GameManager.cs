@@ -518,15 +518,33 @@ public class GameManager : MonoBehaviour
     private void ResultNodePass(CharacterController cherCtr, FieldNode endNode)
     {
         closeNodes.Clear();
-        var startNode = cherCtr.currentNode;
-        var _openNodes = new List<FieldNode>(openNodes);
-        FindNodeRoute(startNode, endNode);
+        for (int i = 0; i < cherCtr.currentNode.onAxisNodes.Count; i++)
+        {
+            var newCloseNodes = new List<FieldNode>();
+            var startNode = cherCtr.currentNode;
+            newCloseNodes.Add(startNode);
+            var onAxisNode = cherCtr.currentNode.onAxisNodes[i];
+            if (onAxisNode == null) continue;
 
-        _openNodes = new List<FieldNode>(closeNodes);
-        closeNodes.Clear();
-        FindNodeRoute(endNode, startNode);
+            var _openNodes = new List<FieldNode>(openNodes);
+            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, onAxisNode, endNode)) continue;
 
-        void FindNodeRoute(FieldNode _startNode, FieldNode _endNode)
+            _openNodes = new List<FieldNode>(newCloseNodes);
+            newCloseNodes.Clear();
+            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, endNode, startNode)) continue;
+
+            if (closeNodes.Count == 0 || closeNodes.Count > newCloseNodes.Count)
+            {
+                closeNodes = newCloseNodes;
+            }
+        }
+
+        if (closeNodes.Count == 0)
+        {
+            Debug.Log("not find NodePass");
+        }
+
+        bool FindNodeRoute(ref List<FieldNode> _openNodes, ref List<FieldNode> closeNodes, FieldNode _startNode, FieldNode _endNode)
         {
             var currentNode = _startNode;
             closeNodes.Add(currentNode);
@@ -564,8 +582,8 @@ public class GameManager : MonoBehaviour
                     closeNodes.Remove(currentNode);
                     if (closeNodes.Count == 0)
                     {
-                        Debug.Log("not find NodePass");
-                        break;
+                        //Debug.Log("not find NodePass");
+                        return false;
                     }
                     else
                     {
@@ -573,6 +591,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+            return true;
         }
     }
 

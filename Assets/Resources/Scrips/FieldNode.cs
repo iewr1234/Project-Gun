@@ -88,13 +88,19 @@ public class FieldNode : MonoBehaviour
                 var node = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
                 if (i != 0 && j != 0)
                 {
-                    offAxisNodes.Add(node);
-                    allAxisNodes.Add(node);
+                    if (node != null)
+                    {
+                        offAxisNodes.Add(node);
+                        allAxisNodes.Add(node);
+                    }
                 }
                 else
                 {
                     onAxisNodes.Add(node);
-                    allAxisNodes.Add(node);
+                    if (node != null)
+                    {
+                        allAxisNodes.Add(node);
+                    }
                 }
             }
         }
