@@ -26,6 +26,15 @@ public class NodeData
     public string floorItemName;
     public Quaternion floorRot;
 
+    [Header("[NodeCover]")]
+    public bool isNodeCover;
+    public FindNodeType nCoverType;
+
+    [Header("[LineCover]")]
+    public bool isLineCover;
+    public TargetDirection[] lCoverDirs;
+    public FindNodeType[] lCoverTypes;
+
     [Header("[Marker]")]
     public bool isMarker;
     public CharacterOwner markerType;
@@ -83,6 +92,7 @@ public class DataManager : MonoBehaviour
             var nodeData = new NodeData();
             nodeData.pos = node.nodePos;
 
+            // Floor Data
             nodeData.isMesh = node.Mesh.enabled;
             if (nodeData.isMesh)
             {
@@ -90,6 +100,63 @@ public class DataManager : MonoBehaviour
                 nodeData.floorRot = node.Mesh.transform.localRotation;
             }
 
+            // NodeCover Data
+            nodeData.isNodeCover = node.cover != null || node.unableMove.enabled;
+            if (nodeData.isNodeCover)
+            {
+                if (node.unableMove.enabled)
+                {
+                    nodeData.nCoverType = FindNodeType.SetUnableMove;
+                }
+                else if (node.cover != null)
+                {
+                    switch (node.cover.coverType)
+                    {
+                        case CoverType.Half:
+                            nodeData.nCoverType = FindNodeType.SetHalfCover;
+                            break;
+                        case CoverType.Full:
+                            nodeData.nCoverType = FindNodeType.SetFullCover;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            // LineCover Data
+            nodeData.isLineCover = (node.outlines.Find(x => x.lineCover != null) != null) || (node.outlines.Find(x => x.unableMove.enabled) != null);
+            if (nodeData.isLineCover)
+            {
+                nodeData.lCoverDirs = new TargetDirection[4];
+                nodeData.lCoverTypes = new FindNodeType[4];
+                for (int j = 0; j < node.outlines.Count; j++)
+                {
+                    var outline = node.outlines[j];
+                    if (outline.unableMove.enabled)
+                    {
+                        nodeData.lCoverDirs[j] = (TargetDirection)j;
+                        nodeData.lCoverTypes[j] = FindNodeType.SetUnableMove;
+                    }
+                    else if ((outline.lineCover != null))
+                    {
+                        nodeData.lCoverDirs[j] = (TargetDirection)j;
+                        switch (outline.lineCover.coverType)
+                        {
+                            case CoverType.Half:
+                                nodeData.lCoverTypes[j] = FindNodeType.SetHalfCover;
+                                break;
+                            case CoverType.Full:
+                                nodeData.lCoverTypes[j] = FindNodeType.SetFullCover;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // Marker Data
             nodeData.isMarker = node.Marker.activeSelf;
             if (nodeData.isMarker)
             {
@@ -105,6 +172,7 @@ public class DataManager : MonoBehaviour
                 }
             }
 
+            // Object Data
             nodeData.isObject = node.setObjects.Count > 0 && node.setObjects.Find(x => x.setNode == node) != null;
             if (nodeData.isObject)
             {

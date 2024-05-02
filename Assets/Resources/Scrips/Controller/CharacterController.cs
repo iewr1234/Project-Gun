@@ -489,30 +489,29 @@ public class CharacterController : MonoBehaviour
 
         void CheckLineCover()
         {
-            if (targetNode.nodePos.x == prevNode.nodePos.x || targetNode.nodePos.y == prevNode.nodePos.y)
-            {
-                TargetDirection nextDir;
-                if (targetNode.nodePos.x > prevNode.nodePos.x)
-                {
-                    nextDir = TargetDirection.Right;
-                }
-                else if (targetNode.nodePos.x < prevNode.nodePos.x)
-                {
-                    nextDir = TargetDirection.Left;
-                }
-                else if (targetNode.nodePos.y > prevNode.nodePos.y)
-                {
-                    nextDir = TargetDirection.Back;
-                }
-                else
-                {
-                    nextDir = TargetDirection.Front;
-                }
+            if (targetNode.nodePos.x != prevNode.nodePos.x && targetNode.nodePos.y != prevNode.nodePos.y) return;
 
-                if (prevNode.outlines[(int)nextDir].lineCover != null)
-                {
-                    animator.SetTrigger("jump");
-                }
+            TargetDirection nextDir;
+            if (targetNode.nodePos.x > prevNode.nodePos.x)
+            {
+                nextDir = TargetDirection.Right;
+            }
+            else if (targetNode.nodePos.x < prevNode.nodePos.x)
+            {
+                nextDir = TargetDirection.Left;
+            }
+            else if (targetNode.nodePos.y > prevNode.nodePos.y)
+            {
+                nextDir = TargetDirection.Back;
+            }
+            else
+            {
+                nextDir = TargetDirection.Front;
+            }
+
+            if (prevNode.outlines[(int)nextDir].lineCover != null)
+            {
+                animator.SetTrigger("jump");
             }
         }
     }

@@ -65,6 +65,7 @@ public class Cover : MonoBehaviour
         switch (coverType)
         {
             case CoverType.Half:
+                canvas.transform.localPosition = new Vector3(0f, 0.5f, 0f);
                 coverMesh.transform.localPosition = nodeHalfCover_Pos;
                 coverMesh.transform.localScale = nodeHalfCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)
@@ -75,6 +76,7 @@ public class Cover : MonoBehaviour
                 }
                 break;
             case CoverType.Full:
+                canvas.transform.localPosition = new Vector3(0f, 1f, 0f);
                 coverMesh.transform.localPosition = nodeFullCover_Pos;
                 coverMesh.transform.localScale = nodeFullCover_Scale;
                 for (int i = 0; i < coverImages.Count; i++)

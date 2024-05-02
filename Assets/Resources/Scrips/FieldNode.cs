@@ -27,7 +27,7 @@ public class FieldNode : MonoBehaviour
     private Canvas canvas;
     private GameObject frame;
     [HideInInspector] public List<NodeOutline> outlines;
-    private MeshRenderer unableMove;
+    [HideInInspector] public MeshRenderer unableMove;
 
     private GameObject marker;
     private Image markerOutline;
@@ -222,7 +222,7 @@ public class FieldNode : MonoBehaviour
             var onAxisNode = onAxisNodes[i];
             if (onAxisNode == null)
             {
-                CreateNodeOutline(i, onAxisNode);
+                CreateNodeOutline(i);
             }
             else
             {
@@ -249,29 +249,16 @@ public class FieldNode : MonoBehaviour
 
                 if (onAxisNode.outlines[(int)symmetricDir] == null)
                 {
-                    onAxisNode.outlines[(int)symmetricDir] = CreateNodeOutline(i, onAxisNode);
+                    onAxisNode.outlines[(int)symmetricDir] = CreateNodeOutline(i);
                 }
             }
         }
 
-        NodeOutline CreateNodeOutline(int index, FieldNode onAxisNode)
+        NodeOutline CreateNodeOutline(int index)
         {
             var outline = Instantiate(Resources.Load<NodeOutline>("Prefabs/NodeOutline"));
             outline.transform.SetParent(nodeOutlineTf, false);
-            outline.SetComponents();
-            var dir = (TargetDirection)index;
-            outline.transform.position = transform.position + DataUtility.GetPositionOfNodeOutline(dir);
-            outline.transform.rotation = DataUtility.GetRotationOfNodeOutline(dir);
-            outlines[index] = outline;
-
-            if (onAxisNode == null)
-            {
-                outline.name = $"NodeOutline({transform.name})";
-            }
-            else
-            {
-                outline.name = $"NodeOutline({transform.name} - {onAxisNode.name})";
-            }
+            outline.SetComponents(index, this);
             return outline;
         }
     }
@@ -347,59 +334,60 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetOnArea(bool lineForm, TargetDirection setDirection, FindNodeType findType)
+    public void SetOnArea(FindNodeType findType)
     {
         if (unableMove.enabled || cover != null) return;
 
-        var outline = outlines[(int)setDirection];
         if (findType == FindNodeType.SetUnableMove)
         {
-            if (lineForm)
-            {
-                outline.unableMove.enabled = true;
-                var nextNode = onAxisNodes[(int)setDirection];
-                ReleaseAdjacentNodes(nextNode);
-                allAxisNodes.Remove(nextNode);
-                nextNode.allAxisNodes.Remove(this);
-            }
-            else
-            {
-                unableMove.enabled = true;
-                canMove = false;
-                ReleaseAdjacentNodes();
-            }
+            unableMove.enabled = true;
+            canMove = false;
+            ReleaseAdjacentNodes();
         }
         else
         {
             var coverType = findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half;
-            if (lineForm)
+            var nodeCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/NodeCover"));
+            nodeCover.transform.SetParent(transform, false);
+            nodeCover.SetComponents(this, coverType);
+        }
+    }
+
+    public void SetOnArea(TargetDirection setDirection, FindNodeType findType)
+    {
+        var outline = outlines[(int)setDirection];
+        if (unableMove.enabled || outline.lineCover != null) return;
+
+        if (findType == FindNodeType.SetUnableMove)
+        {
+            outline.unableMove.enabled = true;
+            var nextNode = onAxisNodes[(int)setDirection];
+            ReleaseAdjacentNodes(nextNode);
+            allAxisNodes.Remove(nextNode);
+            nextNode.allAxisNodes.Remove(this);
+        }
+        else
+        {
+            var coverType = findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half;
+            if (onAxisNodes[(int)setDirection] != null && outline.lineCover == null)
             {
-                if (onAxisNodes[(int)setDirection] != null && outline.lineCover == null)
+                var lineCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/LineCover"));
+                lineCover.transform.SetParent(outline.transform, false);
+                lineCover.SetComponents(outline, this, setDirection, coverType);
+                switch (setDirection)
                 {
-                    var lineCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/LineCover"));
-                    lineCover.transform.SetParent(outline.transform, false);
-                    lineCover.SetComponents(outline, this, setDirection, coverType);
-                    switch (setDirection)
-                    {
-                        case TargetDirection.Front:
-                            lineCover.transform.rotation = Quaternion.Euler(0f, 270f, 0f);
-                            break;
-                        case TargetDirection.Back:
-                            lineCover.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-                            break;
-                        case TargetDirection.Right:
-                            lineCover.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                            break;
-                        default:
-                            break;
-                    }
+                    case TargetDirection.Front:
+                        lineCover.transform.rotation = Quaternion.Euler(0f, 270f, 0f);
+                        break;
+                    case TargetDirection.Back:
+                        lineCover.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                        break;
+                    case TargetDirection.Right:
+                        lineCover.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                        break;
+                    default:
+                        break;
                 }
-            }
-            else
-            {
-                var nodeCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/NodeCover"));
-                nodeCover.transform.SetParent(transform, false);
-                nodeCover.SetComponents(this, coverType);
             }
         }
     }

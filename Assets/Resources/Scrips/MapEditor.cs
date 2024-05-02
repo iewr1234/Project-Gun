@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public enum MapEditorType
 {
@@ -379,7 +380,14 @@ public class MapEditor : MonoBehaviour
                 case true:
                     if (selectNodes.Find(x => x == selectNode) == null)
                     {
-                        selectNode.SetOnArea(lineForm, setDirection, findType);
+                        if (lineForm)
+                        {
+                            selectNode.SetOnArea(setDirection, findType);
+                        }
+                        else
+                        {
+                            selectNode.SetOnArea(findType);
+                        }
                         selectNodes.Add(selectNode);
                     }
                     break;
@@ -691,6 +699,11 @@ public class MapEditor : MonoBehaviour
             for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
             {
                 var node = gameMgr.fieldNodes[i];
+                for (int j = 0; j < node.outlines.Count; j++)
+                {
+                    var outline = node.outlines[j];
+                    Destroy(outline.gameObject);
+                }
                 Destroy(node.gameObject);
             }
             gameMgr.fieldNodes.Clear();
@@ -766,7 +779,7 @@ public class MapEditor : MonoBehaviour
 
     public void Button_Data_Load()
     {
-        if (saveInput.text.Length > 0) return;
+        if (loadDropdown.options.Count == 0 || saveInput.text.Length > 0) return;
 
         var loadName = loadDropdown.options[loadDropdown.value].text;
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
@@ -777,12 +790,35 @@ public class MapEditor : MonoBehaviour
             {
                 var nodeData = mapData.nodeDatas[i];
                 var node = gameMgr.fieldNodes[i];
+
+                // FloorData
                 if (nodeData.isMesh)
                 {
                     var floorItem = mapItems.Find(x => x.name == $"{nodeData.floorItemName}");
                     node.SetOnFloor(floorItem, nodeData.floorRot);
                 }
 
+                // NodeCover Data
+                if (nodeData.isNodeCover)
+                {
+                    node.SetOnArea(nodeData.nCoverType);
+                }
+
+                // LineCover Data
+                if (nodeData.isLineCover)
+                {
+                    for (int j = 0; j < nodeData.lCoverTypes.Length; j++)
+                    {
+                        var setDirection = nodeData.lCoverDirs[j];
+                        var coverType = nodeData.lCoverTypes[j];
+                        if (setDirection != TargetDirection.None && coverType != FindNodeType.None)
+                        {
+                            node.SetOnArea(setDirection, coverType);
+                        }
+                    }
+                }
+
+                // MarkerData
                 if (nodeData.isMarker)
                 {
                     var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
@@ -790,6 +826,7 @@ public class MapEditor : MonoBehaviour
                     node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
                 }
 
+                // ObjectData
                 if (nodeData.isObject)
                 {
                     for (int j = 0; j < nodeData.objectDatas.Length; j++)
