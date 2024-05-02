@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TreeEditor;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -135,6 +136,7 @@ public class CharacterController : MonoBehaviour
     [Space(5f)]
 
     public FieldNode currentNode;
+    private FieldNode prevNode;
     [HideInInspector] public Cover cover;
     [HideInInspector] public bool isCopy;
 
@@ -155,6 +157,7 @@ public class CharacterController : MonoBehaviour
 
     private bool moving;
     private readonly float moveSpeed = 7f;
+    private readonly float jumpSpeed = 2f;
 
     private bool covering;
     private Vector3 coverPos;
@@ -431,6 +434,7 @@ public class CharacterController : MonoBehaviour
         var targetNode = command.passList[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
+            prevNode = targetNode;
             command.passList.Remove(targetNode);
             if (command.passList.Count == 0)
             {
@@ -453,6 +457,7 @@ public class CharacterController : MonoBehaviour
             var canLook = animator.GetCurrentAnimatorStateInfo(0).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(0).IsTag("Move");
             if (canLook && !moving)
             {
+                CheckLineCover();
                 transform.LookAt(targetNode.transform);
                 moving = true;
             }
@@ -463,9 +468,14 @@ public class CharacterController : MonoBehaviour
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
             }
+            else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump") && pos != targetPos)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, jumpSpeed * Time.deltaTime);
+            }
             else if (pos == targetPos)
             {
                 moving = false;
+                prevNode = targetNode;
                 command.passList.Remove(targetNode);
                 //ShowVisibleNodes(sight, targetNode);
                 CheckWatcher(targetNode);
@@ -473,6 +483,35 @@ public class CharacterController : MonoBehaviour
                 {
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
+                }
+            }
+        }
+
+        void CheckLineCover()
+        {
+            if (targetNode.nodePos.x == prevNode.nodePos.x || targetNode.nodePos.y == prevNode.nodePos.y)
+            {
+                TargetDirection nextDir;
+                if (targetNode.nodePos.x > prevNode.nodePos.x)
+                {
+                    nextDir = TargetDirection.Right;
+                }
+                else if (targetNode.nodePos.x < prevNode.nodePos.x)
+                {
+                    nextDir = TargetDirection.Left;
+                }
+                else if (targetNode.nodePos.y > prevNode.nodePos.y)
+                {
+                    nextDir = TargetDirection.Back;
+                }
+                else
+                {
+                    nextDir = TargetDirection.Front;
+                }
+
+                if (prevNode.outlines[(int)nextDir].lineCover != null)
+                {
+                    animator.SetTrigger("jump");
                 }
             }
         }
