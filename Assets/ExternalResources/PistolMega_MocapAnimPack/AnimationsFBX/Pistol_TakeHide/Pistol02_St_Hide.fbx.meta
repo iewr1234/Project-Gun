@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 465a9b2824128434b86a7a61e772bcd3
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 21300
   internalIDToNameTable:
   - first:
       74: 1827226128182048838
@@ -59,7 +59,21 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.53809524
+        functionName: Event_WeaponSwitching
+        data: Holster
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.752915
+        functionName: Event_WeaponChange_OrderType
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {fileID: 31900000, guid: c0665c1efdec28843a8b850765770410, type: 2}
@@ -922,6 +936,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

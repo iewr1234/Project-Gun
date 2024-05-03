@@ -2209,6 +2209,13 @@ public class CharacterController : MonoBehaviour
         currentWeapon.WeaponSwitching(switchPos);
     }
 
+    public void Event_WeaponSwitching_Rifle(string switchPos)
+    {
+        if (!animator.GetBool("otherType")) return;
+
+        currentWeapon.WeaponSwitching(switchPos);
+    }
+
     /// <summary>
     /// (애니메이션 이벤트)재장전 완료
     /// </summary>
@@ -2234,6 +2241,16 @@ public class CharacterController : MonoBehaviour
         currentWeapon.WeaponSwitching("Holster");
         currentWeapon = weapons[changeIndex];
         currentWeapon.WeaponSwitching("Right");
+    }
+
+    public void Event_WeaponChange_OrderType()
+    {
+        if (!animator.GetBool("otherType")) return;
+
+        currentWeapon = weapons[changeIndex];
+        currentWeapon.EquipWeapon();
+        animator.SetTrigger("change");
+        animator.SetTrigger("isCut");
     }
 
     public void Event_ChangeEnd()
