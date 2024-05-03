@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public enum FireModeType
 {
@@ -43,10 +44,16 @@ public class Weapon : MonoBehaviour
 
     [SerializeField] private List<bool> hitList = new List<bool>();
 
+    private Vector3 storagePos;
+    private Vector3 storageRot;
     private Vector3 defaultPos;
     private Vector3 defaultRot;
+
     private readonly Vector3 weaponPos_Pistol = new Vector3(0.082f, 0.034f, -0.037f);
     private readonly Vector3 weaponRot_Pistol = new Vector3(-8.375f, 89f, -90.246f);
+
+    private readonly Vector3 weaponPos_Rifle_Holster = new Vector3(-0.19f, -0.21f, -0.2f);
+    private readonly Vector3 weaponRot_Rifle_Holster = new Vector3(0f, 90f, 0f);
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
 
@@ -56,29 +63,13 @@ public class Weapon : MonoBehaviour
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
-        charCtr.weapon = this;
+        charCtr.weapons.Add(this);
         muzzleTf = transform.Find("Muzzle");
 
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
         DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
         type = weaponData.type;
-        switch (type)
-        {
-            case WeaponType.Pistol:
-                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
-                defaultPos = weaponPos_Pistol;
-                defaultRot = weaponRot_Pistol;
-                break;
-            case WeaponType.Rifle:
-                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
-                defaultPos = weaponPos_Rifle;
-                defaultRot = weaponRot_Rifle;
-                break;
-            default:
-                break;
-        }
-        charCtr.SetRig(type);
-        WeaponSwitching("Right");
+        SetWeaponPositionAndRotation();
 
         damage = weaponData.damage;
         penetrate = weaponData.penetrate;
@@ -92,6 +83,83 @@ public class Weapon : MonoBehaviour
 
         magMax = weaponData.magMax;
         Reload();
+
+        void SetWeaponPositionAndRotation()
+        {
+            switch (type)
+            {
+                case WeaponType.Pistol:
+                    storagePos = Vector3.zero;
+                    storageRot = Vector3.zero;
+                    defaultPos = weaponPos_Pistol;
+                    defaultRot = weaponRot_Pistol;
+                    break;
+                case WeaponType.Rifle:
+                    storagePos = weaponPos_Rifle_Holster;
+                    storageRot = weaponRot_Rifle_Holster;
+                    defaultPos = weaponPos_Rifle;
+                    defaultRot = weaponRot_Rifle;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void EquipWeapon()
+    {
+        switch (type)
+        {
+            case WeaponType.Pistol:
+                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
+                break;
+            case WeaponType.Rifle:
+                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
+                break;
+            default:
+                break;
+        }
+        charCtr.SetRig(type);
+    }
+
+    public void WeaponSwitching(string switchPos)
+    {
+        switch (switchPos)
+        {
+            case "Holster":
+                if (type == WeaponType.Pistol)
+                {
+                    transform.SetParent(charCtr.subHolsterTf, false);
+                }
+                else
+                {
+                    transform.SetParent(charCtr.mainHolsterTf, false);
+                }
+                transform.localPosition = storagePos;
+                transform.localRotation = Quaternion.Euler(storageRot);
+                break;
+            case "Right":
+                transform.SetParent(charCtr.rightHandTf, false);
+                transform.localPosition = defaultPos;
+                transform.localRotation = Quaternion.Euler(defaultRot);
+                break;
+            case "Left":
+                transform.SetParent(charCtr.leftHandTf);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void Reload()
+    {
+        var ammoNum = magMax;
+        if (!chamberBullet)
+        {
+            ammoNum--;
+            chamberBullet = true;
+        }
+        loadedAmmo = ammoNum;
     }
 
     public int GetShootBulletNumber()
@@ -206,34 +274,6 @@ public class Weapon : MonoBehaviour
         {
             chamberBullet = false;
         }
-    }
-
-    public void WeaponSwitching(string switchPos)
-    {
-        switch (switchPos)
-        {
-            case "Right":
-                transform.SetParent(charCtr.rightHandTf, false);
-                transform.localPosition = defaultPos;
-                transform.localRotation = Quaternion.Euler(defaultRot);
-                break;
-            case "Left":
-                transform.SetParent(charCtr.leftHandTf);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void Reload()
-    {
-        var ammoNum = magMax;
-        if (!chamberBullet)
-        {
-            ammoNum--;
-            chamberBullet = true;
-        }
-        loadedAmmo = ammoNum;
     }
 
     public CharacterController CharCtr

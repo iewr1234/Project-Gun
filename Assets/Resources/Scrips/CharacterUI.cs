@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class CharacterUI : MonoBehaviour
@@ -20,6 +21,7 @@ public class CharacterUI : MonoBehaviour
     public void SetComponents(CharacterController _charCtr)
     {
         charCtr = _charCtr;
+        charCtr.charUI = this;
         transform.name = $"{charCtr.name}_UI";
         LookAtTheCamera();
 

@@ -29,7 +29,9 @@ public class CharacterDataInfo
     public int reaction;
     [Space(5f)]
 
-    public string mainWeaponID;
+    public string mainWeapon1_ID;
+    public string mainWeapon2_ID;
+    public string subWeapon_ID;
     public string armorID;
 }
 

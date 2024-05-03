@@ -31,6 +31,7 @@ public enum CommandType
     Watch,
     Shoot,
     Reload,
+    ChangeWeapon,
 }
 
 [System.Serializable]
@@ -92,8 +93,8 @@ public class CharacterController : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
-    [SerializeField] private CharacterUI charUI;
-    public Weapon weapon;
+    [HideInInspector] public CharacterUI charUI;
+    public List<Weapon> weapons;
     public Armor armor;
 
     [Header("---Access Component---")]
@@ -104,6 +105,8 @@ public class CharacterController : MonoBehaviour
     private MultiAimConstraint headRig;
     private MultiAimConstraint chestRig;
 
+    [HideInInspector] public Transform mainHolsterTf;
+    [HideInInspector] public Transform subHolsterTf;
     [HideInInspector] public Transform rightHandTf;
     [HideInInspector] public Transform leftHandTf;
 
@@ -135,6 +138,7 @@ public class CharacterController : MonoBehaviour
     [Tooltip("반응")] public int reaction;
     [Space(5f)]
 
+    public Weapon currentWeapon;
     public FieldNode currentNode;
     private FieldNode prevNode;
     [HideInInspector] public Cover cover;
@@ -179,16 +183,18 @@ public class CharacterController : MonoBehaviour
 
     private bool reloading;
 
+    private bool changing;
+    private int changeIndex;
+
     /// <summary>
     /// 구성요소 설정
     /// </summary>
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterUI _charUI, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
-        charUI = _charUI;
         animator = GetComponent<Animator>();
         cd = GetComponent<Collider>();
 
@@ -198,6 +204,8 @@ public class CharacterController : MonoBehaviour
         chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
         chestRig.weight = 0f;
 
+        mainHolsterTf = transform.Find("Root/Hips/Spine_01/Spine_02");
+        subHolsterTf = transform.Find("Root/Hips/UpperLeg_R/Holster");
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
 
@@ -302,7 +310,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     private void DrawWeaponRange()
     {
-        if (weapon == null) return;
+        if (currentWeapon == null) return;
 
         Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
         Gizmos.color = Color.yellow;
@@ -310,11 +318,11 @@ public class CharacterController : MonoBehaviour
         var segments = 30f;
         var angleStep = 360f / segments;
         var angle = 0 * angleStep * Mathf.Deg2Rad;
-        var startPos = new Vector3(Mathf.Cos(angle) * weapon.range, height, Mathf.Sin(angle) * weapon.range);
+        var startPos = new Vector3(Mathf.Cos(angle) * currentWeapon.range, height, Mathf.Sin(angle) * currentWeapon.range);
         for (int i = 0; i <= segments; i++)
         {
             angle = i * angleStep * Mathf.Deg2Rad;
-            var endPos = new Vector3(Mathf.Cos(angle) * weapon.range, height, Mathf.Sin(angle) * weapon.range);
+            var endPos = new Vector3(Mathf.Cos(angle) * currentWeapon.range, height, Mathf.Sin(angle) * currentWeapon.range);
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
@@ -401,6 +409,9 @@ public class CharacterController : MonoBehaviour
                 break;
             case CommandType.Reload:
                 ReloadPrecess(command);
+                break;
+            case CommandType.ChangeWeapon:
+                ChangeWeaponProcess(command);
                 break;
             default:
                 break;
@@ -601,7 +612,7 @@ public class CharacterController : MonoBehaviour
         Cover FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < weapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -723,7 +734,7 @@ public class CharacterController : MonoBehaviour
         TargetDirection FindCloseTargetDirection()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < weapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -873,7 +884,7 @@ public class CharacterController : MonoBehaviour
 
         float GetDistance()
         {
-            switch (weapon.type)
+            switch (currentWeapon.type)
             {
                 case WeaponType.Pistol:
                     return 0.45f;
@@ -886,7 +897,7 @@ public class CharacterController : MonoBehaviour
 
         float GetSpeed()
         {
-            switch (weapon.type)
+            switch (currentWeapon.type)
             {
                 case WeaponType.Pistol:
                     return targetingMoveSpeed_Pistol;
@@ -939,7 +950,7 @@ public class CharacterController : MonoBehaviour
                 {
                     case CommandType.Aim:
                         animator.SetBool("isRight", command.targetInfo.isRight);
-                        animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                        animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                         coverPos = command.targetInfo.shooterNode.transform.position;
                         SetAiming(command.targetInfo);
                         break;
@@ -978,7 +989,7 @@ public class CharacterController : MonoBehaviour
             switch (command.type)
             {
                 case CommandType.Aim:
-                    animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                    animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                     transform.LookAt(command.targetInfo.target.transform);
                     SetAiming(command.targetInfo);
                     break;
@@ -1004,7 +1015,7 @@ public class CharacterController : MonoBehaviour
     private void SetAiming(TargetInfo targetInfo)
     {
         aimTf = targetInfo.target.transform;
-        if (weapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
+        if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
@@ -1057,8 +1068,36 @@ public class CharacterController : MonoBehaviour
         if (!reloading && animator.GetCurrentAnimatorStateInfo(1).IsTag("None"))
         {
             animator.SetTrigger("reload");
-            weapon.Reload();
+            currentWeapon.Reload();
             reloading = true;
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 무기교체 처리
+    /// </summary>
+    /// <param name="command"></param>
+    private void ChangeWeaponProcess(CharacterCommand command)
+    {
+        if (!changing)
+        {
+            changeIndex = weapons.IndexOf(currentWeapon);
+            changeIndex++;
+            if (changeIndex == weapons.Count)
+            {
+                changeIndex = 0;
+            }
+            var nextWeapon = weapons[changeIndex];
+            if (currentWeapon.type != nextWeapon.type)
+            {
+                animator.SetBool("otherType", true);
+            }
+            else
+            {
+                animator.SetBool("otherType", false);
+            }
+            animator.SetTrigger("change");
+            changing = true;
         }
     }
 
@@ -1252,7 +1291,7 @@ public class CharacterController : MonoBehaviour
         var pos = watchNode.transform.position;
         var nodeAngleRad = Mathf.Atan2(targetNode.transform.position.x - pos.x, targetNode.transform.position.z - pos.z);
         var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-        var halfAngle = weapon.watchAngle / 2f;
+        var halfAngle = currentWeapon.watchAngle / 2f;
         watchInfo = new WatchInfo()
         {
             drawRang = drawRange,
@@ -1290,7 +1329,7 @@ public class CharacterController : MonoBehaviour
             if (Physics.Raycast(watchPos, dir, out RaycastHit hit, range, gameMgr.watchLayer))
             {
                 var charCtr = hit.collider.GetComponent<CharacterController>();
-                if (charCtr != null && charCtr == this && watcher.weapon.chamberBullet)
+                if (charCtr != null && charCtr == this && watcher.currentWeapon.chamberBullet)
                 {
                     watcher.AddCommand(CommandType.Shoot, this, currentNode);
                 }
@@ -1352,7 +1391,7 @@ public class CharacterController : MonoBehaviour
             var pos = currentNode.transform.position;
             var targetPos = target.currentNode.transform.position;
             var distance = DataUtility.GetDistance(pos, targetPos);
-            if (distance < weapon.range)
+            if (distance < currentWeapon.range)
             {
                 FieldNode RN = null;
                 FieldNode LN = null;
@@ -1714,13 +1753,13 @@ public class CharacterController : MonoBehaviour
             {
                 DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
                 DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
-                DataUtility.SetMeshsMaterial(target.weapon.meshs, "Draw/AlwaysVisible");
+                DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
             }
             else
             {
                 DataUtility.SetMeshsMaterial(target.meshs, "Standard");
                 DataUtility.SetMeshsMaterial(target.sMeshs, "Standard");
-                DataUtility.SetMeshsMaterial(target.weapon.meshs, "Standard");
+                DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Standard");
             }
         }
     }
@@ -1785,6 +1824,9 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 조준상태를 해제
+    /// </summary>
     public void SetTargetOff()
     {
         var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
@@ -1793,7 +1835,7 @@ public class CharacterController : MonoBehaviour
             var target = targetList[i];
             DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
             DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
-            DataUtility.SetMeshsMaterial(target.weapon.meshs, "Draw/AlwaysVisible");
+            DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
         }
     }
 
@@ -1946,7 +1988,7 @@ public class CharacterController : MonoBehaviour
                     targetCover = null,
                     isRight = watchInfo.isRight,
                 };
-                animator.SetInteger("shootNum", weapon.GetShootBulletNumber());
+                animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                 SetAiming(targetInfo);
 
                 var shootCommand = new CharacterCommand
@@ -2053,7 +2095,7 @@ public class CharacterController : MonoBehaviour
         {
             DataUtility.SetMeshsMaterial(meshs, "Standard");
             DataUtility.SetMeshsMaterial(sMeshs, "Standard");
-            DataUtility.SetMeshsMaterial(weapon.meshs, "Standard");
+            DataUtility.SetMeshsMaterial(currentWeapon.meshs, "Standard");
             animator.enabled = false;
             cd.enabled = false;
             headAim = false;
@@ -2140,14 +2182,8 @@ public class CharacterController : MonoBehaviour
 
     #region Animation Event
     /// <summary>
-    /// (애니메이션 이벤트)무기 위치 변경
+    /// (애니메이션 이벤트)무기 사격
     /// </summary>
-    /// <param name="switchPos"></param>
-    public void Event_WeaponSwitching(string switchPos)
-    {
-        weapon.WeaponSwitching(switchPos);
-    }
-
     public void Event_FireWeapon()
     {
         var shootCommand = commandList[0];
@@ -2158,10 +2194,19 @@ public class CharacterController : MonoBehaviour
         }
 
         var target = shootCommand.targetInfo.target;
-        weapon.FireBullet(target);
+        currentWeapon.FireBullet(target);
         var shootNum = animator.GetInteger("shootNum");
         shootNum--;
         animator.SetInteger("shootNum", shootNum);
+    }
+
+    /// <summary>
+    /// (애니메이션 이벤트)무기 위치 변경
+    /// </summary>
+    /// <param name="switchPos"></param>
+    public void Event_WeaponSwitching(string switchPos)
+    {
+        currentWeapon.WeaponSwitching(switchPos);
     }
 
     /// <summary>
@@ -2183,6 +2228,30 @@ public class CharacterController : MonoBehaviour
         commandList.RemoveAt(0);
         reloading = false;
     }
+
+    public void Event_WeaponChange()
+    {
+        currentWeapon.WeaponSwitching("Holster");
+        currentWeapon = weapons[changeIndex];
+        currentWeapon.WeaponSwitching("Right");
+    }
+
+    public void Event_ChangeEnd()
+    {
+        if (commandList.Count == 0)
+        {
+            Debug.LogError("No Command in the CommanderList");
+            return;
+        }
+        else if (commandList[0].type != CommandType.ChangeWeapon)
+        {
+            Debug.LogError("CommandType is not ChangeWeapon");
+            return;
+        }
+
+        commandList.RemoveAt(0);
+        changing = false;
+    }
     #endregion
 
     public GameManager GameMgr
@@ -2190,10 +2259,4 @@ public class CharacterController : MonoBehaviour
         private set { gameMgr = value; }
         get { return gameMgr; }
     }
-    public CharacterUI CharUI
-    {
-        private set { charUI = value; }
-        get { return charUI; }
-    }
-
 }

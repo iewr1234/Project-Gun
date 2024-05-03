@@ -242,7 +242,7 @@ public class DataManager : MonoBehaviour
 
     #region Character Data
     [HideInInspector] public CharacterData charData;
-    private readonly string charDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:Q";
+    private readonly string charDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:S";
     private enum CharacterVariable
     {
         ID,
@@ -260,7 +260,9 @@ public class DataManager : MonoBehaviour
         Mobility,
         Aiming,
         Reaction,
-        MainWeaponID,
+        MainWeapon1_ID,
+        MainWeapon2_ID,
+        SubWeapon_ID,
         ArmorID,
     }
 
@@ -300,7 +302,9 @@ public class DataManager : MonoBehaviour
                     mobility = int.Parse(data[(int)CharacterVariable.Mobility]),
                     aiming = int.Parse(data[(int)CharacterVariable.Aiming]),
                     reaction = int.Parse(data[(int)CharacterVariable.Reaction]),
-                    mainWeaponID = data[(int)CharacterVariable.MainWeaponID],
+                    mainWeapon1_ID = data[(int)CharacterVariable.MainWeapon1_ID],
+                    mainWeapon2_ID = data[(int)CharacterVariable.MainWeapon2_ID],
+                    subWeapon_ID = data[(int)CharacterVariable.SubWeapon_ID],
                     armorID = data[(int)CharacterVariable.ArmorID].Replace("\r", ""),
                 };
                 charData.charInfos.Add(playerInfo);

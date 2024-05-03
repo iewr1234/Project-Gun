@@ -86,28 +86,53 @@ public class GameManager : MonoBehaviour
         var charData = dataMgr.charData.charInfos.Find(x => x.ID == charID);
         var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charData.prefabName}"));
         charCtr.transform.SetParent(characterTf, false);
-        var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
-        charUI.transform.SetParent(characterTf, false);
         var node = fieldNodes.Find(x => x.nodePos == nodePos);
         charCtr.transform.position = node.transform.position;
         if (ownerType == CharacterOwner.Enemy)
         {
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        charCtr.SetComponents(this, charUI, ownerType, charData, node);
+        charCtr.SetComponents(this, ownerType, charData, node);
 
-        var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == charData.mainWeaponID);
-        var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
-        weapon.SetComponets(charCtr, weaponData);
+        // Set Weapons
+        var weaponIDs = new string[3] { charData.mainWeapon1_ID, charData.mainWeapon2_ID, charData.subWeapon_ID };
+        for (int i = 0; i < weaponIDs.Length; i++)
+        {
+            var weaponID = weaponIDs[i];
+            var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponID);
+            if (weaponData != null)
+            {
+                var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
+                weapon.SetComponets(charCtr, weaponData);
+            }
+        }
+        for (int i = 0; i < charCtr.weapons.Count; i++)
+        {
+            var weapon = charCtr.weapons[i];
+            if (charCtr.currentWeapon == null)
+            {
+                weapon.EquipWeapon();
+                weapon.WeaponSwitching("Right");
+                charCtr.currentWeapon = weapon;
+            }
+            else
+            {
+                weapon.WeaponSwitching("Holster");
+            }
+        }
 
+        // Set Armor
         if (charData.armorID != "None")
         {
             var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
             charCtr.armor = new Armor(armorData);
         }
 
-        CreateRange();
+        // Set CharacterUI
+        var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
+        charUI.transform.SetParent(characterTf, false);
         charUI.SetComponents(charCtr);
+        CreateRange();
     }
 
     /// <summary>
@@ -178,7 +203,7 @@ public class GameManager : MonoBehaviour
         switch (actionState)
         {
             case ActionState.Move:
-                if (Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetKeyDown(KeyCode.F))
                 {
                     ClearLine();
                     selectChar.FindTargets(selectChar.currentNode);
@@ -189,13 +214,17 @@ public class GameManager : MonoBehaviour
                         actionState = ActionState.Shot;
                     }
                 }
-                else if (Input.GetKeyDown(KeyCode.R) && selectChar.weapon.loadedAmmo < selectChar.weapon.magMax)
+                else if (Input.GetKeyDown(KeyCode.R) && selectChar.currentWeapon.loadedAmmo < selectChar.currentWeapon.magMax)
                 {
                     ClearLine();
                     selectChar.AddCommand(CommandType.Reload);
                     SwitchMovableNodes(false);
                     selectChar = null;
                     actionState = ActionState.None;
+                }
+                else if (Input.GetKeyDown(KeyCode.X) && selectChar.weapons.Count > 1)
+                {
+                    selectChar.AddCommand(CommandType.ChangeWeapon);
                 }
                 else if (Input.GetKeyDown(KeyCode.T))
                 {
@@ -211,9 +240,9 @@ public class GameManager : MonoBehaviour
                 {
                     selectChar.SetNextTargetOn();
                 }
-                else if (Input.GetKeyDown(KeyCode.Space))
+                else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    if (selectChar.weapon.chamberBullet)
+                    if (selectChar.currentWeapon.chamberBullet)
                     {
                         if (selectChar.animator.GetBool("isCover"))
                         {
@@ -228,7 +257,7 @@ public class GameManager : MonoBehaviour
                         }
                         SwitchMovableNodes(false);
                         camMgr.SetCameraState(CameraState.None);
-                        selectChar.CharUI.gameObject.SetActive(true);
+                        selectChar.charUI.gameObject.SetActive(true);
                         selectChar = null;
                         actionState = ActionState.None;
                     }
@@ -243,7 +272,7 @@ public class GameManager : MonoBehaviour
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
-                    selectChar.CharUI.gameObject.SetActive(true);
+                    selectChar.charUI.gameObject.SetActive(true);
                     selectChar = null;
                     actionState = ActionState.None;
                 }

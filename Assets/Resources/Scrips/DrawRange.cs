@@ -31,11 +31,11 @@ public class DrawRange : MonoBehaviour
             gameObject.SetActive(true);
         }
         transform.position = charCtr.watchInfo.watchNode.transform.position;
-        angle = charCtr.weapon.watchAngle;
+        angle = charCtr.currentWeapon.watchAngle;
         var range = DataUtility.GetDistance(transform.position, targetNode.transform.position);
-        if (range > charCtr.weapon.range)
+        if (range > charCtr.currentWeapon.range)
         {
-            range = charCtr.weapon.range;
+            range = charCtr.currentWeapon.range;
         }
         radius = range;
         DrawFan();
