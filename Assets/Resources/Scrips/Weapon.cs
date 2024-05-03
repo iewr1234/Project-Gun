@@ -122,10 +122,9 @@ public class Weapon : MonoBehaviour
         var reboundCheck = 0;
         for (int i = 0; i < shootNum; i++)
         {
-            charCtr.stamina -= stability;
-            if (charCtr.stamina < 0)
+            charCtr.SetStamina(-stability);
+            if (charCtr.stamina == 0)
             {
-                charCtr.stamina = 0;
                 reboundCheck++;
             }
             var value = Random.Range(0, 100);

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TreeEditor;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -93,6 +92,7 @@ public class CharacterController : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
+    [SerializeField] private CharacterUI charUI;
     public Weapon weapon;
     public Armor armor;
 
@@ -185,9 +185,10 @@ public class CharacterController : MonoBehaviour
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterUI _charUI, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
+        charUI = _charUI;
         animator = GetComponent<Animator>();
         cd = GetComponent<Collider>();
 
@@ -1147,6 +1148,60 @@ public class CharacterController : MonoBehaviour
     #endregion
 
     /// <summary>
+    /// 방어구 내구값 설정
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetArmor(int value)
+    {
+        armor.durability += value;
+        if (armor.durability < 0)
+        {
+            armor.durability = 0;
+        }
+        else if (armor.durability > armor.maxDurability)
+        {
+            armor.durability = armor.maxDurability;
+        }
+        charUI.armorGauge.value = armor.durability;
+    }
+
+    /// <summary>
+    /// 체력값 설정
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetHealth(int value)
+    {
+        health += value;
+        if (health < 0)
+        {
+            health = 0;
+        }
+        else if (health > maxHealth)
+        {
+            health = maxHealth;
+        }
+        charUI.healthGauge.value = health;
+    }
+
+    /// <summary>
+    /// 활력값 설정
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetStamina(int value)
+    {
+        stamina += value;
+        if (stamina < 0)
+        {
+            stamina = 0;
+        }
+        else if (stamina > maxStamina)
+        {
+            stamina = maxStamina;
+        }
+        charUI.staminaGauge.value = stamina;
+    }
+
+    /// <summary>
     /// 경계자의 위치를 찾음
     /// </summary>
     /// <param name="targetNode"></param>
@@ -1607,6 +1662,7 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+            charUI.gameObject.SetActive(false);
             return true;
         }
     }
@@ -1965,11 +2021,7 @@ public class CharacterController : MonoBehaviour
             isPenetrate = value < penetrateRate;
 
             var armorDamage = (int)Mathf.Floor(_weapon.damage * (_weapon.armorBreak / 100f));
-            armor.durability -= armorDamage;
-            if (armor.durability < 0)
-            {
-                armor.durability = 0;
-            }
+            SetArmor(-armorDamage);
             bulletproof = armor.bulletproof;
         }
         else
@@ -1978,21 +2030,14 @@ public class CharacterController : MonoBehaviour
             bulletproof = 0f;
         }
 
+        var damage = (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (_weapon.penetrate + bulletproof)));
         if (isPenetrate)
         {
-            health -= (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (_weapon.penetrate + bulletproof)));
-            if (health < 0)
-            {
-                health = 0;
-            }
+            SetHealth(-damage);
         }
         else
         {
-            stamina -= (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (float)_weapon.penetrate + bulletproof));
-            if (stamina < 0)
-            {
-                stamina = 0;
-            }
+            SetStamina(-damage);
         }
 
         if (health == 0)
@@ -2033,6 +2078,7 @@ public class CharacterController : MonoBehaviour
                 rb.AddForce(dir * force, ForceMode.Force);
             }
             state = CharacterState.Dead;
+            Destroy(charUI.gameObject);
         }
     }
 
@@ -2144,4 +2190,10 @@ public class CharacterController : MonoBehaviour
         private set { gameMgr = value; }
         get { return gameMgr; }
     }
+    public CharacterUI CharUI
+    {
+        private set { charUI = value; }
+        get { return charUI; }
+    }
+
 }

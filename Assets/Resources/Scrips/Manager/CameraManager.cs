@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.Windows.WebCam;
 
 public enum CameraState
 {
@@ -19,9 +20,11 @@ public class CameraManager : MonoBehaviour
 
     [Header("---Access Component---")]
     [HideInInspector] public Camera mainCam;
+    [HideInInspector] public Camera subCam;
     private Transform pivotPoint;
     private CinemachineBrain cambrain;
-    [SerializeField] private List<CinemachineVirtualCamera> virCams;
+
+    private List<CinemachineVirtualCamera> virCams;
 
     [Header("--- Assignment Variable---")]
     public CameraState state;
@@ -47,6 +50,7 @@ public class CameraManager : MonoBehaviour
 
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
+        subCam = mainCam.GetComponentInChildren<Camera>();
         camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
         mainCam.transform.localPosition = camDirection * camDistance;
         mainCam.transform.LookAt(pivotPoint);

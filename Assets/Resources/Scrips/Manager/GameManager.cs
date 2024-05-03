@@ -86,13 +86,15 @@ public class GameManager : MonoBehaviour
         var charData = dataMgr.charData.charInfos.Find(x => x.ID == charID);
         var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charData.prefabName}"));
         charCtr.transform.SetParent(characterTf, false);
+        var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
+        charUI.transform.SetParent(characterTf, false);
         var node = fieldNodes.Find(x => x.nodePos == nodePos);
         charCtr.transform.position = node.transform.position;
         if (ownerType == CharacterOwner.Enemy)
         {
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
-        charCtr.SetComponents(this, ownerType, charData, node);
+        charCtr.SetComponents(this, charUI, ownerType, charData, node);
 
         var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == charData.mainWeaponID);
         var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
@@ -105,6 +107,7 @@ public class GameManager : MonoBehaviour
         }
 
         CreateRange();
+        charUI.SetComponents(charCtr);
     }
 
     /// <summary>
@@ -225,6 +228,7 @@ public class GameManager : MonoBehaviour
                         }
                         SwitchMovableNodes(false);
                         camMgr.SetCameraState(CameraState.None);
+                        selectChar.CharUI.gameObject.SetActive(true);
                         selectChar = null;
                         actionState = ActionState.None;
                     }
@@ -239,6 +243,7 @@ public class GameManager : MonoBehaviour
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
+                    selectChar.CharUI.gameObject.SetActive(true);
                     selectChar = null;
                     actionState = ActionState.None;
                 }
