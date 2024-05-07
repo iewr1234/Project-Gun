@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public enum ActionState
@@ -438,93 +439,133 @@ public class GameManager : MonoBehaviour
     private void ShowMovableNodes(CharacterController charCtr)
     {
         SwitchMovableNodes(false);
-        openNodes.Add(charCtr.currentNode);
+        Queue<FieldNode> queue = new Queue<FieldNode>();
+        HashSet<FieldNode> visited = new HashSet<FieldNode>();
+
+        queue.Enqueue(charCtr.currentNode);
+        visited.Add(charCtr.currentNode);
+
         var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
-        ChainOfMovableNode(charCtr.currentNode, mobility);
+
+        int moveRange = 0;
+        while (queue.Count > 0 && moveRange <= mobility)
+        {
+            int nodesInCurrentRange = queue.Count;
+            for (int i = 0; i < nodesInCurrentRange; i++)
+            {
+                FieldNode node = queue.Dequeue();
+                openNodes.Add(node); // 이동 가능 노드로 추가
+
+                foreach (FieldNode neighbor in node.onAxisNodes)
+                {
+                    if (neighbor != null && neighbor.canMove && !visited.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor);
+                        visited.Add(neighbor);
+                    }
+                }
+            }
+            moveRange++;
+        }
         SwitchMovableNodes(true);
     }
 
-    /// <summary>
-    /// 이동노드 연쇄적용
-    /// </summary>
-    /// <param name="node"></param>
-    /// <param name="mobility"></param>
-    private void ChainOfMovableNode(FieldNode node, int mobility)
-    {
-        mobility--;
-        for (int i = 0; i < node.onAxisNodes.Count; i++)
-        {
-            var onAxisNode = node.onAxisNodes[i];
-            if (onAxisNode == null) continue;
+    #region ShowMovableNodes(Old)
+    ///// <summary>
+    ///// 이동가능 노드 표시
+    ///// </summary>
+    ///// <param name="charCtr"></param>
+    //private void ShowMovableNodes(CharacterController charCtr)
+    //{
+    //    SwitchMovableNodes(false);
+    //    openNodes.Add(charCtr.currentNode);
+    //    var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
+    //    ChainOfMovableNode(charCtr.currentNode, mobility);
+    //    SwitchMovableNodes(true);
+    //}
 
-            if (CheckMoveOfNextNode(node, i))
-            {
-                if (!openNodes.Contains(onAxisNode))
-                {
-                    openNodes.Add(onAxisNode);
-                }
-                ChainOfMovableNode(node, onAxisNode, mobility);
-            }
-        }
-    }
+    ///// <summary>
+    ///// 이동노드 연쇄적용
+    ///// </summary>
+    ///// <param name="node"></param>
+    ///// <param name="mobility"></param>
+    //private void ChainOfMovableNode(FieldNode node, int mobility)
+    //{
+    //    mobility--;
+    //    for (int i = 0; i < node.onAxisNodes.Count; i++)
+    //    {
+    //        var onAxisNode = node.onAxisNodes[i];
+    //        if (onAxisNode == null) continue;
 
-    /// <summary>
-    /// 이동노드 연쇄적용
-    /// </summary>
-    /// <param name="prevNode"></param>
-    /// <param name="node"></param>
-    /// <param name="mobility"></param>
-    private void ChainOfMovableNode(FieldNode prevNode, FieldNode node, int mobility)
-    {
-        var canChain = mobility > 0 && node.canMove;
-        if (!canChain) return;
+    //        if (CheckMoveOfNextNode(node, i))
+    //        {
+    //            if (!openNodes.Contains(onAxisNode))
+    //            {
+    //                openNodes.Add(onAxisNode);
+    //            }
+    //            ChainOfMovableNode(node, onAxisNode, mobility);
+    //        }
+    //    }
+    //}
 
-        mobility--;
-        for (int i = 0; i < node.onAxisNodes.Count; i++)
-        {
-            var onAxisNode = node.onAxisNodes[i];
-            if (onAxisNode == null || onAxisNode == prevNode || prevNode.onAxisNodes.Contains(onAxisNode)) continue;
+    ///// <summary>
+    ///// 이동노드 연쇄적용
+    ///// </summary>
+    ///// <param name="prevNode"></param>
+    ///// <param name="node"></param>
+    ///// <param name="mobility"></param>
+    //private void ChainOfMovableNode(FieldNode prevNode, FieldNode node, int mobility)
+    //{
+    //    var canChain = mobility > 0 && node.canMove;
+    //    if (!canChain) return;
 
-            if (CheckMoveOfNextNode(node, i))
-            {
-                if (!openNodes.Contains(onAxisNode))
-                {
-                    openNodes.Add(onAxisNode);
-                }
-                ChainOfMovableNode(node, onAxisNode, mobility);
-            }
-        }
-    }
+    //    mobility--;
+    //    for (int i = 0; i < node.onAxisNodes.Count; i++)
+    //    {
+    //        var onAxisNode = node.onAxisNodes[i];
+    //        if (onAxisNode == null || onAxisNode == prevNode) continue;
 
-    private bool CheckMoveOfNextNode(FieldNode node, int index)
-    {
-        var nextNode = node.onAxisNodes[index];
-        if (!nextNode.canMove)
-        {
-            return false;
-        }
-        else
-        {
-            var outline = node.outlines[index];
-            if (outline == null)
-            {
-                Debug.LogError("Not Found outline");
-            }
+    //        if (CheckMoveOfNextNode(node, i))
+    //        {
+    //            if (!openNodes.Contains(onAxisNode))
+    //            {
+    //                openNodes.Add(onAxisNode);
+    //            }
+    //            ChainOfMovableNode(node, onAxisNode, mobility);
+    //        }
+    //    }
+    //}
 
-            if (outline.lineCover == null && !outline.unableMove.enabled)
-            {
-                return true;
-            }
-            else if (outline.lineCover != null && outline.lineCover.coverType == CoverType.Half)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
+    //private bool CheckMoveOfNextNode(FieldNode node, int index)
+    //{
+    //    var nextNode = node.onAxisNodes[index];
+    //    if (!nextNode.canMove)
+    //    {
+    //        return false;
+    //    }
+    //    else
+    //    {
+    //        var outline = node.outlines[index];
+    //        if (outline == null)
+    //        {
+    //            Debug.LogError("Not Found outline");
+    //        }
+
+    //        if (outline.lineCover == null && !outline.unableMove.enabled)
+    //        {
+    //            return true;
+    //        }
+    //        else if (outline.lineCover != null && outline.lineCover.coverType == CoverType.Half)
+    //        {
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            return false;
+    //        }
+    //    }
+    //}
+    #endregion
 
     /// <summary>
     /// 이동가능 노드 표시변경
@@ -580,17 +621,17 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="startNode"></param>
     /// <param name="endNode"></param>
-    private void ResultNodePass(CharacterController cherCtr, FieldNode endNode)
+    private void ResultNodePass(CharacterController charCtr, FieldNode endNode)
     {
         closeNodes.Clear();
         var moveDist = 0f;
         float newMoveDist = 0f;
-        for (int i = 0; i < cherCtr.currentNode.allAxisNodes.Count; i++)
+        for (int i = 0; i < charCtr.currentNode.allAxisNodes.Count; i++)
         {
             var newCloseNodes = new List<FieldNode>();
-            var startNode = cherCtr.currentNode;
+            var startNode = charCtr.currentNode;
             newCloseNodes.Add(startNode);
-            var allAxisNode = cherCtr.currentNode.allAxisNodes[i];
+            var allAxisNode = charCtr.currentNode.allAxisNodes[i];
             if (!allAxisNode.canMove) continue;
 
             var _openNodes = new List<FieldNode>(openNodes);
@@ -601,7 +642,8 @@ public class GameManager : MonoBehaviour
             newCloseNodes.Clear();
             if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, endNode, startNode)) continue;
 
-            if (closeNodes.Count == 0 || moveDist > newMoveDist)
+            var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
+            if (closeNodes.Count == 0 || (moveDist > newMoveDist && newCloseNodes.Count <= mobility))
             {
                 moveDist = newMoveDist;
                 closeNodes = newCloseNodes;
