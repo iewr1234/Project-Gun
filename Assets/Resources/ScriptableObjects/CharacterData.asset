@@ -23,15 +23,15 @@ MonoBehaviour:
     wisdom: 5
     agility: 5
     dexterity: 5
+    maxAction: 10
     maxHealth: 20
     maxStamina: 10
     sight: 8
-    mobility: 5
     aiming: 75
     reaction: 20
     mainWeapon1_ID: W0001
-    mainWeapon2_ID: None
-    subWeapon_ID: W0003
+    mainWeapon2_ID: W0002
+    subWeapon_ID: None
     armorID: A0001
   - indexName: 'C0002: Insurgent_A'
     ID: C0002
@@ -43,10 +43,10 @@ MonoBehaviour:
     wisdom: 2
     agility: 2
     dexterity: 2
+    maxAction: 10
     maxHealth: 20
     maxStamina: 10
     sight: 5
-    mobility: 4
     aiming: 50
     reaction: 10
     mainWeapon1_ID: W0002

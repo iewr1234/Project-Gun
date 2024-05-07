@@ -44,15 +44,16 @@ public class Weapon : MonoBehaviour
 
     [SerializeField] private List<bool> hitList = new List<bool>();
 
-    private Vector3 storagePos;
-    private Vector3 storageRot;
+    private Vector3 holsterPos;
+    private Vector3 holsterRot;
     private Vector3 defaultPos;
     private Vector3 defaultRot;
 
     private readonly Vector3 weaponPos_Pistol = new Vector3(0.082f, 0.034f, -0.037f);
     private readonly Vector3 weaponRot_Pistol = new Vector3(-8.375f, 89f, -90.246f);
 
-    private readonly Vector3 weaponPos_Rifle_Holster = new Vector3(-0.19f, -0.21f, -0.2f);
+    private readonly Vector3 weaponPos_Rifle_RightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
+    private readonly Vector3 weaponPos_Rifle_LeftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
     private readonly Vector3 weaponRot_Rifle_Holster = new Vector3(0f, 90f, 0f);
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
@@ -89,14 +90,22 @@ public class Weapon : MonoBehaviour
             switch (type)
             {
                 case WeaponType.Pistol:
-                    storagePos = Vector3.zero;
-                    storageRot = Vector3.zero;
+                    holsterPos = Vector3.zero;
+                    holsterRot = Vector3.zero;
                     defaultPos = weaponPos_Pistol;
                     defaultRot = weaponRot_Pistol;
                     break;
                 case WeaponType.Rifle:
-                    storagePos = weaponPos_Rifle_Holster;
-                    storageRot = weaponRot_Rifle_Holster;
+                    if (charCtr.weapons.Count > 1)
+                    {
+                        holsterPos = weaponPos_Rifle_RightHolster;
+                        holsterRot = weaponRot_Rifle_Holster;
+                    }
+                    else
+                    {
+                        holsterPos = weaponPos_Rifle_LeftHolster;
+                        holsterRot = weaponRot_Rifle_Holster;
+                    }
                     defaultPos = weaponPos_Rifle;
                     defaultRot = weaponRot_Rifle;
                     break;
@@ -135,8 +144,8 @@ public class Weapon : MonoBehaviour
                 {
                     transform.SetParent(charCtr.mainHolsterTf, false);
                 }
-                transform.localPosition = storagePos;
-                transform.localRotation = Quaternion.Euler(storageRot);
+                transform.localPosition = holsterPos;
+                transform.localRotation = Quaternion.Euler(holsterRot);
                 break;
             case "Right":
                 transform.SetParent(charCtr.rightHandTf, false);

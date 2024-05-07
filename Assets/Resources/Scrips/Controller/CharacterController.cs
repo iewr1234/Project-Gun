@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -126,18 +127,20 @@ public class CharacterController : MonoBehaviour
     [Tooltip("지혜")] public int wisdom;
     [Tooltip("민첩")] public int agility;
     [Tooltip("솜씨")] public int dexterity;
+    [Tooltip("이동력")] public float mobility;
 
     [Header("[Physical]")]
+    [Tooltip("최대 행동력")] public int maxAction;
+    [Tooltip("행동력")] public int action;
     [Tooltip("최대 체력")] public int maxHealth;
     [Tooltip("체력")] public int health;
     [Tooltip("최대 기력")] public int maxStamina;
     [Tooltip("기력")] public int stamina;
     [Tooltip("시야")] public float sight;
-    [Tooltip("이동력")] public int mobility;
     [Tooltip("조준")] public int aiming;
     [Tooltip("반응")] public int reaction;
-    [Space(5f)]
 
+    [Space(5f)]
     public Weapon currentWeapon;
     public FieldNode currentNode;
     private FieldNode prevNode;
@@ -160,6 +163,7 @@ public class CharacterController : MonoBehaviour
     private float timer;
 
     private bool moving;
+    private int moveNum;
     private readonly float moveSpeed = 7f;
     private readonly float jumpSpeed = 2f;
 
@@ -239,13 +243,15 @@ public class CharacterController : MonoBehaviour
         wisdom = charData.wisdom;
         agility = charData.agility;
         dexterity = charData.dexterity;
+        SetMobility();
 
+        maxAction = charData.maxAction;
+        action = maxAction;
         maxHealth = charData.maxHealth;
         health = maxHealth;
         maxStamina = charData.maxStamina;
         stamina = maxStamina;
         sight = charData.sight;
-        mobility = charData.mobility;
         aiming = charData.aiming;
         reaction = charData.reaction;
 
@@ -446,6 +452,7 @@ public class CharacterController : MonoBehaviour
         var targetNode = command.passList[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
+            moveNum = 0;
             prevNode = targetNode;
             command.passList.Remove(targetNode);
             if (command.passList.Count == 0)
@@ -475,7 +482,7 @@ public class CharacterController : MonoBehaviour
             }
 
             var pos = transform.position;
-            var targetPos = targetNode.transform.position; ;
+            var targetPos = targetNode.transform.position;
             if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Move") && pos != targetPos)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
@@ -493,6 +500,8 @@ public class CharacterController : MonoBehaviour
                 CheckWatcher(targetNode);
                 if (command.passList.Count == 0)
                 {
+                    var moveCost = (int)Mathf.Ceil(moveNum / mobility);
+                    Debug.Log($"이동칸 = {moveNum}, 이동력 = {mobility}, 소모AP = {moveCost}");
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
                 }
@@ -501,29 +510,35 @@ public class CharacterController : MonoBehaviour
 
         void CheckLineCover()
         {
-            if (targetNode.nodePos.x != prevNode.nodePos.x && targetNode.nodePos.y != prevNode.nodePos.y) return;
-
-            TargetDirection nextDir;
-            if (targetNode.nodePos.x > prevNode.nodePos.x)
+            if (targetNode.nodePos.x != prevNode.nodePos.x && targetNode.nodePos.y != prevNode.nodePos.y)
             {
-                nextDir = TargetDirection.Right;
-            }
-            else if (targetNode.nodePos.x < prevNode.nodePos.x)
-            {
-                nextDir = TargetDirection.Left;
-            }
-            else if (targetNode.nodePos.y > prevNode.nodePos.y)
-            {
-                nextDir = TargetDirection.Back;
+                moveNum += 2;
             }
             else
             {
-                nextDir = TargetDirection.Front;
-            }
+                TargetDirection nextDir;
+                if (targetNode.nodePos.x > prevNode.nodePos.x)
+                {
+                    nextDir = TargetDirection.Right;
+                }
+                else if (targetNode.nodePos.x < prevNode.nodePos.x)
+                {
+                    nextDir = TargetDirection.Left;
+                }
+                else if (targetNode.nodePos.y > prevNode.nodePos.y)
+                {
+                    nextDir = TargetDirection.Back;
+                }
+                else
+                {
+                    nextDir = TargetDirection.Front;
+                }
 
-            if (prevNode.outlines[(int)nextDir].lineCover != null)
-            {
-                animator.SetTrigger("jump");
+                if (prevNode.outlines[(int)nextDir].lineCover != null)
+                {
+                    animator.SetTrigger("jump");
+                }
+                moveNum++;
             }
         }
     }
@@ -1187,6 +1202,30 @@ public class CharacterController : MonoBehaviour
     #endregion
 
     /// <summary>
+    /// 이동력 설정
+    /// </summary>
+    public void SetMobility()
+    {
+        mobility = DataUtility.GetFloorValue(1 + 2.5f * ((float)agility / (agility + 100)), 2);
+    }
+
+    /// <summary>
+    /// 행동력 설정
+    /// </summary>
+    public void SetAction(int value)
+    {
+        action += value;
+        if (action < 0)
+        {
+            action = 0;
+        }
+        else if (action > maxAction)
+        {
+            action = maxAction;
+        }
+    }
+
+    /// <summary>
     /// 방어구 내구값 설정
     /// </summary>
     /// <param name="value"></param>
@@ -1639,7 +1678,7 @@ public class CharacterController : MonoBehaviour
             if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 var _cover = hit.collider.GetComponentInParent<Cover>();
-                if (shooterNode.onAxisNodes.Find(x => x == _cover) != null || shooterNode.outlines.Find(x => x.lineCover == _cover))
+                if (shooterNode.onAxisNodes.Find(x => x.cover == _cover) != null || shooterNode.outlines.Find(x => x.lineCover == _cover))
                 {
                     cover = _cover;
                 }

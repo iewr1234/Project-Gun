@@ -21,10 +21,10 @@ public class CharacterDataInfo
     public int dexterity;
     [Space(5f)]
 
+    public int maxAction;
     public int maxHealth;
     public int maxStamina;
     public float sight;
-    public int mobility;
     public int aiming;
     public int reaction;
     [Space(5f)]

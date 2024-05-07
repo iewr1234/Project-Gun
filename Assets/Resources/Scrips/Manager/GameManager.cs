@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private FieldNode targetNode;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
+    private Dictionary<FieldNode, bool> visitedNodes = new Dictionary<FieldNode, bool>();
     private List<FieldNode> openNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
 
@@ -203,7 +204,7 @@ public class GameManager : MonoBehaviour
         switch (actionState)
         {
             case ActionState.Move:
-                if (Input.GetKeyDown(KeyCode.F))
+                if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     ClearLine();
                     selectChar.FindTargets(selectChar.currentNode);
@@ -438,7 +439,8 @@ public class GameManager : MonoBehaviour
     {
         SwitchMovableNodes(false);
         openNodes.Add(charCtr.currentNode);
-        ChainOfMovableNode(charCtr.currentNode, charCtr.mobility, true);
+        var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
+        ChainOfMovableNode(charCtr.currentNode, mobility);
         SwitchMovableNodes(true);
     }
 
@@ -447,51 +449,79 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="node"></param>
     /// <param name="mobility"></param>
-    /// <param name="isFirst"></param>
-    private void ChainOfMovableNode(FieldNode node, int mobility, bool isFirst)
+    private void ChainOfMovableNode(FieldNode node, int mobility)
     {
-        var canChain = isFirst || (mobility > 0 && node.canMove);
-        if (!canChain) return;
-
         mobility--;
         for (int i = 0; i < node.onAxisNodes.Count; i++)
         {
             var onAxisNode = node.onAxisNodes[i];
             if (onAxisNode == null) continue;
 
-            if (CheckMoveOfNextNode(node, onAxisNode))
+            if (CheckMoveOfNextNode(node, i))
             {
-                var find = openNodes.Find(x => x == onAxisNode);
-                if (find == null)
+                if (!openNodes.Contains(onAxisNode))
                 {
                     openNodes.Add(onAxisNode);
                 }
-                ChainOfMovableNode(onAxisNode, mobility, false);
+                ChainOfMovableNode(node, onAxisNode, mobility);
             }
         }
     }
 
-    private bool CheckMoveOfNextNode(FieldNode node, FieldNode nextNode)
+    /// <summary>
+    /// 이동노드 연쇄적용
+    /// </summary>
+    /// <param name="prevNode"></param>
+    /// <param name="node"></param>
+    /// <param name="mobility"></param>
+    private void ChainOfMovableNode(FieldNode prevNode, FieldNode node, int mobility)
     {
+        var canChain = mobility > 0 && node.canMove;
+        if (!canChain) return;
+
+        mobility--;
+        for (int i = 0; i < node.onAxisNodes.Count; i++)
+        {
+            var onAxisNode = node.onAxisNodes[i];
+            if (onAxisNode == null || onAxisNode == prevNode || prevNode.onAxisNodes.Contains(onAxisNode)) continue;
+
+            if (CheckMoveOfNextNode(node, i))
+            {
+                if (!openNodes.Contains(onAxisNode))
+                {
+                    openNodes.Add(onAxisNode);
+                }
+                ChainOfMovableNode(node, onAxisNode, mobility);
+            }
+        }
+    }
+
+    private bool CheckMoveOfNextNode(FieldNode node, int index)
+    {
+        var nextNode = node.onAxisNodes[index];
         if (!nextNode.canMove)
         {
             return false;
         }
         else
         {
-            var outline = node.outlines.Find(x => nextNode.outlines.Find(y => x == y));
+            var outline = node.outlines[index];
             if (outline == null)
             {
                 Debug.LogError("Not Found outline");
             }
 
-            if ((outline.lineCover != null && outline.lineCover.coverType == CoverType.Full) || outline.unableMove.enabled)
+            if (outline.lineCover == null && !outline.unableMove.enabled)
             {
-                return false;
+                return true;
+            }
+            else if (outline.lineCover != null && outline.lineCover.coverType == CoverType.Half)
+            {
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
         }
     }
@@ -536,7 +566,7 @@ public class GameManager : MonoBehaviour
             var movableNode = openNodes[i];
             movableNode.SetNodeOutline(false);
         }
-        //ResultNodePass(charCtr.currentNode, targetNode);
+
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
         {
             charCtr.AddCommand(CommandType.LeaveCover);
@@ -554,10 +584,9 @@ public class GameManager : MonoBehaviour
     {
         closeNodes.Clear();
         var moveDist = 0f;
-        float newMoveDist;
+        float newMoveDist = 0f;
         for (int i = 0; i < cherCtr.currentNode.allAxisNodes.Count; i++)
         {
-            newMoveDist = 0f;
             var newCloseNodes = new List<FieldNode>();
             var startNode = cherCtr.currentNode;
             newCloseNodes.Add(startNode);
@@ -567,6 +596,7 @@ public class GameManager : MonoBehaviour
             var _openNodes = new List<FieldNode>(openNodes);
             if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, allAxisNode, endNode)) continue;
 
+            newMoveDist = 0f;
             _openNodes = new List<FieldNode>(newCloseNodes);
             newCloseNodes.Clear();
             if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, endNode, startNode)) continue;
