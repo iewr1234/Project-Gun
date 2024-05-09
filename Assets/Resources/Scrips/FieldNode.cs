@@ -553,13 +553,13 @@ public class FieldNode : MonoBehaviour
         if (setObject != null)
         {
             var setNode = setObject.setNode;
-            setNode.RemoveSetObject(type);
+            //setNode.RemoveSetObject(type);
             setNode.setObjects.Remove(setObject);
             for (int i = 0; i < setObject.subNodes.Count; i++)
             {
                 var subNode = setObject.subNodes[i];
                 var _setObject = subNode.setObjects.Find(x => x.type == type);
-                subNode.RemoveSetObject(type);
+                //subNode.RemoveSetObject(type);
                 subNode.setObjects.Remove(_setObject);
             }
             Destroy(setObject.setObject);

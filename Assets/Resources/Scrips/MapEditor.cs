@@ -751,6 +751,12 @@ public class MapEditor : MonoBehaviour
         selectItem.outline.enabled = true;
     }
 
+    public void SwitchingLayer(LayerMask layer, bool value)
+    {
+        var newLayer = value ? gameMgr.camMgr.mainCam.cullingMask | layer : gameMgr.camMgr.mainCam.cullingMask & ~layer;
+        gameMgr.camMgr.mainCam.cullingMask = newLayer;
+    }
+
     #region Button Event
     public void PointerEnter_MapEditorButton()
     {

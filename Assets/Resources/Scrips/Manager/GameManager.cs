@@ -681,25 +681,6 @@ public class GameManager : MonoBehaviour
             return lowestNode;
         }
 
-        void GetNodeWithNewParent(FieldNode node)
-        {
-            var axisNodes = node.allAxisNodes.Intersect(openNodes).ToList();
-            if (axisNodes.Count == 0) return;
-
-            var parentNode = axisNodes[0];
-            for (int i = 0; i < axisNodes.Count; i++)
-            {
-                var axisNode = axisNodes[i];
-                if (axisNode.G < parentNode.G)
-                {
-                    parentNode = axisNode;
-                }
-            }
-
-            node.parentNode = parentNode;
-            node.G = node.parentNode.G + DataUtility.GetDistance(node.transform.position, node.parentNode.transform.position);
-        }
-
         void ConstructNodePath()
         {
             var passList = new List<FieldNode>();

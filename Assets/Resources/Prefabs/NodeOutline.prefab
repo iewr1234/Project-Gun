@@ -227,6 +227,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineCover: {fileID: 0}
+  unableMove: {fileID: 0}
+  linePos: {x: 0, y: 0}
 --- !u!1 &7147647521103677263
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +240,7 @@ GameObject:
   - component: {fileID: 214092486992318544}
   - component: {fileID: 7152639521546045671}
   - component: {fileID: 7371680494696331155}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: UnableMove
   m_TagString: Untagged
   m_Icon: {fileID: 0}
