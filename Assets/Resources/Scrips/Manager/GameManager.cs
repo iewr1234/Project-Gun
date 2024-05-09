@@ -610,9 +610,9 @@ public class GameManager : MonoBehaviour
     {
         if (charCtr.animator.GetBool("isMove")) return;
 
-        for (int i = 0; i < openNodes.Count; i++)
+        for (int i = 0; i < movableNodes.Count; i++)
         {
-            var movableNode = openNodes[i];
+            var movableNode = movableNodes[i];
             movableNode.SetNodeOutline(false);
         }
 
@@ -656,16 +656,13 @@ public class GameManager : MonoBehaviour
                 if (!movableNodes.Contains(axisNode)) continue;
 
                 var _G = currentNode.G + DataUtility.GetDistance(currentNode.transform.position, axisNode.transform.position);
-                if (!openNodes.Contains(axisNode))
+                if (!openNodes.Contains(axisNode) || _G < axisNode.G)
                 {
                     axisNode.parentNode = currentNode;
                     axisNode.G = _G;
                     axisNode.H = DataUtility.GetDistance(axisNode.transform.position, endNode.transform.position);
-                    openNodes.Add(axisNode);
-                }
-                else if (_G < axisNode.G)
-                {
-                    GetNodeWithNewParent(axisNode);
+
+                    if (!openNodes.Contains(axisNode)) openNodes.Add(axisNode);
                 }
             }
         }
@@ -687,6 +684,8 @@ public class GameManager : MonoBehaviour
         void GetNodeWithNewParent(FieldNode node)
         {
             var axisNodes = node.allAxisNodes.Intersect(openNodes).ToList();
+            if (axisNodes.Count == 0) return;
+
             var parentNode = axisNodes[0];
             for (int i = 0; i < axisNodes.Count; i++)
             {
