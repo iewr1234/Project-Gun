@@ -720,7 +720,7 @@ public class MapEditor : MonoBehaviour
                 fieldNode.transform.SetParent(fieldNodeTf, false);
                 var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
                 fieldNode.transform.position = pos;
-                fieldNode.SetComponents(gameMgr, new Vector2(j, i));
+                fieldNode.SetComponents(gameMgr, new Vector2Int(j, i));
                 //fieldNode.NodeColor = Color.gray;
                 gameMgr.fieldNodes.Add(fieldNode);
             }

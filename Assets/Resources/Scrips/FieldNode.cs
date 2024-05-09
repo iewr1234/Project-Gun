@@ -42,7 +42,9 @@ public class FieldNode : MonoBehaviour
 
     //public bool canSee;
     public bool canMove;
-    [HideInInspector] public Vector2 nodePos;
+    [Space(5f)]
+
+    [HideInInspector] public Vector2Int nodePos;
     public List<FieldNode> onAxisNodes;
     public List<FieldNode> offAxisNodes;
     public List<FieldNode> allAxisNodes = new List<FieldNode>();
@@ -50,7 +52,13 @@ public class FieldNode : MonoBehaviour
     [Space(5f)]
     public List<SetObject> setObjects = new List<SetObject>();
 
-    public void SetComponents(GameManager _gameMgr, Vector2 _nodePos)
+    [Header("[A* Algorithm]")]
+    [HideInInspector] public FieldNode parentNode;
+    [HideInInspector] public float G;
+    [HideInInspector] public float H;
+    [HideInInspector] public float F => G + H;
+
+    public void SetComponents(GameManager _gameMgr, Vector2Int _nodePos)
     {
         gameMgr = _gameMgr;
         nodePos = _nodePos;
@@ -288,7 +296,7 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetNodeOutline(List<FieldNode> openNodes)
+    public void SetNodeOutline(List<FieldNode> movableNodes)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
@@ -297,14 +305,14 @@ public class FieldNode : MonoBehaviour
             {
                 outlines[i].SetActiveLine(true);
             }
-            else if (openNodes.Find(x => x == onAxisNode) == null)
+            else if (!movableNodes.Contains(onAxisNode))
             {
                 outlines[i].SetActiveLine(true);
             }
         }
     }
 
-    public void SetNodeOutline(List<FieldNode> openNodes, TargetDirection targetDir)
+    public void SetNodeOutline(List<FieldNode> movableNodes, TargetDirection targetDir)
     {
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
@@ -320,7 +328,7 @@ public class FieldNode : MonoBehaviour
                     outlines[i].SetActiveLine(true);
                 }
             }
-            else if (openNodes.Find(x => x == onAxisNode) == null)
+            else if (!movableNodes.Contains(onAxisNode))
             {
                 if (i == (int)targetDir)
                 {

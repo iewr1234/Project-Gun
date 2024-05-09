@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public enum ActionState
@@ -10,6 +11,13 @@ public enum ActionState
     Move,
     Shot,
     Watch,
+}
+
+[System.Serializable]
+public struct Test
+{
+    public float moveDist;
+    public List<FieldNode> visitedNodes;
 }
 
 public class GameManager : MonoBehaviour
@@ -39,9 +47,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private FieldNode targetNode;
 
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
-    private Dictionary<FieldNode, bool> visitedNodes = new Dictionary<FieldNode, bool>();
-    private List<FieldNode> openNodes = new List<FieldNode>();
+    [SerializeField] private List<FieldNode> movableNodes = new List<FieldNode>();
+    [SerializeField] private List<FieldNode> openNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
+    public List<Test> tests = new List<Test>();
 
     private LineRenderer moveLine;
     private DrawRange currentRange;
@@ -385,8 +394,7 @@ public class GameManager : MonoBehaviour
                         return;
                     }
 
-                    var find = openNodes.Find(x => x == node);
-                    if (targetNode != node && find != null)
+                    if (targetNode != node && movableNodes.Contains(node))
                     {
                         RemoveTargetNode();
                         ResultNodePass(selectChar, node);
@@ -397,7 +405,7 @@ public class GameManager : MonoBehaviour
                         node.CheckCoverNode(true);
                         targetNode = node;
                     }
-                    else if (find == null)
+                    else if (!movableNodes.Contains(node))
                     {
                         ClearLine();
                         RemoveTargetNode();
@@ -454,7 +462,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < nodesInCurrentRange; i++)
             {
                 FieldNode node = queue.Dequeue();
-                openNodes.Add(node); // 이동 가능 노드로 추가
+                movableNodes.Add(node); // 이동 가능 노드로 추가
 
                 foreach (FieldNode neighbor in node.onAxisNodes)
                 {
@@ -576,19 +584,19 @@ public class GameManager : MonoBehaviour
         switch (value)
         {
             case true:
-                for (int i = 0; i < openNodes.Count; i++)
+                for (int i = 0; i < movableNodes.Count; i++)
                 {
-                    var movableNode = openNodes[i];
-                    movableNode.SetNodeOutline(openNodes);
+                    var movableNode = movableNodes[i];
+                    movableNode.SetNodeOutline(movableNodes);
                 }
                 break;
             case false:
-                for (int i = 0; i < openNodes.Count; i++)
+                for (int i = 0; i < movableNodes.Count; i++)
                 {
-                    var movableNode = openNodes[i];
+                    var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(false);
                 }
-                openNodes.Clear();
+                movableNodes.Clear();
                 break;
         }
     }
@@ -623,87 +631,87 @@ public class GameManager : MonoBehaviour
     /// <param name="endNode"></param>
     private void ResultNodePass(CharacterController charCtr, FieldNode endNode)
     {
+        openNodes.Clear();
         closeNodes.Clear();
-        var moveDist = 0f;
-        float newMoveDist = 0f;
-        for (int i = 0; i < charCtr.currentNode.allAxisNodes.Count; i++)
+
+        var startNode = charCtr.currentNode;
+        startNode.G = 0f;
+        startNode.H = DataUtility.GetDistance(startNode.transform.position, endNode.transform.position);
+        openNodes.Add(startNode);
+        while (openNodes.Count > 0)
         {
-            var newCloseNodes = new List<FieldNode>();
-            var startNode = charCtr.currentNode;
-            newCloseNodes.Add(startNode);
-            var allAxisNode = charCtr.currentNode.allAxisNodes[i];
-            if (!allAxisNode.canMove) continue;
-
-            var _openNodes = new List<FieldNode>(openNodes);
-            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, allAxisNode, endNode)) continue;
-
-            newMoveDist = 0f;
-            _openNodes = new List<FieldNode>(newCloseNodes);
-            newCloseNodes.Clear();
-            if (!FindNodeRoute(ref _openNodes, ref newCloseNodes, endNode, startNode)) continue;
-
-            var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
-            if (closeNodes.Count == 0 || (moveDist > newMoveDist && newCloseNodes.Count <= mobility))
-            {
-                moveDist = newMoveDist;
-                closeNodes = newCloseNodes;
-            }
-        }
-
-        if (closeNodes.Count == 0)
-        {
-            Debug.Log("not find NodePass");
-        }
-
-        bool FindNodeRoute(ref List<FieldNode> _openNodes, ref List<FieldNode> closeNodes, FieldNode _startNode, FieldNode _endNode)
-        {
-            var currentNode = _startNode;
+            var currentNode = GetNodeWithLowestF();
+            openNodes.Remove(currentNode);
             closeNodes.Add(currentNode);
-            FieldNode nextNode = null;
-            while (currentNode != _endNode)
+            if (currentNode == endNode)
             {
-                float currentF = 999999f;
-                for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
-                {
-                    var node = currentNode.allAxisNodes[i];
-                    var findOpen = _openNodes.Find(x => x == node);
-                    var findClose = closeNodes.Find(x => x == node);
-                    if (findOpen != null && findClose == null)
-                    {
-                        var g = DataUtility.GetDistance(currentNode.transform.position, node.transform.position);
-                        var h = DataUtility.GetDistance(node.transform.position, _endNode.transform.position);
-                        var f = g + h;
-                        if (f < currentF)
-                        {
-                            currentF = f;
-                            nextNode = node;
-                        }
-                    }
-                }
-                newMoveDist += currentF;
+                ConstructNodePath();
+                break;
+            }
 
-                if (nextNode != null)
+            for (int i = 0; i < currentNode.allAxisNodes.Count; i++)
+            {
+                var axisNode = currentNode.allAxisNodes[i];
+                if (closeNodes.Contains(axisNode)) continue;
+                if (!movableNodes.Contains(axisNode)) continue;
+
+                var _G = currentNode.G + DataUtility.GetDistance(currentNode.transform.position, axisNode.transform.position);
+                if (!openNodes.Contains(axisNode))
                 {
-                    currentNode = nextNode;
-                    closeNodes.Add(currentNode);
-                    _openNodes.Remove(currentNode);
-                    nextNode = null;
+                    axisNode.parentNode = currentNode;
+                    axisNode.G = _G;
+                    axisNode.H = DataUtility.GetDistance(axisNode.transform.position, endNode.transform.position);
+                    openNodes.Add(axisNode);
                 }
-                else
+                else if (_G < axisNode.G)
                 {
-                    closeNodes.Remove(currentNode);
-                    if (closeNodes.Count == 0)
-                    {
-                        //Debug.Log("not find NodePass");
-                        return false;
-                    }
-                    else
-                    {
-                        currentNode = closeNodes[^1];
-                    }
+                    GetNodeWithNewParent(axisNode);
                 }
             }
-            return true;
+        }
+
+        FieldNode GetNodeWithLowestF()
+        {
+            var lowestNode = openNodes[0];
+            for (int i = 0; i < openNodes.Count; i++)
+            {
+                var node = openNodes[i];
+                if (node.F < lowestNode.F)
+                {
+                    lowestNode = node;
+                }
+            }
+            return lowestNode;
+        }
+
+        void GetNodeWithNewParent(FieldNode node)
+        {
+            var axisNodes = node.allAxisNodes.Intersect(openNodes).ToList();
+            var parentNode = axisNodes[0];
+            for (int i = 0; i < axisNodes.Count; i++)
+            {
+                var axisNode = axisNodes[i];
+                if (axisNode.G < parentNode.G)
+                {
+                    parentNode = axisNode;
+                }
+            }
+
+            node.parentNode = parentNode;
+            node.G = node.parentNode.G + DataUtility.GetDistance(node.transform.position, node.parentNode.transform.position);
+        }
+
+        void ConstructNodePath()
+        {
+            var passList = new List<FieldNode>();
+            var currentNode = closeNodes[^1];
+            while (currentNode != startNode)
+            {
+                passList.Add(currentNode);
+                currentNode = currentNode.parentNode;
+            }
+            passList.Add(startNode);
+            closeNodes = passList;
         }
     }
 

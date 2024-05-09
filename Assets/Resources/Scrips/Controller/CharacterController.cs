@@ -45,6 +45,7 @@ public class CharacterCommand
     public float time;
 
     [Header("[Move]")]
+    public int moveNum;
     public List<FieldNode> passList;
 
     [Header("[Cover]")]
@@ -163,7 +164,6 @@ public class CharacterController : MonoBehaviour
     private float timer;
 
     private bool moving;
-    private int moveNum;
     private readonly float moveSpeed = 7f;
     private readonly float jumpSpeed = 2f;
 
@@ -452,7 +452,6 @@ public class CharacterController : MonoBehaviour
         var targetNode = command.passList[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
-            moveNum = 0;
             prevNode = targetNode;
             command.passList.Remove(targetNode);
             if (command.passList.Count == 0)
@@ -500,8 +499,8 @@ public class CharacterController : MonoBehaviour
                 CheckWatcher(targetNode);
                 if (command.passList.Count == 0)
                 {
-                    var moveCost = (int)Mathf.Ceil(moveNum / mobility);
-                    Debug.Log($"이동칸 = {moveNum}, 이동력 = {mobility}, 소모AP = {moveCost}");
+                    var moveCost = (int)Mathf.Ceil(command.moveNum / mobility);
+                    Debug.Log($"이동칸 = {command.moveNum}, 이동력 = {mobility}, 소모AP = {moveCost}");
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
                 }
@@ -510,11 +509,7 @@ public class CharacterController : MonoBehaviour
 
         void CheckLineCover()
         {
-            if (targetNode.nodePos.x != prevNode.nodePos.x && targetNode.nodePos.y != prevNode.nodePos.y)
-            {
-                moveNum += 2;
-            }
-            else
+            if (targetNode.nodePos.x == prevNode.nodePos.x || targetNode.nodePos.y == prevNode.nodePos.y)
             {
                 TargetDirection nextDir;
                 if (targetNode.nodePos.x > prevNode.nodePos.x)
@@ -538,7 +533,6 @@ public class CharacterController : MonoBehaviour
                 {
                     animator.SetTrigger("jump");
                 }
-                moveNum++;
             }
         }
     }
@@ -586,7 +580,7 @@ public class CharacterController : MonoBehaviour
                 else if (Physics.Raycast(pos, transform.forward, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     cover = hit.collider.GetComponentInParent<Cover>();
-                    if (cover == null)
+                    if (cover == null || (cover != null && !currentNode.onAxisNodes.Contains(cover.coverNode)))
                     {
                         cover = SearchCoverOfOnAxisNode();
                     }
@@ -635,7 +629,14 @@ public class CharacterController : MonoBehaviour
                 if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
                 {
                     var cover = hit.collider.GetComponentInParent<Cover>();
-                    return cover;
+                    if (cover != null && currentNode.onAxisNodes.Contains(cover.coverNode))
+                    {
+                        return cover;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 else
                 {
@@ -1939,15 +1940,26 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Move:
-                if (animator.GetBool("isCover"))
+                var moveNum = 0;
+                for (int i = 0; i < passList.Count - 1; i++)
                 {
-                    AddCommand(CommandType.LeaveCover);
+                    var node = passList[i];
+                    var nextNode = passList[i + 1];
+                    if (node.nodePos.x != nextNode.nodePos.x && node.nodePos.y != nextNode.nodePos.y)
+                    {
+                        moveNum += 2;
+                    }
+                    else
+                    {
+                        moveNum++;
+                    }
                 }
 
                 var moveCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
                     type = CommandType.Move,
+                    moveNum = moveNum,
                     passList = new List<FieldNode>(passList),
                 };
                 commandList.Add(moveCommand);
