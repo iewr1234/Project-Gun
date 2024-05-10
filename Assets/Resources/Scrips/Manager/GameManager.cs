@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
 
 public enum ActionState
 {
@@ -28,7 +30,7 @@ public class GameManager : MonoBehaviour
     public MapEditor mapEdt;
 
     [Header("---Access Component---")]
-    [SerializeField] private GameObject arrowPointer;
+    [SerializeField] private ArrowPointer arrowPointer;
 
     private Transform characterTf;
     private Transform linePoolTf;
@@ -50,7 +52,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<FieldNode> movableNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> openNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
-    public List<Test> tests = new List<Test>();
 
     private LineRenderer moveLine;
     private DrawRange currentRange;
@@ -73,8 +74,9 @@ public class GameManager : MonoBehaviour
         mapEdt = FindAnyObjectByType<MapEditor>();
         mapEdt.SetComponents(this);
 
-        arrowPointer = GameObject.FindGameObjectWithTag("ArrowPointer");
-        arrowPointer.SetActive(false);
+        arrowPointer = FindAnyObjectByType<ArrowPointer>();
+        arrowPointer.SetComponents();
+        arrowPointer.gameObject.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
@@ -199,7 +201,6 @@ public class GameManager : MonoBehaviour
         KeyboardInput();
         MouseInput();
         PointerUpEvent();
-        //CreateCover();
         CreatePlayer();
         CreateEnemy();
     }
@@ -384,7 +385,7 @@ public class GameManager : MonoBehaviour
                 case ActionState.Move:
                     if (targetNode != node && node == selectChar.currentNode)
                     {
-                        arrowPointer.SetActive(false);
+                        arrowPointer.gameObject.SetActive(false);
                         moveLine.enabled = false;
                         RemoveTargetNode();
                         selectChar.FindTargets(node);
@@ -620,7 +621,7 @@ public class GameManager : MonoBehaviour
         {
             charCtr.AddCommand(CommandType.LeaveCover);
         }
-        charCtr.AddCommand(CommandType.Move, closeNodes);
+        charCtr.AddCommand(CommandType.Move, arrowPointer.GetMoveCost(), closeNodes);
         charCtr.AddCommand(CommandType.TakeCover);
     }
 
@@ -703,18 +704,32 @@ public class GameManager : MonoBehaviour
         moveLine.enabled = true;
         moveLine.positionCount = closeNodes.Count;
         var height = 0.1f;
+        var moveNum = 0;
         for (int i = 0; i < closeNodes.Count; i++)
         {
-            var pos = closeNodes[i].transform.position;
+            var node = closeNodes[i];
+            var pos = node.transform.position;
             pos.y += height;
             moveLine.SetPosition(i, pos);
-            if (i == 0)
+
+            if (i + 1 < closeNodes.Count)
             {
-                arrowPointer.SetActive(true);
-                pos = closeNodes[i].transform.position + new Vector3(0f, 0.5f, 0f);
-                arrowPointer.transform.position = pos;
+                var nextNode = closeNodes[i + 1];
+                if (node.nodePos.x != nextNode.nodePos.x && node.nodePos.y != nextNode.nodePos.y)
+                {
+                    moveNum += 2;
+                }
+                else
+                {
+                    moveNum++;
+                }
             }
         }
+
+        arrowPointer.gameObject.SetActive(true);
+        arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
+        var moveCost = (int)Mathf.Ceil(moveNum / selectChar.mobility);
+        arrowPointer.SetMoveCost(moveCost);
     }
 
     /// <summary>
@@ -770,7 +785,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void ClearLine()
     {
-        arrowPointer.SetActive(false);
+        arrowPointer.gameObject.SetActive(false);
         moveLine.enabled = false;
         for (int i = 0; i < linePool.Count; i++)
         {
@@ -783,42 +798,6 @@ public class GameManager : MonoBehaviour
             {
                 line.enabled = false;
             }
-        }
-    }
-
-    /// <summary>
-    /// 决企拱 积己
-    /// </summary>
-    private void CreateCover()
-    {
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            var node = GetEmptyNode();
-            var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
-            cover.transform.SetParent(node.transform, false);
-            //cover.SetComponents(node, CoverType.Half);
-        }
-        else if (Input.GetKeyDown(KeyCode.F2))
-        {
-            var node = GetEmptyNode();
-            var cover = Instantiate(Resources.Load<Cover>("Prefabs/Cover"));
-            cover.transform.SetParent(node.transform, false);
-            //cover.SetComponents(node, CoverType.Full);
-        }
-
-        FieldNode GetEmptyNode()
-        {
-            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
-            {
-                var node = hit.collider.GetComponentInParent<FieldNode>();
-                if (node != null && node.canMove)
-                {
-                    return node;
-                }
-            }
-
-            return null;
         }
     }
 

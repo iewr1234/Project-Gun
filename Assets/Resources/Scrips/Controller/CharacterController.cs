@@ -45,7 +45,7 @@ public class CharacterCommand
     public float time;
 
     [Header("[Move]")]
-    public int moveNum;
+    public int moveCost;
     public List<FieldNode> passList;
 
     [Header("[Cover]")]
@@ -499,8 +499,6 @@ public class CharacterController : MonoBehaviour
                 CheckWatcher(targetNode);
                 if (command.passList.Count == 0)
                 {
-                    var moveCost = (int)Mathf.Ceil(command.moveNum / mobility);
-                    Debug.Log($"이동칸 = {command.moveNum}, 이동력 = {mobility}, 소모AP = {moveCost}");
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
                 }
@@ -1935,31 +1933,16 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="passList"></param>
-    public void AddCommand(CommandType type, List<FieldNode> passList)
+    public void AddCommand(CommandType type, int moveCost, List<FieldNode> passList)
     {
         switch (type)
         {
             case CommandType.Move:
-                var moveNum = 0;
-                for (int i = 0; i < passList.Count - 1; i++)
-                {
-                    var node = passList[i];
-                    var nextNode = passList[i + 1];
-                    if (node.nodePos.x != nextNode.nodePos.x && node.nodePos.y != nextNode.nodePos.y)
-                    {
-                        moveNum += 2;
-                    }
-                    else
-                    {
-                        moveNum++;
-                    }
-                }
-
                 var moveCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
                     type = CommandType.Move,
-                    moveNum = moveNum,
+                    moveCost = moveCost,
                     passList = new List<FieldNode>(passList),
                 };
                 commandList.Add(moveCommand);
