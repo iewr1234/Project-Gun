@@ -20,10 +20,19 @@ public class ArrowPointer : MonoBehaviour
 
     private void Update()
     {
+        RotationObject();
+        LookAtTheCamera();
+    }
+
+    private void RotationObject()
+    {
         var rotVal = Time.unscaledDeltaTime * speed;
         var newRot = new Vector3(0f, rotVal, 0f);
         transform.Rotate(newRot);
+    }
 
+    private void LookAtTheCamera()
+    {
         var cam = Camera.main;
         var pos = actionCost.transform.position + cam.transform.rotation * Vector3.forward;
         var rot = cam.transform.rotation * Vector3.up;

@@ -31,11 +31,13 @@ public class GameManager : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private ArrowPointer arrowPointer;
+    [SerializeField] private Collider targetCheck;
 
     private Transform characterTf;
     private Transform linePoolTf;
     private Transform rangePoolTf;
     private Transform bulletsPoolTf;
+    private Transform warningPoolTf;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private ActionState actionState;
@@ -58,6 +60,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
     [HideInInspector] public List<DrawRange> rangePool = new List<DrawRange>();
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
+    [HideInInspector] public List<FireWarning> warningPool = new List<FireWarning>();
 
     [HideInInspector] public LayerMask nodeLayer;
     [HideInInspector] public LayerMask coverLayer;
@@ -65,6 +68,7 @@ public class GameManager : MonoBehaviour
 
     private readonly int linePoolMax = 15;
     private readonly int bulletPoolMax = 30;
+    private readonly int warningPoolMax = 30;
 
     public void Start()
     {
@@ -77,11 +81,14 @@ public class GameManager : MonoBehaviour
         arrowPointer = FindAnyObjectByType<ArrowPointer>();
         arrowPointer.SetComponents();
         arrowPointer.gameObject.SetActive(false);
+        targetCheck = GameObject.FindGameObjectWithTag("TargetCheck").GetComponent<Collider>();
+        targetCheck.gameObject.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
         linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
         rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
+        warningPoolTf = GameObject.FindGameObjectWithTag("Warnings").transform;
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
@@ -89,6 +96,7 @@ public class GameManager : MonoBehaviour
         //CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
         CreateLines();
         CreateBullets();
+        CreateWarnings();
     }
 
     /// <summary>
@@ -193,6 +201,18 @@ public class GameManager : MonoBehaviour
             bullet.transform.SetParent(bulletsPoolTf, false);
             bullet.gameObject.SetActive(false);
             bulletPool.Add(bullet);
+        }
+    }
+
+    private void CreateWarnings()
+    {
+        for (int i = 0; i < warningPoolMax; i++)
+        {
+            var fireWarning = Instantiate(Resources.Load<FireWarning>("Prefabs/FireWarning"));
+            fireWarning.transform.SetParent(warningPoolTf, false);
+            fireWarning.SetComponents();
+            fireWarning.gameObject.SetActive(false);
+            warningPool.Add(fireWarning);
         }
     }
 
@@ -701,6 +721,12 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void DrawMoveLine()
     {
+        for (int i = 0; i < warningPool.Count; i++)
+        {
+            var fireWarning = warningPool[i];
+            fireWarning.gameObject.SetActive(false);
+        }
+
         moveLine.enabled = true;
         moveLine.positionCount = closeNodes.Count;
         var height = 0.1f;
@@ -709,9 +735,7 @@ public class GameManager : MonoBehaviour
         {
             var node = closeNodes[i];
             var pos = node.transform.position;
-            pos.y += height;
-            moveLine.SetPosition(i, pos);
-
+            moveLine.SetPosition(i, pos + new Vector3(0f, height, 0f));
             if (i + 1 < closeNodes.Count)
             {
                 var nextNode = closeNodes[i + 1];
@@ -799,6 +823,13 @@ public class GameManager : MonoBehaviour
                 line.enabled = false;
             }
         }
+    }
+
+    public void SetFireWarning(FieldNode node)
+    {
+        var fireWarning = warningPool.Find(x => !x.gameObject.activeSelf);
+        fireWarning.gameObject.SetActive(true);
+        fireWarning.transform.position = node.transform.position;
     }
 
     private void CreatePlayer()

@@ -747,6 +747,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
   outlines: []
+  unableMove: {fileID: 0}
   charCtr: {fileID: 0}
   cover: {fileID: 0}
   canMove: 0
@@ -755,6 +756,9 @@ MonoBehaviour:
   offAxisNodes: []
   allAxisNodes: []
   setObjects: []
+  parentNode: {fileID: 0}
+  G: 0
+  H: 0
 --- !u!1 &7222206265994946332
 GameObject:
   m_ObjectHideFlags: 0
