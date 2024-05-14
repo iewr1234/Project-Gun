@@ -27,6 +27,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
+    [Tooltip("발사속도")] public int rpm;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
     [Tooltip("정확도")] public float MOA;
@@ -76,6 +77,7 @@ public class Weapon : MonoBehaviour
         penetrate = weaponData.penetrate;
         armorBreak = weaponData.armorBreak;
         critical = weaponData.critical;
+        rpm = weaponData.rpm;
         range = weaponData.range;
         watchAngle = weaponData.watchAngle;
         MOA = weaponData.MOA;

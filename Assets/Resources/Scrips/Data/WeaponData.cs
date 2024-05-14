@@ -25,6 +25,7 @@ public class WeaponDataInfo
     public int penetrate;
     public int armorBreak;
     public int critical;
+    public int rpm;
     public float range;
     public int watchAngle;
     public float MOA;

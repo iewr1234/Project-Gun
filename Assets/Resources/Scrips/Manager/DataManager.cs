@@ -316,7 +316,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:N";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:O";
     private enum WeaponVariable
     {
         ID,
@@ -327,6 +327,7 @@ public class DataManager : MonoBehaviour
         Penetrate,
         ArmorBreak,
         Critical,
+        RPM,
         Range,
         WatchAngle,
         MOA,
@@ -364,6 +365,7 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)WeaponVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)WeaponVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)WeaponVariable.Critical]),
+                    rpm = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
                     MOA = float.Parse(data[(int)WeaponVariable.MOA]),

@@ -453,6 +453,8 @@ public class CharacterController : MonoBehaviour
         {
             prevNode = targetNode;
             command.passList.Remove(targetNode);
+            SetAction(-command.moveCost);
+            SetStamina(-command.moveCost * 5);
             if (command.passList.Count == 0)
             {
                 commandList.RemoveAt(0);
