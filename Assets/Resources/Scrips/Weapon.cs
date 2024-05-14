@@ -174,16 +174,19 @@ public class Weapon : MonoBehaviour
     public int GetShootBulletNumber()
     {
         var shootNum = 0;
-        switch (fireMode)
+        if (chamberBullet)
         {
-            case FireModeType.SingleFire:
-                shootNum = 1;
-                break;
-            case FireModeType.AutoFire:
-                shootNum = autoFireNum > loadedAmmo + 1 ? loadedAmmo + 1 : autoFireNum;
-                break;
-            default:
-                break;
+            switch (fireMode)
+            {
+                case FireModeType.SingleFire:
+                    shootNum = 1;
+                    break;
+                case FireModeType.AutoFire:
+                    shootNum = autoFireNum > loadedAmmo + 1 ? loadedAmmo + 1 : autoFireNum;
+                    break;
+                default:
+                    break;
+            }
         }
 
         return shootNum;

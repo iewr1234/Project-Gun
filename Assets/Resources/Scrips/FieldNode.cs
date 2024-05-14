@@ -44,6 +44,10 @@ public class FieldNode : MonoBehaviour
     public bool canMove;
     [Space(5f)]
 
+    [HideInInspector] public bool hitNode;
+    [HideInInspector] public CharacterController watcher;
+    [Space(5f)]
+
     [HideInInspector] public Vector2Int nodePos;
     public List<FieldNode> onAxisNodes;
     public List<FieldNode> offAxisNodes;

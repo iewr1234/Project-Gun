@@ -93,7 +93,6 @@ public class GameManager : MonoBehaviour
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
 
-        //CreateCharacter(CharacterOwner.Player, new Vector2(0f, 0f), "C0001");
         CreateLines();
         CreateBullets();
         CreateWarnings();
@@ -381,6 +380,11 @@ public class GameManager : MonoBehaviour
                         }
                         break;
                     case ActionState.Watch:
+                        selectChar.SetWatch();
+                        currentRange = null;
+                        selectChar.state = CharacterState.Watch;
+                        selectChar = null;
+                        actionState = ActionState.None;
                         break;
                     default:
                         break;
@@ -407,6 +411,7 @@ public class GameManager : MonoBehaviour
                     {
                         arrowPointer.gameObject.SetActive(false);
                         moveLine.enabled = false;
+                        ClearFireWarning();
                         RemoveTargetNode();
                         selectChar.FindTargets(node);
                         DrawAimLine(node);
@@ -435,7 +440,7 @@ public class GameManager : MonoBehaviour
                 case ActionState.Watch:
                     if (targetNode != node)
                     {
-                        if (node != selectChar.currentNode)
+                        if (node != null && node != selectChar.currentNode)
                         {
                             currentRange.SetRange(selectChar, node);
                             currentRange.transform.LookAt(node.transform);
@@ -474,7 +479,7 @@ public class GameManager : MonoBehaviour
         queue.Enqueue(charCtr.currentNode);
         visited.Add(charCtr.currentNode);
 
-        var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
+        var mobility = (int)DataUtility.GetFloorValue(charCtr.Mobility * charCtr.action, 0);
 
         int moveRange = 0;
         while (queue.Count > 0 && moveRange <= mobility)
@@ -721,12 +726,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void DrawMoveLine()
     {
-        for (int i = 0; i < warningPool.Count; i++)
-        {
-            var fireWarning = warningPool[i];
-            fireWarning.gameObject.SetActive(false);
-        }
-
+        ClearFireWarning();
         moveLine.enabled = true;
         moveLine.positionCount = closeNodes.Count;
         var height = 0.1f;
@@ -747,12 +747,17 @@ public class GameManager : MonoBehaviour
                 {
                     moveNum++;
                 }
+
+                if (selectChar.ownerType == CharacterOwner.Player)
+                {
+                    selectChar.CheckWatcher(node);
+                }
             }
         }
 
         arrowPointer.gameObject.SetActive(true);
         arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
-        var moveCost = (int)Mathf.Ceil(moveNum / selectChar.mobility);
+        var moveCost = (int)Mathf.Ceil(moveNum / selectChar.Mobility);
         arrowPointer.SetMoveCost(moveCost);
     }
 
@@ -811,6 +816,7 @@ public class GameManager : MonoBehaviour
     {
         arrowPointer.gameObject.SetActive(false);
         moveLine.enabled = false;
+        ClearFireWarning();
         for (int i = 0; i < linePool.Count; i++)
         {
             var line = linePool[i];
@@ -830,6 +836,15 @@ public class GameManager : MonoBehaviour
         var fireWarning = warningPool.Find(x => !x.gameObject.activeSelf);
         fireWarning.gameObject.SetActive(true);
         fireWarning.transform.position = node.transform.position;
+    }
+
+    public void ClearFireWarning()
+    {
+        for (int i = 0; i < warningPool.Count; i++)
+        {
+            var fireWarning = warningPool[i];
+            fireWarning.gameObject.SetActive(false);
+        }
     }
 
     private void CreatePlayer()

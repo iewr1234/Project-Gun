@@ -128,7 +128,7 @@ public class CharacterController : MonoBehaviour
     [Tooltip("지혜")] public int wisdom;
     [Tooltip("민첩")] public int agility;
     [Tooltip("솜씨")] public int dexterity;
-    [Tooltip("이동력")] public float mobility;
+    [Tooltip("이동력")] public float Mobility => DataUtility.GetFloorValue(1 + 2.5f * ((float)agility / (agility + 100)), 2);
 
     [Header("[Physical]")]
     [Tooltip("최대 행동력")] public int maxAction;
@@ -243,7 +243,6 @@ public class CharacterController : MonoBehaviour
         wisdom = charData.wisdom;
         agility = charData.agility;
         dexterity = charData.dexterity;
-        SetMobility();
 
         maxAction = charData.maxAction;
         action = maxAction;
@@ -496,7 +495,22 @@ public class CharacterController : MonoBehaviour
                 prevNode = targetNode;
                 command.passList.Remove(targetNode);
                 //ShowVisibleNodes(sight, targetNode);
-                CheckWatcher(targetNode);
+                switch (ownerType)
+                {
+                    case CharacterOwner.Player:
+                        if (targetNode.hitNode)
+                        {
+                            targetNode.watcher.AddCommand(CommandType.Shoot, this, targetNode);
+                            targetNode.hitNode = false;
+                            targetNode.watcher = null;
+                        }
+                        break;
+                    case CharacterOwner.Enemy:
+                        CheckWatcher(targetNode);
+                        break;
+                    default:
+                        break;
+                }
                 if (command.passList.Count == 0)
                 {
                     animator.SetBool("isMove", false);
@@ -1200,17 +1214,6 @@ public class CharacterController : MonoBehaviour
     //}
     #endregion
 
-    /// <summary>
-    /// 이동력 설정
-    /// </summary>
-    public void SetMobility()
-    {
-        mobility = DataUtility.GetFloorValue(1 + 2.5f * ((float)agility / (agility + 100)), 2);
-    }
-
-    /// <summary>
-    /// 행동력 설정
-    /// </summary>
     public void SetAction(int value)
     {
         action += value;
@@ -1364,12 +1367,24 @@ public class CharacterController : MonoBehaviour
             var dir = new Vector3(Mathf.Sin(angleRad), 0f, Mathf.Cos(angleRad)).normalized;
             var watchPos = watchInfo.watchNode.transform.position + interval;
             var range = watchInfo.drawRang.radius;
-            if (Physics.Raycast(watchPos, dir, out RaycastHit hit, range, gameMgr.watchLayer))
+            var hits = Physics.RaycastAll(watchPos, dir, range, gameMgr.watchLayer).ToList();
+            hits.Reverse();
+            for (int j = 0; j < hits.Count; j++)
             {
-                var charCtr = hit.collider.GetComponent<CharacterController>();
-                if (charCtr != null && charCtr == this && watcher.currentWeapon.chamberBullet)
+                var check = hits[j].collider.GetComponentInParent<FieldNode>();
+                if (check != null && check == currentNode)
                 {
-                    watcher.AddCommand(CommandType.Shoot, this, currentNode);
+                    if (ownerType == CharacterOwner.Player)
+                    {
+                        gameMgr.SetFireWarning(currentNode);
+                        currentNode.hitNode = true;
+                        currentNode.watcher = watcher;
+                        break;
+                    }
+                    else
+                    {
+                        watcher.AddCommand(CommandType.Shoot, this, currentNode);
+                    }
                 }
             }
         }
@@ -2010,6 +2025,8 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Shoot:
+                if (!currentWeapon.chamberBullet) return;
+
                 target.animator.speed = 0f;
                 target.pause = true;
                 var targetInfo = new TargetInfo()
