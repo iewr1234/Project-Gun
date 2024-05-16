@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public enum ActionState
 {
@@ -17,9 +17,8 @@ public enum ActionState
 public struct MovePass
 {
     public string indexName;
-    public int actionCost;
-    public int staminaCost;
     public List<FieldNode> passNodes;
+    public int moveNum;
 }
 
 public class GameManager : MonoBehaviour
@@ -38,6 +37,7 @@ public class GameManager : MonoBehaviour
     private Transform rangePoolTf;
     private Transform bulletsPoolTf;
     private Transform warningPoolTf;
+    private Transform passPointPoolTf;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private ActionState actionState;
@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<FieldNode> openNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
     [SerializeField] private List<MovePass> passList = new List<MovePass>();
-    private int passCount;
+    [SerializeField] private int moveNum;
     private LineRenderer moveLine;
 
     [Header("[Character]")]
@@ -68,6 +68,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<DrawRange> rangePool = new List<DrawRange>();
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
     [HideInInspector] public List<FireWarning> warningPool = new List<FireWarning>();
+    [HideInInspector] public List<MeshRenderer> passPointPool = new List<MeshRenderer>();
 
     [HideInInspector] public LayerMask nodeLayer;
     [HideInInspector] public LayerMask coverLayer;
@@ -76,6 +77,7 @@ public class GameManager : MonoBehaviour
     private readonly int linePoolMax = 15;
     private readonly int bulletPoolMax = 30;
     private readonly int warningPoolMax = 30;
+    private readonly int passPointPoolMax = 30;
 
     public void Start()
     {
@@ -96,6 +98,7 @@ public class GameManager : MonoBehaviour
         rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
         bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
         warningPoolTf = GameObject.FindGameObjectWithTag("Warnings").transform;
+        passPointPoolTf = GameObject.FindGameObjectWithTag("PassPoints").transform;
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
@@ -103,6 +106,7 @@ public class GameManager : MonoBehaviour
         CreateLines();
         CreateBullets();
         CreateWarnings();
+        CreatePassPoint();
     }
 
     /// <summary>
@@ -222,6 +226,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void CreatePassPoint()
+    {
+        for (int i = 0; i < passPointPoolMax; i++)
+        {
+            var passPoint = Instantiate(Resources.Load<MeshRenderer>("Prefabs/PassPoint"));
+            passPoint.transform.SetParent(passPointPoolTf, false);
+            passPoint.gameObject.SetActive(false);
+            passPointPool.Add(passPoint);
+        }
+    }
+
     public void Update()
     {
         KeyboardInput();
@@ -269,6 +284,7 @@ public class GameManager : MonoBehaviour
                     {
                         RemoveTargetNode();
                         SwitchMovableNodes(false);
+                        SwitchCharacterUI(false);
                         actionState = ActionState.Shot;
                     }
                 }
@@ -291,6 +307,13 @@ public class GameManager : MonoBehaviour
                     SwitchMovableNodes(false);
                     currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
                     actionState = ActionState.Watch;
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape) && passList.Count > 0)
+                {
+                    ClearPassPoint();
+                    ShowMovableNodes(selectChar);
+                    ResultNodePass(selectChar, targetNode);
+                    DrawMoveLine();
                 }
 
                 if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -339,8 +362,8 @@ public class GameManager : MonoBehaviour
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
-                    selectChar.charUI.gameObject.SetActive(true);
                     selectChar = null;
+                    SwitchCharacterUI(true);
                     actionState = ActionState.None;
                 }
                 break;
@@ -363,6 +386,20 @@ public class GameManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+
+        void SwitchCharacterUI(bool value)
+        {
+            for (int i = 0; i < playerList.Count; i++)
+            {
+                var player = playerList[i];
+                player.charUI.gameObject.SetActive(value);
+            }
+            for (int i = 0; i < enemyList.Count; i++)
+            {
+                var enemy = enemyList[i];
+                enemy.charUI.gameObject.SetActive(value);
+            }
         }
     }
 
@@ -393,7 +430,7 @@ public class GameManager : MonoBehaviour
                                 selectChar.watchInfo.drawRang.gameObject.SetActive(false);
                                 selectChar.state = CharacterState.None;
                             }
-                            ShowMovableNodes(selectChar, selectChar.currentNode);
+                            ShowMovableNodes(selectChar);
                             actionState = ActionState.Move;
                         }
                         break;
@@ -406,7 +443,7 @@ public class GameManager : MonoBehaviour
                             selectChar = null;
                             actionState = ActionState.None;
                         }
-                        else if (node.canMove && selectChar != null)
+                        else if (node == targetNode && node.canMove && selectChar != null)
                         {
                             ClearLine();
                             RemoveTargetNode();
@@ -434,31 +471,18 @@ public class GameManager : MonoBehaviour
                 case ActionState.Move:
                     if (addPass)
                     {
-                        var moveNum = 0;
-                        for (int i = 0; i < closeNodes.Count; i++)
-                        {
-                            var node = closeNodes[i];
-                            if(i+1 < closeNodes.Count)
-                            {
-                                var nextNode = closeNodes[i+1];
-                                if (node.nodePos.x != nextNode.nodePos.x && node.nodePos.y != nextNode.nodePos.y)
-                                {
-                                    moveNum += 2;
-                                }
-                                else
-                                {
-                                    moveNum++;
-                                }
-                            }
-                        }
-                        var moveCost = (int)Mathf.Ceil(moveNum / selectChar.Mobility);
+                        if (passList.Count > 0 && passList[0].passNodes[0] == targetNode) return;
 
+                        var passPoint = passPointPool.Find(x => !x.gameObject.activeSelf);
+                        var pos = closeNodes[0].transform.position;
+                        pos.y += 0.1f;
+                        passPoint.transform.position = pos;
+                        passPoint.gameObject.SetActive(true);
                         var movePass = new MovePass()
                         {
                             indexName = $"PassPoint_{closeNodes[0].name}",
-                            actionCost = moveCost,
-                            staminaCost = moveCost * 5,
                             passNodes = new List<FieldNode>(closeNodes),
+                            moveNum = moveNum,
                         };
                         closeNodes.Clear();
                         passList.Insert(0, movePass);
@@ -489,7 +513,7 @@ public class GameManager : MonoBehaviour
             switch (actionState)
             {
                 case ActionState.Move:
-                    if (targetNode != node && node == selectChar.currentNode)
+                    if (targetNode != node && node == selectChar.currentNode && passList.Count == 0)
                     {
                         arrowPointer.gameObject.SetActive(false);
                         moveLine.enabled = false;
@@ -513,11 +537,11 @@ public class GameManager : MonoBehaviour
                         node.CheckCoverNode(true);
                         targetNode = node;
                     }
-                    else if (!movableNodes.Contains(node))
-                    {
-                        ClearLine();
-                        RemoveTargetNode();
-                    }
+                    //else if (!movableNodes.Contains(node))
+                    //{
+                    //    ClearLine();
+                    //    RemoveTargetNode();
+                    //}
                     break;
                 case ActionState.Watch:
                     if (targetNode != node)
@@ -552,6 +576,45 @@ public class GameManager : MonoBehaviour
     /// 이동가능 노드 표시
     /// </summary>
     /// <param name="charCtr"></param>
+    private void ShowMovableNodes(CharacterController charCtr)
+    {
+        SwitchMovableNodes(false);
+        Queue<FieldNode> queue = new Queue<FieldNode>();
+        HashSet<FieldNode> visited = new HashSet<FieldNode>();
+
+        queue.Enqueue(charCtr.currentNode);
+        visited.Add(charCtr.currentNode);
+
+        var action = charCtr.action;
+        if (charCtr.stamina < action * 5)
+        {
+            action = (int)(charCtr.stamina * 0.2f);
+        }
+        charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
+
+        int moveRange = 0;
+        while (queue.Count > 0 && moveRange <= charCtr.maxMoveNum)
+        {
+            int nodesInCurrentRange = queue.Count;
+            for (int i = 0; i < nodesInCurrentRange; i++)
+            {
+                FieldNode node = queue.Dequeue();
+                movableNodes.Add(node); // 이동 가능 노드로 추가
+
+                foreach (FieldNode neighbor in node.onAxisNodes)
+                {
+                    if (neighbor != null && neighbor.canMove && !visited.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor);
+                        visited.Add(neighbor);
+                    }
+                }
+            }
+            moveRange++;
+        }
+        SwitchMovableNodes(true);
+    }
+
     private void ShowMovableNodes(CharacterController charCtr, FieldNode currentNode)
     {
         SwitchMovableNodes(false);
@@ -561,23 +624,9 @@ public class GameManager : MonoBehaviour
         queue.Enqueue(currentNode);
         visited.Add(currentNode);
 
-        var passAction = 0;
-        var passStamina = 0;
-        foreach (var movePass in passList)
-        {
-            passAction += movePass.actionCost;
-            passStamina += movePass.staminaCost;
-        }
-
-        var action = charCtr.action - passAction;
-        if (charCtr.stamina < action * 5)
-        {
-            action = (int)DataUtility.GetFloorValue((charCtr.stamina - passStamina) * 0.2f, 0);
-        }
-        var mobility = (int)DataUtility.GetFloorValue(charCtr.Mobility * action, 0);
-
+        var moveNum = charCtr.maxMoveNum - passList.Sum(x => x.moveNum);
         int moveRange = 0;
-        while (queue.Count > 0 && moveRange <= mobility)
+        while (queue.Count > 0 && moveRange <= moveNum)
         {
             int nodesInCurrentRange = queue.Count;
             for (int i = 0; i < nodesInCurrentRange; i++)
@@ -737,11 +786,22 @@ public class GameManager : MonoBehaviour
             movableNode.SetNodeOutline(false);
         }
 
+        var movePass = closeNodes;
+        if (passList.Count > 0)
+        {
+            foreach (var pass in passList)
+            {
+                var newPass = movePass.Concat(pass.passNodes).Distinct().ToList();
+                movePass = newPass;
+            }
+            ClearPassPoint();
+        }
+
         if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
         {
             charCtr.AddCommand(CommandType.LeaveCover);
         }
-        charCtr.AddCommand(CommandType.Move, arrowPointer.GetMoveCost(), closeNodes);
+        charCtr.AddCommand(CommandType.Move, arrowPointer.GetMoveCost(), movePass);
         charCtr.AddCommand(CommandType.TakeCover);
     }
 
@@ -823,15 +883,15 @@ public class GameManager : MonoBehaviour
     private void DrawMoveLine()
     {
         ClearFireWarning();
+        moveNum = 0;
         moveLine.enabled = true;
-        moveLine.positionCount = 99;
+        moveLine.positionCount = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
         var height = 0.1f;
-        var moveNum = 0;
         var passNodes = new List<FieldNode>();
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var node = closeNodes[i];
-            RanderAndCheck(node, i, closeNodes);
+            moveNum += RanderAndCheck(node, i, closeNodes);
             passNodes.Add(node);
         }
         foreach (var movePass in passList)
@@ -840,10 +900,9 @@ public class GameManager : MonoBehaviour
             {
                 var node = movePass.passNodes[i];
                 RanderAndCheck(node, i, movePass.passNodes);
-                passNodes.Add(node);
+                if (i > 0) passNodes.Add(node);
             }
         }
-        moveLine.positionCount = passNodes.Count;
         for (int i = 0; i < passNodes.Count; i++)
         {
             var passNode = passNodes[i];
@@ -852,13 +911,13 @@ public class GameManager : MonoBehaviour
 
         arrowPointer.gameObject.SetActive(true);
         arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
-        var moveCost = (int)Mathf.Ceil(moveNum / selectChar.Mobility);
+        var moveCost = (int)Mathf.Ceil((moveNum + passList.Sum(x => x.moveNum)) / selectChar.Mobility);
         arrowPointer.SetMoveCost(moveCost);
 
-        void RanderAndCheck(FieldNode node, int index, List<FieldNode> nodes)
+        int RanderAndCheck(FieldNode node, int index, List<FieldNode> nodes)
         {
+            var moveNum = 0;
             var pos = node.transform.position;
-            //moveLine.SetPosition(allCount + index, pos + new Vector3(0f, height, 0f));
             if (index + 1 < nodes.Count)
             {
                 var nextNode = nodes[index + 1];
@@ -876,6 +935,7 @@ public class GameManager : MonoBehaviour
                     selectChar.CheckWatcher(node);
                 }
             }
+            return moveNum;
         }
     }
 
@@ -945,6 +1005,23 @@ public class GameManager : MonoBehaviour
             else
             {
                 line.enabled = false;
+            }
+        }
+    }
+
+    private void ClearPassPoint()
+    {
+        passList.Clear();
+        for (int i = 0; i < passPointPool.Count; i++)
+        {
+            var passPoint = passPointPool[i];
+            if (passPoint.gameObject.activeSelf)
+            {
+                passPoint.gameObject.SetActive(false);
+            }
+            else
+            {
+                break;
             }
         }
     }

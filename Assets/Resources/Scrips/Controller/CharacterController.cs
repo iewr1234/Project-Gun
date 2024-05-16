@@ -46,7 +46,7 @@ public class CharacterCommand
 
     [Header("[Move]")]
     public int moveCost;
-    public List<FieldNode> passList;
+    public List<FieldNode> movePass;
 
     [Header("[Cover]")]
     public Cover cover;
@@ -129,6 +129,8 @@ public class CharacterController : MonoBehaviour
     [Tooltip("¹ÎÃ¸")] public int agility;
     [Tooltip("¼Ø¾¾")] public int dexterity;
     [Tooltip("ÀÌµ¿·Â")] public float Mobility => DataUtility.GetFloorValue(1 + 2.5f * ((float)agility / (agility + 100)), 2);
+    public float mobility;
+    [HideInInspector] public int maxMoveNum;
 
     [Header("[Physical]")]
     [Tooltip("ÃÖ´ë Çàµ¿·Â")] public int maxAction;
@@ -243,6 +245,7 @@ public class CharacterController : MonoBehaviour
         wisdom = charData.wisdom;
         agility = charData.agility;
         dexterity = charData.dexterity;
+        mobility = Mobility;
 
         maxAction = charData.maxAction;
         action = maxAction;
@@ -448,14 +451,14 @@ public class CharacterController : MonoBehaviour
             targetList.Clear();
         }
 
-        var targetNode = command.passList[^1];
+        var targetNode = command.movePass[^1];
         if (!animator.GetBool("isMove") && targetNode == currentNode)
         {
             prevNode = targetNode;
-            command.passList.Remove(targetNode);
+            command.movePass.Remove(targetNode);
             SetAction(-command.moveCost);
             SetStamina(-command.moveCost * 5);
-            if (command.passList.Count == 0)
+            if (command.movePass.Count == 0)
             {
                 commandList.RemoveAt(0);
             }
@@ -468,7 +471,7 @@ public class CharacterController : MonoBehaviour
                 animator.SetBool("isMove", true);
                 currentNode.canMove = true;
                 currentNode.charCtr = null;
-                currentNode = command.passList[0];
+                currentNode = command.movePass[0];
                 currentNode.canMove = false;
                 currentNode.charCtr = this;
             }
@@ -495,7 +498,7 @@ public class CharacterController : MonoBehaviour
             {
                 moving = false;
                 prevNode = targetNode;
-                command.passList.Remove(targetNode);
+                command.movePass.Remove(targetNode);
                 //ShowVisibleNodes(sight, targetNode);
                 switch (ownerType)
                 {
@@ -513,7 +516,8 @@ public class CharacterController : MonoBehaviour
                     default:
                         break;
                 }
-                if (command.passList.Count == 0)
+
+                if (command.movePass.Count == 0 || stamina == 0)
                 {
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
@@ -1745,7 +1749,8 @@ public class CharacterController : MonoBehaviour
             CameraState camState;
             if (cover == null)
             {
-                camState = CameraState.FrontAim;
+                //camState = CameraState.FrontAim;
+                camState = CameraState.RightAim;
             }
             else if (targetInfo.isRight)
             {
@@ -1756,7 +1761,6 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
-            charUI.gameObject.SetActive(false);
             return true;
         }
     }
@@ -1782,7 +1786,8 @@ public class CharacterController : MonoBehaviour
         CameraState camState;
         if (cover == null)
         {
-            camState = CameraState.FrontAim;
+            //camState = CameraState.FrontAim;
+            camState = CameraState.RightAim;
         }
         else if (targetInfo.isRight)
         {
@@ -1949,8 +1954,8 @@ public class CharacterController : MonoBehaviour
     /// Ä¿¸Çµå Ãß°¡
     /// </summary>
     /// <param name="type"></param>
-    /// <param name="passList"></param>
-    public void AddCommand(CommandType type, int moveCost, List<FieldNode> passList)
+    /// <param name="movePass"></param>
+    public void AddCommand(CommandType type, int moveCost, List<FieldNode> movePass)
     {
         switch (type)
         {
@@ -1960,7 +1965,7 @@ public class CharacterController : MonoBehaviour
                     indexName = $"{type}",
                     type = CommandType.Move,
                     moveCost = moveCost,
-                    passList = new List<FieldNode>(passList),
+                    movePass = new List<FieldNode>(movePass),
                 };
                 commandList.Add(moveCommand);
                 break;
