@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -1761,6 +1762,8 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+            gameMgr.uiMgr.SetActiveAimUI(true);
+            gameMgr.uiMgr.SetTargetInfo(targetInfo.target);
             return true;
         }
     }
@@ -1798,6 +1801,7 @@ public class CharacterController : MonoBehaviour
             camState = CameraState.LeftAim;
         }
         gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+        gameMgr.uiMgr.SetTargetInfo(targetInfo.target);
     }
 
     /// <summary>
@@ -1897,6 +1901,7 @@ public class CharacterController : MonoBehaviour
             DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
             DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
         }
+        gameMgr.uiMgr.SetActiveAimUI(false);
     }
 
     /// <summary>

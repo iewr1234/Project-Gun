@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     [Header("---Access Script---")]
     public DataManager dataMgr;
     public CameraManager camMgr;
+    public UserInterfaceManager uiMgr;
     public MapEditor mapEdt;
 
     [Header("---Access Component---")]
@@ -84,6 +85,8 @@ public class GameManager : MonoBehaviour
         dataMgr = FindAnyObjectByType<DataManager>();
         camMgr = FindAnyObjectByType<CameraManager>();
         camMgr.SetComponents(this);
+        uiMgr = FindAnyObjectByType<UserInterfaceManager>();
+        uiMgr.SetComponents(this);
         mapEdt = FindAnyObjectByType<MapEditor>();
         mapEdt.SetComponents(this);
 
@@ -330,6 +333,14 @@ public class GameManager : MonoBehaviour
                 {
                     selectChar.SetNextTargetOn();
                 }
+                else if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    uiMgr.SetfireRateGauge();
+                }
+                else if (Input.GetKeyDown(KeyCode.E))
+                {
+                    uiMgr.SetSightGauge();
+                }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     if (selectChar.currentWeapon.chamberBullet)
@@ -346,8 +357,9 @@ public class GameManager : MonoBehaviour
                             selectChar.AddCommand(CommandType.Shoot);
                         }
                         SwitchMovableNodes(false);
+                        SwitchCharacterUI(true);
                         camMgr.SetCameraState(CameraState.None);
-                        selectChar.charUI.gameObject.SetActive(true);
+                        uiMgr.SetActiveAimUI(false);
                         selectChar = null;
                         actionState = ActionState.None;
                     }
@@ -358,10 +370,10 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    selectChar.SetTargetOff();
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
+                    selectChar.SetTargetOff();
                     selectChar = null;
                     SwitchCharacterUI(true);
                     actionState = ActionState.None;
