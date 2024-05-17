@@ -281,6 +281,17 @@ public class GameManager : MonoBehaviour
             case ActionState.Move:
                 if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
+                    if (!selectChar.currentWeapon.chamberBullet)
+                    {
+                        Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
+                        return;
+                    }
+                    if (selectChar.action < selectChar.currentWeapon.actionCost)
+                    {
+                        Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
+                        return;
+                    }
+
                     ClearLine();
                     selectChar.FindTargets(selectChar.currentNode);
                     if (selectChar.SetTargetOn())
@@ -343,30 +354,25 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    if (selectChar.currentWeapon.chamberBullet)
+                    if (selectChar.animator.GetBool("isCover"))
                     {
-                        if (selectChar.animator.GetBool("isCover"))
-                        {
-                            selectChar.AddCommand(CommandType.Aim);
-                            selectChar.AddCommand(CommandType.Shoot);
-                            selectChar.AddCommand(CommandType.BackCover);
-                        }
-                        else
-                        {
-                            selectChar.AddCommand(CommandType.Aim);
-                            selectChar.AddCommand(CommandType.Shoot);
-                        }
-                        SwitchMovableNodes(false);
-                        SwitchCharacterUI(true);
-                        camMgr.SetCameraState(CameraState.None);
-                        uiMgr.SetActiveAimUI(false);
-                        selectChar = null;
-                        actionState = ActionState.None;
+                        selectChar.AddCommand(CommandType.Aim);
+                        selectChar.AddCommand(CommandType.Shoot);
+                        selectChar.AddCommand(CommandType.BackCover);
                     }
                     else
                     {
-                        Debug.Log($"{selectChar.name}: No Ammo");
+                        selectChar.AddCommand(CommandType.Aim);
+                        selectChar.AddCommand(CommandType.Shoot);
                     }
+                    SwitchMovableNodes(false);
+                    SwitchCharacterUI(true);
+                    selectChar.SetAction(-selectChar.currentWeapon.actionCost);
+                    camMgr.SetCameraState(CameraState.None);
+                    uiMgr.SetActionPoint(selectChar);
+                    uiMgr.SetActiveAimUI(false);
+                    selectChar = null;
+                    actionState = ActionState.None;
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
@@ -374,6 +380,7 @@ public class GameManager : MonoBehaviour
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
                     selectChar.SetTargetOff();
+                    uiMgr.SetUsedActionPoint(selectChar, 0);
                     selectChar = null;
                     SwitchCharacterUI(true);
                     actionState = ActionState.None;
@@ -535,6 +542,7 @@ public class GameManager : MonoBehaviour
                         DrawAimLine(node);
                         node.CheckCoverNode(true);
                         targetNode = node;
+                        uiMgr.SetUsedActionPoint(selectChar, 0);
                         return;
                     }
 
@@ -925,6 +933,7 @@ public class GameManager : MonoBehaviour
         arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
         var moveCost = (int)Mathf.Ceil((moveNum + passList.Sum(x => x.moveNum)) / selectChar.Mobility);
         arrowPointer.SetMoveCost(moveCost);
+        uiMgr.SetUsedActionPoint(selectChar, moveCost);
 
         int RanderAndCheck(FieldNode node, int index, List<FieldNode> nodes)
         {

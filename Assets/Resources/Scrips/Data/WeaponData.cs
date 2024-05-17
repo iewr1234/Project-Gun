@@ -33,6 +33,7 @@ public class WeaponDataInfo
     public int rebound;
     [Space(5f)]
 
+    public int actionCost;
     public int magMax;
 }
 

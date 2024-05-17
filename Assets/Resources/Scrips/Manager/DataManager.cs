@@ -316,7 +316,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:O";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:P";
     private enum WeaponVariable
     {
         ID,
@@ -333,6 +333,7 @@ public class DataManager : MonoBehaviour
         MOA,
         Stability,
         Rebound,
+        ActionCost,
         MagMax,
     }
 
@@ -371,6 +372,7 @@ public class DataManager : MonoBehaviour
                     MOA = float.Parse(data[(int)WeaponVariable.MOA]),
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
+                    actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
                     magMax = int.Parse(data[(int)WeaponVariable.MagMax]),
                 };
                 weaponData.weaponInfos.Add(weaponInfo);

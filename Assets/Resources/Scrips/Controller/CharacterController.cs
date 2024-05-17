@@ -1221,6 +1221,10 @@ public class CharacterController : MonoBehaviour
     //}
     #endregion
 
+    /// <summary>
+    /// 행동력 설정
+    /// </summary>
+    /// <param name="value"></param>
     public void SetAction(int value)
     {
         action += value;
@@ -1232,6 +1236,8 @@ public class CharacterController : MonoBehaviour
         {
             action = maxAction;
         }
+
+        gameMgr.uiMgr.SetActionPoint(this);
     }
 
     /// <summary>
@@ -1748,10 +1754,13 @@ public class CharacterController : MonoBehaviour
             var targetInfo = targetList[targetIndex];
             SetTargeting(targetInfo);
             CameraState camState;
-            if (cover == null)
+            if (targetInfo.shooterCover == null)
             {
-                //camState = CameraState.FrontAim;
                 camState = CameraState.RightAim;
+            }
+            else if (targetInfo.shooterCover.coverType == CoverType.Half)
+            {
+                camState = CameraState.FrontAim;
             }
             else if (targetInfo.isRight)
             {
@@ -1762,6 +1771,7 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+            gameMgr.uiMgr.SetUsedActionPoint(this, currentWeapon.actionCost);
             gameMgr.uiMgr.SetActiveAimUI(true);
             gameMgr.uiMgr.SetTargetInfo(targetInfo.target);
             return true;
@@ -1789,8 +1799,11 @@ public class CharacterController : MonoBehaviour
         CameraState camState;
         if (cover == null)
         {
-            //camState = CameraState.FrontAim;
             camState = CameraState.RightAim;
+        }
+        else if (cover.coverType == CoverType.Half)
+        {
+            camState = CameraState.FrontAim;
         }
         else if (targetInfo.isRight)
         {

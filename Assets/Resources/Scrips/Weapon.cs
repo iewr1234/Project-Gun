@@ -39,6 +39,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
+    [Tooltip("행동소모")] public int actionCost;
     [Tooltip("탄창용량")] public int magMax;
     [Tooltip("장전된 탄환 수")] public int loadedAmmo;
     [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;
@@ -84,6 +85,7 @@ public class Weapon : MonoBehaviour
         stability = weaponData.stability;
         rebound = weaponData.rebound;
 
+        actionCost = weaponData.actionCost;
         magMax = weaponData.magMax;
         Reload();
 
