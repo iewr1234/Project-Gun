@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum TargetDirection
@@ -33,6 +35,12 @@ public static class DataUtility
     public static readonly float aimPointZ = 5f;
 
     public static readonly float lineInterval = 0.5f;
+
+    public static float GetDistance(Vector3 posA, Vector3 posB)
+    {
+        var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
+        return Mathf.Round(distance * 100) / 100;
+    }
 
     public static Vector3 GetPositionOfNodeOutline(TargetDirection setDirection)
     {
@@ -90,12 +98,6 @@ public static class DataUtility
         }
 
         return Quaternion.Euler(rot);
-    }
-
-    public static float GetDistance(Vector3 posA, Vector3 posB)
-    {
-        var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
-        return Mathf.Round(distance * 100) / 100;
     }
 
     public static void SetMeshsMaterial(List<MeshRenderer> meshs, string shaderName)
@@ -156,6 +158,59 @@ public static class DataUtility
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// ¸íÁß·ü °è»ê
+    /// </summary>
+    /// <param name="charCtr"></param>
+    /// <param name="targetInfo"></param>
+    /// <returns></returns>
+    public static float GetHitAccuracy(CharacterController charCtr, TargetInfo targetInfo)
+    {
+        var pos = targetInfo.shooterNode.transform.position;
+        var targetPos = targetInfo.targetNode.transform.position;
+        var dist = GetDistance(pos, targetPos);
+        var weapon = charCtr.currentWeapon;
+        var reboundCheck = 0;
+        if (charCtr.stamina == 0)
+        {
+            reboundCheck++;
+        }
+        var value = Random.Range(0, 100);
+        var shooterHit = charCtr.aiming - (weapon.MOA * dist) + (15 / (dist / 3)) - (weapon.rebound * reboundCheck);
+        if (shooterHit < 0f)
+        {
+            shooterHit = 0f;
+        }
+        var coverBonus = GetCoverBonus();
+        var reactionBonus = GetReactionBonus();
+        var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
+        return Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
+
+        int GetCoverBonus()
+        {
+            if (targetInfo.targetCover == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return targetInfo.targetCover.coverType == CoverType.Full ? 40 : 20;
+            }
+        }
+
+        float GetReactionBonus()
+        {
+            if (targetInfo.targetCover == null)
+            {
+                return 0.1f;
+            }
+            else
+            {
+                return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
             }
         }
     }

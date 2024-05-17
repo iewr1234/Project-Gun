@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public enum ActionState
 {
@@ -167,6 +168,8 @@ public class GameManager : MonoBehaviour
         charUI.transform.SetParent(characterTf, false);
         charUI.SetComponents(charCtr);
         CreateRange();
+
+        uiMgr.SetMagNum(charCtr);
     }
 
     /// <summary>
@@ -346,14 +349,32 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Q))
                 {
-                    uiMgr.SetfireRateGauge();
+                    uiMgr.SetfireRateGauge(selectChar);
                 }
                 else if (Input.GetKeyDown(KeyCode.E))
                 {
-                    uiMgr.SetSightGauge();
+                    uiMgr.SetSightGauge(selectChar);
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
+                    var weapon = selectChar.currentWeapon;
+                    var totalCost = weapon.actionCost + selectChar.fireRateNum + selectChar.sightNum;
+                    if (totalCost > selectChar.action)
+                    {
+                        Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
+                        return;
+                    }
+                    var shootNum = (int)(((float)weapon.rpm / 200) * (selectChar.fireRateNum + 1));
+                    var loadedAmmo = weapon.loadedAmmo;
+                    if (weapon.chamberBullet) loadedAmmo++;
+
+                    if (shootNum > loadedAmmo)
+                    {
+                        Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");
+                        return;
+                    }
+
+                    selectChar.animator.SetInteger("shootNum", shootNum);
                     if (selectChar.animator.GetBool("isCover"))
                     {
                         selectChar.AddCommand(CommandType.Aim);
@@ -367,10 +388,11 @@ public class GameManager : MonoBehaviour
                     }
                     SwitchMovableNodes(false);
                     SwitchCharacterUI(true);
-                    selectChar.SetAction(-selectChar.currentWeapon.actionCost);
+                    selectChar.SetAction(-totalCost);
                     camMgr.SetCameraState(CameraState.None);
-                    uiMgr.SetActionPoint(selectChar);
-                    uiMgr.SetActiveAimUI(false);
+                    uiMgr.SetActionPoint_Bottom(selectChar);
+                    uiMgr.SetActiveAimUI(selectChar, false);
+                    uiMgr.SetMagNum(selectChar, weapon.loadedAmmo - shootNum);
                     selectChar = null;
                     actionState = ActionState.None;
                 }
@@ -380,7 +402,7 @@ public class GameManager : MonoBehaviour
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     camMgr.SetCameraState(CameraState.None);
                     selectChar.SetTargetOff();
-                    uiMgr.SetUsedActionPoint(selectChar, 0);
+                    uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
                     selectChar = null;
                     SwitchCharacterUI(true);
                     actionState = ActionState.None;
@@ -542,7 +564,7 @@ public class GameManager : MonoBehaviour
                         DrawAimLine(node);
                         node.CheckCoverNode(true);
                         targetNode = node;
-                        uiMgr.SetUsedActionPoint(selectChar, 0);
+                        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
                         return;
                     }
 
@@ -612,6 +634,12 @@ public class GameManager : MonoBehaviour
         }
         charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
 
+        var remainingShootCost = action - charCtr.currentWeapon.actionCost;
+        if (remainingShootCost > 0)
+        {
+            charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.actionCost));
+        }
+
         int moveRange = 0;
         while (queue.Count > 0 && moveRange <= charCtr.maxMoveNum)
         {
@@ -621,12 +649,13 @@ public class GameManager : MonoBehaviour
                 FieldNode node = queue.Dequeue();
                 movableNodes.Add(node); // 이동 가능 노드로 추가
 
-                foreach (FieldNode neighbor in node.onAxisNodes)
+                foreach (FieldNode onAxisNode in node.onAxisNodes)
                 {
-                    if (neighbor != null && neighbor.canMove && !visited.Contains(neighbor))
+                    if (onAxisNode != null && onAxisNode.canMove && !visited.Contains(onAxisNode))
                     {
-                        queue.Enqueue(neighbor);
-                        visited.Add(neighbor);
+                        onAxisNode.canShoot = remainingShootCost > 0 && remainingShootCost > moveRange;
+                        queue.Enqueue(onAxisNode);
+                        visited.Add(onAxisNode);
                     }
                 }
             }
@@ -644,9 +673,10 @@ public class GameManager : MonoBehaviour
         queue.Enqueue(currentNode);
         visited.Add(currentNode);
 
-        var moveNum = charCtr.maxMoveNum - passList.Sum(x => x.moveNum);
+        var passMoveNum = passList.Sum(x => x.moveNum);
+        var maxMoveNum = charCtr.maxMoveNum - passMoveNum;
         int moveRange = 0;
-        while (queue.Count > 0 && moveRange <= moveNum)
+        while (queue.Count > 0 && moveRange <= maxMoveNum)
         {
             int nodesInCurrentRange = queue.Count;
             for (int i = 0; i < nodesInCurrentRange; i++)
@@ -654,12 +684,13 @@ public class GameManager : MonoBehaviour
                 FieldNode node = queue.Dequeue();
                 movableNodes.Add(node); // 이동 가능 노드로 추가
 
-                foreach (FieldNode neighbor in node.onAxisNodes)
+                foreach (FieldNode onAxisNode in node.onAxisNodes)
                 {
-                    if (neighbor != null && neighbor.canMove && !visited.Contains(neighbor))
+                    if (onAxisNode != null && onAxisNode.canMove && !visited.Contains(onAxisNode))
                     {
-                        queue.Enqueue(neighbor);
-                        visited.Add(neighbor);
+                        onAxisNode.canShoot = charCtr.shootMoveNum > passMoveNum + moveRange;
+                        queue.Enqueue(onAxisNode);
+                        visited.Add(onAxisNode);
                     }
                 }
             }
@@ -667,103 +698,6 @@ public class GameManager : MonoBehaviour
         }
         SwitchMovableNodes(true);
     }
-
-    #region ShowMovableNodes(Old)
-    ///// <summary>
-    ///// 이동가능 노드 표시
-    ///// </summary>
-    ///// <param name="charCtr"></param>
-    //private void ShowMovableNodes(CharacterController charCtr)
-    //{
-    //    SwitchMovableNodes(false);
-    //    openNodes.Add(charCtr.currentNode);
-    //    var mobility = (int)DataUtility.GetFloorValue(charCtr.mobility * charCtr.action, 0);
-    //    ChainOfMovableNode(charCtr.currentNode, mobility);
-    //    SwitchMovableNodes(true);
-    //}
-
-    ///// <summary>
-    ///// 이동노드 연쇄적용
-    ///// </summary>
-    ///// <param name="node"></param>
-    ///// <param name="mobility"></param>
-    //private void ChainOfMovableNode(FieldNode node, int mobility)
-    //{
-    //    mobility--;
-    //    for (int i = 0; i < node.onAxisNodes.Count; i++)
-    //    {
-    //        var onAxisNode = node.onAxisNodes[i];
-    //        if (onAxisNode == null) continue;
-
-    //        if (CheckMoveOfNextNode(node, i))
-    //        {
-    //            if (!openNodes.Contains(onAxisNode))
-    //            {
-    //                openNodes.Add(onAxisNode);
-    //            }
-    //            ChainOfMovableNode(node, onAxisNode, mobility);
-    //        }
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 이동노드 연쇄적용
-    ///// </summary>
-    ///// <param name="prevNode"></param>
-    ///// <param name="node"></param>
-    ///// <param name="mobility"></param>
-    //private void ChainOfMovableNode(FieldNode prevNode, FieldNode node, int mobility)
-    //{
-    //    var canChain = mobility > 0 && node.canMove;
-    //    if (!canChain) return;
-
-    //    mobility--;
-    //    for (int i = 0; i < node.onAxisNodes.Count; i++)
-    //    {
-    //        var onAxisNode = node.onAxisNodes[i];
-    //        if (onAxisNode == null || onAxisNode == prevNode) continue;
-
-    //        if (CheckMoveOfNextNode(node, i))
-    //        {
-    //            if (!openNodes.Contains(onAxisNode))
-    //            {
-    //                openNodes.Add(onAxisNode);
-    //            }
-    //            ChainOfMovableNode(node, onAxisNode, mobility);
-    //        }
-    //    }
-    //}
-
-    //private bool CheckMoveOfNextNode(FieldNode node, int index)
-    //{
-    //    var nextNode = node.onAxisNodes[index];
-    //    if (!nextNode.canMove)
-    //    {
-    //        return false;
-    //    }
-    //    else
-    //    {
-    //        var outline = node.outlines[index];
-    //        if (outline == null)
-    //        {
-    //            Debug.LogError("Not Found outline");
-    //        }
-
-    //        if (outline.lineCover == null && !outline.unableMove.enabled)
-    //        {
-    //            return true;
-    //        }
-    //        else if (outline.lineCover != null && outline.lineCover.coverType == CoverType.Half)
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //        {
-    //            return false;
-    //        }
-    //    }
-    //}
-    #endregion
 
     /// <summary>
     /// 이동가능 노드 표시변경
@@ -933,7 +867,7 @@ public class GameManager : MonoBehaviour
         arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
         var moveCost = (int)Mathf.Ceil((moveNum + passList.Sum(x => x.moveNum)) / selectChar.Mobility);
         arrowPointer.SetMoveCost(moveCost);
-        uiMgr.SetUsedActionPoint(selectChar, moveCost);
+        uiMgr.SetUsedActionPoint_Bottom(selectChar, moveCost);
 
         int RanderAndCheck(FieldNode node, int index, List<FieldNode> nodes)
         {

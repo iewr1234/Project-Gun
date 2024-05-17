@@ -203,26 +203,12 @@ public class Weapon : MonoBehaviour
         var targetPos = targetInfo.targetNode.transform.position;
         var dist = DataUtility.GetDistance(pos, targetPos);
         var allMiss = true;
-        var reboundCheck = 0;
         for (int i = 0; i < shootNum; i++)
         {
             charCtr.SetStamina(-stability);
-            if (charCtr.stamina == 0)
-            {
-                reboundCheck++;
-            }
+            var hitAccuracy = DataUtility.GetHitAccuracy(charCtr, targetInfo);
             var value = Random.Range(0, 100);
-            var shooterHit = charCtr.aiming - (MOA * dist) + (15 / (dist / 3)) - (rebound * reboundCheck);
-            if (shooterHit < 0f)
-            {
-                shooterHit = 0f;
-            }
-            var coverBonus = GetCoverBonus();
-            var reactionBonus = GetReactionBonus();
-            var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
-            var hitAccuracy = Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
             var isHit = value < hitAccuracy;
-            //Debug.Log($"{charCtr.name}: {value} < {hitAccuracy} = {isHit}");
             if (isHit && allMiss)
             {
                 allMiss = false;
@@ -235,30 +221,6 @@ public class Weapon : MonoBehaviour
         Debug.Log($"{charCtr.name}: ShootNum = {shootNum}, Hit = {hit.Count}, Miss = {miss.Count}");
 
         return allMiss;
-
-        int GetCoverBonus()
-        {
-            if (targetInfo.targetCover == null)
-            {
-                return 0;
-            }
-            else
-            {
-                return targetInfo.targetCover.coverType == CoverType.Full ? 40 : 20;
-            }
-        }
-
-        float GetReactionBonus()
-        {
-            if (targetInfo.targetCover == null)
-            {
-                return 0.1f;
-            }
-            else
-            {
-                return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
-            }
-        }
     }
 
     public void FireBullet(CharacterController target)

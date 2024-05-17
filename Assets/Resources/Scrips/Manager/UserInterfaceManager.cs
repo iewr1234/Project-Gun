@@ -3,21 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-
-public class AimUI
-{
-    [Header("---Access Component---")]
-    public GameObject uiObject;
-    public Image fireRateGauge;
-    public Image sightGauge;
-    public Slider armorGauge;
-    public Slider healthGauge;
-    public Slider staminaGauge;
-
-    [Header("--- Assignment Variable---")]
-    public int fireRateNum;
-    public int sightNum;
-}
+using TMPro;
 
 public class UserInterfaceManager : MonoBehaviour
 {
@@ -26,28 +12,30 @@ public class UserInterfaceManager : MonoBehaviour
 
     [Header("---Access Component---\n[BottomUI]")]
     public GameObject bottomUI;
+    [HideInInspector] public TextMeshProUGUI magNumText;
     public List<ActionBlock> actionBlocks;
 
     [Header("[AimUI]")]
     public GameObject aimUI;
+    [HideInInspector] public TextMeshProUGUI shootNumText;
+    [HideInInspector] public TextMeshProUGUI hitAccuracyText;
+    [HideInInspector] public TextMeshProUGUI actionPointText;
     [HideInInspector] public Image fireRateGauge;
     [HideInInspector] public Image sightGauge;
     [HideInInspector] public Slider armorGauge;
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
 
-    [Header("--- Assignment Variable---\n[AimUI]")]
-    public int fireRateNum;
-    public int sightNum;
-
     private readonly string aimUIGaugePath = "Sprites/SightGauge/Gauge_SightAp";
-    private readonly int aimUIGaugeMax = 5;
+    private readonly int aimUIGaugeMax = 4;
 
     public void SetComponents(GameManager _gameMgr)
     {
         gameMgr = _gameMgr;
 
         bottomUI = transform.Find("BottomUI").gameObject;
+        magNumText = transform.Find("BottomUI/MagNum").GetComponent<TextMeshProUGUI>();
+        magNumText.enabled = false;
         actionBlocks = bottomUI.transform.Find("ActionPoint").GetComponentsInChildren<ActionBlock>().ToList();
         for (int i = 0; i < actionBlocks.Count; i++)
         {
@@ -56,22 +44,58 @@ public class UserInterfaceManager : MonoBehaviour
         }
 
         aimUI = transform.Find("AimUI").gameObject;
+        shootNumText = transform.Find("AimUI/ShootNum").GetComponent<TextMeshProUGUI>();
+        hitAccuracyText = transform.Find("AimUI/HitAccuracy").GetComponent<TextMeshProUGUI>();
+        actionPointText = transform.Find("AimUI/ActionPoint/Text").GetComponent<TextMeshProUGUI>();
         fireRateGauge = transform.Find("AimUI/FireRateGauge").GetComponent<Image>();
         sightGauge = transform.Find("AimUI/SightGauge").GetComponent<Image>();
         armorGauge = transform.Find("AimUI/TargetInfo/ArmorGauge").GetComponent<Slider>();
         healthGauge = transform.Find("AimUI/TargetInfo/HealthGauge").GetComponent<Slider>();
         staminaGauge = transform.Find("AimUI/TargetInfo/StaminaGauge").GetComponent<Slider>();
         aimUI.SetActive(false);
-
-        fireRateNum = 1;
-        sightNum = 1;
     }
 
-    public void SetActionPoint(CharacterController charCtr)
+    public void SetMagNum(CharacterController charCtr)
     {
         if (charCtr.ownerType != CharacterOwner.Player) return;
 
-        Debug.Log("!");
+        var weapon = charCtr.currentWeapon;
+        var loadedAmmo = weapon.loadedAmmo;
+        if (weapon.chamberBullet) loadedAmmo++;
+
+        magNumText.enabled = true;
+        magNumText.text = $"{loadedAmmo}/{weapon.magMax}";
+    }
+
+    public void SetMagNum(CharacterController charCtr, int loadedAmmo)
+    {
+        if (charCtr.ownerType != CharacterOwner.Player) return;
+
+        var weapon = charCtr.currentWeapon;
+        magNumText.enabled = true;
+        magNumText.text = $"{loadedAmmo}/{weapon.magMax}";
+    }
+
+    public void SetShootNum(CharacterController charCtr)
+    {
+        var weapon = charCtr.currentWeapon;
+        var shootNum = (int)(((float)weapon.rpm / 200) * (charCtr.fireRateNum + 1));
+        var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
+        if (shootNum > loadedAmmo)
+        {
+            shootNumText.color = Color.red;
+        }
+        else
+        {
+            shootNumText.color = Color.black;
+        }
+        shootNumText.text = $"{shootNum}";
+    }
+
+    public void SetActionPoint_Bottom(CharacterController charCtr)
+    {
+        if (charCtr.ownerType != CharacterOwner.Player) return;
+
         for (int i = 0; i < actionBlocks.Count; i++)
         {
             var actionBlock = actionBlocks[i];
@@ -86,7 +110,7 @@ public class UserInterfaceManager : MonoBehaviour
         }
     }
 
-    public void SetUsedActionPoint(CharacterController charCtr, int usedAction)
+    public void SetUsedActionPoint_Bottom(CharacterController charCtr, int usedAction)
     {
         if (charCtr.ownerType != CharacterOwner.Player) return;
 
@@ -106,50 +130,75 @@ public class UserInterfaceManager : MonoBehaviour
         }
     }
 
-    public void SetActiveAimUI(bool value)
+    public void SetActiveAimUI(CharacterController charCtr, bool value)
     {
         aimUI.SetActive(value);
-        if (!value)
+        if (value)
         {
-            fireRateNum = 1;
-            sightNum = 1;
-            fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{fireRateNum}");
-            sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{sightNum}");
+            SetShootNum(charCtr);
+            SetActionPoint_Aim(charCtr);
+        }
+        else
+        {
+            fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + "1");
+            sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + "1");
         }
     }
 
-    public void SetfireRateGauge()
+    public void SetActionPoint_Aim(CharacterController charCtr)
     {
-        fireRateNum++;
-        if (fireRateNum > aimUIGaugeMax)
+        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        if (totalCost > charCtr.action)
         {
-            fireRateNum = 1;
+            actionPointText.color = Color.red;
         }
-
-        fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{fireRateNum}");
+        else
+        {
+            actionPointText.color = Color.white;
+        }
+        actionPointText.text = $"<size=36>{totalCost}</size><color=#D2D2D2>/{charCtr.maxAction} AP</color>";
     }
 
-    public void SetSightGauge()
+    public void SetfireRateGauge(CharacterController charCtr)
     {
-        sightNum++;
-        if (sightNum > aimUIGaugeMax)
+        charCtr.fireRateNum++;
+        if (charCtr.fireRateNum > aimUIGaugeMax)
         {
-            sightNum = 1;
+            charCtr.fireRateNum = 0;
         }
 
-        sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{sightNum}");
+        fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fireRateNum + 1}");
+        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        SetUsedActionPoint_Bottom(charCtr, totalCost);
+        SetShootNum(charCtr);
+        SetActionPoint_Aim(charCtr);
     }
 
-    public void SetTargetInfo(CharacterController targetCtr)
+    public void SetSightGauge(CharacterController charCtr)
     {
-        if (targetCtr.armor != null)
+        charCtr.sightNum++;
+        if (charCtr.sightNum > aimUIGaugeMax)
         {
-            armorGauge.maxValue = targetCtr.armor.maxDurability;
-            armorGauge.value = targetCtr.armor.durability;
+            charCtr.sightNum = 0;
         }
-        healthGauge.maxValue = targetCtr.maxHealth;
-        healthGauge.value = targetCtr.health;
-        staminaGauge.maxValue = targetCtr.maxStamina;
-        staminaGauge.value = targetCtr.stamina;
+
+        sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightNum + 1}");
+        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        SetUsedActionPoint_Bottom(charCtr, totalCost);
+        SetActionPoint_Aim(charCtr);
+    }
+
+    public void SetTargetInfo(TargetInfo targetInfo)
+    {
+        hitAccuracyText.text = $"{DataUtility.GetHitAccuracy(targetInfo.target, targetInfo)}%";
+        if (targetInfo.target.armor != null)
+        {
+            armorGauge.maxValue = targetInfo.target.armor.maxDurability;
+            armorGauge.value = targetInfo.target.armor.durability;
+        }
+        healthGauge.maxValue = targetInfo.target.maxHealth;
+        healthGauge.value = targetInfo.target.health;
+        staminaGauge.maxValue = targetInfo.target.maxStamina;
+        staminaGauge.value = targetInfo.target.stamina;
     }
 }

@@ -40,8 +40,8 @@ public class FieldNode : MonoBehaviour
     public Cover cover;
     [Space(5f)]
 
-    //public bool canSee;
     public bool canMove;
+    public bool canShoot;
     [Space(5f)]
 
     [HideInInspector] public bool hitNode;
@@ -307,11 +307,29 @@ public class FieldNode : MonoBehaviour
             var onAxisNode = onAxisNodes[i];
             if (onAxisNode == null)
             {
+                if (canShoot || charCtr != null)
+                {
+                    outlines[i].SetActiveLine(true);
+                }
+                else
+                {
+                    outlines[i].SetActiveLine(true, Color.yellow);
+                }
+            }
+            else if (movableNodes.Contains(onAxisNode) && canShoot && !onAxisNode.canShoot)
+            {
                 outlines[i].SetActiveLine(true);
             }
             else if (!movableNodes.Contains(onAxisNode))
             {
-                outlines[i].SetActiveLine(true);
+                if (canShoot)
+                {
+                    outlines[i].SetActiveLine(true);
+                }
+                else
+                {
+                    outlines[i].SetActiveLine(true, Color.yellow);
+                }
             }
         }
     }

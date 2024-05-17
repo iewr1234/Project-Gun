@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -132,6 +130,7 @@ public class CharacterController : MonoBehaviour
     [Tooltip("이동력")] public float Mobility => DataUtility.GetFloorValue(1 + 2.5f * ((float)agility / (agility + 100)), 2);
     public float mobility;
     [HideInInspector] public int maxMoveNum;
+    [HideInInspector] public int shootMoveNum;
 
     [Header("[Physical]")]
     [Tooltip("최대 행동력")] public int maxAction;
@@ -146,6 +145,9 @@ public class CharacterController : MonoBehaviour
 
     [Space(5f)]
     public Weapon currentWeapon;
+    [HideInInspector] public int fireRateNum;
+    [HideInInspector] public int sightNum;
+
     public FieldNode currentNode;
     private FieldNode prevNode;
     [HideInInspector] public Cover cover;
@@ -518,7 +520,7 @@ public class CharacterController : MonoBehaviour
                         break;
                 }
 
-                if (command.movePass.Count == 0 || stamina == 0)
+                if (command.movePass.Count == 0)
                 {
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
@@ -985,7 +987,7 @@ public class CharacterController : MonoBehaviour
                 {
                     case CommandType.Aim:
                         animator.SetBool("isRight", command.targetInfo.isRight);
-                        animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
+                        //animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                         coverPos = command.targetInfo.shooterNode.transform.position;
                         SetAiming(command.targetInfo);
                         break;
@@ -1024,7 +1026,7 @@ public class CharacterController : MonoBehaviour
             switch (command.type)
             {
                 case CommandType.Aim:
-                    animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
+                    //animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                     transform.LookAt(command.targetInfo.target.transform);
                     SetAiming(command.targetInfo);
                     break;
@@ -1236,8 +1238,7 @@ public class CharacterController : MonoBehaviour
         {
             action = maxAction;
         }
-
-        gameMgr.uiMgr.SetActionPoint(this);
+        gameMgr.uiMgr.SetActionPoint_Bottom(this);
     }
 
     /// <summary>
@@ -1705,7 +1706,9 @@ public class CharacterController : MonoBehaviour
             if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 var _cover = hit.collider.GetComponentInParent<Cover>();
-                if (shooterNode.onAxisNodes.Find(x => x.cover == _cover) != null || shooterNode.outlines.Find(x => x.lineCover == _cover))
+                if (_cover == null) return;
+
+                if (shooterNode.onAxisNodes.Contains(_cover.coverNode) || shooterNode.outlines.Find(x => x.lineCover == _cover))
                 {
                     cover = _cover;
                 }
@@ -1750,6 +1753,8 @@ public class CharacterController : MonoBehaviour
         else
         {
             targetIndex = 0;
+            fireRateNum = 0;
+            sightNum = 0;
             ChangeTargetShader();
             var targetInfo = targetList[targetIndex];
             SetTargeting(targetInfo);
@@ -1771,9 +1776,9 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
-            gameMgr.uiMgr.SetUsedActionPoint(this, currentWeapon.actionCost);
-            gameMgr.uiMgr.SetActiveAimUI(true);
-            gameMgr.uiMgr.SetTargetInfo(targetInfo.target);
+            gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.actionCost);
+            gameMgr.uiMgr.SetActiveAimUI(this, true);
+            gameMgr.uiMgr.SetTargetInfo(targetInfo);
             return true;
         }
     }
@@ -1814,7 +1819,7 @@ public class CharacterController : MonoBehaviour
             camState = CameraState.LeftAim;
         }
         gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
-        gameMgr.uiMgr.SetTargetInfo(targetInfo.target);
+        gameMgr.uiMgr.SetTargetInfo(targetInfo);
     }
 
     /// <summary>
@@ -1914,7 +1919,7 @@ public class CharacterController : MonoBehaviour
             DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
             DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
         }
-        gameMgr.uiMgr.SetActiveAimUI(false);
+        gameMgr.uiMgr.SetActiveAimUI(this, false);
     }
 
     /// <summary>
