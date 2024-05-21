@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -17,8 +18,8 @@ public class InventoryManager : MonoBehaviour
     private Transform itemPool;
 
     [Header("--- Assignment Variable---")]
+    public ItemSlot onSlot;
     public ItemHandler holdingItem;
-    private Vector2 pivot;
 
     private List<ItemHandler> items = new List<ItemHandler>();
     private readonly int itemPoolMax = 100;
@@ -59,7 +60,8 @@ public class InventoryManager : MonoBehaviour
 
         var testItem = items.Find(x => !x.gameObject.activeSelf);
         testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 1));
-        otherStorage.SaveInStorage(testItem);
+        var emptySlot = otherStorage.itemSlots.Find(x => x.item == null);
+        PutTheItem(testItem, emptySlot);
     }
 
     private void CreateItems()
@@ -69,25 +71,10 @@ public class InventoryManager : MonoBehaviour
             var item = Instantiate(Resources.Load<ItemHandler>("Prefabs/Inventory/Item"));
             item.transform.name = $"Item_{i}";
             item.transform.SetParent(itemPool, false);
-            item.SetComponents(i);
+            item.SetComponents(this);
             item.gameObject.SetActive(false);
             items.Add(item);
         }
-    }
-
-    private void FixedUpdate()
-    {
-        MoveItem();
-    }
-
-    private void MoveItem()
-    {
-        if (holdingItem == null) return;
-
-        var pos = Input.mousePosition;
-        pos.x += pivot.x;
-        pos.y += pivot.y;
-        holdingItem.transform.position = pos;
     }
 
     private void Update()
@@ -115,35 +102,23 @@ public class InventoryManager : MonoBehaviour
     public void TakeTheItem(ItemHandler item)
     {
         item.transform.SetParent(itemPool, false);
-        holdingItem = item;
-        if (holdingItem.size == new Vector2Int(1, 1))
-        {
-            pivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
-        }
-        else
-        {
-
-        }
-        MoveItem();
     }
 
-    public void PutTheItem(ItemSlot itemSlot)
+    public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
     {
-        if (holdingItem == null) return;
-
-        itemSlot.item = holdingItem;
-        var itemTf = itemSlot.myStorage != null ? myItemTf : otherItemTf;
-        holdingItem.transform.SetParent(itemTf, false);
-        var pos = itemSlot.transform.position;
-        if (holdingItem.size == new Vector2Int(1, 1))
+        if (itemSlot == null)
         {
-            pos.x += pivot.x;
-            pos.y += pivot.y;
-            holdingItem.transform.position = pos;
+            var itemTf = item.itemSlot.myStorage != null ? myItemTf : otherItemTf;
+            item.transform.SetParent(itemTf, false);
+            item.transform.position = item.itemSlot.transform.position;
         }
         else
         {
-
+            item.itemSlot = itemSlot;
+            itemSlot.item = item;
+            var itemTf = itemSlot.myStorage != null ? myItemTf : otherItemTf;
+            item.transform.SetParent(itemTf, false);
+            item.transform.position = itemSlot.transform.position;
         }
         holdingItem = null;
     }

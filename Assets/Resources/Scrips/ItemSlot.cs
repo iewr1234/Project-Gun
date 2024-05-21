@@ -28,17 +28,15 @@ public class ItemSlot : MonoBehaviour
         transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
     }
 
-    public void Button_ItemSlot()
+    public void PointerEnter_ItemSlot()
     {
         var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
-        if (item != null)
-        {
-            invenMgr.TakeTheItem(item);
-            item = null;
-        }
-        else
-        {
-            invenMgr.PutTheItem(this);
-        }
+        invenMgr.onSlot = this;
+    }
+
+    public void PointerExit_ItemSlot()
+    {
+        var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
+        invenMgr.onSlot = null;
     }
 }

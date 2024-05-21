@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public enum ItemType
 {
@@ -12,23 +14,28 @@ public enum ItemType
     Backpack,
 }
 
-public class ItemHandler : MonoBehaviour
+public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    [Header("---Access Script---")]
+    public InventoryManager invenMgr;
+    public ItemSlot itemSlot;
+
     [Header("---Access Component---")]
     public RectTransform rect;
+    private Image targetImage;
 
     [Header("--- Assignment Variable---")]
     public ItemType type;
     public Vector2Int size = new Vector2Int(1, 1);
+    [HideInInspector] public Vector2 pivot;
 
-    [HideInInspector] public int poolIndex;
-
-    public void SetComponents(int index)
+    public void SetComponents(InventoryManager _invenMgr)
     {
+        invenMgr = _invenMgr;
         rect = GetComponent<RectTransform>();
+        targetImage = transform.Find("BackGround").GetComponent<Image>();
 
         ResizeItemRect();
-        poolIndex = index;
     }
 
     private void ResizeItemRect()
@@ -57,6 +64,41 @@ public class ItemHandler : MonoBehaviour
             default:
                 break;
         }
+
+        if (size == new Vector2Int(1, 1))
+        {
+            pivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
+        }
+        else
+        {
+
+        }
         gameObject.SetActive(true);
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        targetImage.raycastTarget = false;
+        invenMgr.TakeTheItem(this);
+        FollowMouse();
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        FollowMouse();
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        invenMgr.PutTheItem(this, invenMgr.onSlot);
+        targetImage.raycastTarget = true;
+    }
+
+    private void FollowMouse()
+    {
+        var pos = Input.mousePosition;
+        pos.x += pivot.x;
+        pos.y += pivot.y;
+        transform.position = pos;
     }
 }
