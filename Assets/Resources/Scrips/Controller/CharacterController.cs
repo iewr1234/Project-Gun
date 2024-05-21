@@ -451,6 +451,12 @@ public class CharacterController : MonoBehaviour
     {
         if (targetList.Count > 0)
         {
+            var tagetInfo = targetList.OrderBy(x => DataUtility.GetDistance(x.shooterNode.transform.position, x.targetNode.transform.position)).FirstOrDefault();
+            Debug.Log($"{transform.name}: {tagetInfo.shooterCover.coverType}");
+            if (tagetInfo.shooterCover)
+            {
+                AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
+            }
             targetList.Clear();
         }
 

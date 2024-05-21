@@ -36,6 +36,8 @@ public static class DataUtility
 
     public static readonly float lineInterval = 0.5f;
 
+    public static readonly int itemSize = 70;
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

@@ -1,17 +1,15 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
+using UnityEngine.SceneManagement;
 
-public enum ActionState
+public enum GameState
 {
     None,
     Move,
     Shot,
     Watch,
+    Inventory,
 }
 
 [System.Serializable]
@@ -29,6 +27,7 @@ public class GameManager : MonoBehaviour
     public CameraManager camMgr;
     public UserInterfaceManager uiMgr;
     public MapEditor mapEdt;
+    public InventoryManager invenMgr;
 
     [Header("---Access Component---")]
     [SerializeField] private ArrowPointer arrowPointer;
@@ -42,7 +41,7 @@ public class GameManager : MonoBehaviour
     private Transform passPointPoolTf;
 
     [Header("--- Assignment Variable---")]
-    [SerializeField] private ActionState actionState;
+    public GameState gameState;
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
 
     [Header("[Move]")]
@@ -98,11 +97,12 @@ public class GameManager : MonoBehaviour
         targetCheck.gameObject.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
-        linePoolTf = GameObject.FindGameObjectWithTag("Lines").transform;
-        rangePoolTf = GameObject.FindGameObjectWithTag("Ranges").transform;
-        bulletsPoolTf = GameObject.FindGameObjectWithTag("Bullets").transform;
-        warningPoolTf = GameObject.FindGameObjectWithTag("Warnings").transform;
-        passPointPoolTf = GameObject.FindGameObjectWithTag("PassPoints").transform;
+        var objectPool = GameObject.FindGameObjectWithTag("ObjectPool").transform;
+        linePoolTf = objectPool.transform.Find("LinePool");
+        rangePoolTf = objectPool.transform.Find("RangePool");
+        bulletsPoolTf = objectPool.transform.Find("BulletPool");
+        warningPoolTf = objectPool.transform.Find("WarningPool");
+        passPointPoolTf = objectPool.transform.Find("PassPointPool");
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
@@ -111,6 +111,9 @@ public class GameManager : MonoBehaviour
         CreateBullets();
         CreateWarnings();
         CreatePassPoint();
+
+        invenMgr = FindAnyObjectByType<InventoryManager>();
+        invenMgr.SetComponents(this);
     }
 
     /// <summary>
@@ -245,6 +248,8 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
+        if (gameState == GameState.Inventory) return;
+
         KeyboardInput();
         MouseInput();
         PointerUpEvent();
@@ -277,11 +282,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void KeyboardInput()
     {
-        if (selectChar == null) return;
-
-        switch (actionState)
+        switch (gameState)
         {
-            case ActionState.Move:
+            case GameState.Move:
                 if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     if (!selectChar.currentWeapon.chamberBullet)
@@ -302,7 +305,7 @@ public class GameManager : MonoBehaviour
                         RemoveTargetNode();
                         SwitchMovableNodes(false);
                         SwitchCharacterUI(false);
-                        actionState = ActionState.Shot;
+                        gameState = GameState.Shot;
                     }
                 }
                 else if (Input.GetKeyDown(KeyCode.R) && selectChar.currentWeapon.loadedAmmo < selectChar.currentWeapon.magMax)
@@ -311,7 +314,7 @@ public class GameManager : MonoBehaviour
                     selectChar.AddCommand(CommandType.Reload);
                     SwitchMovableNodes(false);
                     selectChar = null;
-                    actionState = ActionState.None;
+                    gameState = GameState.None;
                 }
                 else if (Input.GetKeyDown(KeyCode.X) && selectChar.weapons.Count > 1)
                 {
@@ -323,7 +326,7 @@ public class GameManager : MonoBehaviour
                     ClearLine();
                     SwitchMovableNodes(false);
                     currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
-                    actionState = ActionState.Watch;
+                    gameState = GameState.Watch;
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape) && passList.Count > 0)
                 {
@@ -342,7 +345,7 @@ public class GameManager : MonoBehaviour
                     addPass = false;
                 }
                 break;
-            case ActionState.Shot:
+            case GameState.Shot:
                 if (Input.GetKeyDown(KeyCode.Tab))
                 {
                     selectChar.SetNextTargetOn();
@@ -394,7 +397,7 @@ public class GameManager : MonoBehaviour
                     uiMgr.SetActiveAimUI(selectChar, false);
                     uiMgr.SetMagNum(selectChar, weapon.loadedAmmo - shootNum);
                     selectChar = null;
-                    actionState = ActionState.None;
+                    gameState = GameState.None;
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
@@ -405,24 +408,24 @@ public class GameManager : MonoBehaviour
                     uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
                     selectChar = null;
                     SwitchCharacterUI(true);
-                    actionState = ActionState.None;
+                    gameState = GameState.None;
                 }
                 break;
-            case ActionState.Watch:
+            case GameState.Watch:
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     selectChar.SetWatch();
                     currentRange = null;
                     selectChar.state = CharacterState.Watch;
                     selectChar = null;
-                    actionState = ActionState.None;
+                    gameState = GameState.None;
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
                     currentRange.gameObject.SetActive(false);
                     currentRange = null;
                     selectChar = null;
-                    actionState = ActionState.None;
+                    gameState = GameState.None;
                 }
                 break;
             default:
@@ -455,9 +458,9 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
             {
                 var node = hit.collider.GetComponentInParent<FieldNode>();
-                switch (actionState)
+                switch (gameState)
                 {
-                    case ActionState.None:
+                    case GameState.None:
                         if (node.charCtr != null && selectChar == null)
                         {
                             selectChar = node.charCtr;
@@ -472,33 +475,26 @@ public class GameManager : MonoBehaviour
                                 selectChar.state = CharacterState.None;
                             }
                             ShowMovableNodes(selectChar);
-                            actionState = ActionState.Move;
+                            gameState = GameState.Move;
                         }
                         break;
-                    case ActionState.Move:
+                    case GameState.Move:
                         if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
                         {
-                            SwitchMovableNodes(false);
-                            ClearLine();
-                            RemoveTargetNode();
-                            selectChar = null;
-                            actionState = ActionState.None;
+                            DeselectCharacter();
                         }
                         else if (node == targetNode && node.canMove && selectChar != null)
                         {
-                            ClearLine();
-                            RemoveTargetNode();
                             CharacterMove(selectChar, node);
-                            selectChar = null;
-                            actionState = ActionState.None;
+                            DeselectCharacter();
                         }
                         break;
-                    case ActionState.Watch:
+                    case GameState.Watch:
                         selectChar.SetWatch();
                         currentRange = null;
                         selectChar.state = CharacterState.Watch;
                         selectChar = null;
-                        actionState = ActionState.None;
+                        gameState = GameState.None;
                         break;
                     default:
                         break;
@@ -507,9 +503,9 @@ public class GameManager : MonoBehaviour
         }
         else if (Input.GetMouseButtonDown(1) && selectChar != null)
         {
-            switch (actionState)
+            switch (gameState)
             {
-                case ActionState.Move:
+                case GameState.Move:
                     if (addPass)
                     {
                         if (passList.Count > 0 && passList[0].passNodes[0] == targetNode) return;
@@ -530,9 +526,9 @@ public class GameManager : MonoBehaviour
                         ShowMovableNodes(selectChar, passList[0].passNodes[0]);
                     }
                     break;
-                case ActionState.Shot:
+                case GameState.Shot:
                     break;
-                case ActionState.Watch:
+                case GameState.Watch:
                     break;
                 default:
                     break;
@@ -551,9 +547,9 @@ public class GameManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
         {
             var node = hit.collider.GetComponentInParent<FieldNode>();
-            switch (actionState)
+            switch (gameState)
             {
-                case ActionState.Move:
+                case GameState.Move:
                     if (targetNode != node && node == selectChar.currentNode && passList.Count == 0)
                     {
                         arrowPointer.gameObject.SetActive(false);
@@ -585,7 +581,7 @@ public class GameManager : MonoBehaviour
                     //    RemoveTargetNode();
                     //}
                     break;
-                case ActionState.Watch:
+                case GameState.Watch:
                     if (targetNode != node)
                     {
                         if (node != null && node != selectChar.currentNode)
@@ -612,6 +608,17 @@ public class GameManager : MonoBehaviour
             targetNode.CheckCoverNode(false);
         }
         targetNode = null;
+    }
+
+    public void DeselectCharacter()
+    {
+        if (selectChar == null) return;
+
+        SwitchMovableNodes(false);
+        ClearLine();
+        RemoveTargetNode();
+        selectChar = null;
+        gameState = GameState.None;
     }
 
     /// <summary>
@@ -734,11 +741,11 @@ public class GameManager : MonoBehaviour
     {
         if (charCtr.animator.GetBool("isMove")) return;
 
-        for (int i = 0; i < movableNodes.Count; i++)
-        {
-            var movableNode = movableNodes[i];
-            movableNode.SetNodeOutline(false);
-        }
+        //for (int i = 0; i < movableNodes.Count; i++)
+        //{
+        //    var movableNode = movableNodes[i];
+        //    movableNode.SetNodeOutline(false);
+        //}
 
         var movePass = closeNodes;
         if (passList.Count > 0)
@@ -756,7 +763,7 @@ public class GameManager : MonoBehaviour
             charCtr.AddCommand(CommandType.LeaveCover);
         }
         charCtr.AddCommand(CommandType.Move, arrowPointer.GetMoveCost(), movePass);
-        charCtr.AddCommand(CommandType.TakeCover);
+        //charCtr.AddCommand(CommandType.TakeCover);
     }
 
     /// <summary>
