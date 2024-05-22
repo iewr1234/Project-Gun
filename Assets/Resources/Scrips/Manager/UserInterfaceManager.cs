@@ -55,6 +55,11 @@ public class UserInterfaceManager : MonoBehaviour
         aimUI.SetActive(false);
     }
 
+    public void SetActiveGameUI(bool value)
+    {
+        bottomUI.SetActive(value);
+    }
+
     public void SetMagNum(CharacterController charCtr)
     {
         if (charCtr.ownerType != CharacterOwner.Player) return;

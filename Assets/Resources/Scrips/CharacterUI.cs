@@ -26,7 +26,7 @@ public class CharacterUI : MonoBehaviour
         LookAtTheCamera();
 
         canvas = GetComponent<Canvas>();
-        canvas.worldCamera = charCtr.GameMgr.camMgr.subCam;
+        canvas.worldCamera = charCtr.GameMgr.camMgr.mainCam;
         canvas.sortingOrder = -1;
         armorGauge = transform.Find("ArmorGauge").GetComponent<Slider>();
         healthGauge = transform.Find("HealthGauge").GetComponent<Slider>();

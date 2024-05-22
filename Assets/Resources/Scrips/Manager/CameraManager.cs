@@ -19,8 +19,8 @@ public class CameraManager : MonoBehaviour
     private GameManager gameMgr;
 
     [Header("---Access Component---")]
-    [HideInInspector] public Camera mainCam;
-    [HideInInspector] public Camera subCam;
+    public Camera mainCam;
+    public Camera subCam;
     private Transform pivotPoint;
     private CinemachineBrain cambrain;
 
@@ -50,7 +50,7 @@ public class CameraManager : MonoBehaviour
 
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
-        subCam = mainCam.GetComponentInChildren<Camera>();
+        subCam = mainCam.transform.Find("SubCamera").GetComponent<Camera>();
         camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
         mainCam.transform.localPosition = camDirection * camDistance;
         mainCam.transform.LookAt(pivotPoint);

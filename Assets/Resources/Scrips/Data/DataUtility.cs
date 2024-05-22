@@ -37,6 +37,9 @@ public static class DataUtility
     public static readonly float lineInterval = 0.5f;
 
     public static readonly int itemSize = 70;
+    public static readonly Color slot_onItemColor = new Color(190 / 255f, 200 / 255f, 1f, 1f);
+    public static readonly Color slot_moveColor = new Color(180 / 255f, 1f, 145 / 255f, 1f);
+    public static readonly Color slot_unMoveColor = new Color(1f, 145 / 255f, 145 / 255f, 1f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
