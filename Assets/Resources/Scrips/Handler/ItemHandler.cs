@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Linq;
+using System;
 
 public enum ItemType
 {
@@ -17,6 +18,7 @@ public enum ItemType
 
 public struct ItemSample
 {
+    public int index;
     public GameObject sampleObject;
     public List<MeshRenderer> meshs;
 }
@@ -40,7 +42,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public Vector2Int pivotIndex;
     [SerializeField] private Vector2 movePivot;
-    [HideInInspector] public int sampleIndex;
+    [SerializeField] private int sampleIndex;
 
     public void SetComponents(InventoryManager _invenMgr, bool isSample)
     {
@@ -57,6 +59,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             for (int i = 0; i < samplesTf.childCount; i++)
             {
                 var sample = new ItemSample();
+                sample.index = i;
                 sample.sampleObject = samplesTf.GetChild(i).gameObject;
                 sample.meshs = sample.sampleObject.GetComponentsInChildren<MeshRenderer>().ToList();
                 samples.Add(sample);
@@ -103,6 +106,49 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var activeSample = samples.Find(x => x.sampleObject.activeSelf);
         if (activeSample.sampleObject != null) activeSample.sampleObject.SetActive(false);
         samples[sampleIndex].sampleObject.SetActive(true);
+        gameObject.SetActive(true);
+    }
+
+    public void SetItemInfo(ItemType _type, Vector2Int _size, int _sampleIndex, Vector3 _rot)
+    {
+        type = _type;
+        size = _size;
+        sampleIndex = _sampleIndex;
+        switch (type)
+        {
+            case ItemType.MainWeapon:
+                break;
+            case ItemType.SubWeapon:
+                break;
+            case ItemType.Magazine:
+                break;
+            case ItemType.Rig:
+                break;
+            case ItemType.Backpack:
+                break;
+            default:
+                break;
+        }
+
+        if (size == new Vector2Int(1, 1))
+        {
+            rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
+            pivotIndex = new Vector2Int(0, 0);
+            movePivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
+        }
+        else
+        {
+            rect.sizeDelta = new Vector2Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y);
+            pivotIndex = new Vector2Int(size.x / 2, size.y / 2);
+            var pivotX = (pivotIndex.x * DataUtility.itemSize) + (DataUtility.itemSize / 2);
+            var pivotY = (pivotIndex.y * DataUtility.itemSize) + (DataUtility.itemSize / 2);
+            movePivot = new Vector2(-pivotX, pivotY);
+        }
+
+        var activeSample = samples.Find(x => x.sampleObject.activeSelf);
+        if (activeSample.sampleObject != null) activeSample.sampleObject.SetActive(false);
+        samples[sampleIndex].sampleObject.SetActive(true);
+        samples[sampleIndex].sampleObject.transform.localRotation = Quaternion.Euler(_rot);
         gameObject.SetActive(true);
     }
 
@@ -154,5 +200,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
         var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
         transform.position = worldPos;
+    }
+
+    public ItemSample GetSample()
+    {
+        return samples[sampleIndex];
     }
 }

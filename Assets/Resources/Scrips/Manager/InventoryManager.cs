@@ -103,6 +103,10 @@ public class InventoryManager : MonoBehaviour
         {
             ShowInventory();
         }
+        else if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
+        {
+            RotateItem();
+        }
     }
 
     public void ShowInventory()
@@ -117,9 +121,58 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr.mapEdt != null) gameMgr.mapEdt.gameObject.SetActive(!value);
     }
 
+    private void RotateItem()
+    {
+        if (holdingItem.size.x == 1 && holdingItem.size.y == 1) return;
+
+        var sample = holdingItem.GetSample();
+        Vector3 newRot;
+        if (sample.sampleObject.transform.localRotation.x == 0f)
+        {
+            newRot = sample.sampleObject.transform.localRotation.eulerAngles;
+            newRot.x = 90f;
+        }
+        else
+        {
+            newRot = sample.sampleObject.transform.localRotation.eulerAngles;
+            newRot.x = 0f;
+        }
+        sample.sampleObject.transform.localRotation = Quaternion.Euler(newRot);
+        var newSize = new Vector2Int(holdingItem.size.y, holdingItem.size.x);
+        holdingItem.SetItemInfo(holdingItem.type, newSize, sample.index);
+        holdingItem.FollowMouse();
+        if (onSlot != null)
+        {
+            if (onSlots.Count > 0)
+            {
+                for (int i = 0; i < onSlots.Count; i++)
+                {
+                    var onSlot = onSlots[i];
+                    if (onSlot.item != null && onSlot.item != holdingItem)
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    }
+                    else if (onSlot.item != null && onSlot.item == holdingItem)
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    }
+                    else
+                    {
+                        onSlot.SetSlotColor(Color.white);
+                    }
+                }
+                onSlots.Clear();
+            }
+            onSlot.PointerEnter_ItemSlot();
+        }
+    }
+
     public void TakeTheItem(ItemHandler item)
     {
-        sampleItem.SetItemInfo(item.type, item.size, item.sampleIndex);
+        var sample = item.GetSample();
+        var index = sample.index;
+        var rot = sample.sampleObject.transform.localRotation.eulerAngles;
+        sampleItem.SetItemInfo(item.type, item.size, index, rot);
         sampleItem.transform.position = item.transform.position;
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
@@ -214,16 +267,10 @@ public class InventoryManager : MonoBehaviour
 
     public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, ItemHandler item, Vector2Int startIndex)
     {
-        //var startIndex = slotIndex - item.pivotIndex;
         var setSlots = itemSlots.FindAll(x => x.slotIndex.x >= startIndex.x
                                            && x.slotIndex.y >= startIndex.y
                                            && x.slotIndex.x < startIndex.x + item.size.x
                                            && x.slotIndex.y < startIndex.y + item.size.y);
-        //for (int i = 0; i < setSlots.Count; i++)
-        //{
-        //    var setSlot = setSlots[i];
-        //    Debug.Log(setSlot.name);
-        //}
 
         return setSlots;
     }
