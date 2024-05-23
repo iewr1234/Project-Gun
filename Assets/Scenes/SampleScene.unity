@@ -18349,8 +18349,8 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
-  m_StartCorner: 0
+  m_ChildAlignment: 8
+  m_StartCorner: 3
   m_StartAxis: 0
   m_CellSize: {x: 70, y: 70}
   m_Spacing: {x: 2, y: 2}
@@ -21082,6 +21082,10 @@ PrefabInstance:
     - target: {fileID: 6096228520283075680, guid: 411fd0a184205544dbbe5d6c6f083581, type: 3}
       propertyPath: m_Name
       value: ItemSlot_103
+      objectReference: {fileID: 0}
+    - target: {fileID: 6096228520283075680, guid: 411fd0a184205544dbbe5d6c6f083581, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 411fd0a184205544dbbe5d6c6f083581, type: 3}
@@ -29398,7 +29402,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 963194227}
-  m_PlaneDistance: 10
+  m_PlaneDistance: 2
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -31394,6 +31398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sampleItem: {fileID: 0}
   onSlot: {fileID: 0}
+  onSlots: []
   holdingItem: {fileID: 0}
 --- !u!4 &1883874475
 Transform:

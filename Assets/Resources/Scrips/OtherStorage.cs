@@ -19,19 +19,12 @@ public class OtherStorage : MonoBehaviour
         invenMgr = _invenMgr;
 
         itemSlots = GetComponentsInChildren<ItemSlot>().ToList();
+        itemSlots.Reverse();
         for (int i = 0; i < itemSlots.Count; i++)
         {
             var itemSlot = itemSlots[i];
             var index = new Vector2Int(i % size.x, i / size.x);
             itemSlot.SetComponents(this, index);
         }
-    }
-
-    public void SaveInStorage(ItemHandler item)
-    {
-        var emptySlot = itemSlots.Find(x => x.item == null);
-        emptySlot.item = item;
-        item.transform.SetParent(emptySlot.transform);
-        item.transform.localPosition = Vector3.zero;
     }
 }

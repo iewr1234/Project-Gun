@@ -46,6 +46,7 @@ public class MyStorage : MonoBehaviour
         itemSlots = itemsRect.GetComponentsInChildren<ItemSlot>().ToList();
 
         SetStorageSize();
+        itemSlots.Reverse();
         for (int i = 0; i < itemSlots.Count; i++)
         {
             var itemSlot = itemSlots[i];
@@ -56,22 +57,6 @@ public class MyStorage : MonoBehaviour
                 itemSlot.gameObject.SetActive(false);
             }
         }
-    }
-
-    private void Update()
-    {
-        ResizeStorage();
-    }
-
-
-    private void ResizeStorage()
-    {
-        if (size.x * size.y <= reSizeNum) return;
-
-        var addSize = new Vector2(0, 8);
-        if (rect.sizeDelta == itemsRect.sizeDelta + addSize) return;
-
-        rect.sizeDelta = itemsRect.sizeDelta + addSize;
     }
 
     private void SetStorageSize()
@@ -107,5 +92,21 @@ public class MyStorage : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private void Update()
+    {
+        ResizeStorage();
+    }
+
+
+    private void ResizeStorage()
+    {
+        if (size.x * size.y <= reSizeNum) return;
+
+        var addSize = new Vector2(0, 8);
+        if (rect.sizeDelta == itemsRect.sizeDelta + addSize) return;
+
+        rect.sizeDelta = itemsRect.sizeDelta + addSize;
     }
 }

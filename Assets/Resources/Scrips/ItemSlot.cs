@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ItemSlot : MonoBehaviour
@@ -46,28 +45,37 @@ public class ItemSlot : MonoBehaviour
     {
         var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
         invenMgr.onSlot = this;
-        if (invenMgr.holdingItem != null && invenMgr.holdingItem.itemSlot != this)
+        if (invenMgr.holdingItem != null)
         {
-            if (item != null)
+            if (myStorage != null)
             {
-                if (invenMgr.holdingItem.size == new Vector2Int(1, 1))
-                {
-                    item.targetImage.color = DataUtility.slot_unMoveColor;
-                }
-                else
-                {
-
-                }
+                ProcessOfSlotSize(myStorage.itemSlots, invenMgr.holdingItem);
             }
             else
             {
-                if (invenMgr.holdingItem.size == new Vector2Int(1, 1))
+                ProcessOfSlotSize(otherStorage.itemSlots, invenMgr.holdingItem);
+            }
+        }
+        else if (item != null)
+        {
+            item.targetImage.raycastTarget = true;
+        }
+
+        void ProcessOfSlotSize(List<ItemSlot> itemSlots, ItemHandler item)
+        {
+            var startIndex = invenMgr.onSlot.slotIndex - item.pivotIndex;
+            invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item, startIndex);
+            var findItem = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
+            for (int i = 0; i < invenMgr.onSlots.Count; i++)
+            {
+                var onSlot = invenMgr.onSlots[i];
+                if (findItem)
                 {
-                    SetSlotColor(DataUtility.slot_moveColor);
+                    onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                 }
                 else
                 {
-
+                    onSlot.SetSlotColor(DataUtility.slot_moveColor);
                 }
             }
         }
@@ -79,45 +87,42 @@ public class ItemSlot : MonoBehaviour
         invenMgr.onSlot = null;
         if (invenMgr.holdingItem != null)
         {
-            if (item == null)
+            if (invenMgr.onSlots.Count > 0)
             {
-                SetSlotColor(Color.white);
-            }
-            else if (invenMgr.holdingItem != item && item.targetImage.color != DataUtility.slot_onItemColor)
-            {
-                if (item.size == new Vector2Int(1, 1))
+                for (int i = 0; i < invenMgr.onSlots.Count; i++)
                 {
-                    item.targetImage.color = DataUtility.slot_onItemColor;
+                    var onSlot = invenMgr.onSlots[i];
+                    if (onSlot.item != null && onSlot.item != invenMgr.holdingItem)
+                    {
+                        //onSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    }
+                    else if (onSlot.item != null && onSlot.item == invenMgr.holdingItem)
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    }
+                    else
+                    {
+                        onSlot.SetSlotColor(Color.white);
+                    }
+                }
+                invenMgr.onSlots.Clear();
+            }
+            else
+            {
+                if (item == null)
+                {
+                    SetSlotColor(Color.white);
                 }
                 else
                 {
-
+                    SetSlotColor(DataUtility.slot_onItemColor);
                 }
             }
         }
+        else if (item != null)
+        {
+            item.targetImage.raycastTarget = false;
+        }
     }
-
-    //public void OnBeginDrag(PointerEventData eventData)
-    //{
-    //    if (item == null) return;
-
-    //    var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
-    //    if (invenMgr.onSlot != this) return;
-
-    //    var color = DataUtility.slot_onItemColor;
-    //    color.a = 100 / 255f;
-    //    item.targetImage.color = color;
-    //    invenMgr.TakeTheItem(item);
-    //    FollowMouse();
-    //}
-
-    //public void OnDrag(PointerEventData eventData)
-    //{
-    //    FollowMouse();
-    //}
-
-    //public void OnEndDrag(PointerEventData eventData)
-    //{
-    //    SetItem(invenMgr.onSlot);
-    //}
 }

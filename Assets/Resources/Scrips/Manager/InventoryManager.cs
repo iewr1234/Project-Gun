@@ -12,7 +12,7 @@ public class InventoryManager : MonoBehaviour
     private OtherStorage otherStorage;
 
     [Header("---Access Component---")]
-    [SerializeField] private ItemHandler sampleItem;
+    public ItemHandler sampleItem;
 
     private Canvas inventoryUI;
     private Transform myItemTf;
@@ -21,6 +21,7 @@ public class InventoryManager : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public ItemSlot onSlot;
+    public List<ItemSlot> onSlots;
     public ItemHandler holdingItem;
 
     private List<ItemHandler> items = new List<ItemHandler>();
@@ -46,6 +47,7 @@ public class InventoryManager : MonoBehaviour
 
         inventoryUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         inventoryUI.worldCamera = gameMgr.camMgr.mainCam;
+        inventoryUI.planeDistance = 2f;
         myItemTf = inventoryUI.transform.Find("MyStorage/StorageField");
         otherItemTf = inventoryUI.transform.Find("OtherStorage/StorageField");
         itemPool = inventoryUI.transform.Find("ItemPool");
@@ -66,14 +68,15 @@ public class InventoryManager : MonoBehaviour
         inventoryUI.gameObject.SetActive(false);
 
         var testItem = items.Find(x => !x.gameObject.activeSelf);
-        testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 1), 0);
+        testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 2), 0);
         var emptySlot = otherStorage.itemSlots.Find(x => x.item == null);
-        testItem.SetItem(emptySlot);
+        var emptySlots = FindAllMultiSizeSlots(otherStorage.itemSlots, testItem, emptySlot.slotIndex);
+        PutTheItem(testItem, emptySlots);
 
         testItem = items.Find(x => !x.gameObject.activeSelf);
         testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 1), 0);
         emptySlot = otherStorage.itemSlots.Find(x => x.item == null);
-        testItem.SetItem(emptySlot);
+        PutTheItem(testItem, emptySlot);
     }
 
     private void CreateItems()
@@ -126,19 +129,13 @@ public class InventoryManager : MonoBehaviour
     {
         if (itemSlot == null || itemSlot.item != null)
         {
-            var itemTf = item.itemSlot.myStorage != null ? myItemTf : otherItemTf;
-            item.transform.SetParent(itemTf, false);
+            //var itemTf = item.itemSlot.myStorage != null ? myItemTf : otherItemTf;
+            item.transform.SetParent(item.itemSlot.transform, false);
             item.transform.position = item.itemSlot.transform.position;
-            if (itemSlot.item != null)
+            if (itemSlot != null && itemSlot.item != null)
             {
-                if (itemSlot.item.size == new Vector2Int(1, 1))
-                {
-                    itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
-                }
-                else
-                {
-
-                }
+                //itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
             }
         }
         else
@@ -157,6 +154,78 @@ public class InventoryManager : MonoBehaviour
         }
         holdingItem = null;
         sampleItem.gameObject.SetActive(false);
+
+        item.targetImage.raycastTarget = true;
+        item.targetImage.color = Color.clear;
+    }
+
+    public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
+    {
+        var findItem = itemSlots.Find(x => x.item != null && x.item != item);
+        if (findItem || itemSlots.Count < item.size.x * item.size.y)
+        {
+            //var itemTf = item.itemSlots[0].myStorage != null ? myItemTf : otherItemTf;
+            item.transform.SetParent(item.itemSlots[0].transform, false);
+            item.transform.position = item.itemSlots[0].transform.position;
+            item.targetImage.color = DataUtility.slot_onItemColor;
+            for (int i = 0; i < itemSlots.Count; i++)
+            {
+                var itemSlot = itemSlots[i];
+                if (itemSlot.item != null)
+                {
+                    itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                }
+                else
+                {
+                    itemSlot.SetSlotColor(Color.white);
+                }
+            }
+        }
+        else
+        {
+            if (item.itemSlots.Count > 0)
+            {
+                for (int i = 0; i < item.itemSlots.Count; i++)
+                {
+                    var itemSlot = item.itemSlots[i];
+                    itemSlot.item = null;
+                    itemSlot.SetSlotColor(Color.white);
+                }
+                item.itemSlots.Clear();
+            }
+
+            for (int i = 0; i < itemSlots.Count; i++)
+            {
+                var itemSlot = itemSlots[i];
+                itemSlot.item = item;
+                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+            }
+            item.itemSlots = new List<ItemSlot>(itemSlots);
+            item.transform.SetParent(itemSlots[0].transform, false);
+            item.transform.localPosition = Vector3.zero;
+        }
+        holdingItem = null;
+        onSlots.Clear();
+        sampleItem.gameObject.SetActive(false);
+
+        item.targetImage.raycastTarget = true;
+        item.targetImage.color = Color.clear;
+    }
+
+    public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, ItemHandler item, Vector2Int startIndex)
+    {
+        //var startIndex = slotIndex - item.pivotIndex;
+        var setSlots = itemSlots.FindAll(x => x.slotIndex.x >= startIndex.x
+                                           && x.slotIndex.y >= startIndex.y
+                                           && x.slotIndex.x < startIndex.x + item.size.x
+                                           && x.slotIndex.y < startIndex.y + item.size.y);
+        //for (int i = 0; i < setSlots.Count; i++)
+        //{
+        //    var setSlot = setSlots[i];
+        //    Debug.Log(setSlot.name);
+        //}
+
+        return setSlots;
     }
 
     public int GetCanvasDistance()

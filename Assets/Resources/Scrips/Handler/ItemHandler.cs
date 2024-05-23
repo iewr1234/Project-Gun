@@ -25,7 +25,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 {
     [Header("---Access Script---")]
     public InventoryManager invenMgr;
-    public ItemSlot itemSlot;
 
     [Header("---Access Component---")]
     public RectTransform rect;
@@ -35,7 +34,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("--- Assignment Variable---")]
     public ItemType type;
     public Vector2Int size = new Vector2Int(1, 1);
-    [HideInInspector] public Vector2 pivot;
+    [Space(5f)]
+
+    public ItemSlot itemSlot;
+    public List<ItemSlot> itemSlots = new List<ItemSlot>();
+    [HideInInspector] public Vector2Int pivotIndex;
+    [SerializeField] private Vector2 movePivot;
     [HideInInspector] public int sampleIndex;
 
     public void SetComponents(InventoryManager _invenMgr, bool isSample)
@@ -60,16 +64,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    //private void FixedUpdate()
-    //{
-    //    if (itemSlot == null) return;
-
-    //    if (invenMgr.holdingItem != this)
-    //    {
-    //        transform.position = itemSlot.transform.position;
-    //    }
-    //}
-
     public void SetItemInfo(ItemType _type, Vector2Int _size, int _sampleIndex)
     {
         type = _type;
@@ -77,8 +71,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         sampleIndex = _sampleIndex;
         switch (type)
         {
-            case ItemType.None:
-                break;
             case ItemType.MainWeapon:
                 break;
             case ItemType.SubWeapon:
@@ -95,11 +87,17 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (size == new Vector2Int(1, 1))
         {
-            pivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
+            rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
+            pivotIndex = new Vector2Int(0, 0);
+            movePivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
         }
         else
         {
-
+            rect.sizeDelta = new Vector2Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y);
+            pivotIndex = new Vector2Int(size.x / 2, size.y / 2);
+            var pivotX = (pivotIndex.x * DataUtility.itemSize) + (DataUtility.itemSize / 2);
+            var pivotY = (pivotIndex.y * DataUtility.itemSize) + (DataUtility.itemSize / 2);
+            movePivot = new Vector2(-pivotX, pivotY);
         }
 
         var activeSample = samples.Find(x => x.sampleObject.activeSelf);
@@ -114,6 +112,20 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var color = DataUtility.slot_onItemColor;
         color.a = 100 / 255f;
         targetImage.color = color;
+
+        //if (size == new Vector2Int(1, 1))
+        //{
+        //    itemSlot.SetSlotColor(Color.white);
+        //}
+        //else
+        //{
+        //    for (int i = 0; i < itemSlots.Count; i++)
+        //    {
+        //        var itemSlot = itemSlots[i];
+        //        itemSlot.SetSlotColor(Color.white);
+        //    }
+        //}
+
         invenMgr.TakeTheItem(this);
         FollowMouse();
     }
@@ -125,20 +137,22 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        SetItem(invenMgr.onSlot);
+        if (invenMgr == null) return;
+
+        if (size == new Vector2Int(1, 1))
+        {
+            invenMgr.PutTheItem(this, invenMgr.onSlot);
+        }
+        else
+        {
+            invenMgr.PutTheItem(this, invenMgr.onSlots);
+        }
     }
 
-    public void SetItem(ItemSlot itemSlot)
-    {
-        invenMgr.PutTheItem(this, itemSlot);
-        targetImage.raycastTarget = true;
-        targetImage.color = Color.clear;
-    }
-
-    private void FollowMouse()
+    public void FollowMouse()
     {
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x + pivot.x, mousePos.y + pivot.y, invenMgr.GetCanvasDistance()));
+        var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
         transform.position = worldPos;
     }
 }
