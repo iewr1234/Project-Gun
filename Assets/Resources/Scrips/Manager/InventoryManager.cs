@@ -77,7 +77,7 @@ public class InventoryManager : MonoBehaviour
         otherStorage.SetComponents(this);
 
         CreateItems();
-        //inventoryUI.gameObject.SetActive(false);
+        invenUI.gameObject.SetActive(false);
 
         var testItem = items.Find(x => !x.gameObject.activeSelf);
         testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 2), 0);
@@ -127,8 +127,8 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr.gameState == GameState.Shot || gameMgr.gameState == GameState.Watch) return;
 
         var value = !invenCam.enabled;
-        //inventoryUI.gameObject.SetActive(value);
         invenCam.enabled = value;
+        invenUI.gameObject.SetActive(value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         gameMgr.uiMgr.SetActiveGameUI(!value);
