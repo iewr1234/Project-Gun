@@ -1,6 +1,8 @@
+using EPOOutline;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -100,6 +102,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
+    private Outlinable outlinable;
     [SerializeField] private Collider cd;
 
     [HideInInspector] public Transform aimPoint;
@@ -205,6 +208,7 @@ public class CharacterController : MonoBehaviour
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
+        outlinable = this.AddComponent<Outlinable>();
         cd = GetComponent<Collider>();
 
         aimPoint = transform.Find("AimPoint");
@@ -220,9 +224,9 @@ public class CharacterController : MonoBehaviour
 
         ownerType = _ownerType;
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        DataUtility.SetMeshsMaterial(ownerType, meshs);
+        //DataUtility.SetMeshsMaterial(ownerType, meshs);
         sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
-        DataUtility.SetMeshsMaterial(ownerType, sMeshs);
+        //DataUtility.SetMeshsMaterial(ownerType, sMeshs);
         ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
         for (int i = 0; i < ragdollCds.Count; i++)
         {
@@ -279,6 +283,25 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    public void SetOutlinable()
+    {
+        outlinable.AddAllChildRenderersToRenderingList();
+        outlinable.RenderStyle = RenderStyle.FrontBack;
+        switch (ownerType)
+        {
+            case CharacterOwner.Player:
+                outlinable.BackParameters.Color = DataUtility.color_Player;
+                break;
+            case CharacterOwner.Enemy:
+                outlinable.BackParameters.Color = DataUtility.color_Enemy;
+                break;
+            default:
+                break;
+        }
+        outlinable.BackParameters.BlurShift = 0f;
+        outlinable.FrontParameters.Enabled = false;
     }
 
     private void OnDrawGizmos()
@@ -1761,7 +1784,7 @@ public class CharacterController : MonoBehaviour
             targetIndex = 0;
             fireRateNum = 0;
             sightNum = 0;
-            ChangeTargetShader();
+            //ChangeTargetShader();
             var targetInfo = targetList[targetIndex];
             SetTargeting(targetInfo);
             CameraState camState;
@@ -1803,7 +1826,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
         }
-        ChangeTargetShader();
+        //ChangeTargetShader();
 
         var targetInfo = targetList[targetIndex];
         SetTargeting(targetInfo);

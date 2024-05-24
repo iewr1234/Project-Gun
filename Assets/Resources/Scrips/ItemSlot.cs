@@ -20,7 +20,7 @@ public class ItemSlot : MonoBehaviour
     {
         myStorage = _myStorage;
 
-        slotImage = GetComponent<Image>();
+        slotImage = transform.Find("BackGround").GetComponent<Image>();
 
         slotIndex = _slotIndex;
         transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
@@ -30,7 +30,7 @@ public class ItemSlot : MonoBehaviour
     {
         otherStorage = _otherStorage;
 
-        slotImage = GetComponent<Image>();
+        slotImage = transform.Find("BackGround").GetComponent<Image>();
 
         slotIndex = _slotIndex;
         transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";

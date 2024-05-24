@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2072783157184057682}
   - component: {fileID: 2062859998667089190}
   - component: {fileID: 2054184910979356582}
+  - component: {fileID: 1829752634415559490}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_04
   m_TagString: Untagged
@@ -83,6 +84,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1829752634415559490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076166318557147456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076173168054543740
 GameObject:
   m_ObjectHideFlags: 0
@@ -94,6 +107,7 @@ GameObject:
   - component: {fileID: 2073267950613466592}
   - component: {fileID: 2066315333040982044}
   - component: {fileID: 2055490539857075054}
+  - component: {fileID: 2916428973280486016}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Earmuffs_01
   m_TagString: Untagged
@@ -166,6 +180,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2916428973280486016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076173168054543740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076215853789377702
 GameObject:
   m_ObjectHideFlags: 0
@@ -176,6 +202,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079188868690047140}
   - component: {fileID: 2106596813424618840}
+  - component: {fileID: 8012434380985599262}
   m_Layer: 0
   m_Name: SM_Chr_Civilian_Female_01
   m_TagString: Untagged
@@ -301,6 +328,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000103354454, y: 0.8548994, z: -0.038698435}
     m_Extent: {x: 1.022316, y: 0.96217847, z: 0.23708206}
   m_DirtyAABB: 0
+--- !u!114 &8012434380985599262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076215853789377702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076218281055042058
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,6 +351,7 @@ GameObject:
   - component: {fileID: 2078987092351346156}
   - component: {fileID: 2063612146902162040}
   - component: {fileID: 2055676001646337782}
+  - component: {fileID: 7586543341799950798}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_05
   m_TagString: Untagged
@@ -384,6 +424,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7586543341799950798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076218281055042058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076221995197517864
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,6 +446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073264822638848414}
   - component: {fileID: 2104125425520457258}
+  - component: {fileID: 5485060782057178392}
   m_Layer: 0
   m_Name: SM_Chr_Contractor_Female_01
   m_TagString: Untagged
@@ -519,6 +572,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.8419765, z: -0.045262158}
     m_Extent: {x: 1.0232847, y: 0.9465474, z: 0.27920887}
   m_DirtyAABB: 0
+--- !u!114 &5485060782057178392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076221995197517864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076226010758061254
 GameObject:
   m_ObjectHideFlags: 0
@@ -624,6 +689,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079028451390258740}
   - component: {fileID: 2107116133016006060}
+  - component: {fileID: 784520971708173099}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Bombsuit_Neck_01
   m_TagString: Untagged
@@ -749,6 +815,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.010321647, y: 1.5194197, z: -0.040450007}
     m_Extent: {x: 0.25272807, y: 0.20380926, z: 0.27630824}
   m_DirtyAABB: 0
+--- !u!114 &784520971708173099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076277572128846546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076327744577198532
 GameObject:
   m_ObjectHideFlags: 0
@@ -871,6 +949,7 @@ GameObject:
   - component: {fileID: 2079094947933681640}
   - component: {fileID: 2066312208095479802}
   - component: {fileID: 2054101712933507440}
+  - component: {fileID: 589728943305553619}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Knife_Sheath_01
   m_TagString: Untagged
@@ -943,6 +1022,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &589728943305553619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076335590334148962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076340132225755460
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,6 +1139,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073119510036353624}
   - component: {fileID: 2106707805747985922}
+  - component: {fileID: 5314145616483083856}
   m_Layer: 0
   m_Name: SM_Chr_Leader_Male_01
   m_TagString: Untagged
@@ -1173,6 +1265,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00011152029, y: 0.84347904, z: -0.03633435}
     m_Extent: {x: 1.025528, y: 0.9445722, z: 0.24946828}
   m_DirtyAABB: 0
+--- !u!114 &5314145616483083856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076357651463278648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076365988124797936
 GameObject:
   m_ObjectHideFlags: 0
@@ -1184,6 +1288,7 @@ GameObject:
   - component: {fileID: 2079349885574233454}
   - component: {fileID: 2063449987173674686}
   - component: {fileID: 2053788574641783412}
+  - component: {fileID: 4315915678610638309}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Backpack_01
   m_TagString: Untagged
@@ -1256,6 +1361,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4315915678610638309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076365988124797936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076374727236052804
 GameObject:
   m_ObjectHideFlags: 0
@@ -1298,6 +1415,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079366225271286016}
   - component: {fileID: 2106968841843274178}
+  - component: {fileID: 5251631529962310027}
   m_Layer: 0
   m_Name: SM_Chr_Contractor_Male_01
   m_TagString: Untagged
@@ -1423,6 +1541,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00022959709, y: 0.84497845, z: -0.03405296}
     m_Extent: {x: 1.027361, y: 0.9430728, z: 0.2641474}
   m_DirtyAABB: 0
+--- !u!114 &5251631529962310027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076385196284323684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076385684720900348
 GameObject:
   m_ObjectHideFlags: 0
@@ -1433,6 +1563,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073034710345356532}
   - component: {fileID: 2104142119796135608}
+  - component: {fileID: 931879334924460566}
   m_Layer: 0
   m_Name: SM_Chr_Soldier_Male_01
   m_TagString: Untagged
@@ -1558,6 +1689,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0008060336, y: 0.8449393, z: -0.03346622}
     m_Extent: {x: 1.0269654, y: 0.9435851, z: 0.26641542}
   m_DirtyAABB: 0
+--- !u!114 &931879334924460566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076385684720900348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076415371619153198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1600,6 +1743,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079381731584538992}
   - component: {fileID: 2107570422286499048}
+  - component: {fileID: 889093316205915080}
   m_Layer: 0
   m_Name: SM_Chr_Civilian_Male_01
   m_TagString: Untagged
@@ -1725,6 +1869,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00041258335, y: 0.8421438, z: -0.030104235}
     m_Extent: {x: 1.0249741, y: 0.94590735, z: 0.26607895}
   m_DirtyAABB: 0
+--- !u!114 &889093316205915080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076441510533861390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076451462796466864
 GameObject:
   m_ObjectHideFlags: 0
@@ -1943,6 +2099,7 @@ GameObject:
   - component: {fileID: 2079261021919201470}
   - component: {fileID: 2063770137628792314}
   - component: {fileID: 2054077168244520234}
+  - component: {fileID: 5921977294911683104}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_Mag_Single_01
   m_TagString: Untagged
@@ -2015,6 +2172,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5921977294911683104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076479596174199330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076483178973684316
 GameObject:
   m_ObjectHideFlags: 0
@@ -2025,6 +2194,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079409276795690546}
   - component: {fileID: 2104118440996159982}
+  - component: {fileID: 2466389905726135650}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Male_04
   m_TagString: Untagged
@@ -2150,6 +2320,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00041264296, y: 0.8426419, z: -0.036873363}
     m_Extent: {x: 1.0249741, y: 0.94540924, z: 0.24999353}
   m_DirtyAABB: 0
+--- !u!114 &2466389905726135650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076483178973684316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076504695241512056
 GameObject:
   m_ObjectHideFlags: 0
@@ -2287,6 +2469,7 @@ GameObject:
   - component: {fileID: 2079495347253077074}
   - component: {fileID: 2062724004740075316}
   - component: {fileID: 2055878757715202258}
+  - component: {fileID: 1092266777443883943}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_Mag_Single_01
   m_TagString: Untagged
@@ -2359,6 +2542,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1092266777443883943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076607196094451728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076610863947004892
 GameObject:
   m_ObjectHideFlags: 0
@@ -2466,6 +2661,7 @@ GameObject:
   - component: {fileID: 2079521339372321788}
   - component: {fileID: 2063662591079861240}
   - component: {fileID: 2055457143636760136}
+  - component: {fileID: 4815916221266261745}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Goggles_Strap_01_Glass
   m_TagString: Glass
@@ -2538,6 +2734,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4815916221266261745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076636176522720566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076639956894589704
 GameObject:
   m_ObjectHideFlags: 0
@@ -2611,6 +2819,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072788724364556456}
   - component: {fileID: 2106818873688833946}
+  - component: {fileID: 7938331864777649720}
   m_Layer: 0
   m_Name: SM_Chr_Bombsuit_Male_01
   m_TagString: Untagged
@@ -2736,6 +2945,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00000011920929, y: 0.83634055, z: -0.02430296}
     m_Extent: {x: 1.0253866, y: 0.9517106, z: 0.30100113}
   m_DirtyAABB: 0
+--- !u!114 &7938331864777649720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076662356929422768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076685818799610246
 GameObject:
   m_ObjectHideFlags: 0
@@ -2859,6 +3080,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072812245352168636}
   - component: {fileID: 2106662069508717830}
+  - component: {fileID: 5007631709921643216}
   m_Layer: 0
   m_Name: SM_Chr_Soldier_Female_01
   m_TagString: Untagged
@@ -2984,6 +3206,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.8412484, z: -0.024408408}
     m_Extent: {x: 1.0232847, y: 0.9472754, z: 0.2657426}
   m_DirtyAABB: 0
+--- !u!114 &5007631709921643216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076698696861860780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076706076471705700
 GameObject:
   m_ObjectHideFlags: 0
@@ -2995,6 +3229,7 @@ GameObject:
   - component: {fileID: 2079530874724001596}
   - component: {fileID: 2063673130864733056}
   - component: {fileID: 2055640085442664390}
+  - component: {fileID: 8702827314180261385}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Hat_Cap_01
   m_TagString: Untagged
@@ -3067,6 +3302,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8702827314180261385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076706076471705700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076710717857594790
 GameObject:
   m_ObjectHideFlags: 0
@@ -3078,6 +3325,7 @@ GameObject:
   - component: {fileID: 2073103924893078504}
   - component: {fileID: 2063582100565157734}
   - component: {fileID: 2053801339422875752}
+  - component: {fileID: 4636593659917360553}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_Mag_Single_01
   m_TagString: Untagged
@@ -3150,6 +3398,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4636593659917360553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076710717857594790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2076719948256918678
 GameObject:
   m_ObjectHideFlags: 0
@@ -3191,6 +3451,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079163354460006960}
   - component: {fileID: 2106881831137269412}
+  - component: {fileID: 6975170367250106490}
   m_Layer: 0
   m_Name: SM_Chr_Contractor_Male_02
   m_TagString: Untagged
@@ -3316,6 +3577,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0013849139, y: 0.8648821, z: -0.023968205}
     m_Extent: {x: 1.0266688, y: 0.965539, z: 0.27693683}
   m_DirtyAABB: 0
+--- !u!114 &6975170367250106490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076929428352649514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077011196279008612
 GameObject:
   m_ObjectHideFlags: 0
@@ -3326,6 +3599,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079127421619759832}
   - component: {fileID: 2103954479944938908}
+  - component: {fileID: 272047889563262229}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Headpiece_02
   m_TagString: Untagged
@@ -3451,6 +3725,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00067441165, y: 1.5745528, z: 0.006749898}
     m_Extent: {x: 0.1511593, y: 0.15974087, z: 0.14812174}
   m_DirtyAABB: 0
+--- !u!114 &272047889563262229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077011196279008612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077024211268639874
 GameObject:
   m_ObjectHideFlags: 0
@@ -3462,6 +3748,7 @@ GameObject:
   - component: {fileID: 2078996173109545658}
   - component: {fileID: 2063676029952082378}
   - component: {fileID: 2055694616612197738}
+  - component: {fileID: 2697317318113638644}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_02
   m_TagString: Untagged
@@ -3534,6 +3821,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2697317318113638644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077024211268639874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077032967189136580
 GameObject:
   m_ObjectHideFlags: 0
@@ -3576,6 +3875,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079249101674212258}
   - component: {fileID: 2106996609701594200}
+  - component: {fileID: 5024499504848905245}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Male_03
   m_TagString: Untagged
@@ -3701,6 +4001,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00014126301, y: 0.8426154, z: -0.055243544}
     m_Extent: {x: 1.0252455, y: 0.9454357, z: 0.2935384}
   m_DirtyAABB: 0
+--- !u!114 &5024499504848905245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077039670734554854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077044572921186558
 GameObject:
   m_ObjectHideFlags: 0
@@ -3742,6 +4054,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073016929690283992}
   - component: {fileID: 2106772109078799828}
+  - component: {fileID: 5094847873601438515}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Male_02
   m_TagString: Untagged
@@ -3867,6 +4180,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0012684464, y: 0.8456731, z: -0.022395074}
     m_Extent: {x: 1.0270483, y: 0.9428514, z: 0.24018851}
   m_DirtyAABB: 0
+--- !u!114 &5094847873601438515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077068154282476374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077084046519979164
 GameObject:
   m_ObjectHideFlags: 0
@@ -4052,6 +4377,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079050553221869208}
   - component: {fileID: 2106670477424171726}
+  - component: {fileID: 392282106090166251}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Neck_01
   m_TagString: Untagged
@@ -4177,6 +4503,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00165084, y: 1.4266381, z: -0.034346387}
     m_Extent: {x: 0.27522853, y: 0.1353237, z: 0.16276735}
   m_DirtyAABB: 0
+--- !u!114 &392282106090166251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077095464884107940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077096079480155528
 GameObject:
   m_ObjectHideFlags: 0
@@ -4187,6 +4525,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072911555246689656}
   - component: {fileID: 2106727962197000902}
+  - component: {fileID: 3835071139703794348}
   m_Layer: 0
   m_Name: SM_Chr_Attack_Ghillie_Mask_01
   m_TagString: Untagged
@@ -4312,6 +4651,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0045271367, y: 1.5625987, z: 0.05154157}
     m_Extent: {x: 0.15596734, y: 0.22180569, z: 0.10016954}
   m_DirtyAABB: 0
+--- !u!114 &3835071139703794348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077096079480155528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077097495994755654
 GameObject:
   m_ObjectHideFlags: 0
@@ -4323,6 +4674,7 @@ GameObject:
   - component: {fileID: 2079051360930807290}
   - component: {fileID: 2063296530030275474}
   - component: {fileID: 2055804698517889278}
+  - component: {fileID: 821986822162561869}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Holster_Pistol_02
   m_TagString: Untagged
@@ -4395,6 +4747,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &821986822162561869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077097495994755654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077099684862639412
 GameObject:
   m_ObjectHideFlags: 0
@@ -4525,15 +4889,21 @@ MonoBehaviour:
   wisdom: 0
   agility: 0
   dexterity: 0
+  mobility: 5
+  maxMoveNum: 0
+  shootMoveNum: 0
+  maxAction: 0
+  action: 0
   maxHealth: 20
   health: 0
   maxStamina: 0
   stamina: 0
   sight: 7.5
-  mobility: 5
   aiming: 0
   reaction: 0
   currentWeapon: {fileID: 0}
+  fireRateNum: 0
+  sightNum: 0
   currentNode: {fileID: 0}
   cover: {fileID: 0}
   isCopy: 0
@@ -4721,6 +5091,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079338630676538872}
   - component: {fileID: 2106998881384251786}
+  - component: {fileID: 7822384550554947589}
   m_Layer: 0
   m_Name: SM_Chr_Pilot_Female_01
   m_TagString: Untagged
@@ -4846,6 +5217,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.84023285, z: -0.027690858}
     m_Extent: {x: 1.0221847, y: 0.94829106, z: 0.26846024}
   m_DirtyAABB: 0
+--- !u!114 &7822384550554947589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077129857958312346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077135178856722132
 GameObject:
   m_ObjectHideFlags: 0
@@ -4856,6 +5239,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079143355145715606}
   - component: {fileID: 2106762549825820574}
+  - component: {fileID: 3061828906039361693}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Headpiece_01
   m_TagString: Untagged
@@ -4981,6 +5365,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0009983331, y: 1.58146, z: 0.001311928}
     m_Extent: {x: 0.15748905, y: 0.21420914, z: 0.14751866}
   m_DirtyAABB: 0
+--- !u!114 &3061828906039361693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077135178856722132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077136390797184624
 GameObject:
   m_ObjectHideFlags: 0
@@ -4991,6 +5387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2078989115510671032}
   - component: {fileID: 2104160530670806108}
+  - component: {fileID: 7646508294120675360}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Neck_03
   m_TagString: Untagged
@@ -5116,6 +5513,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0063019693, y: 1.4710603, z: -0.07399131}
     m_Extent: {x: 0.23270735, y: 0.13343221, z: 0.20543416}
   m_DirtyAABB: 0
+--- !u!114 &7646508294120675360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077136390797184624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077142224687424314
 GameObject:
   m_ObjectHideFlags: 0
@@ -5157,6 +5566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079201876490564612}
   - component: {fileID: 2107051702800475630}
+  - component: {fileID: 8591554086822798033}
   m_Layer: 0
   m_Name: SM_Chr_Ghillie_Male_01
   m_TagString: Untagged
@@ -5282,6 +5692,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0012045503, y: 0.87602144, z: -0.077846035}
     m_Extent: {x: 1.0260208, y: 0.97466725, z: 0.30610228}
   m_DirtyAABB: 0
+--- !u!114 &8591554086822798033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077143297970903946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077161156791002998
 GameObject:
   m_ObjectHideFlags: 0
@@ -5292,6 +5714,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073284724962739416}
   - component: {fileID: 2106566908443904172}
+  - component: {fileID: 7225335814738376858}
   m_Layer: 0
   m_Name: SM_Chr_Pilot_Male_01
   m_TagString: Untagged
@@ -5417,6 +5840,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00046151876, y: 0.8454535, z: -0.04611814}
     m_Extent: {x: 1.0252917, y: 0.9430709, z: 0.25691566}
   m_DirtyAABB: 0
+--- !u!114 &7225335814738376858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077161156791002998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077162368357445854
 GameObject:
   m_ObjectHideFlags: 0
@@ -5427,6 +5862,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072850474842660556}
   - component: {fileID: 2107004601894482980}
+  - component: {fileID: 9187505731114819469}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Headpiece_03
   m_TagString: Untagged
@@ -5552,6 +5988,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0038254857, y: 1.6088237, z: 0.0014727861}
     m_Extent: {x: 0.15448408, y: 0.19269395, z: 0.14735796}
   m_DirtyAABB: 0
+--- !u!114 &9187505731114819469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077162368357445854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077175936480939686
 GameObject:
   m_ObjectHideFlags: 0
@@ -5713,6 +6161,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072968609649829030}
   - component: {fileID: 2103760997705620696}
+  - component: {fileID: 4592326049122465468}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Neck_02
   m_TagString: Untagged
@@ -5838,6 +6287,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.020831928, y: 1.4061407, z: 0.026470996}
     m_Extent: {x: 0.16033278, y: 0.13126528, z: 0.16346246}
   m_DirtyAABB: 0
+--- !u!114 &4592326049122465468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077190998152173322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077191136183915884
 GameObject:
   m_ObjectHideFlags: 0
@@ -5849,6 +6310,7 @@ GameObject:
   - component: {fileID: 2079091358302227266}
   - component: {fileID: 2062681884380118020}
   - component: {fileID: 2055889135689678000}
+  - component: {fileID: 6984042596559529763}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_02
   m_TagString: Untagged
@@ -5921,6 +6383,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6984042596559529763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077191136183915884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077193677605571914
 GameObject:
   m_ObjectHideFlags: 0
@@ -5963,6 +6437,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079252459091370906}
   - component: {fileID: 2106817291383330574}
+  - component: {fileID: 61221748503673631}
   m_Layer: 0
   m_Name: SM_Chr_Soldier_Male_02
   m_TagString: Untagged
@@ -6088,6 +6563,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0010966659, y: 0.8449393, z: -0.034024134}
     m_Extent: {x: 1.0258031, y: 0.9435851, z: 0.26744437}
   m_DirtyAABB: 0
+--- !u!114 &61221748503673631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077199272481650418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077208307053551558
 GameObject:
   m_ObjectHideFlags: 0
@@ -6130,6 +6617,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2078976633567607064}
   - component: {fileID: 2107608694864945812}
+  - component: {fileID: 8913750263564861671}
   m_Layer: 0
   m_Name: SM_Chr_Soldier_Female_02
   m_TagString: Untagged
@@ -6255,6 +6743,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.84124833, z: -0.024875067}
     m_Extent: {x: 1.0221847, y: 0.94727546, z: 0.25776738}
   m_DirtyAABB: 0
+--- !u!114 &8913750263564861671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077239896178868820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077241243988713956
 GameObject:
   m_ObjectHideFlags: 0
@@ -6266,6 +6766,7 @@ GameObject:
   - component: {fileID: 2073045837471588006}
   - component: {fileID: 2063482840718680880}
   - component: {fileID: 2053970917700525322}
+  - component: {fileID: 16076304818811402}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Hair_Male_04
   m_TagString: Untagged
@@ -6338,6 +6839,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &16076304818811402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077241243988713956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077258735001677794
 GameObject:
   m_ObjectHideFlags: 0
@@ -6348,6 +6861,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2079521375999782662}
   - component: {fileID: 2103853961821127772}
+  - component: {fileID: 5880787630591873747}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Male_05
   m_TagString: Untagged
@@ -6473,6 +6987,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00041258335, y: 0.84134054, z: -0.028178953}
     m_Extent: {x: 1.0249741, y: 0.9467107, z: 0.24473026}
   m_DirtyAABB: 0
+--- !u!114 &5880787630591873747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077258735001677794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077260300075018948
 GameObject:
   m_ObjectHideFlags: 0
@@ -6483,6 +7009,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073340968229526644}
   - component: {fileID: 2106956062612139020}
+  - component: {fileID: 1306160944494381991}
   m_Layer: 0
   m_Name: SM_Chr_Civilian_Female_02
   m_TagString: Untagged
@@ -6608,6 +7135,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00010341406, y: 0.85822445, z: -0.028798223}
     m_Extent: {x: 1.022316, y: 0.9519053, z: 0.24184594}
   m_DirtyAABB: 0
+--- !u!114 &1306160944494381991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077260300075018948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077264069908050266
 GameObject:
   m_ObjectHideFlags: 0
@@ -6761,6 +7300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072978261998185570}
   - component: {fileID: 2106612597574938938}
+  - component: {fileID: 7377795221288090922}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Male_01
   m_TagString: Untagged
@@ -6886,6 +7426,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0007863045, y: 0.84273136, z: -0.023537442}
     m_Extent: {x: 1.0261877, y: 0.9452522, z: 0.24399199}
   m_DirtyAABB: 0
+--- !u!114 &7377795221288090922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077264524475313400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077266473836985928
 GameObject:
   m_ObjectHideFlags: 0
@@ -6897,6 +7449,7 @@ GameObject:
   - component: {fileID: 2073191822013488870}
   - component: {fileID: 2066481635050697624}
   - component: {fileID: 2055436491911884042}
+  - component: {fileID: 1495249745409134668}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Pouch_Mag_Single_01
   m_TagString: Untagged
@@ -6969,6 +7522,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1495249745409134668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077266473836985928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077273429414070752
 GameObject:
   m_ObjectHideFlags: 0
@@ -7011,6 +7576,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073294769391650544}
   - component: {fileID: 2104039367568241640}
+  - component: {fileID: 3251212079761881393}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Female_02
   m_TagString: Untagged
@@ -7136,6 +7702,18 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.001429677, y: 0.8419769, z: -0.007547058}
     m_Extent: {x: 1.0220896, y: 0.94654775, z: 0.22707531}
   m_DirtyAABB: 0
+--- !u!114 &3251212079761881393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077280706154047392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077867510698976562
 GameObject:
   m_ObjectHideFlags: 0
@@ -7146,6 +7724,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073111993571500386}
   - component: {fileID: 2106957179943884514}
+  - component: {fileID: 7125333953851959761}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Contractor_Scarf_01
   m_TagString: Untagged
@@ -7271,6 +7850,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.002930373, y: 1.4884231, z: -0.020747475}
     m_Extent: {x: 0.1631276, y: 0.09145135, z: 0.13126609}
   m_DirtyAABB: 0
+--- !u!114 &7125333953851959761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077867510698976562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077878358400342834
 GameObject:
   m_ObjectHideFlags: 0
@@ -7430,6 +8021,7 @@ GameObject:
   - component: {fileID: 2079515571169262424}
   - component: {fileID: 2063270756357665170}
   - component: {fileID: 2054853240450600938}
+  - component: {fileID: 5204913754561101371}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Goggles_Strap_01
   m_TagString: Untagged
@@ -7503,6 +8095,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5204913754561101371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077912673018886420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077928752806256104
 GameObject:
   m_ObjectHideFlags: 0
@@ -7513,6 +8117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072999177919152908}
   - component: {fileID: 2103792214332581850}
+  - component: {fileID: 263835664140671220}
   m_Layer: 0
   m_Name: SM_Chr_Insurgent_Female_01
   m_TagString: Untagged
@@ -7638,6 +8243,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.000000059604645, y: 0.84997, z: -0.011988573}
     m_Extent: {x: 1.022471, y: 0.939389, z: 0.2448979}
   m_DirtyAABB: 0
+--- !u!114 &263835664140671220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077928752806256104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077941817708458044
 GameObject:
   m_ObjectHideFlags: 0
@@ -8048,6 +8665,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073195362826239488}
   - component: {fileID: 2103927637990113592}
+  - component: {fileID: 5014614857699588278}
   m_Layer: 0
   m_Name: SM_Chr_Attach_Insurgent_Headpiece_04
   m_TagString: Untagged
@@ -8173,6 +8791,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00080732256, y: 1.5764095, z: -0.0009885952}
     m_Extent: {x: 0.16721594, y: 0.21925962, z: 0.15640154}
   m_DirtyAABB: 0
+--- !u!114 &5014614857699588278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077958533439585542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077960332906251758
 GameObject:
   m_ObjectHideFlags: 0
@@ -8277,6 +8907,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073080857634439558}
   - component: {fileID: 2106913519998772020}
+  - component: {fileID: 414921517386491207}
   m_Layer: 0
   m_Name: SM_Chr_Civilian_Male_02
   m_TagString: Untagged
@@ -8402,6 +9033,18 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00041258335, y: 0.84228575, z: -0.045071125}
     m_Extent: {x: 1.0249741, y: 0.9457654, z: 0.24920988}
   m_DirtyAABB: 0
+--- !u!114 &414921517386491207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077981381839357464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4746544197340268385
 GameObject:
   m_ObjectHideFlags: 0
@@ -8600,3 +9243,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8946814413348558816, guid: 1a8cadcf6cc64874d832f5aa2e9517f7, type: 3}
   m_PrefabInstance: {fileID: 4211127602360141647}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5069248266189498873 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8946814413348384438, guid: 1a8cadcf6cc64874d832f5aa2e9517f7, type: 3}
+  m_PrefabInstance: {fileID: 4211127602360141647}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6694318482599506252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5069248266189498873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034bc47afcbf5e141a58d5c20b7808e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

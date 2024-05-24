@@ -70,7 +70,7 @@ public class Weapon : MonoBehaviour
         muzzleTf = transform.Find("Muzzle");
 
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
+        //DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
         type = weaponData.type;
         SetWeaponPositionAndRotation();
 

@@ -1,5 +1,7 @@
+using EPOOutline;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -158,6 +160,7 @@ public class GameManager : MonoBehaviour
                 weapon.WeaponSwitching("Holster");
             }
         }
+        charCtr.SetOutlinable();
 
         // Set Armor
         if (charData.armorID != "None")
