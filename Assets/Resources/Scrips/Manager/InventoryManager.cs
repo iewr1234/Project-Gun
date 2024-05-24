@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.Progress;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -15,8 +15,13 @@ public class InventoryManager : MonoBehaviour
     public ItemHandler sampleItem;
 
     private Canvas inventoryUI;
-    private Transform myItemTf;
-    private Transform otherItemTf;
+
+    private ScrollRect myScrollRect;
+    private GameObject myScrollbar;
+
+    private ScrollRect otherScrollRect;
+    private GameObject otherScrollbar;
+
     private Transform itemPool;
 
     [Header("--- Assignment Variable---")]
@@ -48,14 +53,19 @@ public class InventoryManager : MonoBehaviour
         inventoryUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         inventoryUI.worldCamera = gameMgr.camMgr.mainCam;
         inventoryUI.planeDistance = 2f;
-        myItemTf = inventoryUI.transform.Find("MyStorage/StorageField");
-        otherItemTf = inventoryUI.transform.Find("OtherStorage/StorageField");
+
+        myScrollRect = inventoryUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
+        myScrollbar = inventoryUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
+
+        otherScrollRect = inventoryUI.transform.Find("OtherStorage/ScrollView").GetComponent<ScrollRect>();
+        otherScrollbar = inventoryUI.transform.Find("OtherStorage/ScrollView/Scrollbar Vertical").gameObject;
+
         itemPool = inventoryUI.transform.Find("ItemPool");
         sampleItem = inventoryUI.transform.Find("SampleItem").GetComponent<ItemHandler>();
         sampleItem.SetComponents(this, true);
         sampleItem.gameObject.SetActive(false);
 
-        myStorages = inventoryUI.transform.Find("MyStorage/StorageField/StorageItems").GetComponentsInChildren<MyStorage>().ToList();
+        myStorages = inventoryUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
         for (int i = 0; i < myStorages.Count; i++)
         {
             var storage = myStorages[i];
@@ -95,6 +105,7 @@ public class InventoryManager : MonoBehaviour
     private void Update()
     {
         KeyboardInput();
+        StorageScrollView();
     }
 
     private void KeyboardInput()
@@ -166,6 +177,14 @@ public class InventoryManager : MonoBehaviour
             }
             onSlot.PointerEnter_ItemSlot();
         }
+    }
+
+    private void StorageScrollView()
+    {
+        if (!inventoryUI.gameObject.activeSelf) return;
+
+        myScrollRect.vertical = myScrollbar.activeSelf;
+        otherScrollRect.vertical = otherScrollbar.activeSelf;
     }
 
     public void TakeTheItem(ItemHandler item)
