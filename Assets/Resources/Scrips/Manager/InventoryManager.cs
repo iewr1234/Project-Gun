@@ -141,6 +141,7 @@ public class InventoryManager : MonoBehaviour
         var newSize = new Vector2Int(holdingItem.size.y, holdingItem.size.x);
         holdingItem.SetItemInfo(holdingItem.type, newSize, sample.index);
         holdingItem.FollowMouse();
+
         if (onSlot != null)
         {
             if (onSlots.Count > 0)
