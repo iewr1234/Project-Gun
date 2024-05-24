@@ -1,10 +1,10 @@
-using EPOOutline;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using EPOOutline;
+using Unity.VisualScripting;
 
 public enum CharacterOwner
 {
@@ -287,21 +287,29 @@ public class CharacterController : MonoBehaviour
 
     public void SetOutlinable()
     {
-        outlinable.AddAllChildRenderersToRenderingList();
         outlinable.RenderStyle = RenderStyle.FrontBack;
+        outlinable.BackParameters.DilateShift = 0f;
+        outlinable.BackParameters.BlurShift = 0f;
+        outlinable.BackParameters.FillPass.Shader = Resources.Load<Shader>("Shaders/Outline/Fills/Interlaced");
+        outlinable.BackParameters.FillPass.SetColor("_PublicColor", Color.gray);
+        outlinable.BackParameters.FillPass.SetFloat("_PublicSize", 2f);
+        outlinable.BackParameters.FillPass.SetFloat("_PublicSpeed", 0f);
+        outlinable.BackParameters.FillPass.SetFloat("_PublicAngle", 45f);
         switch (ownerType)
         {
             case CharacterOwner.Player:
+                outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Player);
                 outlinable.BackParameters.Color = DataUtility.color_Player;
                 break;
             case CharacterOwner.Enemy:
+                outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Enemy);
                 outlinable.BackParameters.Color = DataUtility.color_Enemy;
                 break;
             default:
                 break;
         }
-        outlinable.BackParameters.BlurShift = 0f;
         outlinable.FrontParameters.Enabled = false;
+        outlinable.AddAllChildRenderersToRenderingList();
     }
 
     private void OnDrawGizmos()
@@ -475,7 +483,6 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count > 0)
         {
             var tagetInfo = targetList.OrderBy(x => DataUtility.GetDistance(x.shooterNode.transform.position, x.targetNode.transform.position)).FirstOrDefault();
-            Debug.Log($"{transform.name}: {tagetInfo.shooterCover.coverType}");
             if (tagetInfo.shooterCover)
             {
                 AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
