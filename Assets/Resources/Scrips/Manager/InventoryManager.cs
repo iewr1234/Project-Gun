@@ -14,7 +14,8 @@ public class InventoryManager : MonoBehaviour
     [Header("---Access Component---")]
     public ItemHandler sampleItem;
 
-    private Canvas inventoryUI;
+    [HideInInspector] public Camera invenCam;
+    private Canvas invenUI;
 
     private ScrollRect myScrollRect;
     private GameObject myScrollbar;
@@ -50,32 +51,33 @@ public class InventoryManager : MonoBehaviour
     {
         gameMgr = _gmaeMgr;
 
-        inventoryUI = transform.Find("InventoryUI").GetComponent<Canvas>();
-        inventoryUI.worldCamera = gameMgr.camMgr.mainCam;
-        inventoryUI.planeDistance = 2f;
+        invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
+        invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
+        invenUI.worldCamera = invenCam;
+        invenUI.planeDistance = 2f;
 
-        myScrollRect = inventoryUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
-        myScrollbar = inventoryUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
+        myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
+        myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
 
-        otherScrollRect = inventoryUI.transform.Find("OtherStorage/ScrollView").GetComponent<ScrollRect>();
-        otherScrollbar = inventoryUI.transform.Find("OtherStorage/ScrollView/Scrollbar Vertical").gameObject;
+        otherScrollRect = invenUI.transform.Find("OtherStorage/ScrollView").GetComponent<ScrollRect>();
+        otherScrollbar = invenUI.transform.Find("OtherStorage/ScrollView/Scrollbar Vertical").gameObject;
 
-        itemPool = inventoryUI.transform.Find("ItemPool");
-        sampleItem = inventoryUI.transform.Find("SampleItem").GetComponent<ItemHandler>();
+        itemPool = invenUI.transform.Find("ItemPool");
+        sampleItem = invenUI.transform.Find("SampleItem").GetComponent<ItemHandler>();
         sampleItem.SetComponents(this, true);
         sampleItem.gameObject.SetActive(false);
 
-        myStorages = inventoryUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
+        myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
         for (int i = 0; i < myStorages.Count; i++)
         {
             var storage = myStorages[i];
             storage.SetComponents(this);
         }
-        otherStorage = inventoryUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
+        otherStorage = invenUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
         otherStorage.SetComponents(this);
 
         CreateItems();
-        inventoryUI.gameObject.SetActive(false);
+        //inventoryUI.gameObject.SetActive(false);
 
         var testItem = items.Find(x => !x.gameObject.activeSelf);
         testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 2), 0);
@@ -124,10 +126,11 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr.gameState == GameState.Shot || gameMgr.gameState == GameState.Watch) return;
 
-        var value = !inventoryUI.gameObject.activeSelf;
-        inventoryUI.gameObject.SetActive(value);
+        var value = !invenCam.enabled;
+        //inventoryUI.gameObject.SetActive(value);
+        invenCam.enabled = value;
         gameMgr.DeselectCharacter();
-        gameMgr.gameState = inventoryUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
+        gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         gameMgr.uiMgr.SetActiveGameUI(!value);
         if (gameMgr.mapEdt != null) gameMgr.mapEdt.gameObject.SetActive(!value);
     }
@@ -181,7 +184,7 @@ public class InventoryManager : MonoBehaviour
 
     private void StorageScrollView()
     {
-        if (!inventoryUI.gameObject.activeSelf) return;
+        if (!invenUI.gameObject.activeSelf) return;
 
         myScrollRect.vertical = myScrollbar.activeSelf;
         otherScrollRect.vertical = otherScrollbar.activeSelf;
@@ -299,7 +302,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null)
         {
-            return (int)inventoryUI.planeDistance;
+            return (int)invenUI.planeDistance;
         }
         else
         {
