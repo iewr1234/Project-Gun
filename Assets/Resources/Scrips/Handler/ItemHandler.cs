@@ -1,21 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Linq;
-using System;
 
-public enum ItemType
-{
-    None,
-    MainWeapon,
-    SubWeapon,
-    Magazine,
-    Rig,
-    Backpack,
-}
-
+[System.Serializable]
 public struct ItemSample
 {
     public int index;
@@ -31,11 +21,17 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("---Access Component---")]
     public RectTransform rect;
     [HideInInspector] public Image targetImage;
-    private List<ItemSample> samples = new List<ItemSample>();
+    [SerializeField] private List<ItemSample> samples = new List<ItemSample>();
 
     [Header("--- Assignment Variable---")]
-    public ItemType type;
+    public ItemDataInfo itemData;
+    //public ItemType type;
+    //public ItemRarity rarity;
+    //public float weight;
+    //public int maxNesting;
+    //public int price;
     public Vector2Int size = new Vector2Int(1, 1);
+    public bool rotation;
     [Space(5f)]
 
     public ItemSlot itemSlot;
@@ -44,14 +40,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [SerializeField] private Vector2 movePivot;
     [SerializeField] private int sampleIndex;
 
-    public void SetComponents(InventoryManager _invenMgr, bool isSample)
+    public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
         rect = GetComponent<RectTransform>();
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         SetSamples();
-
-        rect.sizeDelta = new Vector2Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y);
+        rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
 
         void SetSamples()
         {
@@ -61,18 +56,24 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 var sample = new ItemSample();
                 sample.index = i;
                 sample.sampleObject = samplesTf.GetChild(i).gameObject;
+                sample.sampleObject.SetActive(false);
                 sample.meshs = sample.sampleObject.GetComponentsInChildren<MeshRenderer>().ToList();
                 samples.Add(sample);
             }
         }
     }
 
-    public void SetItemInfo(ItemType _type, Vector2Int _size, int _sampleIndex)
+    public void SetItemInfo(ItemDataInfo _itemData)
     {
-        type = _type;
-        size = _size;
-        sampleIndex = _sampleIndex;
-        switch (type)
+        itemData = _itemData;
+        //type = _itemData.type;
+        //rarity = _itemData.rarity;
+        //weight = _itemData.weight;
+        //maxNesting = _itemData.maxNesting;
+        //price = _itemData.price;
+        size = _itemData.size;
+        sampleIndex = itemData.index;
+        switch (itemData.type)
         {
             case ItemType.MainWeapon:
                 break;
@@ -87,34 +88,23 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             default:
                 break;
         }
+        SetItemRotation(false);
 
-        if (size == new Vector2Int(1, 1))
+        var activeSample = samples.Find(x => x.sampleObject.activeSelf && x.sampleObject != samples[sampleIndex].sampleObject);
+        if (activeSample.sampleObject != null)
         {
-            rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
-            pivotIndex = new Vector2Int(0, 0);
-            movePivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
+            activeSample.sampleObject.SetActive(false);
         }
-        else
-        {
-            rect.sizeDelta = new Vector2Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y);
-            pivotIndex = new Vector2Int(size.x / 2, size.y / 2);
-            var pivotX = (pivotIndex.x * DataUtility.itemSize) + (DataUtility.itemSize / 2);
-            var pivotY = (pivotIndex.y * DataUtility.itemSize) + (DataUtility.itemSize / 2);
-            movePivot = new Vector2(-pivotX, pivotY);
-        }
-
-        var activeSample = samples.Find(x => x.sampleObject.activeSelf);
-        if (activeSample.sampleObject != null) activeSample.sampleObject.SetActive(false);
         samples[sampleIndex].sampleObject.SetActive(true);
         gameObject.SetActive(true);
     }
 
-    public void SetItemInfo(ItemType _type, Vector2Int _size, int _sampleIndex, Vector3 _rot)
+    public void SetSampleItemInfo(ItemDataInfo _itemData, bool rotation)
     {
-        type = _type;
-        size = _size;
-        sampleIndex = _sampleIndex;
-        switch (type)
+        itemData = _itemData;
+        size = itemData.size;
+        sampleIndex = _itemData.index;
+        switch (itemData.type)
         {
             case ItemType.MainWeapon:
                 break;
@@ -129,7 +119,21 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             default:
                 break;
         }
+        SetItemRotation(rotation);
 
+        var activeSample = samples.Find(x => x.sampleObject.activeSelf);
+        if (activeSample.sampleObject != null)
+        {
+            activeSample.sampleObject.SetActive(false);
+        }
+        samples[sampleIndex].sampleObject.SetActive(true);
+        gameObject.SetActive(true);
+    }
+
+    public void SetItemRotation(bool _rotation)
+    {
+        rotation = _rotation;
+        size = rotation ? new Vector2Int(itemData.size.y, itemData.size.x) : itemData.size;
         if (size == new Vector2Int(1, 1))
         {
             rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
@@ -145,11 +149,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             movePivot = new Vector2(-pivotX, pivotY);
         }
 
-        var activeSample = samples.Find(x => x.sampleObject.activeSelf);
-        if (activeSample.sampleObject != null) activeSample.sampleObject.SetActive(false);
-        samples[sampleIndex].sampleObject.SetActive(true);
-        samples[sampleIndex].sampleObject.transform.localRotation = Quaternion.Euler(_rot);
-        gameObject.SetActive(true);
+        var sample = GetSample();
+        var itemRot = sample.sampleObject.transform.localRotation.eulerAngles;
+        if (rotation)
+        {
+            itemRot.x += 90f;
+        }
+        sample.sampleObject.transform.localRotation = Quaternion.Euler(itemRot);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -185,7 +191,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (invenMgr == null) return;
 
-        if (size == new Vector2Int(1, 1))
+        if (itemData.size == new Vector2Int(1, 1))
         {
             invenMgr.PutTheItem(this, invenMgr.onSlot);
         }

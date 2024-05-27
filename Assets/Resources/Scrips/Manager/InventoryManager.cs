@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [Header("---Access Script---")]
+    private DataManager dataMgr;
     private GameManager gameMgr;
     private List<MyStorage> myStorages = new List<MyStorage>();
     private OtherStorage otherStorage;
@@ -15,6 +16,7 @@ public class InventoryManager : MonoBehaviour
     public ItemHandler sampleItem;
 
     [HideInInspector] public Camera invenCam;
+    [HideInInspector] public Camera sampleCam;
     private Canvas invenUI;
 
     private ScrollRect myScrollRect;
@@ -49,12 +51,13 @@ public class InventoryManager : MonoBehaviour
 
     public void SetComponents(GameManager _gmaeMgr)
     {
+        dataMgr = _gmaeMgr.dataMgr;
         gameMgr = _gmaeMgr;
 
         invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
+        sampleCam = transform.Find("InventoryCamera/SampleCamera").GetComponent<Camera>();
         invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         invenUI.worldCamera = invenCam;
-        invenUI.planeDistance = 2f;
 
         myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
         myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
@@ -64,7 +67,7 @@ public class InventoryManager : MonoBehaviour
 
         itemPool = invenUI.transform.Find("ItemPool");
         sampleItem = invenUI.transform.Find("SampleItem").GetComponent<ItemHandler>();
-        sampleItem.SetComponents(this, true);
+        sampleItem.SetComponents(this);
         sampleItem.gameObject.SetActive(false);
 
         myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
@@ -79,16 +82,11 @@ public class InventoryManager : MonoBehaviour
         CreateItems();
         invenUI.gameObject.SetActive(false);
 
-        var testItem = items.Find(x => !x.gameObject.activeSelf);
-        testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 2), 0);
-        var emptySlot = otherStorage.itemSlots.Find(x => x.item == null);
-        var emptySlots = FindAllMultiSizeSlots(otherStorage.itemSlots, testItem, emptySlot.slotIndex);
-        PutTheItem(testItem, emptySlots);
-
-        testItem = items.Find(x => !x.gameObject.activeSelf);
-        testItem.SetItemInfo(ItemType.None, new Vector2Int(1, 1), 0);
-        emptySlot = otherStorage.itemSlots.Find(x => x.item == null);
-        PutTheItem(testItem, emptySlot);
+        SetItemInStorage("T0001", otherStorage.itemSlots);
+        for (int i = 0; i < 3; i++)
+        {
+            SetItemInStorage("T0002", otherStorage.itemSlots);
+        }
     }
 
     private void CreateItems()
@@ -98,7 +96,7 @@ public class InventoryManager : MonoBehaviour
             var item = Instantiate(Resources.Load<ItemHandler>("Prefabs/Inventory/Item"));
             item.transform.name = $"Item_{i}";
             item.transform.SetParent(itemPool, false);
-            item.SetComponents(this, false);
+            item.SetComponents(this);
             item.gameObject.SetActive(false);
             items.Add(item);
         }
@@ -128,32 +126,22 @@ public class InventoryManager : MonoBehaviour
 
         var value = !invenCam.enabled;
         invenCam.enabled = value;
+        sampleCam.enabled = value;
         invenUI.gameObject.SetActive(value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         gameMgr.uiMgr.SetActiveGameUI(!value);
-        if (gameMgr.mapEdt != null) gameMgr.mapEdt.gameObject.SetActive(!value);
+        if (gameMgr.mapEdt != null)
+        {
+            gameMgr.mapEdt.gameObject.SetActive(!value);
+        }
     }
 
     private void RotateItem()
     {
-        if (holdingItem.size.x == 1 && holdingItem.size.y == 1) return;
+        if (holdingItem.itemData.size.x == 1 && holdingItem.itemData.size.y == 1) return;
 
-        var sample = holdingItem.GetSample();
-        Vector3 newRot;
-        if (sample.sampleObject.transform.localRotation.x == 0f)
-        {
-            newRot = sample.sampleObject.transform.localRotation.eulerAngles;
-            newRot.x = 90f;
-        }
-        else
-        {
-            newRot = sample.sampleObject.transform.localRotation.eulerAngles;
-            newRot.x = 0f;
-        }
-        sample.sampleObject.transform.localRotation = Quaternion.Euler(newRot);
-        var newSize = new Vector2Int(holdingItem.size.y, holdingItem.size.x);
-        holdingItem.SetItemInfo(holdingItem.type, newSize, sample.index);
+        holdingItem.SetItemRotation(!holdingItem.rotation);
         holdingItem.FollowMouse();
 
         if (onSlot != null)
@@ -192,13 +180,33 @@ public class InventoryManager : MonoBehaviour
 
     public void TakeTheItem(ItemHandler item)
     {
-        var sample = item.GetSample();
-        var index = sample.index;
-        var rot = sample.sampleObject.transform.localRotation.eulerAngles;
-        sampleItem.SetItemInfo(item.type, item.size, index, rot);
+        sampleItem.SetSampleItemInfo(item.itemData, item.rotation);
         sampleItem.transform.position = item.transform.position;
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
+    }
+
+    public void SetItemInStorage(string itemID, List<ItemSlot> itemSlots)
+    {
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemID);
+        if (itemData == null)
+        {
+            Debug.Log("Not found item");
+            return;
+        }
+
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(itemData);
+        var emptySlot = itemSlots.Find(x => x.item == null);
+        if (item.size == new Vector2Int(1, 1))
+        {
+            PutTheItem(item, emptySlot);
+        }
+        else
+        {
+            var emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
+            PutTheItem(item, emptySlots);
+        }
     }
 
     public void PutTheItem(ItemHandler item, ItemSlot itemSlot)

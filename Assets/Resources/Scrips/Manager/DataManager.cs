@@ -78,6 +78,9 @@ public class DataManager : MonoBehaviour
 
         if (armorData == null)
             armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
+
+        if (itemData == null)
+            itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
     }
 
     #region MapEditor
@@ -268,6 +271,11 @@ public class DataManager : MonoBehaviour
 
     public void UpdateCharacterData()
     {
+        if (charData == null)
+        {
+            charData = Resources.Load<CharacterData>("ScriptableObjects/CharacterData");
+        }
+
         if (charData.charInfos.Count > 0)
         {
             charData.charInfos.Clear();
@@ -339,6 +347,11 @@ public class DataManager : MonoBehaviour
 
     public void UpdateWeaponData()
     {
+        if (weaponData == null)
+        {
+            weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
+        }
+
         if (weaponData.weaponInfos.Count > 0)
         {
             weaponData.weaponInfos.Clear();
@@ -395,6 +408,11 @@ public class DataManager : MonoBehaviour
 
     public void UpdateArmorData()
     {
+        if (armorData == null)
+        {
+            armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
+        }
+
         if (armorData.armorInfos.Count > 0)
         {
             armorData.armorInfos.Clear();
@@ -426,6 +444,65 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Item Data
+    [HideInInspector] public ItemData itemData;
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:I";
+    private enum ItemVariable
+    {
+        ID,
+        ItemName,
+        Type,
+        Rarity,
+        Weight,
+        MaxNesting,
+        Price,
+        X_Size,
+        Y_Size,
+    }
+
+    public void UpdateItemData()
+    {
+        if (itemData == null)
+        {
+            itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
+        }
+
+        if (itemData.itemInfos.Count > 0)
+        {
+            itemData.itemInfos.Clear();
+        }
+        StartCoroutine(ReadItemData());
+
+        IEnumerator ReadItemData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(itemDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var itemInfo = new ItemDataInfo
+                {
+                    indexName = $"{data[(int)ItemVariable.ID]}: {data[(int)ItemVariable.ItemName]}",
+                    ID = data[(int)ItemVariable.ID],
+                    itemName = data[(int)ItemVariable.ItemName],
+                    type = (ItemType)int.Parse(data[(int)ItemVariable.Type]),
+                    rarity = (ItemRarity)int.Parse(data[(int)ItemVariable.Rarity]),
+                    weight = float.Parse(data[(int)ItemVariable.Weight]),
+                    maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
+                    price = int.Parse(data[(int)ItemVariable.Price]),
+                    size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
+                    index = i,
+                };
+                itemData.itemInfos.Add(itemInfo);
+            }
+            Debug.Log("Update Item Data");
+        }
+    }
+    #endregion
+
     #region Custom Editor
     [CustomEditor(typeof(DataManager))]
     public class DataEditor : Editor
@@ -443,32 +520,35 @@ public class DataManager : MonoBehaviour
             GUILayout.Label('\n' + "---Read GoogleSheet Data---");
             if (GUILayout.Button("Update the Character Database"))
             {
-                dataMgr.SetComponents();
                 dataMgr.UpdateCharacterData();
                 EditorUtility.SetDirty(dataMgr.charData);
             }
             if (GUILayout.Button("Update the Weapon Database"))
             {
-                dataMgr.SetComponents();
                 dataMgr.UpdateWeaponData();
                 EditorUtility.SetDirty(dataMgr.weaponData);
             }
             if (GUILayout.Button("Update the Armor Database"))
             {
-                dataMgr.SetComponents();
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+            }
+            if (GUILayout.Button("Update the Item Database"))
+            {
+                dataMgr.UpdateItemData();
+                EditorUtility.SetDirty(dataMgr.itemData);
             }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))
             {
-                dataMgr.SetComponents();
                 dataMgr.UpdateCharacterData();
                 EditorUtility.SetDirty(dataMgr.charData);
                 dataMgr.UpdateWeaponData();
                 EditorUtility.SetDirty(dataMgr.weaponData);
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+                dataMgr.UpdateItemData();
+                EditorUtility.SetDirty(dataMgr.itemData);
             }
         }
     }

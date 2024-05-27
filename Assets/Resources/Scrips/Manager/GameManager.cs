@@ -264,14 +264,16 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < playerList.Count; i++)
                 {
                     var player = playerList[i];
+                    var newStamina = 30 + (player.action * 10);
                     player.SetAction(player.maxAction);
-                    player.SetStamina(player.maxStamina);
+                    player.SetStamina(newStamina);
                 }
                 for (int i = 0; i < enemyList.Count; i++)
                 {
                     var enemy = enemyList[i];
+                    var newStamina = 30 + (enemy.action * 10);
                     enemy.SetAction(enemy.maxAction);
-                    enemy.SetStamina(enemy.maxStamina);
+                    enemy.SetStamina(newStamina);
                 }
             }
         }
@@ -360,6 +362,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
+                    selectChar.targetList[selectChar.targetIndex].target.SetActiveOutline(false);
                     var weapon = selectChar.currentWeapon;
                     var totalCost = weapon.actionCost + selectChar.fireRateNum + selectChar.sightNum;
                     if (totalCost > selectChar.action)
@@ -479,7 +482,7 @@ public class GameManager : MonoBehaviour
                         }
                         break;
                     case GameState.Move:
-                        if (node.charCtr != null && selectChar != null && node.charCtr == selectChar)
+                        if (node.charCtr != null && selectChar != null && node.charCtr != null && node.charCtr == selectChar)
                         {
                             DeselectCharacter();
                         }

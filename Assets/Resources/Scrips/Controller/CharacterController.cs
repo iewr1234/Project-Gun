@@ -299,17 +299,27 @@ public class CharacterController : MonoBehaviour
         {
             case CharacterOwner.Player:
                 outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Player);
-                outlinable.BackParameters.Color = DataUtility.color_Player;
                 break;
             case CharacterOwner.Enemy:
                 outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Enemy);
-                outlinable.BackParameters.Color = DataUtility.color_Enemy;
                 break;
             default:
                 break;
         }
+        outlinable.BackParameters.Color = Color.red;
         outlinable.FrontParameters.Enabled = false;
+        outlinable.FrontParameters.DilateShift = 0f;
+        outlinable.FrontParameters.BlurShift = 0f;
+        outlinable.FrontParameters.Color = Color.red;
         outlinable.AddAllChildRenderersToRenderingList();
+    }
+
+    public void SetActiveOutline(bool value)
+    {
+        var newDilate = value ? 1f : 0f;
+        outlinable.BackParameters.DilateShift = newDilate;
+        outlinable.FrontParameters.Enabled = value;
+        outlinable.FrontParameters.DilateShift = newDilate;
     }
 
     private void OnDrawGizmos()
@@ -1292,7 +1302,7 @@ public class CharacterController : MonoBehaviour
         {
             armor.durability = armor.maxDurability;
         }
-        charUI.armorGauge.value = armor.durability;
+        charUI.SetCharacterValue();
     }
 
     /// <summary>
@@ -1310,7 +1320,7 @@ public class CharacterController : MonoBehaviour
         {
             health = maxHealth;
         }
-        charUI.healthGauge.value = health;
+        charUI.SetCharacterValue();
     }
 
     /// <summary>
@@ -1328,7 +1338,7 @@ public class CharacterController : MonoBehaviour
         {
             stamina = maxStamina;
         }
-        charUI.staminaGauge.value = stamina;
+        charUI.SetCharacterValue();
     }
 
     /// <summary>
@@ -1419,22 +1429,38 @@ public class CharacterController : MonoBehaviour
             var range = watchInfo.drawRang.radius;
             var hits = Physics.RaycastAll(watchPos, dir, range, gameMgr.watchLayer).ToList();
             hits.Reverse();
+
+            var shoot = false;
             for (int j = 0; j < hits.Count; j++)
             {
+                var cover = hits[j].collider.GetComponentInParent<Cover>();
+                if (cover != null)
+                {
+                    shoot = false;
+                    break;
+                }
+
                 var check = hits[j].collider.GetComponentInParent<FieldNode>();
                 if (check != null && check == currentNode)
                 {
-                    if (ownerType == CharacterOwner.Player)
-                    {
+                    shoot = true;
+                }
+            }
+
+            if (shoot)
+            {
+                switch (ownerType)
+                {
+                    case CharacterOwner.Player:
                         gameMgr.SetFireWarning(currentNode);
                         currentNode.hitNode = true;
                         currentNode.watcher = watcher;
                         break;
-                    }
-                    else
-                    {
+                    case CharacterOwner.Enemy:
                         watcher.AddCommand(CommandType.Shoot, this, currentNode);
-                    }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -1792,7 +1818,9 @@ public class CharacterController : MonoBehaviour
             fireRateNum = 0;
             sightNum = 0;
             //ChangeTargetShader();
+
             var targetInfo = targetList[targetIndex];
+            targetInfo.target.SetActiveOutline(true);
             SetTargeting(targetInfo);
             CameraState camState;
             if (targetInfo.shooterCover == null)
@@ -1827,6 +1855,7 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count < 2) return;
 
         var prevTargetInfo = targetList[targetIndex];
+        prevTargetInfo.target.SetActiveOutline(false);
         prevTargetInfo.target.AddCommand(CommandType.Targeting, false, transform);
         targetIndex++;
         if (targetIndex == targetList.Count)
@@ -1836,6 +1865,7 @@ public class CharacterController : MonoBehaviour
         //ChangeTargetShader();
 
         var targetInfo = targetList[targetIndex];
+        targetInfo.target.SetActiveOutline(true);
         SetTargeting(targetInfo);
         CameraState camState;
         if (cover == null)

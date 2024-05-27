@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+using TMPro;
 
 public class CharacterUI : MonoBehaviour
 {
@@ -14,6 +14,9 @@ public class CharacterUI : MonoBehaviour
     [HideInInspector] public Slider armorGauge;
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
+    [HideInInspector] public TextMeshProUGUI armorText;
+    [HideInInspector] public TextMeshProUGUI healthText;
+    [HideInInspector] public TextMeshProUGUI staminaText;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private Vector3 uiPos;
@@ -31,6 +34,9 @@ public class CharacterUI : MonoBehaviour
         armorGauge = transform.Find("ArmorGauge").GetComponent<Slider>();
         healthGauge = transform.Find("HealthGauge").GetComponent<Slider>();
         staminaGauge = transform.Find("StaminaGauge").GetComponent<Slider>();
+        armorText = armorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         if (charCtr.armor != null)
         {
             armorGauge.maxValue = charCtr.armor.maxDurability;
@@ -44,6 +50,7 @@ public class CharacterUI : MonoBehaviour
         healthGauge.value = charCtr.health;
         staminaGauge.maxValue = charCtr.maxStamina;
         staminaGauge.value = charCtr.stamina;
+        SetCharacterValue();
     }
 
     private void FixedUpdate()
@@ -59,5 +66,18 @@ public class CharacterUI : MonoBehaviour
         var pos = transform.position + cam.transform.rotation * Vector3.forward;
         var rot = cam.transform.rotation * Vector3.up;
         transform.LookAt(pos, rot);
+    }
+
+    public void SetCharacterValue()
+    {
+        if (charCtr.armor != null)
+        {
+            armorGauge.value = charCtr.armor.durability;
+            armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
+        }
+        healthGauge.value = charCtr.health;
+        healthText.text = $"{healthGauge.value} / {healthGauge.maxValue}";
+        staminaGauge.value = charCtr.stamina;
+        staminaText.text = $"{staminaGauge.value} / {staminaGauge.maxValue}";
     }
 }
