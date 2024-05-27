@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 [System.Serializable]
 public struct ItemSample
@@ -21,17 +22,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("---Access Component---")]
     public RectTransform rect;
     [HideInInspector] public Image targetImage;
+    [HideInInspector] public TextMeshProUGUI countText;
     [SerializeField] private List<ItemSample> samples = new List<ItemSample>();
 
     [Header("--- Assignment Variable---")]
     public ItemDataInfo itemData;
-    //public ItemType type;
-    //public ItemRarity rarity;
-    //public float weight;
-    //public int maxNesting;
-    //public int price;
     public Vector2Int size = new Vector2Int(1, 1);
-    public bool rotation;
+    public int totalCount;
+    [HideInInspector] public bool rotation;
     [Space(5f)]
 
     public ItemSlot itemSlot;
@@ -45,6 +43,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         invenMgr = _invenMgr;
         rect = GetComponent<RectTransform>();
         targetImage = transform.Find("BackGround").GetComponent<Image>();
+        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         SetSamples();
         rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
 
@@ -63,15 +62,21 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetItemInfo(ItemDataInfo _itemData)
+    public void SetItemInfo(ItemDataInfo _itemData, int count)
     {
         itemData = _itemData;
-        //type = _itemData.type;
-        //rarity = _itemData.rarity;
-        //weight = _itemData.weight;
-        //maxNesting = _itemData.maxNesting;
-        //price = _itemData.price;
         size = _itemData.size;
+        totalCount = count;
+        if (itemData.maxNesting == 1)
+        {
+            countText.enabled = false;
+        }
+        else
+        {
+            countText.enabled = true;
+            countText.text = $"{totalCount}";
+        }
+
         sampleIndex = itemData.index;
         switch (itemData.type)
         {
@@ -164,19 +169,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var color = DataUtility.slot_onItemColor;
         color.a = 100 / 255f;
         targetImage.color = color;
-
-        //if (size == new Vector2Int(1, 1))
-        //{
-        //    itemSlot.SetSlotColor(Color.white);
-        //}
-        //else
-        //{
-        //    for (int i = 0; i < itemSlots.Count; i++)
-        //    {
-        //        var itemSlot = itemSlots[i];
-        //        itemSlot.SetSlotColor(Color.white);
-        //    }
-        //}
 
         invenMgr.TakeTheItem(this);
         FollowMouse();

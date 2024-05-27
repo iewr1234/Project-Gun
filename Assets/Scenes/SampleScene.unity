@@ -11692,6 +11692,7 @@ MonoBehaviour:
   charData: {fileID: 11400000, guid: bb86e38becd4b024ba9564d567e55176, type: 2}
   weaponData: {fileID: 11400000, guid: 6406cd07453d88548b1c445c7d676a38, type: 2}
   armorData: {fileID: 11400000, guid: c99feb4b6c520454ab389525d8794223, type: 2}
+  itemData: {fileID: 11400000, guid: 0795e72aaa944984a8dc876ebbec0444, type: 2}
 --- !u!1001 &562581251
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27173,7 +27174,7 @@ MonoBehaviour:
     m_Left: 25
     m_Right: 0
     m_Top: 40
-    m_Bottom: 0
+    m_Bottom: 40
   m_ChildAlignment: 8
   m_StartCorner: 3
   m_StartAxis: 0
@@ -34720,6 +34721,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 3463550274333855499, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4823327856307303019, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
       propertyPath: m_Color.a
       value: 0
@@ -38497,8 +38502,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 933797406}
   m_HandleRect: {fileID: 933797405}
   m_Direction: 2
-  m_Value: 0.999971
-  m_Size: 0.77692306
+  m_Value: 0.9999745
+  m_Size: 0.75373137
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

@@ -10,9 +10,9 @@ public enum ItemType
     Body,
     Rig,
     Backpack,
-    MainWeapon,
+    MainWeapon = 10,
     SubWeapon,
-    Magazine,
+    Magazine = 30,
     Grenade,
 }
 

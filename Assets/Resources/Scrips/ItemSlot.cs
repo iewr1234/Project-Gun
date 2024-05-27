@@ -65,11 +65,22 @@ public class ItemSlot : MonoBehaviour
         {
             var startIndex = invenMgr.onSlot.slotIndex - item.pivotIndex;
             invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item, startIndex);
-            var findItem = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
+            var findSlot = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
             for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
                 var onSlot = invenMgr.onSlots[i];
-                if (findItem)
+                if (findSlot && findSlot.item.itemData == item.itemData)
+                {
+                    if (findSlot.item.totalCount == findSlot.item.itemData.maxNesting)
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
+                    }
+                    else if (findSlot.item.totalCount < findSlot.item.itemData.maxNesting)
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_moveColor);
+                    }
+                }
+                else if (findSlot)
                 {
                     onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                 }
