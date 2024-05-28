@@ -71,11 +71,11 @@ public class ItemSlot : MonoBehaviour
                 var onSlot = invenMgr.onSlots[i];
                 if (findSlot && findSlot.item.itemData == item.itemData)
                 {
-                    if (findSlot.item.totalCount == findSlot.item.itemData.maxNesting)
+                    if (findSlot.item.TotalCount == findSlot.item.itemData.maxNesting)
                     {
                         onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                     }
-                    else if (findSlot.item.totalCount < findSlot.item.itemData.maxNesting)
+                    else if (findSlot.item.TotalCount < findSlot.item.itemData.maxNesting)
                     {
                         onSlot.SetSlotColor(DataUtility.slot_moveColor);
                     }

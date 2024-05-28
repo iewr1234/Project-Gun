@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InventoryManager : MonoBehaviour
 {
     [Header("---Access Script---")]
+    [SerializeField] private GameManager gameMgr;
     private DataManager dataMgr;
-    private GameManager gameMgr;
-    private List<MyStorage> myStorages = new List<MyStorage>();
-    private OtherStorage otherStorage;
+
+    [Space(5f)]
+    [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
+    [SerializeField] private OtherStorage otherStorage;
+    private PopUp_Inventory popUp;
 
     [Header("---Access Component---")]
     public ItemHandler sampleItem;
@@ -35,6 +39,8 @@ public class InventoryManager : MonoBehaviour
     private List<ItemHandler> items = new List<ItemHandler>();
     private readonly int itemPoolMax = 100;
 
+    [SerializeField] private bool itemSplit;
+
     private void Awake()
     {
         var find = FindObjectsOfType<InventoryManager>();
@@ -51,13 +57,16 @@ public class InventoryManager : MonoBehaviour
 
     public void SetComponents(GameManager _gmaeMgr)
     {
-        dataMgr = _gmaeMgr.dataMgr;
         gameMgr = _gmaeMgr;
+        dataMgr = _gmaeMgr.dataMgr;
+        popUp = transform.Find("InventoryUI/Pop_Up").GetComponent<PopUp_Inventory>();
+        popUp.SetComponents(this);
 
         invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
         sampleCam = transform.Find("InventoryCamera/SampleCamera").GetComponent<Camera>();
         invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         invenUI.worldCamera = invenCam;
+
 
         myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
         myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
@@ -116,11 +125,24 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
+            itemSplit = false;
             ShowInventory();
         }
-        else if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
+
+        if (!invenUI.gameObject.activeSelf) return;
+
+        if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
         {
             RotateItem();
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            itemSplit = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            itemSplit = false;
         }
     }
 
@@ -213,6 +235,13 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void SetItemInStorage(ItemDataInfo itemData, int count, ItemSlot itemSlot)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(itemData, count);
+        PutTheItem(item, itemSlot);
+    }
+
     public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
     {
         if (itemSlot == null)
@@ -230,32 +259,40 @@ public class InventoryManager : MonoBehaviour
                 ItemNesting();
             }
         }
-        else
+        else if (itemSlot != null && itemSlot.item == null)
         {
             ItemMove(true);
         }
-        //holdingItem = null;
-        //sampleItem.gameObject.SetActive(false);
-
-        //item.targetImage.raycastTarget = true;
-        //item.targetImage.color = Color.clear;
+        else
+        {
+            ItemMove(false);
+        }
 
         void ItemMove(bool value)
         {
             switch (value)
             {
                 case true:
-                    if (item.itemSlot != null)
+                    if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
                     {
-                        item.itemSlot.item = null;
-                        item.itemSlot.SetSlotColor(Color.white);
+                        ItemSplit();
+                        itemSplit = false;
+                        return;
                     }
-                    itemSlot.item = item;
-                    itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    else
+                    {
+                        if (item.itemSlot != null)
+                        {
+                            item.itemSlot.item = null;
+                            item.itemSlot.SetSlotColor(Color.white);
+                        }
+                        itemSlot.item = item;
+                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
 
-                    item.itemSlot = itemSlot;
-                    item.transform.SetParent(itemSlot.transform, false);
-                    item.transform.localPosition = Vector3.zero;
+                        item.itemSlot = itemSlot;
+                        item.transform.SetParent(itemSlot.transform, false);
+                        item.transform.localPosition = Vector3.zero;
+                    }
                     break;
                 case false:
                     item.transform.SetParent(item.itemSlot.transform, false);
@@ -266,25 +303,28 @@ public class InventoryManager : MonoBehaviour
                     }
                     break;
             }
+
+            if (holdingItem != null)
+            {
+                item.targetImage.raycastTarget = true;
+            }
+            item.targetImage.color = Color.clear;
             holdingItem = null;
             sampleItem.gameObject.SetActive(false);
-
-            item.targetImage.raycastTarget = true;
-            item.targetImage.color = Color.clear;
         }
 
         void ItemNesting()
         {
-            if (itemSlot.item.totalCount == itemSlot.item.itemData.maxNesting)
+            if (itemSlot.item.TotalCount == itemSlot.item.itemData.maxNesting)
             {
                 ItemMove(false);
             }
-            else if (itemSlot.item.totalCount < itemSlot.item.itemData.maxNesting)
+            else if (itemSlot.item.TotalCount < itemSlot.item.itemData.maxNesting)
             {
 
                 itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-                var slotCount = itemSlot.item.totalCount;
-                var itemCount = item.totalCount;
+                var slotCount = itemSlot.item.TotalCount;
+                var itemCount = item.TotalCount;
                 if (slotCount + itemCount > itemSlot.item.itemData.maxNesting)
                 {
                     if (item.itemSlot != null)
@@ -292,11 +332,10 @@ public class InventoryManager : MonoBehaviour
                         item.itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
                     }
                     var count = slotCount + itemCount - itemSlot.item.itemData.maxNesting;
-                    item.totalCount = count;
                     item.transform.SetParent(item.itemSlot.transform, false);
                     item.transform.position = item.itemSlot.transform.position;
-                    item.countText.text = $"{item.totalCount}";
-                    itemSlot.item.totalCount = itemSlot.item.itemData.maxNesting;
+                    item.SetTotalCount(count);
+                    itemSlot.item.SetTotalCount(itemSlot.item.itemData.maxNesting);
                 }
                 else
                 {
@@ -305,16 +344,30 @@ public class InventoryManager : MonoBehaviour
                         item.itemSlot.item = null;
                         item.itemSlot.SetSlotColor(Color.white);
                     }
+                    item.itemSlot = null;
                     item.gameObject.SetActive(false);
-                    itemSlot.item.totalCount += itemCount;
+                    itemSlot.item.ResultTotalCount(itemCount);
                 }
                 item.targetImage.color = Color.clear;
                 holdingItem = null;
                 sampleItem.gameObject.SetActive(false);
 
                 itemSlot.item.targetImage.raycastTarget = true;
-                itemSlot.item.countText.text = $"{itemSlot.item.totalCount}";
             }
+        }
+
+        void ItemSplit()
+        {
+            item.transform.SetParent(item.itemSlot.transform, false);
+            item.transform.position = item.itemSlot.transform.position;
+            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+
+            popUp.PopUp_Split(item, itemSlot);
+
+            holdingItem = null;
+            sampleItem.transform.position = itemSlot.transform.position;
+
+            item.targetImage.color = Color.clear;
         }
     }
 
@@ -362,12 +415,15 @@ public class InventoryManager : MonoBehaviour
             item.transform.SetParent(itemSlots[0].transform, false);
             item.transform.localPosition = Vector3.zero;
         }
+
+        item.targetImage.color = Color.clear;
+        if (holdingItem != null)
+        {
+            item.targetImage.raycastTarget = true;
+        }
         holdingItem = null;
         onSlots.Clear();
         sampleItem.gameObject.SetActive(false);
-
-        item.targetImage.raycastTarget = true;
-        item.targetImage.color = Color.clear;
     }
 
     public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, ItemHandler item, Vector2Int startIndex)

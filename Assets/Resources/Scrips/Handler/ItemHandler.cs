@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using static UnityEditor.Progress;
 
 [System.Serializable]
 public struct ItemSample
@@ -28,10 +29,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("--- Assignment Variable---")]
     public ItemDataInfo itemData;
     public Vector2Int size = new Vector2Int(1, 1);
-    public int totalCount;
+    private int totalCount;
     [HideInInspector] public bool rotation;
-    [Space(5f)]
 
+    [Space(5f)]
     public ItemSlot itemSlot;
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public Vector2Int pivotIndex;
@@ -66,15 +67,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         itemData = _itemData;
         size = _itemData.size;
-        totalCount = count;
-        if (itemData.maxNesting == 1)
+        countText.enabled = itemData.maxNesting > 1;
+        if (countText.enabled)
         {
-            countText.enabled = false;
-        }
-        else
-        {
-            countText.enabled = true;
-            countText.text = $"{totalCount}";
+            SetTotalCount(count);
         }
 
         sampleIndex = itemData.index;
@@ -133,6 +129,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         samples[sampleIndex].sampleObject.SetActive(true);
         gameObject.SetActive(true);
+    }
+
+    public void SetTotalCount(int value)
+    {
+        totalCount = value;
+        countText.text = $"{totalCount}";
+    }
+
+    public void ResultTotalCount(int value)
+    {
+        totalCount += value;
+        countText.text = $"{totalCount}";
     }
 
     public void SetItemRotation(bool _rotation)
@@ -203,5 +211,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public ItemSample GetSample()
     {
         return samples[sampleIndex];
+    }
+
+    public int TotalCount
+    {
+        private set { totalCount = value; }
+        get { return totalCount; }
     }
 }
