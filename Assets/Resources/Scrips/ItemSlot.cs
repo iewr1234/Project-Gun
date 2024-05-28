@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemSlot : MonoBehaviour
+public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 {
     [Header("---Access Script---")]
     public MyStorage myStorage;
@@ -15,6 +15,20 @@ public class ItemSlot : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public ItemHandler item;
     [HideInInspector] public Vector2Int slotIndex;
+
+    public bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
+    {
+        var scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll == 0f)
+        {
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public void SetComponents(MyStorage _myStorage, Vector2Int _slotIndex)
     {
@@ -65,11 +79,16 @@ public class ItemSlot : MonoBehaviour
         {
             var startIndex = invenMgr.onSlot.slotIndex - item.pivotIndex;
             invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item, startIndex);
+            var sizeCount = item.size.x * item.size.y;
             var findSlot = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
             for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
                 var onSlot = invenMgr.onSlots[i];
-                if (findSlot && findSlot.item.itemData == item.itemData)
+                if (sizeCount > invenMgr.onSlots.Count)
+                {
+                    onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
+                }
+                else if (findSlot && findSlot.item.itemData == item.itemData)
                 {
                     if (findSlot.item.TotalCount == findSlot.item.itemData.maxNesting)
                     {

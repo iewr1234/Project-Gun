@@ -67,7 +67,6 @@ public class InventoryManager : MonoBehaviour
         invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         invenUI.worldCamera = invenCam;
 
-
         myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
         myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
 
@@ -92,6 +91,7 @@ public class InventoryManager : MonoBehaviour
         invenUI.gameObject.SetActive(false);
 
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
         for (int i = 0; i < 3; i++)
         {
             SetItemInStorage("T0002", 3, otherStorage.itemSlots);
@@ -376,6 +376,7 @@ public class InventoryManager : MonoBehaviour
         var findItem = itemSlots.Find(x => x.item != null && x.item != item);
         if (findItem || itemSlots.Count < item.size.x * item.size.y)
         {
+            item.SetItemRotation(sampleItem.rotation);
             item.transform.SetParent(item.itemSlots[0].transform, false);
             item.transform.position = item.itemSlots[0].transform.position;
             item.targetImage.color = DataUtility.slot_onItemColor;

@@ -166,7 +166,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var itemRot = sample.sampleObject.transform.localRotation.eulerAngles;
         if (rotation)
         {
-            itemRot.x += 90f;
+            itemRot.x = 90f;
+        }
+        else
+        {
+            itemRot.x = 0f;
         }
         sample.sampleObject.transform.localRotation = Quaternion.Euler(itemRot);
     }
