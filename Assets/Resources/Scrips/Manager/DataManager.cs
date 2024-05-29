@@ -322,6 +322,67 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Item Data
+    [HideInInspector] public ItemData itemData;
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:J";
+    private enum ItemVariable
+    {
+        ID,
+        DataID,
+        ItemName,
+        Type,
+        Rarity,
+        Weight,
+        MaxNesting,
+        Price,
+        X_Size,
+        Y_Size,
+    }
+
+    public void UpdateItemData()
+    {
+        if (itemData == null)
+        {
+            itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
+        }
+
+        if (itemData.itemInfos.Count > 0)
+        {
+            itemData.itemInfos.Clear();
+        }
+        StartCoroutine(ReadItemData());
+
+        IEnumerator ReadItemData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(itemDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var itemInfo = new ItemDataInfo
+                {
+                    indexName = $"{data[(int)ItemVariable.ID]}: {data[(int)ItemVariable.ItemName]}",
+                    ID = data[(int)ItemVariable.ID],
+                    dataID = data[(int)ItemVariable.DataID],
+                    itemName = data[(int)ItemVariable.ItemName],
+                    type = (ItemType)int.Parse(data[(int)ItemVariable.Type]),
+                    rarity = (ItemRarity)int.Parse(data[(int)ItemVariable.Rarity]),
+                    weight = float.Parse(data[(int)ItemVariable.Weight]),
+                    maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
+                    price = int.Parse(data[(int)ItemVariable.Price]),
+                    size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
+                    index = i,
+                };
+                itemData.itemInfos.Add(itemInfo);
+            }
+            Debug.Log("Update Item Data");
+        }
+    }
+    #endregion
+
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
     private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:P";
@@ -372,7 +433,7 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)WeaponVariable.ID]}: {data[(int)WeaponVariable.WeaponName]}",
                     ID = data[(int)WeaponVariable.ID],
-                    prefabName = data[(int)CharacterVariable.PrefabName],
+                    prefabName = data[(int)WeaponVariable.PrefabName],
                     weaponName = data[(int)WeaponVariable.WeaponName],
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     damage = int.Parse(data[(int)WeaponVariable.Damage]),
@@ -391,6 +452,77 @@ public class DataManager : MonoBehaviour
                 weaponData.weaponInfos.Add(weaponInfo);
             }
             Debug.Log("Update Weapon Data");
+        }
+    }
+    #endregion
+
+    #region
+    [HideInInspector] public WeaponPartsData partsData;
+    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:O";
+    private enum WeaponPartsVariable
+    {
+        ID,
+        PrefabName,
+        PartsName,
+        PartsType,
+        Size,
+        Weight,
+        RPM,
+        Range,
+        MOA,
+        Stability,
+        Rebound,
+        WatchAngle,
+        Ergonomy,
+        HeadShot,
+        ActionCost,
+    }
+
+    public void UpdateWeaponPartsData()
+    {
+        if (partsData == null)
+        {
+            partsData = Resources.Load<WeaponPartsData>("ScriptableObjects/WeaponPartsData");
+        }
+
+        if (partsData.partsInfos.Count > 0)
+        {
+            partsData.partsInfos.Clear();
+        }
+        StartCoroutine(ReadWeaponPartsData());
+
+        IEnumerator ReadWeaponPartsData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(partsDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var partsInfo = new WeaponPartsDataInfo
+                {
+                    indexName = $"{data[(int)WeaponPartsVariable.ID]}: {data[(int)WeaponPartsVariable.PartsName]}",
+                    ID = data[(int)WeaponPartsVariable.ID],
+                    prefabName = data[(int)WeaponPartsVariable.PrefabName],
+                    partsName = data[(int)WeaponPartsVariable.PartsName],
+                    type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
+                    size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
+                    weight = float.Parse(data[(int)WeaponPartsVariable.Weight]),
+                    rpm = int.Parse(data[(int)WeaponPartsVariable.RPM]),
+                    range = float.Parse(data[(int)WeaponPartsVariable.Range]),
+                    MOA = float.Parse(data[(int)WeaponPartsVariable.MOA]),
+                    stability = int.Parse(data[(int)WeaponPartsVariable.Stability]),
+                    rebound = int.Parse(data[(int)WeaponPartsVariable.Rebound]),
+                    watchAngle = int.Parse(data[(int)WeaponPartsVariable.WatchAngle]),
+                    ergonomy = int.Parse(data[(int)WeaponPartsVariable.Ergonomy]),
+                    headShot = float.Parse(data[(int)WeaponPartsVariable.HeadShot]),
+                    actionCost = int.Parse(data[(int)WeaponPartsVariable.ActionCost]),
+                };
+                partsData.partsInfos.Add(partsInfo);
+            }
+            Debug.Log("Update WeaponParts Data");
         }
     }
     #endregion
@@ -444,65 +576,6 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
-    #region Item Data
-    [HideInInspector] public ItemData itemData;
-    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:I";
-    private enum ItemVariable
-    {
-        ID,
-        ItemName,
-        Type,
-        Rarity,
-        Weight,
-        MaxNesting,
-        Price,
-        X_Size,
-        Y_Size,
-    }
-
-    public void UpdateItemData()
-    {
-        if (itemData == null)
-        {
-            itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
-        }
-
-        if (itemData.itemInfos.Count > 0)
-        {
-            itemData.itemInfos.Clear();
-        }
-        StartCoroutine(ReadItemData());
-
-        IEnumerator ReadItemData()
-        {
-            UnityWebRequest www = UnityWebRequest.Get(itemDB);
-            yield return www.SendWebRequest();
-
-            var text = www.downloadHandler.text;
-            var datas = text.Split('\n');
-            for (int i = 0; i < datas.Length; i++)
-            {
-                var data = datas[i].Split('\t');
-                var itemInfo = new ItemDataInfo
-                {
-                    indexName = $"{data[(int)ItemVariable.ID]}: {data[(int)ItemVariable.ItemName]}",
-                    ID = data[(int)ItemVariable.ID],
-                    itemName = data[(int)ItemVariable.ItemName],
-                    type = (ItemType)int.Parse(data[(int)ItemVariable.Type]),
-                    rarity = (ItemRarity)int.Parse(data[(int)ItemVariable.Rarity]),
-                    weight = float.Parse(data[(int)ItemVariable.Weight]),
-                    maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
-                    price = int.Parse(data[(int)ItemVariable.Price]),
-                    size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
-                    index = i,
-                };
-                itemData.itemInfos.Add(itemInfo);
-            }
-            Debug.Log("Update Item Data");
-        }
-    }
-    #endregion
-
     #region Custom Editor
     [CustomEditor(typeof(DataManager))]
     public class DataEditor : Editor
@@ -523,32 +596,39 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateCharacterData();
                 EditorUtility.SetDirty(dataMgr.charData);
             }
+            if (GUILayout.Button("Update the Item Database"))
+            {
+                dataMgr.UpdateItemData();
+                EditorUtility.SetDirty(dataMgr.itemData);
+            }
             if (GUILayout.Button("Update the Weapon Database"))
             {
                 dataMgr.UpdateWeaponData();
                 EditorUtility.SetDirty(dataMgr.weaponData);
+            }
+            if (GUILayout.Button("Update the WeaponParts Database"))
+            {
+                dataMgr.UpdateWeaponPartsData();
+                EditorUtility.SetDirty(dataMgr.partsData);
             }
             if (GUILayout.Button("Update the Armor Database"))
             {
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
             }
-            if (GUILayout.Button("Update the Item Database"))
-            {
-                dataMgr.UpdateItemData();
-                EditorUtility.SetDirty(dataMgr.itemData);
-            }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))
             {
                 dataMgr.UpdateCharacterData();
                 EditorUtility.SetDirty(dataMgr.charData);
-                dataMgr.UpdateWeaponData();
-                EditorUtility.SetDirty(dataMgr.weaponData);
-                dataMgr.UpdateArmorData();
-                EditorUtility.SetDirty(dataMgr.armorData);
                 dataMgr.UpdateItemData();
                 EditorUtility.SetDirty(dataMgr.itemData);
+                dataMgr.UpdateWeaponData();
+                EditorUtility.SetDirty(dataMgr.weaponData);
+                dataMgr.UpdateWeaponPartsData();
+                EditorUtility.SetDirty(dataMgr.partsData);
+                dataMgr.UpdateArmorData();
+                EditorUtility.SetDirty(dataMgr.armorData);
             }
         }
     }

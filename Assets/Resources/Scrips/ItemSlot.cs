@@ -21,7 +21,6 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         var scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll == 0f)
         {
-
             return true;
         }
         else

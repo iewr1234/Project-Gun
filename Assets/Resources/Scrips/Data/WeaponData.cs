@@ -31,8 +31,6 @@ public class WeaponDataInfo
     public float MOA;
     public int stability;
     public int rebound;
-    [Space(5f)]
-
     public int actionCost;
     public int magMax;
 }

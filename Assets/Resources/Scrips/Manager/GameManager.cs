@@ -362,7 +362,6 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    selectChar.targetList[selectChar.targetIndex].target.SetActiveOutline(false);
                     var weapon = selectChar.currentWeapon;
                     var totalCost = weapon.actionCost + selectChar.fireRateNum + selectChar.sightNum;
                     if (totalCost > selectChar.action)
@@ -394,6 +393,7 @@ public class GameManager : MonoBehaviour
                     }
                     SwitchMovableNodes(false);
                     SwitchCharacterUI(true);
+                    selectChar.SetTargetOff();
                     selectChar.SetAction(-totalCost);
                     camMgr.SetCameraState(CameraState.None);
                     uiMgr.SetActionPoint_Bottom(selectChar);
@@ -406,8 +406,8 @@ public class GameManager : MonoBehaviour
                 {
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
-                    camMgr.SetCameraState(CameraState.None);
                     selectChar.SetTargetOff();
+                    camMgr.SetCameraState(CameraState.None);
                     uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
                     selectChar = null;
                     SwitchCharacterUI(true);

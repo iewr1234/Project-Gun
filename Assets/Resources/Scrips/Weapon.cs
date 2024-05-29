@@ -17,7 +17,8 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
-    [SerializeField] private Transform muzzleTf;
+    [SerializeField] private Transform scopeTf;
+    [SerializeField] private Transform bulletTf;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
 
@@ -33,13 +34,13 @@ public class Weapon : MonoBehaviour
     [Tooltip("정확도")] public float MOA;
     [Tooltip("안정성")] public int stability;
     [Tooltip("반동")] public int rebound;
+    [Tooltip("행동소모")] public int actionCost;
     [Space(5f)]
 
     [Tooltip("사격타입")] public FireModeType fireMode;
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
-    [Tooltip("행동소모")] public int actionCost;
     [Tooltip("탄창용량")] public int magMax;
     [Tooltip("장전된 탄환 수")] public int loadedAmmo;
     [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;
@@ -67,10 +68,11 @@ public class Weapon : MonoBehaviour
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
-        muzzleTf = transform.Find("Muzzle");
+
+        scopeTf = transform.Find("PartsTransform/Scope");
+        bulletTf = transform.Find("BulletTransform");
 
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        //DataUtility.SetMeshsMaterial(charCtr.ownerType, meshs);
         type = weaponData.type;
         SetWeaponPositionAndRotation();
 
@@ -84,8 +86,8 @@ public class Weapon : MonoBehaviour
         MOA = weaponData.MOA;
         stability = weaponData.stability;
         rebound = weaponData.rebound;
-
         actionCost = weaponData.actionCost;
+
         magMax = weaponData.magMax;
         Reload();
 
@@ -233,7 +235,7 @@ public class Weapon : MonoBehaviour
         }
 
         bullet.gameObject.SetActive(true);
-        bullet.transform.position = muzzleTf.position;
+        bullet.transform.position = bulletTf.position;
         var aimPos = charCtr.aimPoint.position;
         var random = Random.Range(-shootDisparity, shootDisparity);
         aimPos += charCtr.transform.right * random;

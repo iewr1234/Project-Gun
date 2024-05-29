@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d569ea04c406b9f4eba0f1628bab94b9, type: 3}
+  m_Name: WeaponPartsData
+  m_EditorClassIdentifier: 
+  partsInfos:
+  - indexName: 'P0001: Scope_1'
+    ID: P0001
+    prefabName: Scope_1
+    partsName: Scope_1
+    type: 2
+    size: 0
+    weight: 1
+    rpm: 0
+    range: 5
+    MOA: 3
+    stability: 0
+    rebound: 0
+    watchAngle: 0
+    ergonomy: 2
+    headShot: 3
+    actionCost: 0

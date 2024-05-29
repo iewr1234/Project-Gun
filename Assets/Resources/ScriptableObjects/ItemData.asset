@@ -13,33 +13,25 @@ MonoBehaviour:
   m_Name: ItemData
   m_EditorClassIdentifier: 
   itemInfos:
-  - indexName: 'T0001: Rifle_Magazine_1'
+  - indexName: 'T0001: Rifle_1'
     ID: T0001
-    itemName: Rifle_Magazine_1
-    type: 7
+    dataID: W0001
+    itemName: Rifle_1
+    type: 10
     rarity: 0
-    weight: 1
+    weight: 3
     maxNesting: 1
-    price: 100
-    size: {x: 1, y: 2}
+    price: 1000
+    size: {x: 4, y: 2}
     index: 0
-  - indexName: 'T0002: Grenade'
+  - indexName: 'T0002: Scope_1'
     ID: T0002
-    itemName: Grenade
-    type: 8
+    dataID: P0001
+    itemName: Scope_1
+    type: 21
     rarity: 0
-    weight: 1
-    maxNesting: 5
+    weight: 0.5
+    maxNesting: 1
     price: 100
     size: {x: 1, y: 1}
     index: 1
-  - indexName: 'T0003: ?'
-    ID: T0003
-    itemName: '?'
-    type: 7
-    rarity: 0
-    weight: 1
-    maxNesting: 1
-    price: 100
-    size: {x: 3, y: 5}
-    index: 2

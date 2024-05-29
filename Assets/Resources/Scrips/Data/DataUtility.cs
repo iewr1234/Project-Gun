@@ -105,68 +105,6 @@ public static class DataUtility
         return Quaternion.Euler(rot);
     }
 
-    public static void SetMeshsMaterial(List<MeshRenderer> meshs, string shaderName)
-    {
-        for (int i = 0; i < meshs.Count; i++)
-        {
-            var mesh = meshs[i];
-            mesh.material.shader = Shader.Find(shaderName);
-        }
-    }
-
-    public static void SetMeshsMaterial(CharacterOwner ownerType, List<MeshRenderer> meshs)
-    {
-        for (int i = 0; i < meshs.Count; i++)
-        {
-            var mesh = meshs[i];
-            if (mesh.CompareTag("Glass")) continue;
-
-            mesh.material = new Material(mesh.material);
-            mesh.material.shader = Shader.Find("Draw/AlwaysVisible");
-            switch (ownerType)
-            {
-                case CharacterOwner.Player:
-                    mesh.material.SetColor("_PhantomColor", color_Player);
-                    break;
-                case CharacterOwner.Enemy:
-                    mesh.material.SetColor("_PhantomColor", color_Enemy);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    public static void SetMeshsMaterial(List<SkinnedMeshRenderer> sMeshs, string shaderName)
-    {
-        for (int i = 0; i < sMeshs.Count; i++)
-        {
-            var sMesh = sMeshs[i];
-            sMesh.material.shader = Shader.Find(shaderName);
-        }
-    }
-
-    public static void SetMeshsMaterial(CharacterOwner ownerType, List<SkinnedMeshRenderer> sMeshs)
-    {
-        for (int i = 0; i < sMeshs.Count; i++)
-        {
-            var sMesh = sMeshs[i];
-            sMesh.material = new Material(sMesh.material);
-            sMesh.material.shader = Shader.Find("Draw/AlwaysVisible");
-            switch (ownerType)
-            {
-                case CharacterOwner.Player:
-                    sMesh.material.SetColor("_PhantomColor", color_Player);
-                    break;
-                case CharacterOwner.Enemy:
-                    sMesh.material.SetColor("_PhantomColor", color_Enemy);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
     /// <summary>
     /// ¸íÁß·ü °è»ê
     /// </summary>

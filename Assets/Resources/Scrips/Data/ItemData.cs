@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum ItemType
@@ -12,8 +11,12 @@ public enum ItemType
     Backpack,
     MainWeapon = 10,
     SubWeapon,
-    Magazine = 30,
-    Grenade,
+    Muzzle = 20,
+    Scope,
+    FrontHandle,
+    Magazine,
+    Attachment,
+    UnderBarrel,
 }
 
 public enum ItemRarity
@@ -30,6 +33,7 @@ public class ItemDataInfo
     [Space(5f)]
 
     public string ID;
+    public string dataID;
     public string itemName;
     public ItemType type;
     public ItemRarity rarity;

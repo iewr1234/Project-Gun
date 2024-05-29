@@ -224,9 +224,7 @@ public class CharacterController : MonoBehaviour
 
         ownerType = _ownerType;
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        //DataUtility.SetMeshsMaterial(ownerType, meshs);
         sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
-        //DataUtility.SetMeshsMaterial(ownerType, sMeshs);
         ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
         for (int i = 0; i < ragdollCds.Count; i++)
         {
@@ -298,15 +296,16 @@ public class CharacterController : MonoBehaviour
         switch (ownerType)
         {
             case CharacterOwner.Player:
+                outlinable.BackParameters.Color = DataUtility.color_Player;
                 outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Player);
                 break;
             case CharacterOwner.Enemy:
+                outlinable.BackParameters.Color = DataUtility.color_Enemy;
                 outlinable.BackParameters.FillPass.SetColor("_PublicGapColor", DataUtility.color_Enemy);
                 break;
             default:
                 break;
         }
-        outlinable.BackParameters.Color = Color.red;
         outlinable.FrontParameters.Enabled = false;
         outlinable.FrontParameters.DilateShift = 0f;
         outlinable.FrontParameters.BlurShift = 0f;
@@ -316,6 +315,24 @@ public class CharacterController : MonoBehaviour
 
     public void SetActiveOutline(bool value)
     {
+        if (value)
+        {
+            outlinable.BackParameters.Color = Color.red;
+        }
+        else
+        {
+            switch (ownerType)
+            {
+                case CharacterOwner.Player:
+                    outlinable.BackParameters.Color = DataUtility.color_Player;
+                    break;
+                case CharacterOwner.Enemy:
+                    outlinable.BackParameters.Color = DataUtility.color_Enemy;
+                    break;
+                default:
+                    break;
+            }
+        }
         var newDilate = value ? 1f : 0f;
         outlinable.BackParameters.DilateShift = newDilate;
         outlinable.FrontParameters.Enabled = value;
@@ -1889,30 +1906,6 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
-    /// 타겟 쉐이더 변경
-    /// </summary>
-    private void ChangeTargetShader()
-    {
-        var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-        for (int i = 0; i < targetList.Count; i++)
-        {
-            var target = targetList[i];
-            if (target == this.targetList[targetIndex].target)
-            {
-                DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
-                DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
-                DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
-            }
-            else
-            {
-                DataUtility.SetMeshsMaterial(target.meshs, "Standard");
-                DataUtility.SetMeshsMaterial(target.sMeshs, "Standard");
-                DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Standard");
-            }
-        }
-    }
-
-    /// <summary>
     /// 조준상태로 설정
     /// </summary>
     /// <param name="value"></param>
@@ -1977,14 +1970,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void SetTargetOff()
     {
-        var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-        for (int i = 0; i < targetList.Count; i++)
-        {
-            var target = targetList[i];
-            DataUtility.SetMeshsMaterial(target.meshs, "Draw/AlwaysVisible");
-            DataUtility.SetMeshsMaterial(target.sMeshs, "Draw/AlwaysVisible");
-            DataUtility.SetMeshsMaterial(target.currentWeapon.meshs, "Draw/AlwaysVisible");
-        }
+        targetList[targetIndex].target.SetActiveOutline(false);
         gameMgr.uiMgr.SetActiveAimUI(this, false);
     }
 
@@ -2240,9 +2226,9 @@ public class CharacterController : MonoBehaviour
 
         void CharacterDead()
         {
-            DataUtility.SetMeshsMaterial(meshs, "Standard");
-            DataUtility.SetMeshsMaterial(sMeshs, "Standard");
-            DataUtility.SetMeshsMaterial(currentWeapon.meshs, "Standard");
+            //DataUtility.SetMeshsMaterial(meshs, "Standard");
+            //DataUtility.SetMeshsMaterial(sMeshs, "Standard");
+            //DataUtility.SetMeshsMaterial(currentWeapon.meshs, "Standard");
             animator.enabled = false;
             cd.enabled = false;
             headAim = false;

@@ -1,30 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using static UnityEditor.Progress;
-
-[System.Serializable]
-public struct ItemSample
-{
-    public int index;
-    public GameObject sampleObject;
-    public List<MeshRenderer> meshs;
-}
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("---Access Script---")]
     public InventoryManager invenMgr;
 
+    private WeaponDataInfo weaponData;
+    private WeaponPartsDataInfo partsData;
+
     [Header("---Access Component---")]
     public RectTransform rect;
     [HideInInspector] public Image targetImage;
     [HideInInspector] public TextMeshProUGUI countText;
-    [SerializeField] private List<ItemSample> samples = new List<ItemSample>();
+
+    private Transform samplesTf;
+    private List<GameObject> samples = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
     public ItemDataInfo itemData;
@@ -37,29 +32,23 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public Vector2Int pivotIndex;
     [SerializeField] private Vector2 movePivot;
+    private GameObject activeSample;
     [SerializeField] private int sampleIndex;
 
     public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
         rect = GetComponent<RectTransform>();
+        //rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
-        SetSamples();
-        rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
 
-        void SetSamples()
+        samplesTf = transform.Find("Sample");
+        for (int i = 0; i < samplesTf.childCount; i++)
         {
-            var samplesTf = transform.Find("Sample");
-            for (int i = 0; i < samplesTf.childCount; i++)
-            {
-                var sample = new ItemSample();
-                sample.index = i;
-                sample.sampleObject = samplesTf.GetChild(i).gameObject;
-                sample.sampleObject.SetActive(false);
-                sample.meshs = sample.sampleObject.GetComponentsInChildren<MeshRenderer>().ToList();
-                samples.Add(sample);
-            }
+            var sample = samplesTf.GetChild(i).gameObject;
+            sample.SetActive(false);
+            samples.Add(sample);
         }
     }
 
@@ -77,26 +66,26 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
+                weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                 break;
-            case ItemType.SubWeapon:
-                break;
-            case ItemType.Magazine:
-                break;
-            case ItemType.Rig:
-                break;
-            case ItemType.Backpack:
+            case ItemType.Scope:
+                partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
                 break;
             default:
                 break;
         }
         SetItemRotation(false);
 
-        var activeSample = samples.Find(x => x.sampleObject.activeSelf && x.sampleObject != samples[sampleIndex].sampleObject);
-        if (activeSample.sampleObject != null)
+        if (activeSample != null)
         {
-            activeSample.sampleObject.SetActive(false);
+            activeSample.SetActive(false);
         }
-        samples[sampleIndex].sampleObject.SetActive(true);
+        activeSample = samples.Find(x => x.name == itemData.dataID);
+        if (activeSample == null)
+        {
+            Debug.LogError("Not found Sample object");
+        }
+        activeSample.SetActive(true);
         gameObject.SetActive(true);
     }
 
@@ -122,12 +111,16 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         SetItemRotation(rotation);
 
-        var activeSample = samples.Find(x => x.sampleObject.activeSelf);
-        if (activeSample.sampleObject != null)
+        if (activeSample != null)
         {
-            activeSample.sampleObject.SetActive(false);
+            activeSample.SetActive(false);
         }
-        samples[sampleIndex].sampleObject.SetActive(true);
+        activeSample = samples.Find(x => x.name == itemData.dataID);
+        if (activeSample == null)
+        {
+            Debug.LogError("Not found Sample object");
+        }
+        activeSample.SetActive(true);
         gameObject.SetActive(true);
     }
 
@@ -162,17 +155,16 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             movePivot = new Vector2(-pivotX, pivotY);
         }
 
-        var sample = GetSample();
-        var itemRot = sample.sampleObject.transform.localRotation.eulerAngles;
+        var itemRot = samplesTf.localRotation.eulerAngles;
         if (rotation)
         {
-            itemRot.x = 90f;
+            itemRot.x = -90f;
         }
         else
         {
             itemRot.x = 0f;
         }
-        sample.sampleObject.transform.localRotation = Quaternion.Euler(itemRot);
+        samplesTf.localRotation = Quaternion.Euler(itemRot);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -212,7 +204,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         transform.position = worldPos;
     }
 
-    public ItemSample GetSample()
+    public GameObject GetSample()
     {
         return samples[sampleIndex];
     }

@@ -9,7 +9,7 @@ public class InventoryManager : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
-    private DataManager dataMgr;
+    [HideInInspector] public DataManager dataMgr;
 
     [Space(5f)]
     [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
@@ -74,9 +74,9 @@ public class InventoryManager : MonoBehaviour
         otherScrollbar = invenUI.transform.Find("OtherStorage/ScrollView/Scrollbar Vertical").gameObject;
 
         itemPool = invenUI.transform.Find("ItemPool");
-        sampleItem = invenUI.transform.Find("SampleItem").GetComponent<ItemHandler>();
+        sampleItem = itemPool.transform.Find("SampleItem").GetComponent<ItemHandler>();
         sampleItem.SetComponents(this);
-        sampleItem.gameObject.SetActive(false);
+        InactiveSampleItem();
 
         myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
         for (int i = 0; i < myStorages.Count; i++)
@@ -91,15 +91,7 @@ public class InventoryManager : MonoBehaviour
         invenUI.gameObject.SetActive(false);
 
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
-        for (int i = 0; i < 3; i++)
-        {
-            SetItemInStorage("T0002", 3, otherStorage.itemSlots);
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            SetItemInStorage("T0002", 2, otherStorage.itemSlots);
-        }
+        SetItemInStorage("T0002", 1, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -206,8 +198,7 @@ public class InventoryManager : MonoBehaviour
 
     public void TakeTheItem(ItemHandler item)
     {
-        sampleItem.SetSampleItemInfo(item.itemData, item.rotation);
-        sampleItem.transform.position = item.transform.position;
+        ActiveSampleItem(item);
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
     }
@@ -310,7 +301,7 @@ public class InventoryManager : MonoBehaviour
             }
             item.targetImage.color = Color.clear;
             holdingItem = null;
-            sampleItem.gameObject.SetActive(false);
+            InactiveSampleItem();
         }
 
         void ItemNesting()
@@ -350,7 +341,7 @@ public class InventoryManager : MonoBehaviour
                 }
                 item.targetImage.color = Color.clear;
                 holdingItem = null;
-                sampleItem.gameObject.SetActive(false);
+                InactiveSampleItem();
 
                 itemSlot.item.targetImage.raycastTarget = true;
             }
@@ -424,7 +415,7 @@ public class InventoryManager : MonoBehaviour
         }
         holdingItem = null;
         onSlots.Clear();
-        sampleItem.gameObject.SetActive(false);
+        InactiveSampleItem();
     }
 
     public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, ItemHandler item, Vector2Int startIndex)
@@ -435,6 +426,20 @@ public class InventoryManager : MonoBehaviour
                                            && x.slotIndex.y < startIndex.y + item.size.y);
 
         return setSlots;
+    }
+
+    public void ActiveSampleItem(ItemHandler item)
+    {
+        sampleItem.transform.SetParent(item.transform.parent, false);
+        sampleItem.transform.localPosition = Vector3.zero;
+        sampleItem.SetSampleItemInfo(item.itemData, item.rotation);
+    }
+
+    public void InactiveSampleItem()
+    {
+        sampleItem.transform.SetParent(itemPool, false);
+        sampleItem.transform.SetAsFirstSibling();
+        sampleItem.gameObject.SetActive(false);
     }
 
     public int GetCanvasDistance()

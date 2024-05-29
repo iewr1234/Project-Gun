@@ -70,7 +70,7 @@ public class PopUp_Inventory : MonoBehaviour
         switch (state)
         {
             case State.Split:
-                invenMgr.sampleItem.gameObject.SetActive(false);
+                invenMgr.InactiveSampleItem();
                 if (itemSlot != null)
                 {
                     itemSlot.SetSlotColor(Color.white);
@@ -86,7 +86,7 @@ public class PopUp_Inventory : MonoBehaviour
 
     public void Button_PopUp_Split_Accept()
     {
-        invenMgr.sampleItem.gameObject.SetActive(false);
+        invenMgr.InactiveSampleItem();
         if (split.slider.value == item.TotalCount)
         {
             invenMgr.PutTheItem(item, itemSlot);
