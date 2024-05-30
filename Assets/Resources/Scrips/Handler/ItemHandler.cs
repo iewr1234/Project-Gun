@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("---Access Script---")]
     public InventoryManager invenMgr;
@@ -32,14 +32,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public Vector2Int pivotIndex;
     [SerializeField] private Vector2 movePivot;
+
     private GameObject activeSample;
-    [SerializeField] private int sampleIndex;
 
     public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
         rect = GetComponent<RectTransform>();
-        //rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
 
@@ -62,7 +61,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             SetTotalCount(count);
         }
 
-        sampleIndex = itemData.index;
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
@@ -93,7 +91,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         itemData = _itemData;
         size = itemData.size;
-        sampleIndex = _itemData.index;
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
@@ -169,6 +166,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (Input.GetMouseButton(1)) return;
+
         targetImage.raycastTarget = false;
         var color = DataUtility.slot_onItemColor;
         color.a = 100 / 255f;
@@ -180,12 +179,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (Input.GetMouseButton(1)) return;
+
         FollowMouse();
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (invenMgr == null) return;
+        if (Input.GetMouseButton(1)) return;
 
         if (itemData.size == new Vector2Int(1, 1))
         {
@@ -204,9 +206,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         transform.position = worldPos;
     }
 
-    public GameObject GetSample()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        return samples[sampleIndex];
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            invenMgr.OpenContextMenu(this);
+        }
     }
 
     public int TotalCount

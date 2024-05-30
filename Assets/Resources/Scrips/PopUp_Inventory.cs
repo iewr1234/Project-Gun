@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class PopUp_Inventory : MonoBehaviour
 {
@@ -11,6 +10,7 @@ public class PopUp_Inventory : MonoBehaviour
     {
         None,
         Split,
+        ItemInformation,
     }
 
     private struct Split
@@ -18,6 +18,15 @@ public class PopUp_Inventory : MonoBehaviour
         public GameObject uiObject;
         public Slider slider;
         public TextMeshProUGUI countText;
+    }
+
+    private struct ItemInformation
+    {
+        public GameObject uiObject;
+        public Transform samplesTf;
+        public List<GameObject> samples;
+
+        public GameObject activeSample;
     }
 
     [Header("---Access Script---")]
@@ -28,11 +37,15 @@ public class PopUp_Inventory : MonoBehaviour
     [Space(5f)]
 
     private Split split;
+    private ItemInformation itemInfo;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private State state;
     [SerializeField] private ItemHandler item;
     [SerializeField] private ItemSlot itemSlot;
+
+    private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, 0);
+    private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, 0);
 
     public void SetComponents(InventoryManager _invenMgr)
     {
@@ -48,12 +61,35 @@ public class PopUp_Inventory : MonoBehaviour
         };
         split.uiObject.SetActive(false);
 
+        var _samplesTf = transform.Find("ItemInformation/Sample");
+        itemInfo = new ItemInformation()
+        {
+            uiObject = transform.Find("ItemInformation").gameObject,
+            samplesTf = _samplesTf,
+            samples = FindAllSamples(),
+        };
+
         gameObject.SetActive(false);
+
+        List<GameObject> FindAllSamples()
+        {
+            var samples = new List<GameObject>();
+            for (int i = 0; i < _samplesTf.childCount; i++)
+            {
+                var sample = _samplesTf.GetChild(i).gameObject;
+                sample.SetActive(false);
+                samples.Add(sample);
+            }
+
+            return samples;
+        }
     }
 
+    #region Split
     public void PopUp_Split(ItemHandler _item, ItemSlot _itemSlot)
     {
         gameObject.SetActive(true);
+        transform.localPosition = defaultPos_split;
         topText.text = "아이템 나누기";
         state = State.Split;
 
@@ -76,6 +112,9 @@ public class PopUp_Inventory : MonoBehaviour
                     itemSlot.SetSlotColor(Color.white);
                 }
                 itemSlot = null;
+                break;
+            case State.ItemInformation:
+                invenMgr.selectItem = null;
                 break;
             default:
                 break;
@@ -109,4 +148,23 @@ public class PopUp_Inventory : MonoBehaviour
     {
         split.countText.text = $"{split.slider.value}";
     }
+    #endregion
+
+    #region
+    public void PopUp_ItemInformation()
+    {
+        gameObject.SetActive(true);
+        transform.localPosition = defaultPos_itemInfo;
+        topText.text = $"{invenMgr.selectItem.itemData.itemName}";
+        state = State.ItemInformation;
+
+        itemInfo.uiObject.SetActive(true);
+        if (itemInfo.activeSample != null)
+        {
+            itemInfo.activeSample.SetActive(false);
+        }
+        itemInfo.activeSample = itemInfo.samples.Find(x => x.name == invenMgr.selectItem.itemData.dataID);
+        itemInfo.activeSample.SetActive(true);
+    }
+    #endregion
 }

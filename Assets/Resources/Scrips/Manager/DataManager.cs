@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
+using System;
 
 [System.Serializable]
 public struct ObjectData
@@ -385,7 +385,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:P";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:T";
     private enum WeaponVariable
     {
         ID,
@@ -403,7 +403,11 @@ public class DataManager : MonoBehaviour
         Stability,
         Rebound,
         ActionCost,
-        MagMax,
+        UseMuzzle,
+        UseScope,
+        UseMagazine,
+        UseAttachment,
+        UseUnderBarrel,
     }
 
     public void UpdateWeaponData()
@@ -447,7 +451,11 @@ public class DataManager : MonoBehaviour
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
                     actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
-                    magMax = int.Parse(data[(int)WeaponVariable.MagMax]),
+                    useMuzzle = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseMuzzle])),
+                    useScope = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseScope])),
+                    useMagazine = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseMagazine])),
+                    useAttachment = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseAttachment])),
+                    useUnderBarrel = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseUnderBarrel])),
                 };
                 weaponData.weaponInfos.Add(weaponInfo);
             }
@@ -458,7 +466,7 @@ public class DataManager : MonoBehaviour
 
     #region
     [HideInInspector] public WeaponPartsData partsData;
-    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:O";
+    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:N";
     private enum WeaponPartsVariable
     {
         ID,
@@ -466,7 +474,6 @@ public class DataManager : MonoBehaviour
         PartsName,
         PartsType,
         Size,
-        Weight,
         RPM,
         Range,
         MOA,
@@ -509,7 +516,6 @@ public class DataManager : MonoBehaviour
                     partsName = data[(int)WeaponPartsVariable.PartsName],
                     type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
                     size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
-                    weight = float.Parse(data[(int)WeaponPartsVariable.Weight]),
                     rpm = int.Parse(data[(int)WeaponPartsVariable.RPM]),
                     range = float.Parse(data[(int)WeaponPartsVariable.Range]),
                     MOA = float.Parse(data[(int)WeaponPartsVariable.MOA]),

@@ -10,17 +10,18 @@ public class InventoryManager : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public DataManager dataMgr;
+    [HideInInspector] public PopUp_Inventory popUp;
+    [HideInInspector] public ContextMenu contextMenu;
 
     [Space(5f)]
     [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
     [SerializeField] private OtherStorage otherStorage;
-    private PopUp_Inventory popUp;
 
     [Header("---Access Component---")]
     public ItemHandler sampleItem;
 
     [HideInInspector] public Camera invenCam;
-    [HideInInspector] public Camera sampleCam;
+    [HideInInspector] public Camera subCam;
     private Canvas invenUI;
 
     private ScrollRect myScrollRect;
@@ -35,6 +36,7 @@ public class InventoryManager : MonoBehaviour
     public ItemSlot onSlot;
     public List<ItemSlot> onSlots;
     public ItemHandler holdingItem;
+    public ItemHandler selectItem;
 
     private List<ItemHandler> items = new List<ItemHandler>();
     private readonly int itemPoolMax = 100;
@@ -59,11 +61,13 @@ public class InventoryManager : MonoBehaviour
     {
         gameMgr = _gmaeMgr;
         dataMgr = _gmaeMgr.dataMgr;
-        popUp = transform.Find("InventoryUI/Pop_Up").GetComponent<PopUp_Inventory>();
+        popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
         popUp.SetComponents(this);
+        contextMenu = transform.Find("InventoryUI/ContextMenu").GetComponent<ContextMenu>();
+        contextMenu.SetComponents(this);
 
         invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
-        sampleCam = transform.Find("InventoryCamera/SampleCamera").GetComponent<Camera>();
+        subCam = transform.Find("InventoryCamera/SubCamera").GetComponent<Camera>();
         invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         invenUI.worldCamera = invenCam;
 
@@ -144,7 +148,7 @@ public class InventoryManager : MonoBehaviour
 
         var value = !invenCam.enabled;
         invenCam.enabled = value;
-        sampleCam.enabled = value;
+        subCam.enabled = value;
         invenUI.gameObject.SetActive(value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
@@ -452,5 +456,14 @@ public class InventoryManager : MonoBehaviour
         {
             return 0;
         }
+    }
+
+    public void OpenContextMenu(ItemHandler item)
+    {
+        selectItem = item;
+        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, contextMenu.transform.position.z);
+        var worldPos = invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, GetCanvasDistance()));
+        contextMenu.transform.position = worldPos;
+        contextMenu.gameObject.SetActive(true);
     }
 }

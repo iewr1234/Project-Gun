@@ -294,7 +294,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
                         return;
                     }
-                    if (selectChar.action < selectChar.currentWeapon.actionCost)
+                    if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
                     {
                         Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
                         return;
@@ -363,13 +363,13 @@ public class GameManager : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     var weapon = selectChar.currentWeapon;
-                    var totalCost = weapon.actionCost + selectChar.fireRateNum + selectChar.sightNum;
+                    var totalCost = weapon.weaponData.actionCost + selectChar.fireRateNum + selectChar.sightNum;
                     if (totalCost > selectChar.action)
                     {
                         Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
                         return;
                     }
-                    var shootNum = (int)(((float)weapon.rpm / 200) * (selectChar.fireRateNum + 1));
+                    var shootNum = (int)(((float)weapon.weaponData.rpm / 200) * (selectChar.fireRateNum + 1));
                     var loadedAmmo = weapon.loadedAmmo;
                     if (weapon.chamberBullet) loadedAmmo++;
 
@@ -644,10 +644,10 @@ public class GameManager : MonoBehaviour
         }
         charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
 
-        var remainingShootCost = action - charCtr.currentWeapon.actionCost;
+        var remainingShootCost = action - charCtr.currentWeapon.weaponData.actionCost;
         if (remainingShootCost > 0)
         {
-            charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.actionCost));
+            charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
         }
 
         int moveRange = 0;

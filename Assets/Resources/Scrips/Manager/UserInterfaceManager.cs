@@ -84,7 +84,7 @@ public class UserInterfaceManager : MonoBehaviour
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
-        var shootNum = (int)(((float)weapon.rpm / 200) * (charCtr.fireRateNum + 1));
+        var shootNum = (int)(((float)weapon.weaponData.rpm / 200) * (charCtr.fireRateNum + 1));
         var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
         if (shootNum > loadedAmmo)
         {
@@ -152,7 +152,7 @@ public class UserInterfaceManager : MonoBehaviour
 
     public void SetActionPoint_Aim(CharacterController charCtr)
     {
-        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
         if (totalCost > charCtr.action)
         {
             actionPointText.color = Color.red;
@@ -173,7 +173,7 @@ public class UserInterfaceManager : MonoBehaviour
         }
 
         fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fireRateNum + 1}");
-        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
@@ -188,7 +188,7 @@ public class UserInterfaceManager : MonoBehaviour
         }
 
         sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightNum + 1}");
-        var totalCost = charCtr.currentWeapon.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetActionPoint_Aim(charCtr);
     }

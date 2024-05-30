@@ -387,11 +387,11 @@ public class CharacterController : MonoBehaviour
         var segments = 30f;
         var angleStep = 360f / segments;
         var angle = 0 * angleStep * Mathf.Deg2Rad;
-        var startPos = new Vector3(Mathf.Cos(angle) * currentWeapon.range, height, Mathf.Sin(angle) * currentWeapon.range);
+        var startPos = new Vector3(Mathf.Cos(angle) * currentWeapon.weaponData.range, height, Mathf.Sin(angle) * currentWeapon.weaponData.range);
         for (int i = 0; i <= segments; i++)
         {
             angle = i * angleStep * Mathf.Deg2Rad;
-            var endPos = new Vector3(Mathf.Cos(angle) * currentWeapon.range, height, Mathf.Sin(angle) * currentWeapon.range);
+            var endPos = new Vector3(Mathf.Cos(angle) * currentWeapon.weaponData.range, height, Mathf.Sin(angle) * currentWeapon.weaponData.range);
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
@@ -705,7 +705,7 @@ public class CharacterController : MonoBehaviour
         Cover FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.weaponData.range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -834,7 +834,7 @@ public class CharacterController : MonoBehaviour
         TargetDirection FindCloseTargetDirection()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.weaponData.range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -984,7 +984,7 @@ public class CharacterController : MonoBehaviour
 
         float GetDistance()
         {
-            switch (currentWeapon.type)
+            switch (currentWeapon.weaponData.type)
             {
                 case WeaponType.Pistol:
                     return 0.45f;
@@ -997,7 +997,7 @@ public class CharacterController : MonoBehaviour
 
         float GetSpeed()
         {
-            switch (currentWeapon.type)
+            switch (currentWeapon.weaponData.type)
             {
                 case WeaponType.Pistol:
                     return targetingMoveSpeed_Pistol;
@@ -1188,7 +1188,7 @@ public class CharacterController : MonoBehaviour
                 changeIndex = 0;
             }
             var nextWeapon = weapons[changeIndex];
-            if (currentWeapon.type != nextWeapon.type)
+            if (currentWeapon.weaponData.type != nextWeapon.weaponData.type)
             {
                 animator.SetBool("otherType", true);
             }
@@ -1409,7 +1409,7 @@ public class CharacterController : MonoBehaviour
         var pos = watchNode.transform.position;
         var nodeAngleRad = Mathf.Atan2(targetNode.transform.position.x - pos.x, targetNode.transform.position.z - pos.z);
         var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-        var halfAngle = currentWeapon.watchAngle / 2f;
+        var halfAngle = currentWeapon.weaponData.watchAngle / 2f;
         watchInfo = new WatchInfo()
         {
             drawRang = drawRange,
@@ -1537,7 +1537,7 @@ public class CharacterController : MonoBehaviour
             var pos = currentNode.transform.position;
             var targetPos = target.currentNode.transform.position;
             var distance = DataUtility.GetDistance(pos, targetPos);
-            if (distance < currentWeapon.range)
+            if (distance < currentWeapon.weaponData.range)
             {
                 FieldNode RN = null;
                 FieldNode LN = null;
@@ -1857,7 +1857,7 @@ public class CharacterController : MonoBehaviour
                 camState = CameraState.LeftAim;
             }
             gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
-            gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.actionCost);
+            gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
             gameMgr.uiMgr.SetTargetInfo(targetInfo);
             return true;
@@ -2192,10 +2192,10 @@ public class CharacterController : MonoBehaviour
                 armor.bulletproof = 0f;
             }
 
-            var penetrateRate = _weapon.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _weapon.penetrate)) * 100f) : 95;
+            var penetrateRate = _weapon.weaponData.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _weapon.weaponData.penetrate)) * 100f) : 95;
             isPenetrate = value < penetrateRate;
 
-            var armorDamage = (int)Mathf.Floor(_weapon.damage * (_weapon.armorBreak / 100f));
+            var armorDamage = (int)Mathf.Floor(_weapon.weaponData.damage * (_weapon.weaponData.armorBreak / 100f));
             SetArmor(-armorDamage);
             bulletproof = armor.bulletproof;
         }
@@ -2205,7 +2205,7 @@ public class CharacterController : MonoBehaviour
             bulletproof = 0f;
         }
 
-        var damage = (int)Mathf.Floor(_weapon.damage * (_weapon.penetrate / (_weapon.penetrate + bulletproof)));
+        var damage = (int)Mathf.Floor(_weapon.weaponData.damage * (_weapon.weaponData.penetrate / (_weapon.weaponData.penetrate + bulletproof)));
         if (isPenetrate)
         {
             SetHealth(-damage);

@@ -123,7 +123,7 @@ public static class DataUtility
             reboundCheck++;
         }
         var value = Random.Range(0, 100);
-        var shooterHit = charCtr.aiming - (weapon.MOA * dist) + (15 / (dist / 3)) - (weapon.rebound * reboundCheck);
+        var shooterHit = charCtr.aiming - (weapon.weaponData.MOA * dist) + (15 / (dist / 3)) - (weapon.weaponData.rebound * reboundCheck);
         if (shooterHit < 0f)
         {
             shooterHit = 0f;

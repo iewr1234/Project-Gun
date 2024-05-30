@@ -17,24 +17,13 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
-    [SerializeField] private Transform scopeTf;
     [SerializeField] private Transform bulletTf;
 
-    [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
+    [HideInInspector] public List<GameObject> partsObjects = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
-    [Tooltip("무기분류")] public WeaponType type;
-    [Tooltip("피해량")] public int damage;
-    [Tooltip("관통")] public int penetrate;
-    [Tooltip("방어구 손상")] public int armorBreak;
-    [Tooltip("파편화")] public int critical;
-    [Tooltip("발사속도")] public int rpm;
-    [Tooltip("사거리")] public float range;
-    [Tooltip("경계각")] public int watchAngle;
-    [Tooltip("정확도")] public float MOA;
-    [Tooltip("안정성")] public int stability;
-    [Tooltip("반동")] public int rebound;
-    [Tooltip("행동소모")] public int actionCost;
+    public WeaponDataInfo weaponData;
+    public float weight;
     [Space(5f)]
 
     [Tooltip("사격타입")] public FireModeType fireMode;
@@ -45,6 +34,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("장전된 탄환 수")] public int loadedAmmo;
     [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;
 
+    private List<WeaponPartsDataInfo> partsList = new List<WeaponPartsDataInfo>();
     [SerializeField] private List<bool> hitList = new List<bool>();
 
     private Vector3 holsterPos;
@@ -63,37 +53,52 @@ public class Weapon : MonoBehaviour
 
     private readonly float shootDisparity = 0.15f;
 
-    public void SetComponets(CharacterController _charCtr, WeaponDataInfo weaponData)
+    public void SetComponets(CharacterController _charCtr, WeaponDataInfo _weaponData)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
 
-        scopeTf = transform.Find("PartsTransform/Scope");
         bulletTf = transform.Find("BulletTransform");
+        AddWeaponPartsObjects();
 
-        meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        type = weaponData.type;
+        weaponData = _weaponData;
+        //type = weaponData.type;
         SetWeaponPositionAndRotation();
 
-        damage = weaponData.damage;
-        penetrate = weaponData.penetrate;
-        armorBreak = weaponData.armorBreak;
-        critical = weaponData.critical;
-        rpm = weaponData.rpm;
-        range = weaponData.range;
-        watchAngle = weaponData.watchAngle;
-        MOA = weaponData.MOA;
-        stability = weaponData.stability;
-        rebound = weaponData.rebound;
-        actionCost = weaponData.actionCost;
+        //damage = weaponData.damage;
+        //penetrate = weaponData.penetrate;
+        //armorBreak = weaponData.armorBreak;
+        //critical = weaponData.critical;
+        //rpm = weaponData.rpm;
+        //range = weaponData.range;
+        //watchAngle = weaponData.watchAngle;
+        //MOA = weaponData.MOA;
+        //stability = weaponData.stability;
+        //rebound = weaponData.rebound;
+        //actionCost = weaponData.actionCost;
 
-        magMax = weaponData.magMax;
+        magMax = 30;
         Reload();
+
+        void AddWeaponPartsObjects()
+        {
+            var parts = new List<GameObject>();
+            var partsTf = transform.Find("PartsTransform");
+            var scopeTf = partsTf.transform.Find("Scope");
+            for (int i = 0; i < scopeTf.childCount; i++)
+            {
+                var sample = scopeTf.GetChild(i).gameObject;
+                sample.SetActive(false);
+                parts.Add(sample);
+            }
+
+            partsObjects = parts;
+        }
 
         void SetWeaponPositionAndRotation()
         {
-            switch (type)
+            switch (weaponData.type)
             {
                 case WeaponType.Pistol:
                     holsterPos = Vector3.zero;
@@ -123,7 +128,7 @@ public class Weapon : MonoBehaviour
 
     public void EquipWeapon()
     {
-        switch (type)
+        switch (weaponData.type)
         {
             case WeaponType.Pistol:
                 charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
@@ -134,7 +139,7 @@ public class Weapon : MonoBehaviour
             default:
                 break;
         }
-        charCtr.SetRig(type);
+        charCtr.SetRig(weaponData.type);
     }
 
     public void WeaponSwitching(string switchPos)
@@ -142,7 +147,7 @@ public class Weapon : MonoBehaviour
         switch (switchPos)
         {
             case "Holster":
-                if (type == WeaponType.Pistol)
+                if (weaponData.type == WeaponType.Pistol)
                 {
                     transform.SetParent(charCtr.subHolsterTf, false);
                 }
@@ -207,7 +212,7 @@ public class Weapon : MonoBehaviour
         var allMiss = true;
         for (int i = 0; i < shootNum; i++)
         {
-            charCtr.SetStamina(-stability);
+            charCtr.SetStamina(-weaponData.stability);
             var hitAccuracy = DataUtility.GetHitAccuracy(charCtr, targetInfo);
             var value = Random.Range(0, 100);
             var isHit = value < hitAccuracy;
