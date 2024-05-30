@@ -10,8 +10,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("---Access Script---")]
     public InventoryManager invenMgr;
 
-    private WeaponDataInfo weaponData;
-    private WeaponPartsDataInfo partsData;
+    [HideInInspector] public WeaponDataInfo weaponData;
+    [HideInInspector] public WeaponPartsDataInfo partsData;
 
     [Header("---Access Component---")]
     public RectTransform rect;

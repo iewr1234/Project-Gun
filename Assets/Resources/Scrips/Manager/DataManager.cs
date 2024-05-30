@@ -444,22 +444,37 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)WeaponVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)WeaponVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)WeaponVariable.Critical]),
-                    rpm = int.Parse(data[(int)WeaponVariable.RPM]),
+                    RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
                     MOA = float.Parse(data[(int)WeaponVariable.MOA]),
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
                     actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
-                    useMuzzle = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseMuzzle])),
-                    useScope = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseScope])),
-                    useMagazine = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseMagazine])),
-                    useAttachment = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseAttachment])),
-                    useUnderBarrel = Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.UseUnderBarrel])),
+                    useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
+                    useScope = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
+                    useMagazine = ReadUsePartsSize(data[(int)WeaponVariable.UseMagazine]),
+                    useAttachment = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
+                    useUnderBarrel = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                 };
                 weaponData.weaponInfos.Add(weaponInfo);
             }
             Debug.Log("Update Weapon Data");
+
+            List<WeaponPartsSize> ReadUsePartsSize(string sizeData)
+            {
+                var partSizeList = new List<WeaponPartsSize>();
+                var sizeInfos = sizeData.Split(',');
+                for (int i = 0; i < sizeInfos.Length; i++)
+                {
+                    var sizeInfo = sizeInfos[i];
+                    var partsSize = (WeaponPartsSize)int.Parse(sizeInfo);
+                    partSizeList.Add(partsSize);
+                    if (partsSize == WeaponPartsSize.None) break;
+                }
+
+                return partSizeList;
+            }
         }
     }
     #endregion
@@ -516,7 +531,7 @@ public class DataManager : MonoBehaviour
                     partsName = data[(int)WeaponPartsVariable.PartsName],
                     type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
                     size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
-                    rpm = int.Parse(data[(int)WeaponPartsVariable.RPM]),
+                    RPM = int.Parse(data[(int)WeaponPartsVariable.RPM]),
                     range = float.Parse(data[(int)WeaponPartsVariable.Range]),
                     MOA = float.Parse(data[(int)WeaponPartsVariable.MOA]),
                     stability = int.Parse(data[(int)WeaponPartsVariable.Stability]),

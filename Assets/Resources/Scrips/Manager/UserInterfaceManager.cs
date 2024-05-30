@@ -84,7 +84,7 @@ public class UserInterfaceManager : MonoBehaviour
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
-        var shootNum = (int)(((float)weapon.weaponData.rpm / 200) * (charCtr.fireRateNum + 1));
+        var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fireRateNum + 1));
         var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
         if (shootNum > loadedAmmo)
         {

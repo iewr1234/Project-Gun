@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -24,6 +25,7 @@ public class PopUp_Inventory : MonoBehaviour
     {
         public GameObject uiObject;
         public Transform samplesTf;
+        public List<TextMeshProUGUI> infoTexts;
         public List<GameObject> samples;
 
         public GameObject activeSample;
@@ -66,10 +68,23 @@ public class PopUp_Inventory : MonoBehaviour
         {
             uiObject = transform.Find("ItemInformation").gameObject,
             samplesTf = _samplesTf,
+            infoTexts = FindInformationTexts(),
             samples = FindAllSamples(),
         };
 
         gameObject.SetActive(false);
+
+        List<TextMeshProUGUI> FindInformationTexts()
+        {
+            var infoTexts = transform.Find("ItemInformation/Texts").GetComponentsInChildren<TextMeshProUGUI>();
+            for (int i = 0; i < infoTexts.Length; i++)
+            {
+                var infoText = infoTexts[i];
+                infoText.gameObject.SetActive(false);
+            }
+
+            return infoTexts.ToList();
+        }
 
         List<GameObject> FindAllSamples()
         {
@@ -165,6 +180,98 @@ public class PopUp_Inventory : MonoBehaviour
         }
         itemInfo.activeSample = itemInfo.samples.Find(x => x.name == invenMgr.selectItem.itemData.dataID);
         itemInfo.activeSample.SetActive(true);
+        for (int i = 0; i < itemInfo.infoTexts.Count; i++)
+        {
+            var infoText = itemInfo.infoTexts[i];
+            infoText.gameObject.SetActive(false);
+        }
+
+        var item = invenMgr.selectItem;
+        switch (item.itemData.type)
+        {
+            case ItemType.MainWeapon:
+                MainWeaponInfo();
+                break;
+            case ItemType.Scope:
+                WeaponPartsInfo();
+                break;
+            default:
+                break;
+        }
+
+        void MainWeaponInfo()
+        {
+            string[] labels =
+            {
+                "무게",
+                "RPM",
+                "사거리",
+                "정확도",
+                "안정성",
+                "반동",
+                "경계각",
+                "행동소모"
+            };
+            string[] values =
+            {
+                $"{item.itemData.weight}",
+                $"{item.weaponData.RPM}",
+                $"{item.weaponData.range}",
+                $"{item.weaponData.MOA}",
+                $"{item.weaponData.stability}",
+                $"{item.weaponData.rebound}",
+                $"{item.weaponData.watchAngle}°",
+                $"{item.weaponData.actionCost}"
+            };
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var labelName = itemInfo.infoTexts[i * 2];
+                labelName.text = labels[i];
+                labelName.gameObject.SetActive(true);
+
+                var valueText = itemInfo.infoTexts[i * 2 + 1];
+                valueText.text = values[i];
+                valueText.gameObject.SetActive(true);
+            }
+        }
+
+        void WeaponPartsInfo()
+        {
+            string[] labels =
+            {
+                "무게",
+                "RPM",
+                "사거리",
+                "정확도",
+                "안정성",
+                "반동",
+                "경계각",
+                "행동소모"
+            };
+            string[] values =
+            {
+                $"{item.itemData.weight}",
+                $"{item.partsData.RPM}",
+                $"{item.partsData.range}",
+                $"{item.partsData.MOA}",
+                $"{item.partsData.stability}",
+                $"{item.partsData.rebound}",
+                $"{item.partsData.watchAngle}°",
+                $"{item.partsData.actionCost}"
+            };
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var labelName = itemInfo.infoTexts[i * 2];
+                labelName.text = labels[i];
+                labelName.gameObject.SetActive(true);
+
+                var valueText = itemInfo.infoTexts[i * 2 + 1];
+                valueText.text = values[i];
+                valueText.gameObject.SetActive(true);
+            }
+        }
     }
     #endregion
 }

@@ -369,7 +369,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
                         return;
                     }
-                    var shootNum = (int)(((float)weapon.weaponData.rpm / 200) * (selectChar.fireRateNum + 1));
+                    var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (selectChar.fireRateNum + 1));
                     var loadedAmmo = weapon.loadedAmmo;
                     if (weapon.chamberBullet) loadedAmmo++;
 

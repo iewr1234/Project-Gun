@@ -25,7 +25,7 @@ public class WeaponDataInfo
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
-    [Tooltip("발사속도")] public int rpm;
+    [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
     [Tooltip("정확도")] public float MOA;
@@ -34,11 +34,11 @@ public class WeaponDataInfo
     [Tooltip("행동소모")] public int actionCost;
     [Space(5f)]
 
-    [Tooltip("총구 사용")] public bool useMuzzle;
-    [Tooltip("조준경 사용")] public bool useScope;
-    [Tooltip("탄창 사용")] public bool useMagazine;
-    [Tooltip("부착물 사용")] public bool useAttachment;
-    [Tooltip("언더배럴 사용")] public bool useUnderBarrel;
+    [Tooltip("총구 사용")] public List<WeaponPartsSize> useMuzzle;
+    [Tooltip("조준경 사용")] public List<WeaponPartsSize> useScope;
+    [Tooltip("탄창 사용")] public List<WeaponPartsSize> useMagazine;
+    [Tooltip("부착물 사용")] public List<WeaponPartsSize> useAttachment;
+    [Tooltip("언더배럴 사용")] public List<WeaponPartsSize> useUnderBarrel;
 }
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Object/WeaponData")]

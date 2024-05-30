@@ -63,20 +63,7 @@ public class Weapon : MonoBehaviour
         AddWeaponPartsObjects();
 
         weaponData = _weaponData;
-        //type = weaponData.type;
         SetWeaponPositionAndRotation();
-
-        //damage = weaponData.damage;
-        //penetrate = weaponData.penetrate;
-        //armorBreak = weaponData.armorBreak;
-        //critical = weaponData.critical;
-        //rpm = weaponData.rpm;
-        //range = weaponData.range;
-        //watchAngle = weaponData.watchAngle;
-        //MOA = weaponData.MOA;
-        //stability = weaponData.stability;
-        //rebound = weaponData.rebound;
-        //actionCost = weaponData.actionCost;
 
         magMax = 30;
         Reload();

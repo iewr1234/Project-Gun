@@ -37,7 +37,7 @@ public class WeaponPartsDataInfo
     public float weight;
     [Space(5f)]
 
-    public int rpm;
+    public int RPM;
     public float range;
     public float MOA;
     public int stability;
