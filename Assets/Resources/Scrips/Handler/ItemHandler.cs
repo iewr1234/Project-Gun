@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -28,8 +29,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [HideInInspector] public bool rotation;
 
     [Space(5f)]
-    public ItemSlot itemSlot;
-    public List<ItemSlot> itemSlots = new List<ItemSlot>();
+    public EquipSlot equipSlot;
+    public List<ItemSlot> itemSlots;
     [HideInInspector] public Vector2Int pivotIndex;
     [SerializeField] private Vector2 movePivot;
 
@@ -164,10 +165,66 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         samplesTf.localRotation = Quaternion.Euler(itemRot);
     }
 
+    public void FollowMouse()
+    {
+        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
+        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
+        transform.position = worldPos;
+    }
+
+    public bool CheckEquip(EquipSlot equipSlot)
+    {
+        switch (equipSlot.type)
+        {
+            case EquipType.Head:
+                return itemData.type == ItemType.Head;
+            case EquipType.Body:
+                return itemData.type == ItemType.Body;
+            case EquipType.Rig:
+                return itemData.type == ItemType.Rig;
+            case EquipType.Backpack:
+                return itemData.type == ItemType.Backpack;
+            case EquipType.MainWeapon:
+                return itemData.type == ItemType.MainWeapon;
+            case EquipType.SubWeapon:
+                return itemData.type == ItemType.SubWeapon;
+            case EquipType.Chamber:
+                return itemData.type == ItemType.Bullet;
+            case EquipType.Muzzle:
+                return itemData.type == ItemType.Muzzle;
+            case EquipType.Sight:
+                return itemData.type == ItemType.Sight;
+            default:
+                return false;
+        }
+    }
+
+    public void ChangeRectPivot(bool isEquip)
+    {
+        switch (isEquip)
+        {
+            case true:
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                break;
+            case false:
+                rect.anchorMax = new Vector2(0f, 1f);
+                rect.anchorMin = new Vector2(0f, 1f);
+                rect.pivot = new Vector2(0f, 1f);
+                break;
+        }
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (Input.GetMouseButton(1)) return;
 
+        if (equipSlot != null)
+        {
+            equipSlot.slotText.enabled = true;
+            ChangeRectPivot(false);
+        }
         targetImage.raycastTarget = false;
         var color = DataUtility.slot_onItemColor;
         color.a = 100 / 255f;
@@ -189,7 +246,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (invenMgr == null) return;
         if (Input.GetMouseButton(1)) return;
 
-        if (invenMgr.onEquip && CheckEquip())
+        if (invenMgr.onEquip && CheckEquip(invenMgr.onEquip))
         {
             invenMgr.onEquip.EquipItem(this);
         }
@@ -204,40 +261,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 invenMgr.PutTheItem(this, invenMgr.onSlots);
             }
         }
-
-        bool CheckEquip()
-        {
-            switch (invenMgr.onEquip.type)
-            {
-                case EquipType.Head:
-                    return itemData.type == ItemType.Head;
-                case EquipType.Body:
-                    return itemData.type == ItemType.Body;
-                case EquipType.Rig:
-                    return itemData.type == ItemType.Rig;
-                case EquipType.Backpack:
-                    return itemData.type == ItemType.Backpack;
-                case EquipType.MainWeapon:
-                    return itemData.type == ItemType.MainWeapon;
-                case EquipType.SubWeapon:
-                    return itemData.type == ItemType.SubWeapon;
-                case EquipType.Chamber:
-                    return itemData.type == ItemType.Bullet;
-                case EquipType.Muzzle:
-                    return itemData.type == ItemType.Muzzle;
-                case EquipType.Sight:
-                    return itemData.type == ItemType.Sight;
-                default:
-                    return false;
-            }
-        }
-    }
-
-    public void FollowMouse()
-    {
-        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
-        transform.position = worldPos;
     }
 
     public void OnPointerClick(PointerEventData eventData)

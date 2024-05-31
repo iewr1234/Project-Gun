@@ -36,6 +36,8 @@ public class EquipSlot : MonoBehaviour
     public List<WeaponPartsSize> sizeList;
     public ItemHandler item;
 
+    private readonly Color defaultColor = new Color(50 / 255f, 50 / 255f, 50 / 255f);
+
     public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
@@ -47,19 +49,55 @@ public class EquipSlot : MonoBehaviour
     public void EquipItem(ItemHandler _item)
     {
         item = _item;
-        item.transform.SetParent(transform, false);
-        item.rect.pivot = new Vector2(0.5f, 0.5f);
-        item.transform.localScale = Vector3.zero;
+        backImage.color = defaultColor;
         slotText.enabled = false;
+
+        item.equipSlot = this;
+        for (int i = 0; i < item.itemSlots.Count; i++)
+        {
+            var itemSlot = item.itemSlots[i];
+            itemSlot.SetSlotColor(Color.white);
+            itemSlot.item = null;
+        }
+        item.itemSlots.Clear();
+
+        item.ChangeRectPivot(true);
+        item.transform.SetParent(transform, false);
+        item.transform.localPosition = Vector3.zero;
+        item.targetImage.color = Color.clear;
+        item.targetImage.raycastTarget = true;
+
+        invenMgr.holdingItem = null;
+        invenMgr.InactiveSampleItem();
     }
 
     public void PointerEnter_EquipSlot()
     {
         invenMgr.onEquip = this;
+        if (invenMgr.holdingItem != null)
+        {
+            if (invenMgr.holdingItem.CheckEquip(this))
+            {
+                backImage.color = DataUtility.slot_onItemColor;
+            }
+            else
+            {
+                backImage.color = DataUtility.slot_unMoveColor;
+            }
+        }
+        else if (item != null)
+        {
+            item.targetImage.raycastTarget = true;
+        }
     }
 
     public void PointerExit_EquipSlot()
     {
         invenMgr.onEquip = null;
+        backImage.color = defaultColor;
+        if (item != null)
+        {
+            item.targetImage.raycastTarget = false;
+        }
     }
 }

@@ -211,7 +211,10 @@ public class InventoryManager : MonoBehaviour
 
     public void TakeTheItem(ItemHandler item)
     {
-        ActiveSampleItem(item);
+        if (item.equipSlot == null)
+        {
+            ActiveSampleItem(item);
+        }
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
     }
@@ -285,22 +288,23 @@ public class InventoryManager : MonoBehaviour
                     }
                     else
                     {
-                        if (item.itemSlot != null)
+                        if (item.itemSlots.Count > 0)
                         {
-                            item.itemSlot.item = null;
-                            item.itemSlot.SetSlotColor(Color.white);
+                            item.itemSlots[0].item = null;
+                            item.itemSlots[0].SetSlotColor(Color.white);
+                            item.itemSlots.Clear();
                         }
                         itemSlot.item = item;
                         itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
 
-                        item.itemSlot = itemSlot;
+                        item.itemSlots.Add(itemSlot);
                         item.transform.SetParent(itemSlot.transform, false);
                         item.transform.localPosition = Vector3.zero;
                     }
                     break;
                 case false:
-                    item.transform.SetParent(item.itemSlot.transform, false);
-                    item.transform.position = item.itemSlot.transform.position;
+                    item.transform.SetParent(item.itemSlots[0].transform, false);
+                    item.transform.position = item.itemSlots[0].transform.position;
                     if (itemSlot != null && itemSlot.item != null)
                     {
                         itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
@@ -325,30 +329,29 @@ public class InventoryManager : MonoBehaviour
             }
             else if (itemSlot.item.TotalCount < itemSlot.item.itemData.maxNesting)
             {
-
                 itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
                 var slotCount = itemSlot.item.TotalCount;
                 var itemCount = item.TotalCount;
                 if (slotCount + itemCount > itemSlot.item.itemData.maxNesting)
                 {
-                    if (item.itemSlot != null)
+                    if (item.itemSlots.Count > 0)
                     {
-                        item.itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        item.itemSlots[0].SetSlotColor(DataUtility.slot_onItemColor);
                     }
                     var count = slotCount + itemCount - itemSlot.item.itemData.maxNesting;
-                    item.transform.SetParent(item.itemSlot.transform, false);
-                    item.transform.position = item.itemSlot.transform.position;
+                    item.transform.SetParent(item.itemSlots[0].transform, false);
+                    item.transform.position = item.itemSlots[0].transform.position;
                     item.SetTotalCount(count);
                     itemSlot.item.SetTotalCount(itemSlot.item.itemData.maxNesting);
                 }
                 else
                 {
-                    if (item.itemSlot != null)
+                    if (item.itemSlots.Count > 0)
                     {
-                        item.itemSlot.item = null;
-                        item.itemSlot.SetSlotColor(Color.white);
+                        item.itemSlots[0].item = null;
+                        item.itemSlots[0].SetSlotColor(Color.white);
+                        item.itemSlots.Clear();
                     }
-                    item.itemSlot = null;
                     item.gameObject.SetActive(false);
                     itemSlot.item.ResultTotalCount(itemCount);
                 }
@@ -362,8 +365,8 @@ public class InventoryManager : MonoBehaviour
 
         void ItemSplit()
         {
-            item.transform.SetParent(item.itemSlot.transform, false);
-            item.transform.position = item.itemSlot.transform.position;
+            item.transform.SetParent(item.itemSlots[0].transform, false);
+            item.transform.position = item.itemSlots[0].transform.position;
             itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
 
             popUp.PopUp_Split(item, itemSlot);
@@ -381,19 +384,26 @@ public class InventoryManager : MonoBehaviour
         if (findItem || itemSlots.Count < item.size.x * item.size.y)
         {
             item.SetItemRotation(sampleItem.rotation);
-            item.transform.SetParent(item.itemSlots[0].transform, false);
-            item.transform.position = item.itemSlots[0].transform.position;
-            item.targetImage.color = DataUtility.slot_onItemColor;
-            for (int i = 0; i < itemSlots.Count; i++)
+            if (item.equipSlot != null)
             {
-                var itemSlot = itemSlots[i];
-                if (itemSlot.item != null)
+
+            }
+            else
+            {
+                item.transform.SetParent(item.itemSlots[0].transform, false);
+                item.transform.position = item.itemSlots[0].transform.position;
+                item.targetImage.color = DataUtility.slot_onItemColor;
+                for (int i = 0; i < itemSlots.Count; i++)
                 {
-                    itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
-                }
-                else
-                {
-                    itemSlot.SetSlotColor(Color.white);
+                    var itemSlot = itemSlots[i];
+                    if (itemSlot.item != null)
+                    {
+                        itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                    }
+                    else
+                    {
+                        itemSlot.SetSlotColor(Color.white);
+                    }
                 }
             }
         }
