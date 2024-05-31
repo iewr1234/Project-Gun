@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public enum EquipType
 {
@@ -43,13 +44,22 @@ public class EquipSlot : MonoBehaviour
         slotText = transform.Find("Text").GetComponent<TextMeshProUGUI>();
     }
 
+    public void EquipItem(ItemHandler _item)
+    {
+        item = _item;
+        item.transform.SetParent(transform, false);
+        item.rect.pivot = new Vector2(0.5f, 0.5f);
+        item.transform.localScale = Vector3.zero;
+        slotText.enabled = false;
+    }
+
     public void PointerEnter_EquipSlot()
     {
-
+        invenMgr.onEquip = this;
     }
 
     public void PointerExit_EquipSlot()
     {
-
+        invenMgr.onEquip = null;
     }
 }

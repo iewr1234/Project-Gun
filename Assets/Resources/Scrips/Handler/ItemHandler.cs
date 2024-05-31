@@ -189,13 +189,47 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (invenMgr == null) return;
         if (Input.GetMouseButton(1)) return;
 
-        if (itemData.size == new Vector2Int(1, 1))
+        if (invenMgr.onEquip && CheckEquip())
         {
-            invenMgr.PutTheItem(this, invenMgr.onSlot);
+            invenMgr.onEquip.EquipItem(this);
         }
         else
         {
-            invenMgr.PutTheItem(this, invenMgr.onSlots);
+            if (itemData.size == new Vector2Int(1, 1))
+            {
+                invenMgr.PutTheItem(this, invenMgr.onSlot);
+            }
+            else
+            {
+                invenMgr.PutTheItem(this, invenMgr.onSlots);
+            }
+        }
+
+        bool CheckEquip()
+        {
+            switch (invenMgr.onEquip.type)
+            {
+                case EquipType.Head:
+                    return itemData.type == ItemType.Head;
+                case EquipType.Body:
+                    return itemData.type == ItemType.Body;
+                case EquipType.Rig:
+                    return itemData.type == ItemType.Rig;
+                case EquipType.Backpack:
+                    return itemData.type == ItemType.Backpack;
+                case EquipType.MainWeapon:
+                    return itemData.type == ItemType.MainWeapon;
+                case EquipType.SubWeapon:
+                    return itemData.type == ItemType.SubWeapon;
+                case EquipType.Chamber:
+                    return itemData.type == ItemType.Bullet;
+                case EquipType.Muzzle:
+                    return itemData.type == ItemType.Muzzle;
+                case EquipType.Sight:
+                    return itemData.type == ItemType.Sight;
+                default:
+                    return false;
+            }
         }
     }
 

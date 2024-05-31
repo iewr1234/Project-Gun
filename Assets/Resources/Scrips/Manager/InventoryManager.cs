@@ -14,6 +14,7 @@ public class InventoryManager : MonoBehaviour
     [HideInInspector] public ContextMenu contextMenu;
 
     [Space(5f)]
+    [SerializeField] private List<EquipSlot> charEquips = new List<EquipSlot>();
     [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
     [SerializeField] private OtherStorage otherStorage;
 
@@ -33,6 +34,7 @@ public class InventoryManager : MonoBehaviour
     private Transform itemPool;
 
     [Header("--- Assignment Variable---")]
+    public EquipSlot onEquip;
     public ItemSlot onSlot;
     public List<ItemSlot> onSlots;
     public ItemHandler holdingItem;
@@ -81,6 +83,13 @@ public class InventoryManager : MonoBehaviour
         sampleItem = itemPool.transform.Find("SampleItem").GetComponent<ItemHandler>();
         sampleItem.SetComponents(this);
         InactiveSampleItem();
+
+        charEquips = invenUI.transform.Find("Equip/Slots").GetComponentsInChildren<EquipSlot>().ToList();
+        for (int i = 0; i < charEquips.Count; i++)
+        {
+            var charEquip = charEquips[i];
+            charEquip.SetComponents(this);
+        }
 
         myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
         for (int i = 0; i < myStorages.Count; i++)
