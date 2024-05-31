@@ -43,6 +43,7 @@ public class MyStorage : MonoBehaviour
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 
         equipSlot = GetComponentInChildren<EquipSlot>();
+        equipSlot.SetComponents(invenMgr);
         itemSlots = itemsRect.GetComponentsInChildren<ItemSlot>().ToList();
 
         SetStorageSize();

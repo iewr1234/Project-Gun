@@ -66,7 +66,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.MainWeapon:
                 weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                 break;
-            case ItemType.Scope:
+            case ItemType.Sight:
                 partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
                 break;
             default:

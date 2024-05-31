@@ -13,19 +13,20 @@ MonoBehaviour:
   m_Name: WeaponPartsData
   m_EditorClassIdentifier: 
   partsInfos:
-  - indexName: 'P0001: Scope_1'
+  - indexName: 'P0001: Sight_1'
     ID: P0001
-    prefabName: Scope_1
-    partsName: Scope_1
+    prefabName: Sight_1
+    partsName: Sight_1
+    compatModel: 0100000002000000
     type: 2
     size: 0
     weight: 0
-    rpm: 0
+    RPM: 0
     range: 5
+    watchAngle: 0
     MOA: 3
     stability: 0
     rebound: 0
-    watchAngle: 0
     ergonomy: 2
     headShot: 3
     actionCost: 0

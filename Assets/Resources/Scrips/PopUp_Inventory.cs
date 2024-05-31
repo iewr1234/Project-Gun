@@ -27,6 +27,7 @@ public class PopUp_Inventory : MonoBehaviour
         public Transform samplesTf;
         public List<TextMeshProUGUI> infoTexts;
         public List<GameObject> samples;
+        public List<EquipSlot> equipSlots;
 
         public GameObject activeSample;
     }
@@ -68,13 +69,14 @@ public class PopUp_Inventory : MonoBehaviour
         {
             uiObject = transform.Find("ItemInformation").gameObject,
             samplesTf = _samplesTf,
-            infoTexts = FindInformationTexts(),
+            infoTexts = FindAllInformationTexts(),
             samples = FindAllSamples(),
+            equipSlots = FindAllEquipSlots(),
         };
 
         gameObject.SetActive(false);
 
-        List<TextMeshProUGUI> FindInformationTexts()
+        List<TextMeshProUGUI> FindAllInformationTexts()
         {
             var infoTexts = transform.Find("ItemInformation/Texts").GetComponentsInChildren<TextMeshProUGUI>();
             for (int i = 0; i < infoTexts.Length; i++)
@@ -97,6 +99,18 @@ public class PopUp_Inventory : MonoBehaviour
             }
 
             return samples;
+        }
+
+        List<EquipSlot> FindAllEquipSlots()
+        {
+            var equipSlots = transform.Find("ItemInformation/Slots").GetComponentsInChildren<EquipSlot>();
+            for (int i = 0; i < equipSlots.Length; i++)
+            {
+                var equipSlot = equipSlots[i];
+                equipSlot.SetComponents(invenMgr);
+            }
+
+            return equipSlots.ToList();
         }
     }
 
@@ -190,26 +204,26 @@ public class PopUp_Inventory : MonoBehaviour
         switch (item.itemData.type)
         {
             case ItemType.MainWeapon:
-                MainWeaponInfo();
+                WeaponInfo();
                 break;
-            case ItemType.Scope:
+            case ItemType.Sight:
                 WeaponPartsInfo();
                 break;
             default:
                 break;
         }
 
-        void MainWeaponInfo()
+        void WeaponInfo()
         {
             string[] labels =
             {
                 "무게",
                 "RPM",
                 "사거리",
+                "경계각",
                 "정확도",
                 "안정성",
                 "반동",
-                "경계각",
                 "행동소모"
             };
             string[] values =
@@ -217,10 +231,10 @@ public class PopUp_Inventory : MonoBehaviour
                 $"{item.itemData.weight}",
                 $"{item.weaponData.RPM}",
                 $"{item.weaponData.range}",
+                $"{item.weaponData.watchAngle}°",
                 $"{item.weaponData.MOA}",
                 $"{item.weaponData.stability}",
                 $"{item.weaponData.rebound}",
-                $"{item.weaponData.watchAngle}°",
                 $"{item.weaponData.actionCost}"
             };
 
@@ -234,6 +248,85 @@ public class PopUp_Inventory : MonoBehaviour
                 valueText.text = values[i];
                 valueText.gameObject.SetActive(true);
             }
+
+            EquipType[] type =
+            {
+                EquipType.Chamber,
+                EquipType.Magazine,
+                EquipType.Muzzle,
+                EquipType.Sight,
+                EquipType.UnderRail,
+                EquipType.Rail,
+            };
+
+            for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+            {
+                var equipSlot = itemInfo.equipSlots[i];
+                if (i >= type.Length)
+                {
+                    equipSlot.gameObject.SetActive(false);
+                    continue;
+                }
+
+                switch (type[i])
+                {
+                    case EquipType.Chamber:
+                        equipSlot.slotText.text = "약실";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    case EquipType.Muzzle:
+                        SetWeaponPartSlot("총구", equipSlot, type[i], item.weaponData.useMuzzle);
+                        break;
+                    case EquipType.Sight:
+                        SetWeaponPartSlot("조준경", equipSlot, type[i], item.weaponData.useSight);
+                        break;
+                    case EquipType.UnderRail:
+                        SetWeaponPartSlot("하부", equipSlot, type[i], item.weaponData.useUnderRail);
+                        break;
+                    case EquipType.Rail:
+                        SetWeaponPartSlot("레일", equipSlot, type[i], item.weaponData.useRail);
+                        break;
+                    default:
+                        equipSlot.gameObject.SetActive(false);
+                        break;
+                }
+            }
+
+            void SetWeaponPartSlot(string slotText, EquipSlot equipSlot, EquipType type, List<WeaponPartsSize> sizeList)
+            {
+                if (sizeList[0] == WeaponPartsSize.None)
+                {
+                    equipSlot.gameObject.SetActive(false);
+                }
+                else
+                {
+                    slotText += "\n<size=12>";
+                    for (int i = 0; i < sizeList.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            slotText += ", ";
+                        }
+                        switch (sizeList[i])
+                        {
+                            case WeaponPartsSize.Small:
+                                slotText += "S";
+                                break;
+                            case WeaponPartsSize.Medium:
+                                slotText += "M";
+                                break;
+                            case WeaponPartsSize.Large:
+                                slotText += "L";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    slotText += "</size>";
+                    equipSlot.slotText.text = slotText;
+                    equipSlot.gameObject.SetActive(true);
+                }
+            }
         }
 
         void WeaponPartsInfo()
@@ -243,10 +336,10 @@ public class PopUp_Inventory : MonoBehaviour
                 "무게",
                 "RPM",
                 "사거리",
+                "경계각",
                 "정확도",
                 "안정성",
                 "반동",
-                "경계각",
                 "행동소모"
             };
             string[] values =
@@ -254,10 +347,10 @@ public class PopUp_Inventory : MonoBehaviour
                 $"{item.itemData.weight}",
                 $"{item.partsData.RPM}",
                 $"{item.partsData.range}",
+                $"{item.partsData.watchAngle}°",
                 $"{item.partsData.MOA}",
                 $"{item.partsData.stability}",
                 $"{item.partsData.rebound}",
-                $"{item.partsData.watchAngle}°",
                 $"{item.partsData.actionCost}"
             };
 

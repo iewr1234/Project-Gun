@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
 using System;
+using UnityEngine.Tilemaps;
 
 [System.Serializable]
 public struct ObjectData
@@ -385,12 +386,13 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:T";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:U";
     private enum WeaponVariable
     {
         ID,
         PrefabName,
         WeaponName,
+        Model,
         WeaponType,
         Damage,
         Penetrate,
@@ -439,6 +441,7 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)WeaponVariable.ID],
                     prefabName = data[(int)WeaponVariable.PrefabName],
                     weaponName = data[(int)WeaponVariable.WeaponName],
+                    model = int.Parse(data[(int)WeaponVariable.Model]),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     damage = int.Parse(data[(int)WeaponVariable.Damage]),
                     penetrate = int.Parse(data[(int)WeaponVariable.Penetrate]),
@@ -452,10 +455,10 @@ public class DataManager : MonoBehaviour
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
                     actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
                     useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
-                    useScope = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
+                    useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
                     useMagazine = ReadUsePartsSize(data[(int)WeaponVariable.UseMagazine]),
-                    useAttachment = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
-                    useUnderBarrel = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
+                    useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
+                    useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                 };
                 weaponData.weaponInfos.Add(weaponInfo);
             }
@@ -481,12 +484,13 @@ public class DataManager : MonoBehaviour
 
     #region
     [HideInInspector] public WeaponPartsData partsData;
-    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:N";
+    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:O";
     private enum WeaponPartsVariable
     {
         ID,
         PrefabName,
         PartsName,
+        CompatModel,
         PartsType,
         Size,
         RPM,
@@ -529,6 +533,7 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)WeaponPartsVariable.ID],
                     prefabName = data[(int)WeaponPartsVariable.PrefabName],
                     partsName = data[(int)WeaponPartsVariable.PartsName],
+                    compatModel = ReadCompatModelInfo(data[(int)WeaponPartsVariable.CompatModel]),
                     type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
                     size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
                     RPM = int.Parse(data[(int)WeaponPartsVariable.RPM]),
@@ -544,6 +549,20 @@ public class DataManager : MonoBehaviour
                 partsData.partsInfos.Add(partsInfo);
             }
             Debug.Log("Update WeaponParts Data");
+        }
+
+        List<int> ReadCompatModelInfo(string modelData)
+        {
+            var compatModels = new List<int>();
+            var modelInfos = modelData.Split(',');
+            for (int i = 0; i < modelInfos.Length; i++)
+            {
+                var modelInfo = modelInfos[i];
+                var compatModel = int.Parse(modelInfo);
+                compatModels.Add(compatModel);
+            }
+
+            return compatModels;
         }
     }
     #endregion

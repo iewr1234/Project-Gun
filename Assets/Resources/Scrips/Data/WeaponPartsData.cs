@@ -32,6 +32,7 @@ public class WeaponPartsDataInfo
     public string partsName;
     [Space(5f)]
 
+    public List<int> compatModel;
     public WeaponPartsType type;
     public WeaponPartsSize size;
     public float weight;
@@ -39,10 +40,10 @@ public class WeaponPartsDataInfo
 
     public int RPM;
     public float range;
+    public int watchAngle;
     public float MOA;
     public int stability;
     public int rebound;
-    public int watchAngle;
     public int ergonomy;
     public float headShot;
     public int actionCost;
