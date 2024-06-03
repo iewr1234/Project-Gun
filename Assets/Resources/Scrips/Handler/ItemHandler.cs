@@ -246,9 +246,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (invenMgr == null) return;
         if (Input.GetMouseButton(1)) return;
 
-        if (invenMgr.onEquip && CheckEquip(invenMgr.onEquip))
+        if (invenMgr.onEquip)
         {
-            invenMgr.onEquip.EquipItem(this);
+            invenMgr.EquipItem(this, invenMgr.onEquip);
         }
         else
         {

@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using static UnityEditor.Progress;
+using EPOOutline;
+using Unity.VisualScripting;
 
 public enum EquipType
 {
@@ -28,6 +30,7 @@ public class EquipSlot : MonoBehaviour
     private InventoryManager invenMgr;
 
     [Header("---Access Component---")]
+    public Image outline;
     public Image backImage;
     public TextMeshProUGUI slotText;
 
@@ -36,39 +39,16 @@ public class EquipSlot : MonoBehaviour
     public List<WeaponPartsSize> sizeList;
     public ItemHandler item;
 
-    private readonly Color defaultColor = new Color(50 / 255f, 50 / 255f, 50 / 255f);
-
     public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
 
+        outline = transform.Find("Outline").GetComponent<Image>();
+        outline.enabled = false;
         backImage = transform.Find("BackGround").GetComponent<Image>();
         slotText = transform.Find("Text").GetComponent<TextMeshProUGUI>();
-    }
 
-    public void EquipItem(ItemHandler _item)
-    {
-        item = _item;
-        backImage.color = defaultColor;
-        slotText.enabled = false;
-
-        item.equipSlot = this;
-        for (int i = 0; i < item.itemSlots.Count; i++)
-        {
-            var itemSlot = item.itemSlots[i];
-            itemSlot.SetSlotColor(Color.white);
-            itemSlot.item = null;
-        }
-        item.itemSlots.Clear();
-
-        item.ChangeRectPivot(true);
-        item.transform.SetParent(transform, false);
-        item.transform.localPosition = Vector3.zero;
-        item.targetImage.color = Color.clear;
-        item.targetImage.raycastTarget = true;
-
-        invenMgr.holdingItem = null;
-        invenMgr.InactiveSampleItem();
+        invenMgr.allEquips.Add(this);
     }
 
     public void PointerEnter_EquipSlot()
@@ -94,7 +74,7 @@ public class EquipSlot : MonoBehaviour
     public void PointerExit_EquipSlot()
     {
         invenMgr.onEquip = null;
-        backImage.color = defaultColor;
+        backImage.color = DataUtility.equip_defaultColor;
         if (item != null)
         {
             item.targetImage.raycastTarget = false;

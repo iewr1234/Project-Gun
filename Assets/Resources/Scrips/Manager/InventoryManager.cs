@@ -14,7 +14,7 @@ public class InventoryManager : MonoBehaviour
     [HideInInspector] public ContextMenu contextMenu;
 
     [Space(5f)]
-    [SerializeField] private List<EquipSlot> charEquips = new List<EquipSlot>();
+    public List<EquipSlot> allEquips = new List<EquipSlot>();
     [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
     [SerializeField] private OtherStorage otherStorage;
 
@@ -84,7 +84,7 @@ public class InventoryManager : MonoBehaviour
         sampleItem.SetComponents(this);
         InactiveSampleItem();
 
-        charEquips = invenUI.transform.Find("Equip/Slots").GetComponentsInChildren<EquipSlot>().ToList();
+        var charEquips = invenUI.transform.Find("Equip/Slots").GetComponentsInChildren<EquipSlot>().ToList();
         for (int i = 0; i < charEquips.Count; i++)
         {
             var charEquip = charEquips[i];
@@ -217,6 +217,13 @@ public class InventoryManager : MonoBehaviour
         }
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
+
+        var findEquips = allEquips.FindAll(x => item.CheckEquip(x));
+        for (int i = 0; i < findEquips.Count; i++)
+        {
+            var equipSlot = findEquips[i];
+            equipSlot.outline.enabled = true;
+        }
     }
 
     public void SetItemInStorage(string itemID, int count, List<ItemSlot> itemSlots)
@@ -251,11 +258,7 @@ public class InventoryManager : MonoBehaviour
 
     public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
     {
-        if (itemSlot == null)
-        {
-            ItemMove(false);
-        }
-        else if (itemSlot.item != null && itemSlot.item != item && itemSlot.item.itemData == item.itemData)
+        if (itemSlot.item != null && itemSlot.item != item && itemSlot.item.itemData == item.itemData)
         {
             if (item.itemData.maxNesting == 1)
             {
@@ -383,52 +386,11 @@ public class InventoryManager : MonoBehaviour
         var findItem = itemSlots.Find(x => x.item != null && x.item != item);
         if (findItem || itemSlots.Count < item.size.x * item.size.y)
         {
-            item.SetItemRotation(sampleItem.rotation);
-            if (item.equipSlot != null)
-            {
-
-            }
-            else
-            {
-                item.transform.SetParent(item.itemSlots[0].transform, false);
-                item.transform.position = item.itemSlots[0].transform.position;
-                item.targetImage.color = DataUtility.slot_onItemColor;
-                for (int i = 0; i < itemSlots.Count; i++)
-                {
-                    var itemSlot = itemSlots[i];
-                    if (itemSlot.item != null)
-                    {
-                        itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
-                    }
-                    else
-                    {
-                        itemSlot.SetSlotColor(Color.white);
-                    }
-                }
-            }
+            ItemMove(false);
         }
         else
         {
-            if (item.itemSlots.Count > 0)
-            {
-                for (int i = 0; i < item.itemSlots.Count; i++)
-                {
-                    var itemSlot = item.itemSlots[i];
-                    itemSlot.item = null;
-                    itemSlot.SetSlotColor(Color.white);
-                }
-                item.itemSlots.Clear();
-            }
-
-            for (int i = 0; i < itemSlots.Count; i++)
-            {
-                var itemSlot = itemSlots[i];
-                itemSlot.item = item;
-                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-            }
-            item.itemSlots = new List<ItemSlot>(itemSlots);
-            item.transform.SetParent(itemSlots[0].transform, false);
-            item.transform.localPosition = Vector3.zero;
+            ItemMove(true);
         }
 
         item.targetImage.color = Color.clear;
@@ -438,6 +400,115 @@ public class InventoryManager : MonoBehaviour
         }
         holdingItem = null;
         onSlots.Clear();
+        InactiveSampleItem();
+
+        void ItemMove(bool value)
+        {
+            switch (value)
+            {
+                case true:
+                    if (item.equipSlot != null)
+                    {
+                        item.equipSlot.item = null;
+                        item.equipSlot = null;
+                    }
+                    else if (item.itemSlots.Count > 0)
+                    {
+                        for (int i = 0; i < item.itemSlots.Count; i++)
+                        {
+                            var itemSlot = item.itemSlots[i];
+                            itemSlot.item = null;
+                            itemSlot.SetSlotColor(Color.white);
+                        }
+                        item.itemSlots.Clear();
+                    }
+
+                    for (int i = 0; i < itemSlots.Count; i++)
+                    {
+                        var itemSlot = itemSlots[i];
+                        itemSlot.item = item;
+                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                    }
+                    item.itemSlots = new List<ItemSlot>(itemSlots);
+                    item.transform.SetParent(itemSlots[0].transform, false);
+                    item.transform.localPosition = Vector3.zero;
+                    break;
+                case false:
+                    if (item.equipSlot != null)
+                    {
+                        item.equipSlot.slotText.enabled = false;
+                        item.ChangeRectPivot(true);
+                        item.transform.SetParent(item.equipSlot.transform, false);
+                        item.transform.localPosition = Vector3.zero;
+                    }
+                    else
+                    {
+                        item.SetItemRotation(sampleItem.rotation);
+                        item.transform.SetParent(item.itemSlots[0].transform, false);
+                        item.transform.position = item.itemSlots[0].transform.position;
+                        item.targetImage.color = DataUtility.slot_onItemColor;
+                    }
+
+                    for (int i = 0; i < itemSlots.Count; i++)
+                    {
+                        var itemSlot = itemSlots[i];
+                        if (itemSlot.item != null)
+                        {
+                            itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                        }
+                        else
+                        {
+                            itemSlot.SetSlotColor(Color.white);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    public void EquipItem(ItemHandler item, EquipSlot equipSlot)
+    {
+        if (item.CheckEquip(equipSlot))
+        {
+            equipSlot.item = item;
+            equipSlot.slotText.enabled = false;
+
+            item.equipSlot = equipSlot;
+            for (int i = 0; i < item.itemSlots.Count; i++)
+            {
+                var itemSlot = item.itemSlots[i];
+                itemSlot.SetSlotColor(Color.white);
+                itemSlot.item = null;
+            }
+            item.itemSlots.Clear();
+
+            item.ChangeRectPivot(true);
+            item.transform.SetParent(equipSlot.transform, false);
+            item.transform.localPosition = Vector3.zero;
+            item.targetImage.raycastTarget = true;
+        }
+        else if (item.equipSlot != null)
+        {
+            item.equipSlot.slotText.enabled = false;
+            item.ChangeRectPivot(true);
+            item.transform.SetParent(item.equipSlot.transform, false);
+            item.transform.localPosition = Vector3.zero;
+        }
+        else
+        {
+            item.transform.SetParent(item.itemSlots[0].transform, false);
+            item.transform.position = item.itemSlots[0].transform.position;
+            for (int i = 0; i < item.itemSlots.Count; i++)
+            {
+                var itemSlot = item.itemSlots[i];
+                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+            }
+        }
+        equipSlot.backImage.color = DataUtility.equip_defaultColor;
+        item.targetImage.color = Color.clear;
+
+        onEquip = null;
+        holdingItem = null;
         InactiveSampleItem();
     }
 
@@ -463,6 +534,11 @@ public class InventoryManager : MonoBehaviour
         sampleItem.transform.SetParent(itemPool, false);
         sampleItem.transform.SetAsFirstSibling();
         sampleItem.gameObject.SetActive(false);
+        for (int i = 0; i < allEquips.Count; i++)
+        {
+            var equipSlot = allEquips[i];
+            equipSlot.outline.enabled = false;
+        }
     }
 
     public int GetCanvasDistance()

@@ -41,6 +41,8 @@ public static class DataUtility
     public static readonly Color slot_moveColor = new Color(180 / 255f, 1f, 145 / 255f, 1f);
     public static readonly Color slot_unMoveColor = new Color(1f, 145 / 255f, 145 / 255f, 1f);
 
+    public static readonly Color equip_defaultColor = new Color(50 / 255f, 50 / 255f, 50 / 255f);
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

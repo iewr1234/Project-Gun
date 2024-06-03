@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using EPOOutline;
 using Unity.VisualScripting;
+using EPOOutline;
 
 public enum CharacterOwner
 {
