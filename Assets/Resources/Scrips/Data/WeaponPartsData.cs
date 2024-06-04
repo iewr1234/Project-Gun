@@ -47,6 +47,35 @@ public class WeaponPartsDataInfo
     public int ergonomy;
     public float headShot;
     public int actionCost;
+
+    public WeaponPartsDataInfo CopyData()
+    {
+        var partsData = new WeaponPartsDataInfo()
+        {
+            indexName = indexName,
+
+            ID = ID,
+            prefabName = prefabName,
+            partsName = partsName,
+
+            compatModel = new List<int>(compatModel),
+            type = type,
+            size = size,
+            weight = weight,
+
+            RPM = RPM,
+            range = range,
+            watchAngle = watchAngle,
+            MOA = MOA,
+            stability = stability,
+            rebound = rebound,
+            ergonomy = ergonomy,
+            headShot = headShot,
+            actionCost = actionCost,
+        };
+
+        return partsData;
+    }
 }
 
 [CreateAssetMenu(fileName = "WeaponPartsData", menuName = "Scriptable Object/WeaponPartsData")]

@@ -45,38 +45,7 @@ public class WeaponDataInfo
 
     [Tooltip("장착부품 리스트")] public List<WeaponPartsDataInfo> equipPartsList;
 
-    public WeaponDataInfo()
-    {
-        indexName = string.Empty;
-
-        ID = string.Empty;
-        prefabName = string.Empty;
-        weaponName = string.Empty;
-
-        model = 0;
-        type = WeaponType.None;
-        damage = 0;
-        penetrate = 0;
-        armorBreak = 0;
-        critical = 0;
-        RPM = 0;
-        range = 0;
-        watchAngle = 0;
-        MOA = 0f;
-        stability = 0;
-        rebound = 0;
-        actionCost = 0;
-
-        useMuzzle = new List<WeaponPartsSize>();
-        useSight = new List<WeaponPartsSize>();
-        useMagazine = new List<WeaponPartsSize>();
-        useUnderRail = new List<WeaponPartsSize>();
-        useRail = new List<WeaponPartsSize>();
-
-        equipPartsList = new List<WeaponPartsDataInfo>();
-    }
-
-    public WeaponDataInfo Copy()
+    public WeaponDataInfo CopyData()
     {
         var weaponData = new WeaponDataInfo()
         {

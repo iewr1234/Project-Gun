@@ -57,6 +57,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
     public void PointerEnter_ItemSlot()
     {
         var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
+        invenMgr.onEquip = null;
         invenMgr.onSlot = this;
         if (invenMgr.holdingItem != null)
         {

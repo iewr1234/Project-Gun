@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class PopUp_Inventory : MonoBehaviour
 {
@@ -145,6 +146,7 @@ public class PopUp_Inventory : MonoBehaviour
                 break;
             case State.ItemInformation:
                 invenMgr.selectItem = null;
+                item = null;
                 break;
             default:
                 break;

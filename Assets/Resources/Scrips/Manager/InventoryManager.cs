@@ -107,6 +107,7 @@ public class InventoryManager : MonoBehaviour
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0002", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0002", 1, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -306,7 +307,8 @@ public class InventoryManager : MonoBehaviour
                         itemSlot.item = item;
                         if (item.partsData != null)
                         {
-                            popUp.item.weaponData.equipPartsList.Remove(item.partsData);
+                            var find = popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
+                            popUp.item.weaponData.equipPartsList.Remove(find);
                             popUp.item.SetPartsSample();
                             popUp.SetPartsSample();
                         }
@@ -317,26 +319,29 @@ public class InventoryManager : MonoBehaviour
                         item.transform.SetParent(itemSlot.transform, false);
                         item.transform.localPosition = Vector3.zero;
                     }
-                    else if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
-                    {
-                        ItemSplit();
-                        itemSplit = false;
-                        return;
-                    }
                     else
                     {
-                        if (item.itemSlots.Count > 0)
+                        if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
                         {
-                            item.itemSlots[0].item = null;
-                            item.itemSlots[0].SetSlotColor(Color.white);
-                            item.itemSlots.Clear();
+                            ItemSplit();
+                            itemSplit = false;
+                            return;
                         }
-                        itemSlot.item = item;
-                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        else
+                        {
+                            if (item.itemSlots.Count > 0)
+                            {
+                                item.itemSlots[0].item = null;
+                                item.itemSlots[0].SetSlotColor(Color.white);
+                                item.itemSlots.Clear();
+                            }
+                            itemSlot.item = item;
+                            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
 
-                        item.itemSlots.Add(itemSlot);
-                        item.transform.SetParent(itemSlot.transform, false);
-                        item.transform.localPosition = Vector3.zero;
+                            item.itemSlots.Add(itemSlot);
+                            item.transform.SetParent(itemSlot.transform, false);
+                            item.transform.localPosition = Vector3.zero;
+                        }
                     }
                     break;
                 case false:
@@ -346,6 +351,10 @@ public class InventoryManager : MonoBehaviour
                         item.ChangeRectPivot(true);
                         item.transform.SetParent(item.equipSlot.transform, false);
                         item.transform.localPosition = Vector3.zero;
+                        if (itemSlot != null)
+                        {
+                            itemSlot.SetSlotColor(Color.white);
+                        }
                     }
                     else
                     {
@@ -484,7 +493,7 @@ public class InventoryManager : MonoBehaviour
                         item.SetItemRotation(sampleItem.rotation);
                         item.transform.SetParent(item.itemSlots[0].transform, false);
                         item.transform.position = item.itemSlots[0].transform.position;
-                        item.targetImage.color = DataUtility.slot_onItemColor;
+                        //item.targetImage.color = DataUtility.slot_onItemColor;
                     }
 
                     for (int i = 0; i < itemSlots.Count; i++)
@@ -492,7 +501,7 @@ public class InventoryManager : MonoBehaviour
                         var itemSlot = itemSlots[i];
                         if (itemSlot.item != null)
                         {
-                            itemSlot.item.targetImage.color = DataUtility.slot_onItemColor;
+                            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
                         }
                         else
                         {
@@ -554,13 +563,11 @@ public class InventoryManager : MonoBehaviour
         {
             if (item.partsData != null)
             {
-                popUp.item.weaponData.equipPartsList.Add(item.partsData);
-                popUp.item.SetPartsSample();
-                popUp.SetPartsSample();
-                switch (item.partsData.type)
+                if (popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
                 {
-                    default:
-                        break;
+                    popUp.item.weaponData.equipPartsList.Add(item.partsData);
+                    popUp.item.SetPartsSample();
+                    popUp.SetPartsSample();
                 }
             }
         }
@@ -585,6 +592,9 @@ public class InventoryManager : MonoBehaviour
 
     public void InActiveItem(ItemHandler item)
     {
+        item.itemData = null;
+        item.weaponData = null;
+        item.partsData = null;
         if (item.equipSlot)
         {
             item.equipSlot.item = null;

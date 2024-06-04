@@ -93,6 +93,8 @@ public class EquipSlot : MonoBehaviour
 
     public void PointerEnter_EquipSlot()
     {
+        invenMgr.onSlot = null;
+        invenMgr.onSlots.Clear();
         invenMgr.onEquip = this;
         if (invenMgr.holdingItem != null)
         {

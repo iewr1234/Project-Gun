@@ -80,10 +80,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             case ItemType.MainWeapon:
                 var _weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _weaponData.Copy();
+                weaponData = _weaponData.CopyData();
                 break;
             case ItemType.Sight:
-                partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                var _partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                partsData = _partsData.CopyData();
                 break;
             default:
                 break;
@@ -254,7 +255,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (invenMgr == null) return;
         if (Input.GetMouseButton(1)) return;
 
-        if (invenMgr.onEquip)
+        if (invenMgr.onEquip && !invenMgr.onSlot)
         {
             invenMgr.EquipItem(this, invenMgr.onEquip);
         }
@@ -262,12 +263,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             if (itemData.size == new Vector2Int(1, 1))
             {
-                Debug.Log("1");
                 invenMgr.PutTheItem(this, invenMgr.onSlot);
             }
             else
             {
-                Debug.Log("2");
                 invenMgr.PutTheItem(this, invenMgr.onSlots);
             }
         }
