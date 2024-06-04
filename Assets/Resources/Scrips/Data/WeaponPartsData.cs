@@ -6,7 +6,7 @@ public enum WeaponPartsType
 {
     None,
     Muzzle,
-    Scope,
+    Sight,
     FrontHandle,
     Magazine,
     Attachment,

@@ -4,15 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("---Access Script---")]
     public InventoryManager invenMgr;
+    [Space(5f)]
 
-    [HideInInspector] public WeaponDataInfo weaponData;
-    [HideInInspector] public WeaponPartsDataInfo partsData;
+    public WeaponDataInfo weaponData;
+    public WeaponPartsDataInfo partsData;
 
     [Header("---Access Component---")]
     public RectTransform rect;
@@ -20,13 +20,16 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [HideInInspector] public TextMeshProUGUI countText;
 
     private Transform samplesTf;
-    private List<GameObject> samples = new List<GameObject>();
+    [SerializeField] private List<GameObject> samples = new List<GameObject>();
+    [SerializeField] private List<GameObject> partsSamples = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
     public ItemDataInfo itemData;
-    public Vector2Int size = new Vector2Int(1, 1);
-    private int totalCount;
+    [HideInInspector] public Vector2Int size = new Vector2Int(1, 1);
     [HideInInspector] public bool rotation;
+
+    [Space(5f)]
+    [SerializeField] private int totalCount;
 
     [Space(5f)]
     public EquipSlot equipSlot;
@@ -34,7 +37,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [HideInInspector] public Vector2Int pivotIndex;
     [SerializeField] private Vector2 movePivot;
 
-    private GameObject activeSample;
+    public GameObject activeSample;
 
     public void SetComponents(InventoryManager _invenMgr)
     {
@@ -47,6 +50,19 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < samplesTf.childCount; i++)
         {
             var sample = samplesTf.GetChild(i).gameObject;
+            if (sample.name[0] == 'W')
+            {
+                var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
+                for (int j = 0; j < partsSamples.Length; j++)
+                {
+                    var partsSample = partsSamples[j];
+                    if (partsSample.CompareTag("WeaponParts"))
+                    {
+                        partsSample.gameObject.SetActive(false);
+                        this.partsSamples.Add(partsSample.gameObject);
+                    }
+                }
+            }
             sample.SetActive(false);
             samples.Add(sample);
         }
@@ -54,18 +70,17 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void SetItemInfo(ItemDataInfo _itemData, int count)
     {
-        itemData = _itemData;
+        itemData = new ItemDataInfo(_itemData);
+
         size = _itemData.size;
         countText.enabled = itemData.maxNesting > 1;
-        if (countText.enabled)
-        {
-            SetTotalCount(count);
-        }
+        SetTotalCount(count);
 
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
-                weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                var _weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _weaponData.Copy();
                 break;
             case ItemType.Sight:
                 partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
@@ -122,6 +137,26 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         gameObject.SetActive(true);
     }
 
+    public void SetPartsSample()
+    {
+        var activeSamples = partsSamples.FindAll(x => x.activeSelf);
+        for (int i = 0; i < activeSamples.Count; i++)
+        {
+            var activeSample = activeSamples[i];
+            activeSample.SetActive(false);
+        }
+
+        for (int i = 0; i < weaponData.equipPartsList.Count; i++)
+        {
+            var partsData = weaponData.equipPartsList[i];
+            var smaple = partsSamples.Find(x => x.name == partsData.ID);
+            if (smaple)
+            {
+                smaple.SetActive(true);
+            }
+        }
+    }
+
     public void SetTotalCount(int value)
     {
         totalCount = value;
@@ -170,33 +205,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
         var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
         transform.position = worldPos;
-    }
-
-    public bool CheckEquip(EquipSlot equipSlot)
-    {
-        switch (equipSlot.type)
-        {
-            case EquipType.Head:
-                return itemData.type == ItemType.Head;
-            case EquipType.Body:
-                return itemData.type == ItemType.Body;
-            case EquipType.Rig:
-                return itemData.type == ItemType.Rig;
-            case EquipType.Backpack:
-                return itemData.type == ItemType.Backpack;
-            case EquipType.MainWeapon:
-                return itemData.type == ItemType.MainWeapon;
-            case EquipType.SubWeapon:
-                return itemData.type == ItemType.SubWeapon;
-            case EquipType.Chamber:
-                return itemData.type == ItemType.Bullet;
-            case EquipType.Muzzle:
-                return itemData.type == ItemType.Muzzle;
-            case EquipType.Sight:
-                return itemData.type == ItemType.Sight;
-            default:
-                return false;
-        }
     }
 
     public void ChangeRectPivot(bool isEquip)
@@ -254,10 +262,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             if (itemData.size == new Vector2Int(1, 1))
             {
+                Debug.Log("1");
                 invenMgr.PutTheItem(this, invenMgr.onSlot);
             }
             else
             {
+                Debug.Log("2");
                 invenMgr.PutTheItem(this, invenMgr.onSlots);
             }
         }

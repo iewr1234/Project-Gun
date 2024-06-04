@@ -14,6 +14,7 @@ public class PopUp_Inventory : MonoBehaviour
         ItemInformation,
     }
 
+    [System.Serializable]
     private struct Split
     {
         public GameObject uiObject;
@@ -21,12 +22,14 @@ public class PopUp_Inventory : MonoBehaviour
         public TextMeshProUGUI countText;
     }
 
+    [System.Serializable]
     private struct ItemInformation
     {
         public GameObject uiObject;
         public Transform samplesTf;
         public List<TextMeshProUGUI> infoTexts;
         public List<GameObject> samples;
+        public List<GameObject> partsSamples;
         public List<EquipSlot> equipSlots;
 
         public GameObject activeSample;
@@ -39,13 +42,13 @@ public class PopUp_Inventory : MonoBehaviour
     public TextMeshProUGUI topText;
     [Space(5f)]
 
-    private Split split;
-    private ItemInformation itemInfo;
+    [SerializeField] private Split split;
+    [SerializeField] private ItemInformation itemInfo;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private State state;
-    [SerializeField] private ItemHandler item;
-    [SerializeField] private ItemSlot itemSlot;
+    public ItemHandler item;
+    public ItemSlot itemSlot;
 
     private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, 0);
     private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, 0);
@@ -70,9 +73,9 @@ public class PopUp_Inventory : MonoBehaviour
             uiObject = transform.Find("ItemInformation").gameObject,
             samplesTf = _samplesTf,
             infoTexts = FindAllInformationTexts(),
-            samples = FindAllSamples(),
             equipSlots = FindAllEquipSlots(),
         };
+        FindAllSamples();
 
         gameObject.SetActive(false);
 
@@ -88,19 +91,6 @@ public class PopUp_Inventory : MonoBehaviour
             return infoTexts.ToList();
         }
 
-        List<GameObject> FindAllSamples()
-        {
-            var samples = new List<GameObject>();
-            for (int i = 0; i < _samplesTf.childCount; i++)
-            {
-                var sample = _samplesTf.GetChild(i).gameObject;
-                sample.SetActive(false);
-                samples.Add(sample);
-            }
-
-            return samples;
-        }
-
         List<EquipSlot> FindAllEquipSlots()
         {
             var equipSlots = transform.Find("ItemInformation/Slots").GetComponentsInChildren<EquipSlot>();
@@ -112,22 +102,33 @@ public class PopUp_Inventory : MonoBehaviour
 
             return equipSlots.ToList();
         }
-    }
 
-    #region Split
-    public void PopUp_Split(ItemHandler _item, ItemSlot _itemSlot)
-    {
-        gameObject.SetActive(true);
-        transform.localPosition = defaultPos_split;
-        topText.text = "아이템 나누기";
-        state = State.Split;
-
-        split.uiObject.SetActive(true);
-        item = _item;
-        itemSlot = _itemSlot;
-        split.slider.maxValue = item.TotalCount;
-        split.slider.value = 0;
-        split.countText.text = "0";
+        void FindAllSamples()
+        {
+            var samples = new List<GameObject>();
+            var partsSamples = new List<GameObject>();
+            for (int i = 0; i < itemInfo.samplesTf.childCount; i++)
+            {
+                var sample = _samplesTf.GetChild(i).gameObject;
+                if (sample.name[0] == 'W')
+                {
+                    var _partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
+                    for (int j = 0; j < _partsSamples.Length; j++)
+                    {
+                        var partsSample = _partsSamples[j];
+                        if (partsSample.CompareTag("WeaponParts"))
+                        {
+                            partsSample.gameObject.SetActive(false);
+                            partsSamples.Add(partsSample.gameObject);
+                        }
+                    }
+                }
+                sample.SetActive(false);
+                samples.Add(sample);
+            }
+            itemInfo.samples = samples;
+            itemInfo.partsSamples = partsSamples;
+        }
     }
 
     public void Button_PopUp_Close()
@@ -150,6 +151,22 @@ public class PopUp_Inventory : MonoBehaviour
         }
         gameObject.SetActive(false);
         state = State.None;
+    }
+
+    #region Split
+    public void PopUp_Split(ItemHandler _item, ItemSlot _itemSlot)
+    {
+        gameObject.SetActive(true);
+        transform.localPosition = defaultPos_split;
+        topText.text = "아이템 나누기";
+        state = State.Split;
+
+        split.uiObject.SetActive(true);
+        item = _item;
+        itemSlot = _itemSlot;
+        split.slider.maxValue = item.TotalCount;
+        split.slider.value = 0;
+        split.countText.text = "0";
     }
 
     public void Button_PopUp_Split_Accept()
@@ -179,7 +196,7 @@ public class PopUp_Inventory : MonoBehaviour
     }
     #endregion
 
-    #region
+    #region ItemInformation
     public void PopUp_ItemInformation()
     {
         gameObject.SetActive(true);
@@ -200,7 +217,7 @@ public class PopUp_Inventory : MonoBehaviour
             infoText.gameObject.SetActive(false);
         }
 
-        var item = invenMgr.selectItem;
+        item = invenMgr.selectItem;
         switch (item.itemData.type)
         {
             case ItemType.MainWeapon:
@@ -291,6 +308,7 @@ public class PopUp_Inventory : MonoBehaviour
                         break;
                 }
             }
+            SetPartsSample();
 
             void SetWeaponPartSlot(string slotText, EquipSlot equipSlot, EquipType type, List<WeaponPartsSize> sizeList)
             {
@@ -363,6 +381,52 @@ public class PopUp_Inventory : MonoBehaviour
                 var valueText = itemInfo.infoTexts[i * 2 + 1];
                 valueText.text = values[i];
                 valueText.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    public void SetPartsSample()
+    {
+        var activeSamples = itemInfo.partsSamples.FindAll(x => x.activeSelf);
+        for (int i = 0; i < activeSamples.Count; i++)
+        {
+            var activeSample = activeSamples[i];
+            activeSample.SetActive(false);
+        }
+
+        var partsList = new List<WeaponPartsDataInfo>();
+        for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+        {
+            var equipSlot = itemInfo.equipSlots[i];
+            var partsData = item.weaponData.equipPartsList.Find(x => equipSlot.CheckEquip(x) && !partsList.Contains(x));
+            if (partsData != null)
+            {
+                if (equipSlot.item && equipSlot.item.partsData != partsData)
+                {
+                    var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
+                    equipSlot.item.SetItemInfo(itemData, 1);
+                }
+                else if (!equipSlot.item)
+                {
+                    invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
+                }
+
+                var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.ID);
+                for (int j = 0; j < smaples.Count; j++)
+                {
+                    var smaple = smaples[j];
+                    smaple.SetActive(true);
+                }
+                partsList.Add(partsData);
+            }
+            else if (equipSlot.item)
+            {
+                if (equipSlot.item.itemSlots.Count == 0)
+                {
+                    invenMgr.InActiveItem(equipSlot.item);
+                }
+                equipSlot.slotText.enabled = true;
+                equipSlot.item = null;
             }
         }
     }

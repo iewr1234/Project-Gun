@@ -22,6 +22,7 @@ public enum ItemType
 
 public enum ItemRarity
 {
+    None,
     Nomal,
     Rare,
     Unique,
@@ -42,7 +43,34 @@ public class ItemDataInfo
     public int maxNesting;
     public int price;
     public Vector2Int size;
-    [HideInInspector] public int index;
+
+    public ItemDataInfo()
+    {
+        indexName = string.Empty;
+        ID = string.Empty;
+        dataID = string.Empty;
+        itemName = string.Empty;
+        type = ItemType.None;
+        rarity = ItemRarity.Nomal;
+        weight = 0f;
+        maxNesting = 0;
+        price = 0;
+        size = Vector2Int.zero;
+    }
+
+    public ItemDataInfo(ItemDataInfo itemData)
+    {
+        indexName = itemData.indexName;
+        ID = itemData.ID;
+        dataID = itemData.dataID;
+        itemName = itemData.itemName;
+        type = itemData.type;
+        rarity = itemData.rarity;
+        weight = itemData.weight;
+        maxNesting = itemData.maxNesting;
+        price = itemData.price;
+        size = itemData.size;
+    }
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "Scriptable Object/ItemData")]

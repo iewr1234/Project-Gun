@@ -51,12 +51,52 @@ public class EquipSlot : MonoBehaviour
         invenMgr.allEquips.Add(this);
     }
 
+    public bool CheckEquip(ItemHandler item)
+    {
+        switch (type)
+        {
+            case EquipType.Head:
+                return item.itemData.type == ItemType.Head;
+            case EquipType.Body:
+                return item.itemData.type == ItemType.Body;
+            case EquipType.Rig:
+                return item.itemData.type == ItemType.Rig;
+            case EquipType.Backpack:
+                return item.itemData.type == ItemType.Backpack;
+            case EquipType.MainWeapon:
+                return item.itemData.type == ItemType.MainWeapon;
+            case EquipType.SubWeapon:
+                return item.itemData.type == ItemType.SubWeapon;
+            case EquipType.Chamber:
+                return item.itemData.type == ItemType.Bullet;
+            case EquipType.Muzzle:
+                return item.itemData.type == ItemType.Muzzle;
+            case EquipType.Sight:
+                return item.itemData.type == ItemType.Sight;
+            default:
+                return false;
+        }
+    }
+
+    public bool CheckEquip(WeaponPartsDataInfo partsData)
+    {
+        switch (type)
+        {
+            case EquipType.Muzzle:
+                return partsData.type == WeaponPartsType.Muzzle;
+            case EquipType.Sight:
+                return partsData.type == WeaponPartsType.Sight;
+            default:
+                return false;
+        }
+    }
+
     public void PointerEnter_EquipSlot()
     {
         invenMgr.onEquip = this;
         if (invenMgr.holdingItem != null)
         {
-            if (invenMgr.holdingItem.CheckEquip(this))
+            if (CheckEquip(invenMgr.holdingItem))
             {
                 backImage.color = DataUtility.slot_onItemColor;
             }

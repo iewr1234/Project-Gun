@@ -375,7 +375,6 @@ public class DataManager : MonoBehaviour
                     maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
                     price = int.Parse(data[(int)ItemVariable.Price]),
                     size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
-                    index = i,
                 };
                 itemData.itemInfos.Add(itemInfo);
             }

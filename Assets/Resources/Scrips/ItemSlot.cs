@@ -87,15 +87,15 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                 {
                     onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                 }
-                else if (findSlot && findSlot.item.itemData == item.itemData)
+                else if (findSlot && findSlot.item.itemData.ID == item.itemData.ID)
                 {
-                    if (findSlot.item.TotalCount == findSlot.item.itemData.maxNesting)
-                    {
-                        onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
-                    }
-                    else if (findSlot.item.TotalCount < findSlot.item.itemData.maxNesting)
+                    if (findSlot.item.TotalCount < findSlot.item.itemData.maxNesting)
                     {
                         onSlot.SetSlotColor(DataUtility.slot_moveColor);
+                    }
+                    else
+                    {
+                        onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                     }
                 }
                 else if (findSlot)

@@ -113,6 +113,21 @@ public class Weapon : MonoBehaviour
         }
     }
 
+    public void SetComponets()
+    {
+        var parts = new List<GameObject>();
+        var partsTf = transform.Find("PartsTransform");
+        var scopeTf = partsTf.transform.Find("Scope");
+        for (int i = 0; i < scopeTf.childCount; i++)
+        {
+            var sample = scopeTf.GetChild(i).gameObject;
+            sample.SetActive(false);
+            parts.Add(sample);
+        }
+
+        partsObjects = parts;
+    }
+
     public void EquipWeapon()
     {
         switch (weaponData.type)
