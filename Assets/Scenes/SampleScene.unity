@@ -12852,6 +12852,8 @@ MonoBehaviour:
   itemData: {fileID: 11400000, guid: 0795e72aaa944984a8dc876ebbec0444, type: 2}
   weaponData: {fileID: 11400000, guid: 6406cd07453d88548b1c445c7d676a38, type: 2}
   partsData: {fileID: 11400000, guid: c23c4404f345de446a34f2c7d10bb539, type: 2}
+  magData: {fileID: 11400000, guid: d04caa6942722744aa02bb1d1271b6f5, type: 2}
+  bulletData: {fileID: 11400000, guid: a102e004e835b6045b8d3ab3558d5c8b, type: 2}
   armorData: {fileID: 11400000, guid: c99feb4b6c520454ab389525d8794223, type: 2}
 --- !u!1001 &562581251
 PrefabInstance:
@@ -39091,6 +39093,14 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 4545650817821676732, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4558232965572258226, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: e966820a1f6746943a1c1a74fd4104a0, type: 2}
     - target: {fileID: 4593177363951405049, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -39238,6 +39248,14 @@ PrefabInstance:
     - target: {fileID: 4823327856668031298, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956667118441480571, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4957179584349810215, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5121583567231495110, guid: 9628b26baafd3a249ab984f2d4f80742, type: 3}
       propertyPath: m_Layer
@@ -40987,7 +41005,7 @@ MonoBehaviour:
   dataMgr: {fileID: 0}
   popUp: {fileID: 0}
   contextMenu: {fileID: 0}
-  charEquips: []
+  allEquips: []
   myStorages: []
   otherStorage: {fileID: 0}
   sampleItem: {fileID: 0}
@@ -45704,6 +45722,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topText: {fileID: 0}
+  split:
+    uiObject: {fileID: 0}
+    slider: {fileID: 0}
+    countText: {fileID: 0}
+  itemInfo:
+    uiObject: {fileID: 0}
+    samplesTf: {fileID: 0}
+    infoTexts: []
+    samples: []
+    partsSamples: []
+    equipSlots: []
+    activeSample: {fileID: 0}
   state: 0
   item: {fileID: 0}
   itemSlot: {fileID: 0}

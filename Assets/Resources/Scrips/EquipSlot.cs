@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEditor.Progress;
-using EPOOutline;
-using Unity.VisualScripting;
 
 public enum EquipType
 {
@@ -37,6 +34,7 @@ public class EquipSlot : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public EquipType type;
     public List<WeaponPartsSize> sizeList;
+    public int model;
     public ItemHandler item;
 
     public void SetComponents(InventoryManager _invenMgr)
@@ -69,23 +67,34 @@ public class EquipSlot : MonoBehaviour
                 return item.itemData.type == ItemType.SubWeapon;
             case EquipType.Chamber:
                 return item.itemData.type == ItemType.Bullet;
-            case EquipType.Muzzle:
-                return item.itemData.type == ItemType.Muzzle;
+            case EquipType.Magazine:
+                return item.magData != null
+                    && item.magData.compatModel.Contains(model)
+                    && item.itemData.type == ItemType.Magazine;
             case EquipType.Sight:
-                return item.itemData.type == ItemType.Sight;
+                return item.partsData != null
+                    && item.partsData.compatModel.Contains(model)
+                    && item.itemData.type == ItemType.Sight;
             default:
                 return false;
         }
+    }
+
+    public bool CheckEquip(MagazineDataInfo magData)
+    {
+        return type == EquipType.Magazine
+            && magData != null
+            && magData.compatModel.Contains(model);
     }
 
     public bool CheckEquip(WeaponPartsDataInfo partsData)
     {
         switch (type)
         {
-            case EquipType.Muzzle:
-                return partsData.type == WeaponPartsType.Muzzle;
             case EquipType.Sight:
-                return partsData.type == WeaponPartsType.Sight;
+                return partsData != null
+                    && partsData.compatModel.Contains(model)
+                    && partsData.type == WeaponPartsType.Sight;
             default:
                 return false;
         }

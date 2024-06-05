@@ -282,11 +282,26 @@ MonoBehaviour:
     stability: 0
     rebound: 0
     actionCost: 0
+    useMagazine: 
     useMuzzle: 
     useSight: 
-    useMagazine: 
     useUnderRail: 
     useRail: 
+    equipMag:
+      indexName: 
+      ID: 
+      prefabName: 
+      magName: 
+      compatModel: 
+      magSize: 0
+    equipPartsList: []
+  magData:
+    indexName: 
+    ID: 
+    prefabName: 
+    magName: 
+    compatModel: 
+    magSize: 0
   partsData:
     indexName: 
     ID: 
@@ -321,7 +336,6 @@ MonoBehaviour:
     maxNesting: 0
     price: 0
     size: {x: 0, y: 0}
-    equipPartsList: []
   size: {x: 1, y: 1}
   rotation: 0
   totalCount: 0
@@ -460,6 +474,14 @@ PrefabInstance:
     - target: {fileID: 6653530919449743535, guid: 3c47a3ed81b5f9845a74451fa8b05156, type: 3}
       propertyPath: m_SortingLayer
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8034190267213087890, guid: 3c47a3ed81b5f9845a74451fa8b05156, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8593257148227678800, guid: 3c47a3ed81b5f9845a74451fa8b05156, type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c47a3ed81b5f9845a74451fa8b05156, type: 3}

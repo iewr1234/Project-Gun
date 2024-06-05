@@ -36,13 +36,14 @@ public class WeaponDataInfo
     [Tooltip("Çàµ¿¼Ò¸ð")] public int actionCost;
     [Space(5f)]
 
+    [Tooltip("ÅºÃ¢ »ç¿ë")] public List<WeaponPartsSize> useMagazine;
     [Tooltip("ÃÑ±¸ »ç¿ë")] public List<WeaponPartsSize> useMuzzle;
     [Tooltip("Á¶ÁØ°æ »ç¿ë")] public List<WeaponPartsSize> useSight;
-    [Tooltip("ÅºÃ¢ »ç¿ë")] public List<WeaponPartsSize> useMagazine;
     [Tooltip("ÇÏºÎ »ç¿ë")] public List<WeaponPartsSize> useUnderRail;
     [Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
     [Space(5f)]
 
+    [Tooltip("ÀåÂø ÅºÃ¢")] public MagazineDataInfo equipMag;
     [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList;
 
     public WeaponDataInfo CopyData()
@@ -69,9 +70,9 @@ public class WeaponDataInfo
             rebound = rebound,
             actionCost = actionCost,
 
+            useMagazine = new List<WeaponPartsSize>(useMagazine),
             useMuzzle = new List<WeaponPartsSize>(useMuzzle),
             useSight = new List<WeaponPartsSize>(useSight),
-            useMagazine = new List<WeaponPartsSize>(useMagazine),
             useUnderRail = new List<WeaponPartsSize>(useUnderRail),
             useRail = new List<WeaponPartsSize>(useRail),
 

@@ -72,8 +72,17 @@ public class Weapon : MonoBehaviour
         {
             var parts = new List<GameObject>();
             var partsTf = transform.Find("PartsTransform");
-            var scopeTf = partsTf.transform.Find("Scope");
+
+            var scopeTf = partsTf.Find("Scope");
             for (int i = 0; i < scopeTf.childCount; i++)
+            {
+                var sample = scopeTf.GetChild(i).gameObject;
+                sample.SetActive(false);
+                parts.Add(sample);
+            }
+
+            var magTf = partsTf.Find("Magazine");
+            for (int i = 0; i < magTf.childCount; i++)
             {
                 var sample = scopeTf.GetChild(i).gameObject;
                 sample.SetActive(false);

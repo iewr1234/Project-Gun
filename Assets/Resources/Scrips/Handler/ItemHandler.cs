@@ -12,6 +12,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Space(5f)]
 
     public WeaponDataInfo weaponData;
+    public MagazineDataInfo magData;
     public WeaponPartsDataInfo partsData;
 
     [Header("---Access Component---")]
@@ -39,9 +40,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public GameObject activeSample;
 
+    private readonly Vector3 defaultScale = new Vector3(400f, 400f, 400f);
+
     public void SetComponents(InventoryManager _invenMgr)
     {
         invenMgr = _invenMgr;
+        weaponData = null;
+        magData = null;
+        partsData = null;
+
         rect = GetComponent<RectTransform>();
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
@@ -81,6 +88,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.MainWeapon:
                 var _weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                 weaponData = _weaponData.CopyData();
+                break;
+            case ItemType.Magazine:
+                var _magData = invenMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
+                magData = _magData.CopyData();
                 break;
             case ItemType.Sight:
                 var _partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
@@ -147,6 +158,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             activeSample.SetActive(false);
         }
 
+        if (weaponData.equipMag != null)
+        {
+            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.ID);
+            if (smaple)
+            {
+                smaple.SetActive(true);
+            }
+        }
+
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
@@ -199,6 +219,24 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             itemRot.x = 0f;
         }
         samplesTf.localRotation = Quaternion.Euler(itemRot);
+    }
+
+    public void SetItemScale(bool value)
+    {
+        if (size == new Vector2Int(1, 1)) return;
+
+        switch (value)
+        {
+            case true:
+                var maxSize = size.x >= size.y ? size.x : size.y;
+                var reducedValue = 1f / maxSize;
+                var reducedScale = new Vector3(defaultScale.x * reducedValue, defaultScale.y * reducedValue, defaultScale.z * reducedValue);
+                samplesTf.localScale = reducedScale;
+                break;
+            case false:
+                samplesTf.localScale = defaultScale;
+                break;
+        }
     }
 
     public void FollowMouse()

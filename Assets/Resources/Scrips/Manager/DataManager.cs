@@ -404,9 +404,9 @@ public class DataManager : MonoBehaviour
         Stability,
         Rebound,
         ActionCost,
+        UseMagazine,
         UseMuzzle,
         UseScope,
-        UseMagazine,
         UseAttachment,
         UseUnderBarrel,
     }
@@ -453,9 +453,9 @@ public class DataManager : MonoBehaviour
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
                     actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
+                    useMagazine = ReadUsePartsSize(data[(int)WeaponVariable.UseMagazine]),
                     useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
                     useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
-                    useMagazine = ReadUsePartsSize(data[(int)WeaponVariable.UseMagazine]),
                     useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
                     useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                 };
@@ -471,8 +471,9 @@ public class DataManager : MonoBehaviour
                 {
                     var sizeInfo = sizeInfos[i];
                     var partsSize = (WeaponPartsSize)int.Parse(sizeInfo);
-                    partSizeList.Add(partsSize);
                     if (partsSize == WeaponPartsSize.None) break;
+
+                    partSizeList.Add(partsSize);
                 }
 
                 return partSizeList;

@@ -23,7 +23,6 @@ MonoBehaviour:
     maxNesting: 1
     price: 1000
     size: {x: 4, y: 2}
-    equipPartsList: []
   - indexName: 'T0002: Scope_1'
     ID: T0002
     dataID: P0001
@@ -34,4 +33,13 @@ MonoBehaviour:
     maxNesting: 1
     price: 100
     size: {x: 1, y: 1}
-    equipPartsList: []
+  - indexName: 'T0003: Magazine_1'
+    ID: T0003
+    dataID: M0001
+    itemName: Magazine_1
+    type: 21
+    rarity: 1
+    weight: 0.2
+    maxNesting: 1
+    price: 150
+    size: {x: 1, y: 2}

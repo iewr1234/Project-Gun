@@ -218,6 +218,11 @@ public class PopUp_Inventory : MonoBehaviour
             var infoText = itemInfo.infoTexts[i];
             infoText.gameObject.SetActive(false);
         }
+        for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+        {
+            var equipSlot = itemInfo.equipSlots[i];
+            equipSlot.gameObject.SetActive(false);
+        }
 
         item = invenMgr.selectItem;
         switch (item.itemData.type)
@@ -278,20 +283,26 @@ public class PopUp_Inventory : MonoBehaviour
                 EquipType.Rail,
             };
 
-            for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+            for (int i = 0; i < type.Length; i++)
             {
                 var equipSlot = itemInfo.equipSlots[i];
-                if (i >= type.Length)
-                {
-                    equipSlot.gameObject.SetActive(false);
-                    continue;
-                }
-
+                equipSlot.model = item.weaponData.model;
                 switch (type[i])
                 {
                     case EquipType.Chamber:
                         equipSlot.slotText.text = "¾à½Ç";
                         equipSlot.gameObject.SetActive(true);
+                        break;
+                    case EquipType.Magazine:
+                        if (item.weaponData.useMagazine.Count == 0)
+                        {
+                            equipSlot.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            equipSlot.slotText.text = "ÅºÃ¢";
+                            equipSlot.gameObject.SetActive(true);
+                        }
                         break;
                     case EquipType.Muzzle:
                         SetWeaponPartSlot("ÃÑ±¸", equipSlot, type[i], item.weaponData.useMuzzle);
@@ -314,7 +325,7 @@ public class PopUp_Inventory : MonoBehaviour
 
             void SetWeaponPartSlot(string slotText, EquipSlot equipSlot, EquipType type, List<WeaponPartsSize> sizeList)
             {
-                if (sizeList[0] == WeaponPartsSize.None)
+                if (sizeList.Count == 0)
                 {
                     equipSlot.gameObject.SetActive(false);
                 }
@@ -400,35 +411,73 @@ public class PopUp_Inventory : MonoBehaviour
         for (int i = 0; i < itemInfo.equipSlots.Count; i++)
         {
             var equipSlot = itemInfo.equipSlots[i];
-            var partsData = item.weaponData.equipPartsList.Find(x => equipSlot.CheckEquip(x) && !partsList.Contains(x));
-            if (partsData != null)
+            switch (equipSlot.type)
             {
-                if (equipSlot.item && equipSlot.item.partsData != partsData)
-                {
-                    var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
-                    equipSlot.item.SetItemInfo(itemData, 1);
-                }
-                else if (!equipSlot.item)
-                {
-                    invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
-                }
+                case EquipType.Chamber:
+                    break;
+                case EquipType.Magazine:
+                    var magData = item.weaponData.equipMag;
+                    if (equipSlot.CheckEquip(magData))
+                    {
+                        if (equipSlot.item && equipSlot.item.magData != magData)
+                        {
+                            var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
+                            equipSlot.item.SetItemInfo(itemData, 1);
+                        }
+                        else if (!equipSlot.item)
+                        {
+                            invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
+                        }
 
-                var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.ID);
-                for (int j = 0; j < smaples.Count; j++)
-                {
-                    var smaple = smaples[j];
-                    smaple.SetActive(true);
-                }
-                partsList.Add(partsData);
-            }
-            else if (equipSlot.item)
-            {
-                if (equipSlot.item.itemSlots.Count == 0)
-                {
-                    invenMgr.InActiveItem(equipSlot.item);
-                }
-                equipSlot.slotText.enabled = true;
-                equipSlot.item = null;
+                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.ID);
+                        for (int j = 0; j < smaples.Count; j++)
+                        {
+                            var smaple = smaples[j];
+                            smaple.SetActive(true);
+                        }
+                    }
+                    else if (equipSlot.item)
+                    {
+                        if (equipSlot.item.itemSlots.Count == 0)
+                        {
+                            invenMgr.InActiveItem(equipSlot.item);
+                        }
+                        equipSlot.slotText.enabled = true;
+                        equipSlot.item = null;
+                    }
+                    break;
+                default:
+                    var partsData = item.weaponData.equipPartsList.Find(x => equipSlot.CheckEquip(x) && !partsList.Contains(x));
+                    if (partsData != null)
+                    {
+                        if (equipSlot.item && equipSlot.item.partsData != partsData)
+                        {
+                            var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
+                            equipSlot.item.SetItemInfo(itemData, 1);
+                        }
+                        else if (!equipSlot.item)
+                        {
+                            invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
+                        }
+
+                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.ID);
+                        for (int j = 0; j < smaples.Count; j++)
+                        {
+                            var smaple = smaples[j];
+                            smaple.SetActive(true);
+                        }
+                        partsList.Add(partsData);
+                    }
+                    else if (equipSlot.item)
+                    {
+                        if (equipSlot.item.itemSlots.Count == 0)
+                        {
+                            invenMgr.InActiveItem(equipSlot.item);
+                        }
+                        equipSlot.slotText.enabled = true;
+                        equipSlot.item = null;
+                    }
+                    break;
             }
         }
     }
