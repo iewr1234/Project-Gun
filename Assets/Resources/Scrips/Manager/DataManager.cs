@@ -549,19 +549,115 @@ public class DataManager : MonoBehaviour
             }
             Debug.Log("Update WeaponParts Data");
         }
+    }
+    #endregion
 
-        List<int> ReadCompatModelInfo(string modelData)
+    #region Magazine Data
+    [HideInInspector] public MagazineData magData;
+    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:E";
+    private enum MagazineVariable
+    {
+        ID,
+        PrefabName,
+        MagazineName,
+        CompatModel,
+        MagazineSize,
+    }
+
+    public void UpdateMagazineData()
+    {
+        if (magData == null)
         {
-            var compatModels = new List<int>();
-            var modelInfos = modelData.Split(',');
-            for (int i = 0; i < modelInfos.Length; i++)
-            {
-                var modelInfo = modelInfos[i];
-                var compatModel = int.Parse(modelInfo);
-                compatModels.Add(compatModel);
-            }
+            magData = Resources.Load<MagazineData>("ScriptableObjects/MagazineData");
+        }
 
-            return compatModels;
+        if (magData.magInfos.Count > 0)
+        {
+            magData.magInfos.Clear();
+        }
+        StartCoroutine(ReadMagazineData());
+
+        IEnumerator ReadMagazineData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(magDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var magInfo = new MagazineDataInfo()
+                {
+                    indexName = $"{data[(int)MagazineVariable.ID]}: {data[(int)MagazineVariable.MagazineName]}",
+                    ID = data[(int)MagazineVariable.ID],
+                    prefabName = data[(int)MagazineVariable.PrefabName],
+                    magName = data[(int)MagazineVariable.MagazineName],
+                    compatModel = ReadCompatModelInfo(data[(int)MagazineVariable.CompatModel]),
+                    magSize = int.Parse(data[(int)MagazineVariable.MagazineSize]),
+                };
+                magData.magInfos.Add(magInfo);
+            }
+            Debug.Log("Update Magazine Data");
+        }
+    }
+    #endregion
+
+    #region Bullet Data
+    [HideInInspector] public BulletData bulletData;
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:I";
+    private enum BulletVariable
+    {
+        ID,
+        BulletName,
+        Level,
+        Propellant,
+        Caliber,
+        Damage,
+        Penetrate,
+        ArmorBreak,
+        Critical,
+    }
+
+    public void UpdateBulletData()
+    {
+        if (bulletData == null)
+        {
+            bulletData = Resources.Load<BulletData>("ScriptableObjects/BulletData");
+        }
+
+        if (bulletData.bulletInfos.Count > 0)
+        {
+            bulletData.bulletInfos.Clear();
+        }
+        StartCoroutine(ReadBulletData());
+
+        IEnumerator ReadBulletData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(bulletDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var bulletInfo = new BulletDataInfo()
+                {
+                    indexName = $"{data[(int)BulletVariable.ID]}: {data[(int)BulletVariable.BulletName]}",
+                    ID = data[(int)BulletVariable.ID],
+                    bulletName = data[(int)BulletVariable.BulletName],
+                    level = int.Parse(data[(int)BulletVariable.Level]),
+                    propellant = int.Parse(data[(int)BulletVariable.Propellant]),
+                    caliber = float.Parse(data[(int)BulletVariable.Caliber]),
+                    damage = int.Parse(data[(int)BulletVariable.Damage]),
+                    penetrate = int.Parse(data[(int)BulletVariable.Penetrate]),
+                    armorBreak = int.Parse(data[(int)BulletVariable.ArmorBreak]),
+                    critical = int.Parse(data[(int)BulletVariable.Critical]),
+                };
+                bulletData.bulletInfos.Add(bulletInfo);
+            }
+            Debug.Log("Update Bullet Data");
         }
     }
     #endregion
@@ -615,6 +711,20 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    private List<int> ReadCompatModelInfo(string modelData)
+    {
+        var compatModels = new List<int>();
+        var modelInfos = modelData.Split(',');
+        for (int i = 0; i < modelInfos.Length; i++)
+        {
+            var modelInfo = modelInfos[i];
+            var compatModel = int.Parse(modelInfo);
+            compatModels.Add(compatModel);
+        }
+
+        return compatModels;
+    }
+
     #region Custom Editor
     [CustomEditor(typeof(DataManager))]
     public class DataEditor : Editor
@@ -650,6 +760,16 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateWeaponPartsData();
                 EditorUtility.SetDirty(dataMgr.partsData);
             }
+            if (GUILayout.Button("Update the Magazine Database"))
+            {
+                dataMgr.UpdateMagazineData();
+                EditorUtility.SetDirty(dataMgr.magData);
+            }
+            if (GUILayout.Button("Update the Bullet Database"))
+            {
+                dataMgr.UpdateBulletData();
+                EditorUtility.SetDirty(dataMgr.bulletData);
+            }
             if (GUILayout.Button("Update the Armor Database"))
             {
                 dataMgr.UpdateArmorData();
@@ -666,6 +786,10 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.weaponData);
                 dataMgr.UpdateWeaponPartsData();
                 EditorUtility.SetDirty(dataMgr.partsData);
+                dataMgr.UpdateMagazineData();
+                EditorUtility.SetDirty(dataMgr.magData);
+                dataMgr.UpdateBulletData();
+                EditorUtility.SetDirty(dataMgr.bulletData);
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
             }

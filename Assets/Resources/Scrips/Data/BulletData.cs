@@ -1,0 +1,28 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[System.Serializable]
+public class BulletDataInfo
+{
+    public string indexName;
+    [Space(5f)]
+
+    public string ID;
+    public string bulletName;
+    public int level;
+    [Space(5f)]
+
+    [Tooltip("장약")] public int propellant;
+    [Tooltip("구경")] public float caliber;
+    [Tooltip("피해량")] public int damage;
+    [Tooltip("관통")] public int penetrate;
+    [Tooltip("방어구 손상")] public int armorBreak;
+    [Tooltip("파편화")] public int critical;
+}
+
+[CreateAssetMenu(fileName = "BulletData", menuName = "Scriptable Object/BulletData")]
+public class BulletData : ScriptableObject
+{
+    public List<BulletDataInfo> bulletInfos = new List<BulletDataInfo>();
+}
