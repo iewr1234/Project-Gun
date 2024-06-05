@@ -569,19 +569,24 @@ public class InventoryManager : MonoBehaviour
 
         void ApplyItem()
         {
-            item.SetItemScale(true);
             if (item.magData != null
              && popUp.item.weaponData.equipMag == null)
             {
+                item.SetItemScale(true);
                 popUp.item.weaponData.equipMag = item.magData;
             }
             else if (item.partsData != null
                   && popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
             {
+                item.SetItemScale(true);
                 popUp.item.weaponData.equipPartsList.Add(item.partsData);
             }
-            popUp.item.SetPartsSample();
-            popUp.SetPartsSample();
+
+            if (popUp.item != null)
+            {
+                popUp.item.SetPartsSample();
+                popUp.SetPartsSample();
+            }
         }
     }
 
@@ -596,8 +601,12 @@ public class InventoryManager : MonoBehaviour
             var find = popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
             popUp.item.weaponData.equipPartsList.Remove(find);
         }
-        popUp.item.SetPartsSample();
-        popUp.SetPartsSample();
+
+        if (popUp.item != null)
+        {
+            popUp.item.SetPartsSample();
+            popUp.SetPartsSample();
+        }
     }
 
     public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, ItemHandler item, Vector2Int startIndex)
