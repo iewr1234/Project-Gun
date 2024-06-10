@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -107,6 +105,7 @@ public class InventoryManager : MonoBehaviour
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0002", 1, otherStorage.itemSlots);
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0004", 100, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -259,6 +258,24 @@ public class InventoryManager : MonoBehaviour
         PutTheItem(item, itemSlot);
     }
 
+    public void SetItemInEquipSlot(BulletDataInfo bulletData, int count, EquipSlot equipSlot)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == bulletData.ID);
+        item.SetItemInfo(itemData, count);
+
+        equipSlot.item = item;
+        equipSlot.slotText.enabled = false;
+        equipSlot.countText.enabled = false;
+
+        item.countText.enabled = false;
+        item.equipSlot = equipSlot;
+        item.SetItemScale(true);
+        item.ChangeRectPivot(true);
+        item.transform.SetParent(equipSlot.transform, false);
+        item.transform.localPosition = Vector3.zero;
+    }
+
     public void SetItemInEquipSlot(MagazineDataInfo magData, int count, EquipSlot equipSlot)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
@@ -267,8 +284,12 @@ public class InventoryManager : MonoBehaviour
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
+        equipSlot.countText.enabled = true;
+        equipSlot.countText.text = $"{item.TotalCount}";
 
+        item.countText.enabled = false;
         item.equipSlot = equipSlot;
+        item.SetItemScale(true);
         item.ChangeRectPivot(true);
         item.transform.SetParent(equipSlot.transform, false);
         item.transform.localPosition = Vector3.zero;
@@ -282,8 +303,10 @@ public class InventoryManager : MonoBehaviour
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
+        equipSlot.countText.enabled = false;
 
         item.equipSlot = equipSlot;
+        item.SetItemScale(true);
         item.ChangeRectPivot(true);
         item.transform.SetParent(equipSlot.transform, false);
         item.transform.localPosition = Vector3.zero;
@@ -291,7 +314,14 @@ public class InventoryManager : MonoBehaviour
 
     public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
     {
-        if (itemSlot != null && itemSlot.item != null && itemSlot.item != item && itemSlot.item.itemData == item.itemData)
+        if (itemSlot != null && itemSlot.item != null
+         && item.bulletData != null && itemSlot.item.magData != null
+         && itemSlot.item.magData.loadedBullets.Count < itemSlot.item.magData.magSize)
+        {
+            ItemMove(false);
+        }
+        else if (itemSlot != null && itemSlot.item != null
+              && itemSlot.item != item && itemSlot.item.itemData.ID == item.itemData.ID)
         {
             if (item.itemData.maxNesting == 1)
             {
@@ -347,9 +377,10 @@ public class InventoryManager : MonoBehaviour
                             itemSlot.item = item;
                             itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
 
-                            item.itemSlots.Add(itemSlot);
+                            item.ChangeRectPivot(false);
                             item.transform.SetParent(itemSlot.transform, false);
                             item.transform.localPosition = Vector3.zero;
+                            item.itemSlots.Add(itemSlot);
                         }
                     }
                     break;
@@ -372,7 +403,11 @@ public class InventoryManager : MonoBehaviour
                         item.transform.position = item.itemSlots[0].transform.position;
                         if (itemSlot != null && itemSlot.item != null)
                         {
-                            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                            for (int j = 0; j < itemSlot.item.itemSlots.Count; j++)
+                            {
+                                var _itemSlot = itemSlot.item.itemSlots[j];
+                                _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                            }
                         }
                     }
                     break;
@@ -525,15 +560,17 @@ public class InventoryManager : MonoBehaviour
     {
         if (equipSlot.CheckEquip(item))
         {
+            var itemSlot = item.itemSlots[0];
             equipSlot.item = item;
             equipSlot.slotText.enabled = false;
 
+            item.countText.enabled = false;
             item.equipSlot = equipSlot;
             for (int i = 0; i < item.itemSlots.Count; i++)
             {
-                var itemSlot = item.itemSlots[i];
-                itemSlot.SetSlotColor(Color.white);
-                itemSlot.item = null;
+                var _itemSlot = item.itemSlots[i];
+                _itemSlot.SetSlotColor(Color.white);
+                _itemSlot.item = null;
             }
             item.itemSlots.Clear();
 
@@ -541,11 +578,28 @@ public class InventoryManager : MonoBehaviour
             item.transform.SetParent(equipSlot.transform, false);
             item.transform.localPosition = Vector3.zero;
             item.targetImage.raycastTarget = true;
+
+            switch (item.itemData.type)
+            {
+                case ItemType.Bullet:
+                    var count = item.TotalCount - 1;
+                    SetItemInStorage(item.itemData, count, itemSlot);
+                    equipSlot.countText.enabled = false;
+                    break;
+                case ItemType.Magazine:
+                    equipSlot.countText.enabled = true;
+                    equipSlot.countText.text = $"{item.TotalCount}";
+                    break;
+                default:
+                    equipSlot.countText.enabled = false;
+                    break;
+            }
             ApplyItem();
         }
         else if (item.equipSlot != null)
         {
             item.equipSlot.slotText.enabled = false;
+            item.SetItemScale(true);
             item.ChangeRectPivot(true);
             item.transform.SetParent(item.equipSlot.transform, false);
             item.transform.localPosition = Vector3.zero;
@@ -569,16 +623,20 @@ public class InventoryManager : MonoBehaviour
 
         void ApplyItem()
         {
-            if (item.magData != null
-             && popUp.item.weaponData.equipMag == null)
+            item.SetItemScale(true);
+            if (item.bulletData != null
+             && popUp.item.weaponData.chamberBullet == null)
             {
-                item.SetItemScale(true);
+                popUp.item.weaponData.chamberBullet = item.bulletData;
+            }
+            else if (item.magData != null
+                  && popUp.item.weaponData.equipMag == null)
+            {
                 popUp.item.weaponData.equipMag = item.magData;
             }
             else if (item.partsData != null
                   && popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
             {
-                item.SetItemScale(true);
                 popUp.item.weaponData.equipPartsList.Add(item.partsData);
             }
 

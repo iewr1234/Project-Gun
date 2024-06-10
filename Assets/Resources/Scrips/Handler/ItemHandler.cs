@@ -12,6 +12,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Space(5f)]
 
     public WeaponDataInfo weaponData;
+    public BulletDataInfo bulletData;
     public MagazineDataInfo magData;
     public WeaponPartsDataInfo partsData;
 
@@ -78,16 +79,16 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemInfo(ItemDataInfo _itemData, int count)
     {
         itemData = new ItemDataInfo(_itemData);
-
         size = _itemData.size;
-        countText.enabled = itemData.maxNesting > 1;
-        SetTotalCount(count);
-
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
                 var _weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                 weaponData = _weaponData.CopyData();
+                break;
+            case ItemType.Bullet:
+                var _bulletData = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
+                bulletData = _bulletData.CopyData();
                 break;
             case ItemType.Magazine:
                 var _magData = invenMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
@@ -100,7 +101,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             default:
                 break;
         }
+
         SetItemRotation(false);
+        if (itemData.type == ItemType.Magazine)
+        {
+            countText.enabled = true;
+            SetTotalCount(magData.loadedBullets.Count);
+        }
+        else
+        {
+            countText.enabled = itemData.maxNesting > 1;
+            SetTotalCount(count);
+        }
 
         if (activeSample != null)
         {

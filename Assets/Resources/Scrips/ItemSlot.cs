@@ -88,6 +88,21 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                 {
                     onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
                 }
+                else if (findSlot && findSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet)
+                {
+                    for (int j = 0; j < findSlot.item.itemSlots.Count; j++)
+                    {
+                        var itemSlot = findSlot.item.itemSlots[j];
+                        if (findSlot.item.magData.loadedBullets.Count < findSlot.item.magData.magSize)
+                        {
+                            itemSlot.SetSlotColor(DataUtility.slot_moveColor);
+                        }
+                        else
+                        {
+                            itemSlot.SetSlotColor(DataUtility.slot_unMoveColor);
+                        }
+                    }
+                }
                 else if (findSlot && findSlot.item.itemData.ID == item.itemData.ID)
                 {
                     if (findSlot.item.TotalCount < findSlot.item.itemData.maxNesting)
@@ -138,15 +153,17 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                 }
                 invenMgr.onSlots.Clear();
             }
+
+            if (item == null)
+            {
+                SetSlotColor(Color.white);
+            }
             else
             {
-                if (item == null)
+                for (int j = 0; j < item.itemSlots.Count; j++)
                 {
-                    SetSlotColor(Color.white);
-                }
-                else
-                {
-                    SetSlotColor(DataUtility.slot_onItemColor);
+                    var itemSlot = item.itemSlots[j];
+                    itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
                 }
             }
         }

@@ -51,8 +51,8 @@ public class PopUp_Inventory : MonoBehaviour
     public ItemHandler item;
     public ItemSlot itemSlot;
 
-    private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, 0);
-    private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, 0);
+    private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, -50);
+    private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, -50);
 
     public void SetComponents(InventoryManager _invenMgr)
     {
@@ -414,6 +414,37 @@ public class PopUp_Inventory : MonoBehaviour
             switch (equipSlot.type)
             {
                 case EquipType.Chamber:
+                    var bulletData = item.weaponData.chamberBullet;
+                    if (equipSlot.CheckEquip(bulletData))
+                    {
+                        if (equipSlot.item && equipSlot.item.bulletData != bulletData)
+                        {
+                            var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == bulletData.ID);
+                            equipSlot.item.SetItemInfo(itemData, 1);
+                            equipSlot.item.countText.enabled = false;
+                        }
+                        else if (!equipSlot.item)
+                        {
+                            invenMgr.SetItemInEquipSlot(bulletData, 1, equipSlot);
+                        }
+
+                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == bulletData.ID);
+                        for (int j = 0; j < smaples.Count; j++)
+                        {
+                            var smaple = smaples[j];
+                            smaple.SetActive(true);
+                        }
+                    }
+                    else if (equipSlot.item)
+                    {
+                        if (equipSlot.item.itemSlots.Count == 0)
+                        {
+                            invenMgr.InActiveItem(equipSlot.item);
+                        }
+                        equipSlot.slotText.enabled = true;
+                        equipSlot.countText.enabled = false;
+                        equipSlot.item = null;
+                    }
                     break;
                 case EquipType.Magazine:
                     var magData = item.weaponData.equipMag;
@@ -423,6 +454,7 @@ public class PopUp_Inventory : MonoBehaviour
                         {
                             var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
                             equipSlot.item.SetItemInfo(itemData, 1);
+                            equipSlot.item.countText.enabled = false;
                         }
                         else if (!equipSlot.item)
                         {
@@ -443,6 +475,7 @@ public class PopUp_Inventory : MonoBehaviour
                             invenMgr.InActiveItem(equipSlot.item);
                         }
                         equipSlot.slotText.enabled = true;
+                        equipSlot.countText.enabled = false;
                         equipSlot.item = null;
                     }
                     break;

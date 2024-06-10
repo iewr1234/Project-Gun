@@ -43,6 +43,7 @@ public class WeaponDataInfo
     [Tooltip("레일 사용")] public List<WeaponPartsSize> useRail;
     [Space(5f)]
 
+    [Tooltip("약실 탄환")] public BulletDataInfo chamberBullet;
     [Tooltip("장착 탄창")] public MagazineDataInfo equipMag;
     [Tooltip("장착부품 리스트")] public List<WeaponPartsDataInfo> equipPartsList;
 

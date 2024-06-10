@@ -13,6 +13,9 @@ public class MagazineDataInfo
     public string magName;
     public List<int> compatModel;
     public int magSize;
+    [Space(5f)]
+
+    public List<BulletDataInfo> loadedBullets = new List<BulletDataInfo>();
 
     public MagazineDataInfo CopyData()
     {
@@ -24,6 +27,8 @@ public class MagazineDataInfo
             magName = magName,
             compatModel = new List<int>(compatModel),
             magSize = magSize,
+
+            loadedBullets = new List<BulletDataInfo>(loadedBullets),
         };
 
         return magData;

@@ -19,6 +19,27 @@ public class BulletDataInfo
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
+
+    public BulletDataInfo CopyData()
+    {
+        var bulletData = new BulletDataInfo()
+        {
+            indexName = indexName,
+
+            ID = ID,
+            bulletName = bulletName,
+            level = level,
+
+            propellant = propellant,
+            caliber = caliber,
+            damage = damage,
+            penetrate = penetrate,
+            armorBreak = armorBreak,
+            critical = critical,
+        };
+
+        return bulletData;
+    }
 }
 
 [CreateAssetMenu(fileName = "BulletData", menuName = "Scriptable Object/BulletData")]

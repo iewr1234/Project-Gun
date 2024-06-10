@@ -30,6 +30,7 @@ public class EquipSlot : MonoBehaviour
     public Image outline;
     public Image backImage;
     public TextMeshProUGUI slotText;
+    public TextMeshProUGUI countText;
 
     [Header("--- Assignment Variable---")]
     public EquipType type;
@@ -44,7 +45,9 @@ public class EquipSlot : MonoBehaviour
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;
         backImage = transform.Find("BackGround").GetComponent<Image>();
-        slotText = transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText.enabled = false;
 
         invenMgr.allEquips.Add(this);
     }
@@ -66,7 +69,8 @@ public class EquipSlot : MonoBehaviour
             case EquipType.SubWeapon:
                 return item.itemData.type == ItemType.SubWeapon;
             case EquipType.Chamber:
-                return item.itemData.type == ItemType.Bullet;
+                return item.bulletData != null
+                    && item.itemData.type == ItemType.Bullet;
             case EquipType.Magazine:
                 return item.magData != null
                     && item.magData.compatModel.Contains(model)
@@ -78,6 +82,12 @@ public class EquipSlot : MonoBehaviour
             default:
                 return false;
         }
+    }
+
+    public bool CheckEquip(BulletDataInfo bulletData)
+    {
+        return type == EquipType.Chamber
+            && bulletData != null;
     }
 
     public bool CheckEquip(MagazineDataInfo magData)
