@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class PopUp_Inventory : MonoBehaviour
 {
@@ -49,7 +48,7 @@ public class PopUp_Inventory : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [SerializeField] private State state;
     public ItemHandler item;
-    public ItemSlot itemSlot;
+    public List<ItemSlot> itemSlots;
 
     private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, -50);
     private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, -50);
@@ -138,11 +137,12 @@ public class PopUp_Inventory : MonoBehaviour
         {
             case State.Split:
                 invenMgr.InactiveSampleItem();
-                if (itemSlot != null)
+                for (int i = 0; i < itemSlots.Count; i++)
                 {
+                    var itemSlot = itemSlots[i];
                     itemSlot.SetSlotColor(Color.white);
                 }
-                itemSlot = null;
+                itemSlots.Clear();
                 break;
             case State.ItemInformation:
                 invenMgr.selectItem = null;
@@ -156,7 +156,7 @@ public class PopUp_Inventory : MonoBehaviour
     }
 
     #region Split
-    public void PopUp_Split(ItemHandler _item, ItemSlot _itemSlot)
+    public void PopUp_Split(ItemHandler _item, List<ItemSlot> _itemSlots)
     {
         gameObject.SetActive(true);
         transform.localPosition = defaultPos_split;
@@ -164,8 +164,10 @@ public class PopUp_Inventory : MonoBehaviour
         state = State.Split;
 
         split.uiObject.SetActive(true);
+        itemInfo.uiObject.SetActive(false);
+
         item = _item;
-        itemSlot = _itemSlot;
+        itemSlots = _itemSlots;
         split.slider.maxValue = item.TotalCount;
         split.slider.value = 0;
         split.countText.text = "0";
@@ -176,16 +178,20 @@ public class PopUp_Inventory : MonoBehaviour
         invenMgr.InactiveSampleItem();
         if (split.slider.value == item.TotalCount)
         {
-            invenMgr.PutTheItem(item, itemSlot);
+            invenMgr.PutTheItem(item, itemSlots);
         }
         else if (split.slider.value > 0)
         {
             item.ResultTotalCount((int)-split.slider.value);
-            invenMgr.SetItemInStorage(item.itemData, (int)split.slider.value, itemSlot);
+            invenMgr.SetItemInStorage(item.itemData, (int)split.slider.value, itemSlots);
         }
         else
         {
-            itemSlot.SetSlotColor(Color.white);
+            for (int i = 0; i < itemSlots.Count; i++)
+            {
+                var itemSlot = itemSlots[i];
+                itemSlot.SetSlotColor(Color.white);
+            }
         }
         split.uiObject.SetActive(false);
         gameObject.SetActive(false);
@@ -207,6 +213,8 @@ public class PopUp_Inventory : MonoBehaviour
         state = State.ItemInformation;
 
         itemInfo.uiObject.SetActive(true);
+        split.uiObject.SetActive(false);
+
         if (itemInfo.activeSample != null)
         {
             itemInfo.activeSample.SetActive(false);

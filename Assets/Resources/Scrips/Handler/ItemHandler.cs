@@ -311,14 +311,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         else
         {
-            if (itemData.size == new Vector2Int(1, 1))
-            {
-                invenMgr.PutTheItem(this, invenMgr.onSlot);
-            }
-            else
-            {
-                invenMgr.PutTheItem(this, invenMgr.onSlots);
-            }
+            invenMgr.PutTheItem(this, invenMgr.onSlots);
         }
     }
 

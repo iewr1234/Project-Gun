@@ -102,8 +102,8 @@ public class InventoryManager : MonoBehaviour
         invenUI.gameObject.SetActive(false);
 
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0002", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
         SetItemInStorage("T0004", 100, otherStorage.itemSlots);
     }
@@ -240,22 +240,15 @@ public class InventoryManager : MonoBehaviour
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(itemData, count);
         var emptySlot = itemSlots.Find(x => x.item == null);
-        if (item.size == new Vector2Int(1, 1))
-        {
-            PutTheItem(item, emptySlot);
-        }
-        else
-        {
-            var emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
-            PutTheItem(item, emptySlots);
-        }
+        var emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
+        PutTheItem(item, emptySlots);
     }
 
-    public void SetItemInStorage(ItemDataInfo itemData, int count, ItemSlot itemSlot)
+    public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(itemData, count);
-        PutTheItem(item, itemSlot);
+        PutTheItem(item, itemSlots);
     }
 
     public void SetItemInEquipSlot(BulletDataInfo bulletData, int count, EquipSlot equipSlot)
@@ -312,187 +305,200 @@ public class InventoryManager : MonoBehaviour
         item.transform.localPosition = Vector3.zero;
     }
 
-    public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
+    //public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
+    //{
+    //    if (itemSlot != null && itemSlot.item != null
+    //     && item.bulletData != null && itemSlot.item.magData != null
+    //     && itemSlot.item.magData.loadedBullets.Count < itemSlot.item.magData.magSize)
+    //    {
+    //        ItemMove(false);
+    //    }
+    //    else if (itemSlot != null && itemSlot.item != null
+    //          && itemSlot.item != item && itemSlot.item.itemData.ID == item.itemData.ID)
+    //    {
+    //        if (item.itemData.maxNesting == 1)
+    //        {
+    //            ItemMove(false);
+    //        }
+    //        else
+    //        {
+    //            ItemNesting();
+    //        }
+    //    }
+    //    else if (itemSlot != null && itemSlot.item == null)
+    //    {
+    //        ItemMove(true);
+    //    }
+    //    else
+    //    {
+    //        ItemMove(false);
+    //    }
+
+    //    void ItemMove(bool value)
+    //    {
+    //        switch (value)
+    //        {
+    //            case true:
+    //                if (item.equipSlot != null)
+    //                {
+    //                    item.itemSlots.Add(itemSlot);
+    //                    itemSlot.item = item;
+    //                    UnequipItem(item);
+    //                    item.equipSlot = null;
+    //                    itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+
+    //                    item.ChangeRectPivot(false);
+    //                    item.transform.SetParent(itemSlot.transform, false);
+    //                    item.transform.localPosition = Vector3.zero;
+    //                }
+    //                else
+    //                {
+    //                    if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
+    //                    {
+    //                        ItemSplit();
+    //                        itemSplit = false;
+    //                        return;
+    //                    }
+    //                    else
+    //                    {
+    //                        if (item.itemSlots.Count > 0)
+    //                        {
+    //                            item.itemSlots[0].item = null;
+    //                            item.itemSlots[0].SetSlotColor(Color.white);
+    //                            item.itemSlots.Clear();
+    //                        }
+    //                        itemSlot.item = item;
+    //                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+
+    //                        item.ChangeRectPivot(false);
+    //                        item.transform.SetParent(itemSlot.transform, false);
+    //                        item.transform.localPosition = Vector3.zero;
+    //                        item.itemSlots.Add(itemSlot);
+    //                    }
+    //                }
+    //                break;
+    //            case false:
+    //                if (item.equipSlot != null)
+    //                {
+    //                    item.equipSlot.slotText.enabled = false;
+    //                    item.SetItemScale(true);
+    //                    item.ChangeRectPivot(true);
+    //                    item.transform.SetParent(item.equipSlot.transform, false);
+    //                    item.transform.localPosition = Vector3.zero;
+    //                    if (itemSlot != null)
+    //                    {
+    //                        itemSlot.SetSlotColor(Color.white);
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    item.transform.SetParent(item.itemSlots[0].transform, false);
+    //                    item.transform.position = item.itemSlots[0].transform.position;
+    //                    if (itemSlot != null && itemSlot.item != null)
+    //                    {
+    //                        for (int j = 0; j < itemSlot.item.itemSlots.Count; j++)
+    //                        {
+    //                            var _itemSlot = itemSlot.item.itemSlots[j];
+    //                            _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+    //                        }
+    //                    }
+    //                }
+    //                break;
+    //        }
+
+    //        if (holdingItem != null)
+    //        {
+    //            item.targetImage.raycastTarget = true;
+    //        }
+    //        item.targetImage.color = Color.clear;
+    //        holdingItem = null;
+    //        InactiveSampleItem();
+    //    }
+
+    //    void ItemNesting()
+    //    {
+    //        if (itemSlot.item.TotalCount == itemSlot.item.itemData.maxNesting)
+    //        {
+    //            ItemMove(false);
+    //        }
+    //        else if (itemSlot.item.TotalCount < itemSlot.item.itemData.maxNesting)
+    //        {
+    //            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+    //            var slotCount = itemSlot.item.TotalCount;
+    //            var itemCount = item.TotalCount;
+    //            if (slotCount + itemCount > itemSlot.item.itemData.maxNesting)
+    //            {
+    //                if (item.itemSlots.Count > 0)
+    //                {
+    //                    item.itemSlots[0].SetSlotColor(DataUtility.slot_onItemColor);
+    //                }
+    //                var count = slotCount + itemCount - itemSlot.item.itemData.maxNesting;
+    //                item.transform.SetParent(item.itemSlots[0].transform, false);
+    //                item.transform.position = item.itemSlots[0].transform.position;
+    //                item.SetTotalCount(count);
+    //                itemSlot.item.SetTotalCount(itemSlot.item.itemData.maxNesting);
+    //            }
+    //            else
+    //            {
+    //                InActiveItem(item);
+    //                itemSlot.item.ResultTotalCount(itemCount);
+    //            }
+    //            item.targetImage.color = Color.clear;
+    //            holdingItem = null;
+    //            InactiveSampleItem();
+
+    //            itemSlot.item.targetImage.raycastTarget = true;
+    //        }
+    //    }
+
+    //    void ItemSplit()
+    //    {
+    //        item.transform.SetParent(item.itemSlots[0].transform, false);
+    //        item.transform.position = item.itemSlots[0].transform.position;
+    //        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+
+    //        popUp.PopUp_Split(item, itemSlot);
+
+    //        holdingItem = null;
+    //        sampleItem.transform.position = itemSlot.transform.position;
+
+    //        item.targetImage.color = Color.clear;
+    //    }
+    //}
+
+    public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
     {
-        if (itemSlot != null && itemSlot.item != null
-         && item.bulletData != null && itemSlot.item.magData != null
-         && itemSlot.item.magData.loadedBullets.Count < itemSlot.item.magData.magSize)
+        var canSplit = itemSlots.Find(x => x.item != null) == null;
+        if (canSplit && itemSplit && item.TotalCount > 1)
         {
-            ItemMove(false);
-        }
-        else if (itemSlot != null && itemSlot.item != null
-              && itemSlot.item != item && itemSlot.item.itemData.ID == item.itemData.ID)
-        {
-            if (item.itemData.maxNesting == 1)
-            {
-                ItemMove(false);
-            }
-            else
-            {
-                ItemNesting();
-            }
-        }
-        else if (itemSlot != null && itemSlot.item == null)
-        {
-            ItemMove(true);
+            ItemSplit();
         }
         else
         {
-            ItemMove(false);
-        }
-
-        void ItemMove(bool value)
-        {
-            switch (value)
+            var noneItem = itemSlots.Find(x => x.item != null && x.item != item) == null;
+            var sameItemSlot = onSlot != null && onSlot.item != null && onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID;
+            if (sameItemSlot && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting)
             {
-                case true:
-                    if (item.equipSlot != null)
-                    {
-                        item.itemSlots.Add(itemSlot);
-                        itemSlot.item = item;
-                        UnequipItem(item);
-                        item.equipSlot = null;
-                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-                        item.ChangeRectPivot(false);
-                        item.transform.SetParent(itemSlot.transform, false);
-                        item.transform.localPosition = Vector3.zero;
-                    }
-                    else
-                    {
-                        if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
-                        {
-                            ItemSplit();
-                            itemSplit = false;
-                            return;
-                        }
-                        else
-                        {
-                            if (item.itemSlots.Count > 0)
-                            {
-                                item.itemSlots[0].item = null;
-                                item.itemSlots[0].SetSlotColor(Color.white);
-                                item.itemSlots.Clear();
-                            }
-                            itemSlot.item = item;
-                            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-                            item.ChangeRectPivot(false);
-                            item.transform.SetParent(itemSlot.transform, false);
-                            item.transform.localPosition = Vector3.zero;
-                            item.itemSlots.Add(itemSlot);
-                        }
-                    }
-                    break;
-                case false:
-                    if (item.equipSlot != null)
-                    {
-                        item.equipSlot.slotText.enabled = false;
-                        item.SetItemScale(true);
-                        item.ChangeRectPivot(true);
-                        item.transform.SetParent(item.equipSlot.transform, false);
-                        item.transform.localPosition = Vector3.zero;
-                        if (itemSlot != null)
-                        {
-                            itemSlot.SetSlotColor(Color.white);
-                        }
-                    }
-                    else
-                    {
-                        item.transform.SetParent(item.itemSlots[0].transform, false);
-                        item.transform.position = item.itemSlots[0].transform.position;
-                        if (itemSlot != null && itemSlot.item != null)
-                        {
-                            for (int j = 0; j < itemSlot.item.itemSlots.Count; j++)
-                            {
-                                var _itemSlot = itemSlot.item.itemSlots[j];
-                                _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-                            }
-                        }
-                    }
-                    break;
+                ItemNesting();
+            }
+            else if (noneItem && itemSlots.Count == item.size.x * item.size.y)
+            {
+                ItemMove(true);
+            }
+            else
+            {
+                ItemMove(false);
             }
 
+            item.targetImage.color = Color.clear;
             if (holdingItem != null)
             {
                 item.targetImage.raycastTarget = true;
             }
-            item.targetImage.color = Color.clear;
             holdingItem = null;
+            onSlots.Clear();
             InactiveSampleItem();
         }
-
-        void ItemNesting()
-        {
-            if (itemSlot.item.TotalCount == itemSlot.item.itemData.maxNesting)
-            {
-                ItemMove(false);
-            }
-            else if (itemSlot.item.TotalCount < itemSlot.item.itemData.maxNesting)
-            {
-                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-                var slotCount = itemSlot.item.TotalCount;
-                var itemCount = item.TotalCount;
-                if (slotCount + itemCount > itemSlot.item.itemData.maxNesting)
-                {
-                    if (item.itemSlots.Count > 0)
-                    {
-                        item.itemSlots[0].SetSlotColor(DataUtility.slot_onItemColor);
-                    }
-                    var count = slotCount + itemCount - itemSlot.item.itemData.maxNesting;
-                    item.transform.SetParent(item.itemSlots[0].transform, false);
-                    item.transform.position = item.itemSlots[0].transform.position;
-                    item.SetTotalCount(count);
-                    itemSlot.item.SetTotalCount(itemSlot.item.itemData.maxNesting);
-                }
-                else
-                {
-                    InActiveItem(item);
-                    itemSlot.item.ResultTotalCount(itemCount);
-                }
-                item.targetImage.color = Color.clear;
-                holdingItem = null;
-                InactiveSampleItem();
-
-                itemSlot.item.targetImage.raycastTarget = true;
-            }
-        }
-
-        void ItemSplit()
-        {
-            item.transform.SetParent(item.itemSlots[0].transform, false);
-            item.transform.position = item.itemSlots[0].transform.position;
-            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-            popUp.PopUp_Split(item, itemSlot);
-
-            holdingItem = null;
-            sampleItem.transform.position = itemSlot.transform.position;
-
-            item.targetImage.color = Color.clear;
-        }
-    }
-
-    public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
-    {
-        var findItem = itemSlots.Find(x => x.item != null && x.item != item);
-        if (findItem || itemSlots.Count < item.size.x * item.size.y)
-        {
-            ItemMove(false);
-        }
-        else
-        {
-            ItemMove(true);
-        }
-
-        item.targetImage.color = Color.clear;
-        if (holdingItem != null)
-        {
-            item.targetImage.raycastTarget = true;
-        }
-        holdingItem = null;
-        onSlots.Clear();
-        InactiveSampleItem();
 
         void ItemMove(bool value)
         {
@@ -554,13 +560,64 @@ public class InventoryManager : MonoBehaviour
                     break;
             }
         }
+
+        void ItemNesting()
+        {
+            for (int i = 0; i < onSlot.item.itemSlots.Count; i++)
+            {
+                var _itemSlot = onSlot.item.itemSlots[i];
+                _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+            }
+
+            var newTotal = onSlot.item.TotalCount + item.TotalCount;
+            if (onSlot.item.itemData.maxNesting >= newTotal)
+            {
+                for (int i = 0; i < item.itemSlots.Count; i++)
+                {
+                    var _itemSlot = item.itemSlots[i];
+                    _itemSlot.SetSlotColor(Color.white);
+                }
+                InActiveItem(item);
+                onSlot.item.SetTotalCount(newTotal);
+            }
+            else
+            {
+                for (int i = 0; i < item.itemSlots.Count; i++)
+                {
+                    var _itemSlot = item.itemSlots[i];
+                    _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                }
+                item.transform.SetParent(item.itemSlots[0].transform, false);
+                item.transform.localPosition = Vector3.zero;
+                item.SetTotalCount(newTotal - onSlot.item.itemData.maxNesting);
+                onSlot.item.SetTotalCount(onSlot.item.itemData.maxNesting);
+            }
+        }
+
+        void ItemSplit()
+        {
+            for (int i = 0; i < item.itemSlots.Count; i++)
+            {
+                var itemSlot = item.itemSlots[i];
+                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+            }
+            item.transform.SetParent(item.itemSlots[0].transform, false);
+            item.transform.localPosition = Vector3.zero;
+
+            popUp.PopUp_Split(item, onSlots);
+
+            holdingItem = null;
+            sampleItem.transform.position = onSlots[0].transform.position;
+
+            item.targetImage.color = Color.clear;
+        }
     }
 
     public void EquipItem(ItemHandler item, EquipSlot equipSlot)
     {
         if (equipSlot.CheckEquip(item))
         {
-            var itemSlot = item.itemSlots[0];
+            var itemSlots = item.itemSlots;
             equipSlot.item = item;
             equipSlot.slotText.enabled = false;
 
@@ -583,7 +640,7 @@ public class InventoryManager : MonoBehaviour
             {
                 case ItemType.Bullet:
                     var count = item.TotalCount - 1;
-                    SetItemInStorage(item.itemData, count, itemSlot);
+                    SetItemInStorage(item.itemData, count, itemSlots);
                     equipSlot.countText.enabled = false;
                     break;
                 case ItemType.Magazine:
