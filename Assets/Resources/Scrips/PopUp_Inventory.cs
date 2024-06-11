@@ -5,14 +5,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+public enum PopUpState
+{
+    None,
+    Split,
+    ItemInformation,
+}
+
 public class PopUp_Inventory : MonoBehaviour
 {
-    private enum State
-    {
-        None,
-        Split,
-        ItemInformation,
-    }
 
     [System.Serializable]
     private struct Split
@@ -46,7 +47,7 @@ public class PopUp_Inventory : MonoBehaviour
     [SerializeField] private ItemInformation itemInfo;
 
     [Header("--- Assignment Variable---")]
-    [SerializeField] private State state;
+    public PopUpState state;
     public ItemHandler item;
     public List<ItemSlot> itemSlots;
 
@@ -135,7 +136,7 @@ public class PopUp_Inventory : MonoBehaviour
     {
         switch (state)
         {
-            case State.Split:
+            case PopUpState.Split:
                 invenMgr.InactiveSampleItem();
                 for (int i = 0; i < itemSlots.Count; i++)
                 {
@@ -144,7 +145,7 @@ public class PopUp_Inventory : MonoBehaviour
                 }
                 itemSlots.Clear();
                 break;
-            case State.ItemInformation:
+            case PopUpState.ItemInformation:
                 invenMgr.selectItem = null;
                 item = null;
                 break;
@@ -152,7 +153,7 @@ public class PopUp_Inventory : MonoBehaviour
                 break;
         }
         gameObject.SetActive(false);
-        state = State.None;
+        state = PopUpState.None;
     }
 
     #region Split
@@ -161,16 +162,17 @@ public class PopUp_Inventory : MonoBehaviour
         gameObject.SetActive(true);
         transform.localPosition = defaultPos_split;
         topText.text = "아이템 나누기";
-        state = State.Split;
+        state = PopUpState.Split;
 
         split.uiObject.SetActive(true);
         itemInfo.uiObject.SetActive(false);
 
         item = _item;
         itemSlots = _itemSlots;
-        split.slider.maxValue = item.TotalCount;
-        split.slider.value = 0;
-        split.countText.text = "0";
+        split.slider.value = 1;
+        split.slider.minValue = 1;
+        split.slider.maxValue = item.TotalCount - 1;
+        split.countText.text = "1";
     }
 
     public void Button_PopUp_Split_Accept()
@@ -195,7 +197,7 @@ public class PopUp_Inventory : MonoBehaviour
         }
         split.uiObject.SetActive(false);
         gameObject.SetActive(false);
-        state = State.None;
+        state = PopUpState.None;
     }
 
     public void OnValue_PopUp_Split()
@@ -210,7 +212,7 @@ public class PopUp_Inventory : MonoBehaviour
         gameObject.SetActive(true);
         transform.localPosition = defaultPos_itemInfo;
         topText.text = $"{invenMgr.selectItem.itemData.itemName}";
-        state = State.ItemInformation;
+        state = PopUpState.ItemInformation;
 
         itemInfo.uiObject.SetActive(true);
         split.uiObject.SetActive(false);

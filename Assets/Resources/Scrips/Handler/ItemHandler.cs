@@ -47,6 +47,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         invenMgr = _invenMgr;
         weaponData = null;
+        bulletData = null;
         magData = null;
         partsData = null;
 
@@ -78,7 +79,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void SetItemInfo(ItemDataInfo _itemData, int count)
     {
-        itemData = new ItemDataInfo(_itemData);
+        itemData = _itemData.CopyData();
         size = _itemData.size;
         switch (itemData.type)
         {
@@ -275,9 +276,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
+    private bool CheckItemDrag()
+    {
+        if (invenMgr == null) return false;
+        if (invenMgr.popUp.state == PopUpState.Split) return false;
+        if (Input.GetMouseButton(1)) return false;
+
+        return true;
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (Input.GetMouseButton(1)) return;
+        if (!CheckItemDrag()) return;
 
         if (equipSlot != null)
         {
@@ -295,15 +305,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (Input.GetMouseButton(1)) return;
+        if (!CheckItemDrag()) return;
 
         FollowMouse();
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (invenMgr == null) return;
-        if (Input.GetMouseButton(1)) return;
+        if (!CheckItemDrag()) return;
 
         if (invenMgr.onEquip && !invenMgr.onSlot)
         {

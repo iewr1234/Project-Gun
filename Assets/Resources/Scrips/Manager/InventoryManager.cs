@@ -305,196 +305,38 @@ public class InventoryManager : MonoBehaviour
         item.transform.localPosition = Vector3.zero;
     }
 
-    //public void PutTheItem(ItemHandler item, ItemSlot itemSlot)
-    //{
-    //    if (itemSlot != null && itemSlot.item != null
-    //     && item.bulletData != null && itemSlot.item.magData != null
-    //     && itemSlot.item.magData.loadedBullets.Count < itemSlot.item.magData.magSize)
-    //    {
-    //        ItemMove(false);
-    //    }
-    //    else if (itemSlot != null && itemSlot.item != null
-    //          && itemSlot.item != item && itemSlot.item.itemData.ID == item.itemData.ID)
-    //    {
-    //        if (item.itemData.maxNesting == 1)
-    //        {
-    //            ItemMove(false);
-    //        }
-    //        else
-    //        {
-    //            ItemNesting();
-    //        }
-    //    }
-    //    else if (itemSlot != null && itemSlot.item == null)
-    //    {
-    //        ItemMove(true);
-    //    }
-    //    else
-    //    {
-    //        ItemMove(false);
-    //    }
-
-    //    void ItemMove(bool value)
-    //    {
-    //        switch (value)
-    //        {
-    //            case true:
-    //                if (item.equipSlot != null)
-    //                {
-    //                    item.itemSlots.Add(itemSlot);
-    //                    itemSlot.item = item;
-    //                    UnequipItem(item);
-    //                    item.equipSlot = null;
-    //                    itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-    //                    item.ChangeRectPivot(false);
-    //                    item.transform.SetParent(itemSlot.transform, false);
-    //                    item.transform.localPosition = Vector3.zero;
-    //                }
-    //                else
-    //                {
-    //                    if (itemSlot.item == null && item.TotalCount > 1 && itemSplit)
-    //                    {
-    //                        ItemSplit();
-    //                        itemSplit = false;
-    //                        return;
-    //                    }
-    //                    else
-    //                    {
-    //                        if (item.itemSlots.Count > 0)
-    //                        {
-    //                            item.itemSlots[0].item = null;
-    //                            item.itemSlots[0].SetSlotColor(Color.white);
-    //                            item.itemSlots.Clear();
-    //                        }
-    //                        itemSlot.item = item;
-    //                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-    //                        item.ChangeRectPivot(false);
-    //                        item.transform.SetParent(itemSlot.transform, false);
-    //                        item.transform.localPosition = Vector3.zero;
-    //                        item.itemSlots.Add(itemSlot);
-    //                    }
-    //                }
-    //                break;
-    //            case false:
-    //                if (item.equipSlot != null)
-    //                {
-    //                    item.equipSlot.slotText.enabled = false;
-    //                    item.SetItemScale(true);
-    //                    item.ChangeRectPivot(true);
-    //                    item.transform.SetParent(item.equipSlot.transform, false);
-    //                    item.transform.localPosition = Vector3.zero;
-    //                    if (itemSlot != null)
-    //                    {
-    //                        itemSlot.SetSlotColor(Color.white);
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    item.transform.SetParent(item.itemSlots[0].transform, false);
-    //                    item.transform.position = item.itemSlots[0].transform.position;
-    //                    if (itemSlot != null && itemSlot.item != null)
-    //                    {
-    //                        for (int j = 0; j < itemSlot.item.itemSlots.Count; j++)
-    //                        {
-    //                            var _itemSlot = itemSlot.item.itemSlots[j];
-    //                            _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-    //                        }
-    //                    }
-    //                }
-    //                break;
-    //        }
-
-    //        if (holdingItem != null)
-    //        {
-    //            item.targetImage.raycastTarget = true;
-    //        }
-    //        item.targetImage.color = Color.clear;
-    //        holdingItem = null;
-    //        InactiveSampleItem();
-    //    }
-
-    //    void ItemNesting()
-    //    {
-    //        if (itemSlot.item.TotalCount == itemSlot.item.itemData.maxNesting)
-    //        {
-    //            ItemMove(false);
-    //        }
-    //        else if (itemSlot.item.TotalCount < itemSlot.item.itemData.maxNesting)
-    //        {
-    //            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-    //            var slotCount = itemSlot.item.TotalCount;
-    //            var itemCount = item.TotalCount;
-    //            if (slotCount + itemCount > itemSlot.item.itemData.maxNesting)
-    //            {
-    //                if (item.itemSlots.Count > 0)
-    //                {
-    //                    item.itemSlots[0].SetSlotColor(DataUtility.slot_onItemColor);
-    //                }
-    //                var count = slotCount + itemCount - itemSlot.item.itemData.maxNesting;
-    //                item.transform.SetParent(item.itemSlots[0].transform, false);
-    //                item.transform.position = item.itemSlots[0].transform.position;
-    //                item.SetTotalCount(count);
-    //                itemSlot.item.SetTotalCount(itemSlot.item.itemData.maxNesting);
-    //            }
-    //            else
-    //            {
-    //                InActiveItem(item);
-    //                itemSlot.item.ResultTotalCount(itemCount);
-    //            }
-    //            item.targetImage.color = Color.clear;
-    //            holdingItem = null;
-    //            InactiveSampleItem();
-
-    //            itemSlot.item.targetImage.raycastTarget = true;
-    //        }
-    //    }
-
-    //    void ItemSplit()
-    //    {
-    //        item.transform.SetParent(item.itemSlots[0].transform, false);
-    //        item.transform.position = item.itemSlots[0].transform.position;
-    //        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-
-    //        popUp.PopUp_Split(item, itemSlot);
-
-    //        holdingItem = null;
-    //        sampleItem.transform.position = itemSlot.transform.position;
-
-    //        item.targetImage.color = Color.clear;
-    //    }
-    //}
-
     public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
     {
-        var canSplit = itemSlots.Find(x => x.item != null) == null;
-        if (canSplit && itemSplit && item.TotalCount > 1)
+        if (itemSplit && itemSlots.Find(x => x.item != null) == null
+         && item.itemData.type != ItemType.Magazine && item.TotalCount > 1)
         {
             ItemSplit();
         }
         else
         {
-            var noneItem = itemSlots.Find(x => x.item != null && x.item != item) == null;
-            var sameItemSlot = onSlot != null && onSlot.item != null && onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID;
-            if (sameItemSlot && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting)
+            var insertBullets = onSlot != null && onSlot.item != null
+                             && onSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet
+                             && onSlot.item.magData.loadedBullets.Count < onSlot.item.magData.magSize;
+            var itemNesting = onSlot != null && onSlot.item != null && onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
+                            && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
+            if (insertBullets || itemNesting)
             {
                 ItemNesting();
             }
-            else if (noneItem && itemSlots.Count == item.size.x * item.size.y)
-            {
-                ItemMove(true);
-            }
             else
             {
-                ItemMove(false);
+                var itemMove = itemSlots.Find(x => x.item != null && x.item != item) == null && itemSlots.Count == item.size.x * item.size.y;
+                if (itemMove)
+                {
+                    ItemMove(true);
+                }
+                else
+                {
+                    ItemMove(false);
+                }
             }
 
             item.targetImage.color = Color.clear;
-            if (holdingItem != null)
-            {
-                item.targetImage.raycastTarget = true;
-            }
             holdingItem = null;
             onSlots.Clear();
             InactiveSampleItem();
@@ -528,6 +370,10 @@ public class InventoryManager : MonoBehaviour
                     item.itemSlots = new List<ItemSlot>(itemSlots);
                     item.transform.SetParent(itemSlots[0].transform, false);
                     item.transform.localPosition = Vector3.zero;
+                    if (item.itemData.type == ItemType.Magazine)
+                    {
+                        item.countText.enabled = true;
+                    }
                     break;
                 case false:
                     if (item.equipSlot != null)
@@ -559,6 +405,11 @@ public class InventoryManager : MonoBehaviour
                     }
                     break;
             }
+
+            if (holdingItem != null)
+            {
+                item.targetImage.raycastTarget = true;
+            }
         }
 
         void ItemNesting()
@@ -569,16 +420,29 @@ public class InventoryManager : MonoBehaviour
                 _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
             }
 
-            var newTotal = onSlot.item.TotalCount + item.TotalCount;
-            if (onSlot.item.itemData.maxNesting >= newTotal)
+            int newTotal;
+            int maxValue;
+            if (onSlot.item.itemData.type == ItemType.Magazine)
+            {
+                newTotal = onSlot.item.magData.loadedBullets.Count + item.TotalCount;
+                maxValue = onSlot.item.magData.magSize;
+            }
+            else
+            {
+                newTotal = onSlot.item.TotalCount + item.TotalCount;
+                maxValue = onSlot.item.itemData.maxNesting;
+            }
+
+            if (maxValue >= newTotal)
             {
                 for (int i = 0; i < item.itemSlots.Count; i++)
                 {
                     var _itemSlot = item.itemSlots[i];
                     _itemSlot.SetSlotColor(Color.white);
                 }
-                InActiveItem(item);
                 onSlot.item.SetTotalCount(newTotal);
+                InsertBullets(newTotal);
+                InActiveItem(item);
             }
             else
             {
@@ -589,8 +453,20 @@ public class InventoryManager : MonoBehaviour
                 }
                 item.transform.SetParent(item.itemSlots[0].transform, false);
                 item.transform.localPosition = Vector3.zero;
-                item.SetTotalCount(newTotal - onSlot.item.itemData.maxNesting);
-                onSlot.item.SetTotalCount(onSlot.item.itemData.maxNesting);
+                item.SetTotalCount(newTotal - maxValue);
+                onSlot.item.SetTotalCount(maxValue);
+                InsertBullets(maxValue);
+            }
+            onSlot.item.targetImage.raycastTarget = true;
+
+            void InsertBullets(int num)
+            {
+                if (onSlot.item.itemData.type != ItemType.Magazine || item.itemData.type != ItemType.Bullet) return;
+
+                for (int i = 0; i < num; i++)
+                {
+                    onSlot.item.magData.loadedBullets.Add(item.bulletData);
+                }
             }
         }
 
@@ -682,12 +558,12 @@ public class InventoryManager : MonoBehaviour
         {
             item.SetItemScale(true);
             if (item.bulletData != null
-             && popUp.item.weaponData.chamberBullet == null)
+             && popUp.item.weaponData.chamberBullet != item.bulletData)
             {
                 popUp.item.weaponData.chamberBullet = item.bulletData;
             }
             else if (item.magData != null
-                  && popUp.item.weaponData.equipMag == null)
+                  && popUp.item.weaponData.equipMag != item.magData)
             {
                 popUp.item.weaponData.equipMag = item.magData;
             }

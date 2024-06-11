@@ -54,6 +54,8 @@ public class EquipSlot : MonoBehaviour
 
     public bool CheckEquip(ItemHandler item)
     {
+        if (item == null) return false;
+
         switch (type)
         {
             case EquipType.Head:
@@ -87,7 +89,7 @@ public class EquipSlot : MonoBehaviour
     public bool CheckEquip(BulletDataInfo bulletData)
     {
         return type == EquipType.Chamber
-            && bulletData != null;
+            && bulletData.ID != string.Empty;
     }
 
     public bool CheckEquip(MagazineDataInfo magData)

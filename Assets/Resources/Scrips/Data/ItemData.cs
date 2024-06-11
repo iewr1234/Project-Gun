@@ -44,32 +44,23 @@ public class ItemDataInfo
     public int price;
     public Vector2Int size;
 
-    public ItemDataInfo()
+    public ItemDataInfo CopyData()
     {
-        indexName = string.Empty;
-        ID = string.Empty;
-        dataID = string.Empty;
-        itemName = string.Empty;
-        type = ItemType.None;
-        rarity = ItemRarity.Nomal;
-        weight = 0f;
-        maxNesting = 0;
-        price = 0;
-        size = Vector2Int.zero;
-    }
+        var itemData = new ItemDataInfo
+        {
+            indexName = indexName,
+            ID = ID,
+            dataID = dataID,
+            itemName = itemName,
+            type = type,
+            rarity = rarity,
+            weight = weight,
+            maxNesting = maxNesting,
+            price = price,
+            size = size,
+        };
 
-    public ItemDataInfo(ItemDataInfo itemData)
-    {
-        indexName = itemData.indexName;
-        ID = itemData.ID;
-        dataID = itemData.dataID;
-        itemName = itemData.itemName;
-        type = itemData.type;
-        rarity = itemData.rarity;
-        weight = itemData.weight;
-        maxNesting = itemData.maxNesting;
-        price = itemData.price;
-        size = itemData.size;
+        return itemData;
     }
 }
 
