@@ -119,6 +119,9 @@ public class CharacterController : MonoBehaviour
     private List<Collider> ragdollCds = new List<Collider>();
     private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
+    private Transform weaponPoolTf;
+    private List<Weapon> weaponPool = new List<Weapon>();
+
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
     [Tooltip("캐릭터 상태")] public CharacterState state;
@@ -237,6 +240,14 @@ public class CharacterController : MonoBehaviour
         {
             var rb = ragdollRbs[i];
             rb.isKinematic = true;
+        }
+
+        weaponPoolTf = transform.Find("WeaponPool");
+        weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
+        for (int i = 0; i < weaponPool.Count; i++)
+        {
+            var weapon = weaponPool[i];
+            weapon.gameObject.SetActive(false);
         }
 
         var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
@@ -2267,6 +2278,34 @@ public class CharacterController : MonoBehaviour
         animator.SetBool("isAim", false);
         animator.SetBool("coverAim", false);
         timer = 0f;
+    }
+
+    public void AddWeapon(WeaponDataInfo weaponData)
+    {
+        var weapon = weaponPool.Find(x => x.name == weaponData.weaponName);
+        weapon.SetComponets(this, weaponData);
+        if (currentWeapon == null)
+        {
+            weapon.EquipWeapon();
+            weapon.WeaponSwitching("Right");
+            currentWeapon = weapon;
+        }
+    }
+
+    public void RemoveWeapon(string weaponName)
+    {
+        var weapon = weaponPool.Find(x => x.name == weaponName);
+        if (currentWeapon == weapon)
+        {
+            currentWeapon = null;
+        }
+        weapon.transform.SetParent(weaponPoolTf, false);
+        weapon.Initialize();
+    }
+
+    public Weapon GetWeapon(string weaponName)
+    {
+        return weaponPool.Find(x => x.name == weaponName);
     }
 
     #region Coroutine

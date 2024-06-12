@@ -482,7 +482,7 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
-    #region
+    #region WeaponParts Data
     [HideInInspector] public WeaponPartsData partsData;
     private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:O";
     private enum WeaponPartsVariable
@@ -555,13 +555,14 @@ public class DataManager : MonoBehaviour
 
     #region Magazine Data
     [HideInInspector] public MagazineData magData;
-    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:E";
+    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:F";
     private enum MagazineVariable
     {
         ID,
         PrefabName,
         MagazineName,
         CompatModel,
+        CompatCaliber,
         MagazineSize,
     }
 
@@ -595,6 +596,7 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)MagazineVariable.PrefabName],
                     magName = data[(int)MagazineVariable.MagazineName],
                     compatModel = ReadCompatModelInfo(data[(int)MagazineVariable.CompatModel]),
+                    compatCaliber = float.Parse(data[(int)MagazineVariable.CompatCaliber]),
                     magSize = int.Parse(data[(int)MagazineVariable.MagazineSize]),
                 };
                 magData.magInfos.Add(magInfo);

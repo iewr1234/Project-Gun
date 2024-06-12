@@ -237,6 +237,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemScale(bool value)
     {
         if (size == new Vector2Int(1, 1)) return;
+        if (itemData.type == ItemType.MainWeapon || itemData.type == ItemType.SubWeapon) return;
 
         switch (value)
         {

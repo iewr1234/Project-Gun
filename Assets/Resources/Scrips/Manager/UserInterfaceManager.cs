@@ -62,7 +62,7 @@ public class UserInterfaceManager : MonoBehaviour
 
     public void SetMagNum(CharacterController charCtr)
     {
-        if (charCtr.ownerType != CharacterOwner.Player) return;
+        if (charCtr.ownerType != CharacterOwner.Player || charCtr.weapons.Count == 0) return;
 
         var weapon = charCtr.currentWeapon;
         var loadedAmmo = weapon.loadedAmmo;

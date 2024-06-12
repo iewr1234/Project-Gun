@@ -102,6 +102,7 @@ public class InventoryManager : MonoBehaviour
         invenUI.gameObject.SetActive(false);
 
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0002", 1, otherStorage.itemSlots);
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
@@ -354,12 +355,7 @@ public class InventoryManager : MonoBehaviour
                         itemSlot.SetSlotColor(Color.white);
                     }
                     item.itemSlots = new List<ItemSlot>(itemSlots);
-
-                    if (item.equipSlot != null)
-                    {
-                        UnequipItem(item);
-                        item.equipSlot = null;
-                    }
+                    UnequipItem(item);
 
                     for (int i = 0; i < itemSlots.Count; i++)
                     {
@@ -493,7 +489,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (equipSlot.CheckEquip(item))
         {
-            var itemSlots = item.itemSlots;
+            var itemSlots = new List<ItemSlot>(item.itemSlots);
             equipSlot.item = item;
             equipSlot.slotText.enabled = false;
 
@@ -508,26 +504,78 @@ public class InventoryManager : MonoBehaviour
             item.itemSlots.Clear();
 
             item.ChangeRectPivot(true);
+            item.SetItemRotation(false);
             item.transform.SetParent(equipSlot.transform, false);
             item.transform.localPosition = Vector3.zero;
             item.targetImage.raycastTarget = true;
+            item.SetItemScale(true);
 
             switch (item.itemData.type)
             {
+                case ItemType.MainWeapon:
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        playerCtr.AddWeapon(item.weaponData);
+                    }
+                    break;
+                case ItemType.SubWeapon:
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        playerCtr.AddWeapon(item.weaponData);
+                    }
+                    break;
                 case ItemType.Bullet:
-                    var count = item.TotalCount - 1;
-                    SetItemInStorage(item.itemData, count, itemSlots);
+                    if (item.TotalCount > 1)
+                    {
+                        var count = item.TotalCount - 1;
+                        SetItemInStorage(item.itemData, count, itemSlots);
+                        item.SetTotalCount(1);
+                    }
                     equipSlot.countText.enabled = false;
+                    popUp.item.weaponData.chamberBullet = item.bulletData;
                     break;
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
                     equipSlot.countText.text = $"{item.TotalCount}";
+                    popUp.item.weaponData.equipMag = item.magData;
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                        if (weapon != null)
+                        {
+                            weapon.SetParts(item.magData.ID, true);
+                        }
+                    }
                     break;
                 default:
                     equipSlot.countText.enabled = false;
+                    if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
+                    {
+                        if (popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
+                        {
+                            popUp.item.weaponData.equipPartsList.Add(item.partsData);
+                        }
+                        if (gameMgr != null && gameMgr.playerList.Count > 0)
+                        {
+                            var playerCtr = gameMgr.playerList[0];
+                            var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                            if (weapon != null)
+                            {
+                                weapon.SetParts(item.partsData.ID, true);
+                            }
+                        }
+                    }
                     break;
             }
-            ApplyItem();
+
+            if (popUp.item != null)
+            {
+                popUp.item.SetPartsSample();
+                popUp.SetPartsSample();
+            }
         }
         else if (item.equipSlot != null)
         {
@@ -553,50 +601,57 @@ public class InventoryManager : MonoBehaviour
         onEquip = null;
         holdingItem = null;
         InactiveSampleItem();
-
-        void ApplyItem()
-        {
-            item.SetItemScale(true);
-            if (item.bulletData != null
-             && popUp.item.weaponData.chamberBullet != item.bulletData)
-            {
-                popUp.item.weaponData.chamberBullet = item.bulletData;
-            }
-            else if (item.magData != null
-                  && popUp.item.weaponData.equipMag != item.magData)
-            {
-                popUp.item.weaponData.equipMag = item.magData;
-            }
-            else if (item.partsData != null
-                  && popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
-            {
-                popUp.item.weaponData.equipPartsList.Add(item.partsData);
-            }
-
-            if (popUp.item != null)
-            {
-                popUp.item.SetPartsSample();
-                popUp.SetPartsSample();
-            }
-        }
     }
 
     public void UnequipItem(ItemHandler item)
     {
-        if (item.magData != null)
+        if (item.equipSlot == null) return;
+
+        switch (item.itemData.type)
         {
-            popUp.item.weaponData.equipMag = null;
-        }
-        else if (item.partsData != null)
-        {
-            var find = popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
-            popUp.item.weaponData.equipPartsList.Remove(find);
+            case ItemType.Magazine:
+                popUp.item.weaponData.equipMag = null;
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var playerCtr = gameMgr.playerList[0];
+                    var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                    if (weapon != null)
+                    {
+                        weapon.SetParts(item.magData.ID, false);
+                    }
+                }
+                break;
+            default:
+                if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
+                {
+                    var find = popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
+                    popUp.item.weaponData.equipPartsList.Remove(find);
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                        if (weapon != null)
+                        {
+                            weapon.SetParts(item.partsData.ID, true);
+                        }
+                    }
+                }
+                break;
         }
 
         if (popUp.item != null)
         {
             popUp.item.SetPartsSample();
             popUp.SetPartsSample();
+        }
+        item.equipSlot.item = null;
+        item.equipSlot = null;
+
+        if (gameMgr != null && gameMgr.playerList.Count > 0
+         && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+        {
+            var playerCtr = gameMgr.playerList[0];
+            playerCtr.RemoveWeapon(item.weaponData.weaponName);
         }
     }
 

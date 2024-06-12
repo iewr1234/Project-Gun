@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public enum FireModeType
 {
@@ -17,9 +16,9 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
-    [SerializeField] private Transform bulletTf;
+    [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
 
-    [HideInInspector] public List<GameObject> partsObjects = new List<GameObject>();
+    private Transform bulletTf;
 
     [Header("--- Assignment Variable---")]
     public WeaponDataInfo weaponData;
@@ -73,16 +72,16 @@ public class Weapon : MonoBehaviour
             var parts = new List<GameObject>();
             var partsTf = transform.Find("PartsTransform");
 
-            var scopeTf = partsTf.Find("Scope");
-            for (int i = 0; i < scopeTf.childCount; i++)
+            var magTf = partsTf.Find("Magazine");
+            for (int i = 0; i < magTf.childCount; i++)
             {
-                var sample = scopeTf.GetChild(i).gameObject;
+                var sample = magTf.GetChild(i).gameObject;
                 sample.SetActive(false);
                 parts.Add(sample);
             }
 
-            var magTf = partsTf.Find("Magazine");
-            for (int i = 0; i < magTf.childCount; i++)
+            var scopeTf = partsTf.Find("Scope");
+            for (int i = 0; i < scopeTf.childCount; i++)
             {
                 var sample = scopeTf.GetChild(i).gameObject;
                 sample.SetActive(false);
@@ -120,6 +119,7 @@ public class Weapon : MonoBehaviour
                     break;
             }
         }
+        gameObject.SetActive(true);
     }
 
     public void SetComponets()
@@ -137,6 +137,15 @@ public class Weapon : MonoBehaviour
         partsObjects = parts;
     }
 
+    public void Initialize()
+    {
+        charCtr.weapons.Remove(this);
+        charCtr = null;
+
+        weaponData = null;
+        gameObject.SetActive(false);
+    }
+
     public void EquipWeapon()
     {
         switch (weaponData.type)
@@ -151,6 +160,15 @@ public class Weapon : MonoBehaviour
                 break;
         }
         charCtr.SetRig(weaponData.type);
+    }
+
+    public void SetParts(string partsID, bool value)
+    {
+        var parts = partsObjects.Find(x => x.name == partsID);
+        if (parts != null)
+        {
+            parts.gameObject.SetActive(value);
+        }
     }
 
     public void WeaponSwitching(string switchPos)

@@ -132,17 +132,47 @@ public class GameManager : MonoBehaviour
         charCtr.SetComponents(this, ownerType, charData, node);
 
         // Set Weapons
-        var weaponIDs = new string[3] { charData.mainWeapon1_ID, charData.mainWeapon2_ID, charData.subWeapon_ID };
-        for (int i = 0; i < weaponIDs.Length; i++)
+        switch (charCtr.ownerType)
         {
-            var weaponID = weaponIDs[i];
-            var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponID);
-            if (weaponData != null)
-            {
-                var weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/{weaponData.prefabName}"));
-                weapon.SetComponets(charCtr, weaponData);
-            }
+            case CharacterOwner.Player:
+                var mainWeapons = invenMgr.allEquips.FindAll(x => x.type == EquipType.MainWeapon && x.item != null);
+                for (int i = 0; i < mainWeapons.Count; i++)
+                {
+                    var weaponData = mainWeapons[i].item.weaponData;
+                    if (weaponData.type == WeaponType.None) continue;
+
+                    var weapon = charCtr.GetWeapon(weaponData.weaponName);
+                    weapon.SetComponets(charCtr, weaponData);
+                }
+                break;
+            case CharacterOwner.Enemy:
+                var weaponIDs = new string[3] { charData.mainWeapon1_ID, charData.mainWeapon2_ID, charData.subWeapon_ID };
+                for (int i = 0; i < weaponIDs.Length; i++)
+                {
+                    var weaponID = weaponIDs[i];
+                    var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponID);
+                    if (weaponData != null)
+                    {
+                        Weapon weapon = null;
+                        switch (weaponData.type)
+                        {
+                            case WeaponType.Pistol:
+                                weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Pistol/{weaponData.prefabName}"));
+                                break;
+                            case WeaponType.Rifle:
+                                weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Rifle/{weaponData.prefabName}"));
+                                break;
+                            default:
+                                break;
+                        }
+                        weapon.SetComponets(charCtr, weaponData);
+                    }
+                }
+                break;
+            default:
+                break;
         }
+
         for (int i = 0; i < charCtr.weapons.Count; i++)
         {
             var weapon = charCtr.weapons[i];
@@ -644,10 +674,14 @@ public class GameManager : MonoBehaviour
         }
         charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
 
-        var remainingShootCost = action - charCtr.currentWeapon.weaponData.actionCost;
-        if (remainingShootCost > 0)
+        int remainingShootCost = 0;
+        if (charCtr.currentWeapon != null)
         {
-            charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
+            remainingShootCost = action - charCtr.currentWeapon.weaponData.actionCost;
+            if (remainingShootCost > 0)
+            {
+                charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
+            }
         }
 
         int moveRange = 0;

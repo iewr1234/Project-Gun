@@ -54,7 +54,7 @@ public class EquipSlot : MonoBehaviour
 
     public bool CheckEquip(ItemHandler item)
     {
-        if (item == null) return false;
+        if (item == null || item.itemData == null) return false;
 
         switch (type)
         {
@@ -71,16 +71,16 @@ public class EquipSlot : MonoBehaviour
             case EquipType.SubWeapon:
                 return item.itemData.type == ItemType.SubWeapon;
             case EquipType.Chamber:
-                return item.bulletData != null
-                    && item.itemData.type == ItemType.Bullet;
+                return item.itemData.type == ItemType.Bullet
+                    && item.bulletData != null;
             case EquipType.Magazine:
-                return item.magData != null
-                    && item.magData.compatModel.Contains(model)
-                    && item.itemData.type == ItemType.Magazine;
+                return item.itemData.type == ItemType.Magazine
+                    && item.magData != null
+                    && item.magData.compatModel.Contains(model);
             case EquipType.Sight:
-                return item.partsData != null
-                    && item.partsData.compatModel.Contains(model)
-                    && item.itemData.type == ItemType.Sight;
+                return item.itemData.type == ItemType.Sight
+                    && item.partsData != null
+                    && item.partsData.compatModel.Contains(model);
             default:
                 return false;
         }
@@ -89,14 +89,14 @@ public class EquipSlot : MonoBehaviour
     public bool CheckEquip(BulletDataInfo bulletData)
     {
         return type == EquipType.Chamber
-            && bulletData.ID != string.Empty;
+                    && bulletData.ID != string.Empty;
     }
 
     public bool CheckEquip(MagazineDataInfo magData)
     {
         return type == EquipType.Magazine
-            && magData != null
-            && magData.compatModel.Contains(model);
+                    && magData != null
+                    && magData.compatModel.Contains(model);
     }
 
     public bool CheckEquip(WeaponPartsDataInfo partsData)
@@ -105,8 +105,8 @@ public class EquipSlot : MonoBehaviour
         {
             case EquipType.Sight:
                 return partsData != null
-                    && partsData.compatModel.Contains(model)
-                    && partsData.type == WeaponPartsType.Sight;
+                    && partsData.type == WeaponPartsType.Sight
+                    && partsData.compatModel.Contains(model);
             default:
                 return false;
         }

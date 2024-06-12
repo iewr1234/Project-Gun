@@ -60,6 +60,9 @@ MonoBehaviour:
   armorGauge: {fileID: 0}
   healthGauge: {fileID: 0}
   staminaGauge: {fileID: 0}
+  armorText: {fileID: 0}
+  healthText: {fileID: 0}
+  staminaText: {fileID: 0}
   uiPos: {x: 0, y: 2, z: 0}
 --- !u!223 &6273362393030322055
 Canvas:
@@ -104,7 +107,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &2028876722286442876
 MonoBehaviour:
   m_ObjectHideFlags: 0
