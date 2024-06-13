@@ -29,9 +29,9 @@ public class Weapon : MonoBehaviour
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
-    [Tooltip("탄창용량")] public int magMax;
-    [Tooltip("장전된 탄환 수")] public int loadedAmmo;
-    [Tooltip("약실 내 탄환 존재 여부")] public bool chamberBullet;
+    //[Tooltip("탄창용량")] public int magMax;
+    //[Tooltip("장전된 탄환 수")] public int loadedAmmo;
+    //[Tooltip("약실 내 탄환")] public BulletDataInfo chamberBullet = null;
 
     private List<WeaponPartsDataInfo> partsList = new List<WeaponPartsDataInfo>();
     [SerializeField] private List<bool> hitList = new List<bool>();
@@ -64,7 +64,7 @@ public class Weapon : MonoBehaviour
         weaponData = _weaponData;
         SetWeaponPositionAndRotation();
 
-        magMax = 30;
+        //magMax = 30;
         Reload();
 
         void AddWeaponPartsObjects()
@@ -202,34 +202,13 @@ public class Weapon : MonoBehaviour
 
     public void Reload()
     {
-        var ammoNum = magMax;
-        if (!chamberBullet)
-        {
-            ammoNum--;
-            chamberBullet = true;
-        }
-        loadedAmmo = ammoNum;
-    }
-
-    public int GetShootBulletNumber()
-    {
-        var shootNum = 0;
-        if (chamberBullet)
-        {
-            switch (fireMode)
-            {
-                case FireModeType.SingleFire:
-                    shootNum = 1;
-                    break;
-                case FireModeType.AutoFire:
-                    shootNum = autoFireNum > loadedAmmo + 1 ? loadedAmmo + 1 : autoFireNum;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return shootNum;
+        //var ammoNum = magMax;
+        //if (!chamberBullet)
+        //{
+        //    ammoNum--;
+        //    chamberBullet = true;
+        //}
+        //loadedAmmo = ammoNum;
     }
 
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
@@ -261,6 +240,19 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
+        if (weaponData.chamberBullet == null || weaponData.chamberBullet.level == 0)
+        {
+            if (weaponData.equipMag.loadedBullets.Count == 0)
+            {
+                Debug.Log($"{charCtr.name}: Magazine empty");
+                return;
+            }
+
+            var bulletData = weaponData.equipMag.loadedBullets[0];
+            weaponData.chamberBullet = bulletData;
+            weaponData.equipMag.loadedBullets.RemoveAt(0);
+        }
+
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
         {
@@ -278,15 +270,18 @@ public class Weapon : MonoBehaviour
         bullet.transform.LookAt(aimPos);
 
         var isHit = hitList[0];
-        bullet.SetComponents(this, target, isHit);
+        bullet.SetComponents(weaponData.chamberBullet, target, isHit);
         hitList.RemoveAt(0);
-        if (loadedAmmo > 0)
+      
+        if (weaponData.equipMag.loadedBullets.Count > 0)
         {
-            loadedAmmo--;
+            var bulletData = weaponData.equipMag.loadedBullets[0];
+            weaponData.chamberBullet = bulletData;
+            weaponData.equipMag.loadedBullets.RemoveAt(0);
         }
         else
         {
-            chamberBullet = false;
+            weaponData.chamberBullet = null;
         }
     }
 

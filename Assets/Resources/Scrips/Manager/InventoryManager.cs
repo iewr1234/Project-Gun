@@ -279,7 +279,6 @@ public class InventoryManager : MonoBehaviour
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
         equipSlot.countText.enabled = true;
-        equipSlot.countText.text = $"{item.TotalCount}";
 
         item.countText.enabled = false;
         item.equipSlot = equipSlot;
@@ -317,9 +316,10 @@ public class InventoryManager : MonoBehaviour
         {
             var insertBullets = onSlot != null && onSlot.item != null
                              && onSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet
+                             && onSlot.item.magData.compatCaliber == item.bulletData.caliber
                              && onSlot.item.magData.loadedBullets.Count < onSlot.item.magData.magSize;
             var itemNesting = onSlot != null && onSlot.item != null && onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
-                            && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
+                           && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
             if (insertBullets || itemNesting)
             {
                 ItemNesting();
@@ -609,6 +609,18 @@ public class InventoryManager : MonoBehaviour
 
         switch (item.itemData.type)
         {
+            case ItemType.Bullet:
+                popUp.item.weaponData.chamberBullet = null;
+                //if (gameMgr != null && gameMgr.playerList.Count > 0)
+                //{
+                //    var playerCtr = gameMgr.playerList[0];
+                //    var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                //    if (weapon != null)
+                //    {
+                //        weapon.weaponData.chamberBullet = null;
+                //    }
+                //}
+                break;
             case ItemType.Magazine:
                 popUp.item.weaponData.equipMag = null;
                 if (gameMgr != null && gameMgr.playerList.Count > 0)

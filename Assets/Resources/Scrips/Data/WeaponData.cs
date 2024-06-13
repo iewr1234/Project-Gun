@@ -21,11 +21,8 @@ public class WeaponDataInfo
     [Space(5f)]
 
     [Tooltip("모델")] public int model;
+    [Tooltip("구경")] public float caliber;
     [Tooltip("무기분류")] public WeaponType type;
-    [Tooltip("피해량")] public int damage;
-    [Tooltip("관통")] public int penetrate;
-    [Tooltip("방어구 손상")] public int armorBreak;
-    [Tooltip("파편화")] public int critical;
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
@@ -57,11 +54,8 @@ public class WeaponDataInfo
             weaponName = weaponName,
 
             model = model,
+            caliber = caliber,
             type = type,
-            damage = damage,
-            penetrate = penetrate,
-            armorBreak = armorBreak,
-            critical = critical,
             RPM = RPM,
             range = range,
             watchAngle = watchAngle,

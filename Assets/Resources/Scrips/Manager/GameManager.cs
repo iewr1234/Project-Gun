@@ -319,7 +319,9 @@ public class GameManager : MonoBehaviour
             case GameState.Move:
                 if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    if (!selectChar.currentWeapon.chamberBullet)
+                    var weapon = selectChar.currentWeapon;
+                    if ((weapon.weaponData.equipMag == null || weapon.weaponData.equipMag.loadedBullets.Count == 0)
+                     && (weapon.weaponData.chamberBullet == null || weapon.weaponData.chamberBullet.level == 0))
                     {
                         Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
                         return;
@@ -340,7 +342,8 @@ public class GameManager : MonoBehaviour
                         gameState = GameState.Shot;
                     }
                 }
-                else if (Input.GetKeyDown(KeyCode.R) && selectChar.currentWeapon.loadedAmmo < selectChar.currentWeapon.magMax)
+                else if (Input.GetKeyDown(KeyCode.R)
+                      && selectChar.currentWeapon.weaponData.equipMag.loadedBullets.Count < selectChar.currentWeapon.weaponData.equipMag.magSize)
                 {
                     ClearLine();
                     selectChar.AddCommand(CommandType.Reload);
@@ -384,7 +387,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Q))
                 {
-                    uiMgr.SetfireRateGauge(selectChar);
+                    uiMgr.SetFireRateGauge(selectChar);
                 }
                 else if (Input.GetKeyDown(KeyCode.E))
                 {
@@ -400,8 +403,8 @@ public class GameManager : MonoBehaviour
                         return;
                     }
                     var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (selectChar.fireRateNum + 1));
-                    var loadedAmmo = weapon.loadedAmmo;
-                    if (weapon.chamberBullet) loadedAmmo++;
+                    var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
+                    if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
 
                     if (shootNum > loadedAmmo)
                     {
@@ -428,7 +431,7 @@ public class GameManager : MonoBehaviour
                     camMgr.SetCameraState(CameraState.None);
                     uiMgr.SetActionPoint_Bottom(selectChar);
                     uiMgr.SetActiveAimUI(selectChar, false);
-                    uiMgr.SetMagNum(selectChar, weapon.loadedAmmo - shootNum);
+                    uiMgr.SetMagNum(selectChar, weapon.weaponData.equipMag.loadedBullets.Count - shootNum);
                     selectChar = null;
                     gameState = GameState.None;
                 }
@@ -463,6 +466,11 @@ public class GameManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            Debug.Log($"{playerList[0].currentWeapon.weaponData.chamberBullet.ID}");
         }
 
         void SwitchCharacterUI(bool value)

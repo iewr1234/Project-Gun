@@ -65,11 +65,11 @@ public class UserInterfaceManager : MonoBehaviour
         if (charCtr.ownerType != CharacterOwner.Player || charCtr.weapons.Count == 0) return;
 
         var weapon = charCtr.currentWeapon;
-        var loadedAmmo = weapon.loadedAmmo;
-        if (weapon.chamberBullet) loadedAmmo++;
+        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
+        if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
 
         magNumText.enabled = true;
-        magNumText.text = $"{loadedAmmo}/{weapon.magMax}";
+        magNumText.text = $"{loadedAmmo}/{weapon.weaponData.equipMag.magSize}";
     }
 
     public void SetMagNum(CharacterController charCtr, int loadedAmmo)
@@ -78,14 +78,18 @@ public class UserInterfaceManager : MonoBehaviour
 
         var weapon = charCtr.currentWeapon;
         magNumText.enabled = true;
-        magNumText.text = $"{loadedAmmo}/{weapon.magMax}";
+        magNumText.text = $"{loadedAmmo}/{weapon.weaponData.equipMag.magSize}";
     }
 
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
         var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fireRateNum + 1));
-        var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
+
+        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
+        if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
+
+        //var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
         if (shootNum > loadedAmmo)
         {
             shootNumText.color = Color.red;
@@ -164,7 +168,7 @@ public class UserInterfaceManager : MonoBehaviour
         actionPointText.text = $"<size=36>{totalCost}</size><color=#D2D2D2>/{charCtr.maxAction} AP</color>";
     }
 
-    public void SetfireRateGauge(CharacterController charCtr)
+    public void SetFireRateGauge(CharacterController charCtr)
     {
         charCtr.fireRateNum++;
         if (charCtr.fireRateNum > aimUIGaugeMax)

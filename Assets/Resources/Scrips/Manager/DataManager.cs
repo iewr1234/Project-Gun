@@ -385,18 +385,15 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:U";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:R";
     private enum WeaponVariable
     {
         ID,
         PrefabName,
         WeaponName,
         Model,
+        Caliber,
         WeaponType,
-        Damage,
-        Penetrate,
-        ArmorBreak,
-        Critical,
         RPM,
         Range,
         WatchAngle,
@@ -441,11 +438,8 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)WeaponVariable.PrefabName],
                     weaponName = data[(int)WeaponVariable.WeaponName],
                     model = int.Parse(data[(int)WeaponVariable.Model]),
+                    caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
-                    damage = int.Parse(data[(int)WeaponVariable.Damage]),
-                    penetrate = int.Parse(data[(int)WeaponVariable.Penetrate]),
-                    armorBreak = int.Parse(data[(int)WeaponVariable.ArmorBreak]),
-                    critical = int.Parse(data[(int)WeaponVariable.Critical]),
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
@@ -614,8 +608,8 @@ public class DataManager : MonoBehaviour
         ID,
         BulletName,
         Level,
-        Propellant,
         Caliber,
+        Propellant,
         Damage,
         Penetrate,
         ArmorBreak,
@@ -651,8 +645,8 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)BulletVariable.ID],
                     bulletName = data[(int)BulletVariable.BulletName],
                     level = int.Parse(data[(int)BulletVariable.Level]),
-                    propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
+                    propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     damage = int.Parse(data[(int)BulletVariable.Damage]),
                     penetrate = int.Parse(data[(int)BulletVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)BulletVariable.ArmorBreak]),

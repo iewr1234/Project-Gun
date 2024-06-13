@@ -6,7 +6,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [Header("---Access Script---")]
-    [SerializeField] private Weapon weapon;
+    //[SerializeField] private Weapon weapon;
     private CharacterController target;
 
     [Header("---Access Component---")]
@@ -16,6 +16,7 @@ public class Bullet : MonoBehaviour
     private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
+    [SerializeField] private BulletDataInfo bulletData;
     [SerializeField] private float speed = 30f;
 
     [SerializeField] private LayerMask targetLayer;
@@ -26,9 +27,9 @@ public class Bullet : MonoBehaviour
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
-    public void SetComponents(Weapon _weapon, CharacterController _target, bool _isHit)
+    public void SetComponents(BulletDataInfo _bulletData, CharacterController _target, bool _isHit)
     {
-        weapon = _weapon;
+        bulletData = _bulletData.CopyData();
         target = _target;
 
         if (trail == null)
@@ -86,7 +87,7 @@ public class Bullet : MonoBehaviour
             var charCtr = hit.collider.GetComponentInParent<CharacterController>();
             if (charCtr != null && charCtr == target && isHit)
             {
-                charCtr.OnHit(transform.forward, weapon);
+                charCtr.OnHit(transform.forward, bulletData);
                 isHit = false;
                 Debug.Log($"{charCtr.name}: Hit");
             }

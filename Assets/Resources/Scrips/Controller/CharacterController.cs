@@ -2118,7 +2118,7 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Shoot:
-                if (!currentWeapon.chamberBullet) return;
+                if (currentWeapon.weaponData.chamberBullet == null || currentWeapon.weaponData.chamberBullet.level == 0) return;
 
                 target.animator.speed = 0f;
                 target.pause = true;
@@ -2132,7 +2132,7 @@ public class CharacterController : MonoBehaviour
                     targetCover = null,
                     isRight = watchInfo.isRight,
                 };
-                animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
+                //animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                 SetAiming(targetInfo);
 
                 var shootCommand = new CharacterCommand
@@ -2188,7 +2188,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, Weapon _weapon)
+    public void OnHit(Vector3 dir, BulletDataInfo _bulletData)
     {
         if (state == CharacterState.Dead) return;
 
@@ -2203,10 +2203,10 @@ public class CharacterController : MonoBehaviour
                 armor.bulletproof = 0f;
             }
 
-            var penetrateRate = _weapon.weaponData.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _weapon.weaponData.penetrate)) * 100f) : 95;
+            var penetrateRate = _bulletData.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _bulletData.penetrate)) * 100f) : 95;
             isPenetrate = value < penetrateRate;
 
-            var armorDamage = (int)Mathf.Floor(_weapon.weaponData.damage * (_weapon.weaponData.armorBreak / 100f));
+            var armorDamage = (int)Mathf.Floor(_bulletData.damage * (_bulletData.armorBreak / 100f));
             SetArmor(-armorDamage);
             bulletproof = armor.bulletproof;
         }
@@ -2216,7 +2216,7 @@ public class CharacterController : MonoBehaviour
             bulletproof = 0f;
         }
 
-        var damage = (int)Mathf.Floor(_weapon.weaponData.damage * (_weapon.weaponData.penetrate / (_weapon.weaponData.penetrate + bulletproof)));
+        var damage = (int)Mathf.Floor(_bulletData.damage * (_bulletData.penetrate / (_bulletData.penetrate + bulletproof)));
         if (isPenetrate)
         {
             SetHealth(-damage);
@@ -2230,7 +2230,7 @@ public class CharacterController : MonoBehaviour
         {
             CharacterDead();
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && _weapon.CharCtr.state != CharacterState.Watch)
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && !animator.GetBool("isMove"))
         {
             animator.SetTrigger("isHit");
         }

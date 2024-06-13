@@ -297,6 +297,7 @@ public class PopUp_Inventory : MonoBehaviour
             {
                 var equipSlot = itemInfo.equipSlots[i];
                 equipSlot.model = item.weaponData.model;
+                equipSlot.caliber = item.weaponData.caliber;
                 switch (type[i])
                 {
                     case EquipType.Chamber:
@@ -470,6 +471,7 @@ public class PopUp_Inventory : MonoBehaviour
                         {
                             invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
                         }
+                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
 
                         var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.ID);
                         for (int j = 0; j < smaples.Count; j++)

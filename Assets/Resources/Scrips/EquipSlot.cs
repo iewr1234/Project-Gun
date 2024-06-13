@@ -36,6 +36,7 @@ public class EquipSlot : MonoBehaviour
     public EquipType type;
     public List<WeaponPartsSize> sizeList;
     public int model;
+    public float caliber;
     public ItemHandler item;
 
     public void SetComponents(InventoryManager _invenMgr)
@@ -89,7 +90,8 @@ public class EquipSlot : MonoBehaviour
     public bool CheckEquip(BulletDataInfo bulletData)
     {
         return type == EquipType.Chamber
-                    && bulletData.ID != string.Empty;
+                    && bulletData != null
+                    && bulletData.caliber == caliber;
     }
 
     public bool CheckEquip(MagazineDataInfo magData)
