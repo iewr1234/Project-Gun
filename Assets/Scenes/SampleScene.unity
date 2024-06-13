@@ -1445,7 +1445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.50980395, g: 0.50980395, b: 0.50980395, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -35848,6 +35848,7 @@ GameObject:
   - component: {fileID: 1667366613}
   - component: {fileID: 1667366615}
   - component: {fileID: 1667366614}
+  - component: {fileID: 1667366616}
   m_Layer: 5
   m_Name: Top
   m_TagString: Untagged
@@ -35893,7 +35894,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -35917,6 +35918,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1667366612}
   m_CullTransparentMesh: 1
+--- !u!114 &1667366616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667366612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 13
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2111169816}
+          m_TargetAssemblyTypeName: PopUp_Inventory, Assembly-CSharp
+          m_MethodName: BeginDrag_PopUp
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 5
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2111169816}
+          m_TargetAssemblyTypeName: PopUp_Inventory, Assembly-CSharp
+          m_MethodName: OnDrag_PopUp
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1667665069
 GameObject:
   m_ObjectHideFlags: 0
@@ -45768,7 +45814,7 @@ MonoBehaviour:
     activeSample: {fileID: 0}
   state: 0
   item: {fileID: 0}
-  itemSlot: {fileID: 0}
+  itemSlots: []
 --- !u!224 &2111870984 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9176758475737121650, guid: 42f8faae9c959a74eb5549f9332baf24, type: 3}

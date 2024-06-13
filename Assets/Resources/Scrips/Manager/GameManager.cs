@@ -343,6 +343,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 else if (Input.GetKeyDown(KeyCode.R)
+                      && selectChar.currentWeapon != null
                       && selectChar.currentWeapon.weaponData.equipMag.loadedBullets.Count < selectChar.currentWeapon.weaponData.equipMag.magSize)
                 {
                     ClearLine();

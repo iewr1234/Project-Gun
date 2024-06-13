@@ -51,6 +51,8 @@ public class PopUp_Inventory : MonoBehaviour
     public ItemHandler item;
     public List<ItemSlot> itemSlots;
 
+    private Vector3 offset;
+
     private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, -50);
     private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, -50);
 
@@ -129,6 +131,14 @@ public class PopUp_Inventory : MonoBehaviour
             }
             itemInfo.samples = samples;
             itemInfo.partsSamples = partsSamples;
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Button_PopUp_Close();
         }
     }
 
@@ -527,4 +537,50 @@ public class PopUp_Inventory : MonoBehaviour
         }
     }
     #endregion
+
+    private void FollowMouse()
+    {
+        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
+        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, invenMgr.GetCanvasDistance()));
+        transform.position = worldPos;
+
+        var pos = transform.localPosition;
+        if (split.uiObject.activeSelf && pos.y < -260f)
+        {
+            pos.y = -260f;
+        }
+        else if (itemInfo.uiObject.activeSelf && pos.y < -20f)
+        {
+            pos.y = -20f;
+        }
+        else if (pos.y > 440f)
+        {
+            pos.y = 440f;
+        }
+
+        if (pos.x > 635f)
+        {
+            pos.x = 635f;
+        }
+        else if (pos.x < -635f)
+        {
+            pos.x = -635f;
+        }
+
+        pos.z = -50f;
+        transform.localPosition = pos;
+    }
+
+    public void BeginDrag_PopUp()
+    {
+        Debug.Log("BeginDrag");
+        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
+        offset = mousePos - transform.position;
+        FollowMouse();
+    }
+
+    public void OnDrag_PopUp()
+    {
+        FollowMouse();
+    }
 }
