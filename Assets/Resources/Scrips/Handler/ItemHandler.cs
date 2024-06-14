@@ -18,6 +18,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     [Header("---Access Component---")]
     public RectTransform rect;
+    [HideInInspector] public Image frameImage;
     [HideInInspector] public Image targetImage;
     [HideInInspector] public TextMeshProUGUI countText;
 
@@ -115,10 +116,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             SetTotalCount(count);
         }
 
-        if (activeSample != null)
-        {
-            activeSample.SetActive(false);
-        }
         activeSample = samples.Find(x => x.name == itemData.dataID);
         if (activeSample == null)
         {
@@ -126,6 +123,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         activeSample.SetActive(true);
         gameObject.SetActive(true);
+
+        if (!invenMgr.activeItem.Contains(this))
+        {
+            invenMgr.activeItem.Add(this);
+        }
     }
 
     public void SetSampleItemInfo(ItemDataInfo _itemData, bool rotation)

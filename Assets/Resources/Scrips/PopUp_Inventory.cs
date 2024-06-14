@@ -156,6 +156,13 @@ public class PopUp_Inventory : MonoBehaviour
                 itemSlots.Clear();
                 break;
             case PopUpState.ItemInformation:
+                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+                {
+                    var equipSlot = itemInfo.equipSlots[i];
+                    if (equipSlot.item == null) continue;
+
+                    invenMgr.InActiveItem(equipSlot.item);
+                }
                 invenMgr.selectItem = null;
                 item = null;
                 break;
@@ -573,7 +580,6 @@ public class PopUp_Inventory : MonoBehaviour
 
     public void BeginDrag_PopUp()
     {
-        Debug.Log("BeginDrag");
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
         offset = mousePos - transform.position;
         FollowMouse();

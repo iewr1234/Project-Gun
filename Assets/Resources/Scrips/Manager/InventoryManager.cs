@@ -38,10 +38,16 @@ public class InventoryManager : MonoBehaviour
     public ItemHandler holdingItem;
     public ItemHandler selectItem;
 
+    private bool click;
+    private float clickTime;
+
     private List<ItemHandler> items = new List<ItemHandler>();
     private readonly int itemPoolMax = 100;
 
-    [SerializeField] private bool itemSplit;
+    [Space(5f)]
+    public List<ItemHandler> activeItem = new List<ItemHandler>();
+
+    private bool itemSplit;
 
     private void Awake()
     {
@@ -125,6 +131,7 @@ public class InventoryManager : MonoBehaviour
     private void Update()
     {
         KeyboardInput();
+        MouseInput();
         StorageScrollView();
     }
 
@@ -200,6 +207,39 @@ public class InventoryManager : MonoBehaviour
                 onSlots.Clear();
             }
             onSlot.PointerEnter_ItemSlot();
+        }
+    }
+
+    private void MouseInput()
+    {
+        if (!invenUI.gameObject.activeSelf) return;
+
+        DoubleClick();
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!click)
+            {
+                click = true;
+                clickTime = 0f;
+            }
+            else if (onSlot != null && onSlot.item != null)
+            {
+                selectItem = onSlot.item;
+                popUp.PopUp_ItemInformation();
+            }
+        }
+
+
+        void DoubleClick()
+        {
+            if (!click) return;
+
+            clickTime += Time.deltaTime;
+            if (clickTime > 0.2f)
+            {
+                click = false;
+                clickTime = 0f;
+            }
         }
     }
 
@@ -702,7 +742,14 @@ public class InventoryManager : MonoBehaviour
             item.itemSlots.Clear();
         }
         item.transform.SetParent(itemPool, false);
+
+        if (item.activeSample != null)
+        {
+            item.activeSample.SetActive(false);
+            item.activeSample = null;
+        }
         item.gameObject.SetActive(false);
+        activeItem.Remove(item);
     }
 
     public void InactiveSampleItem()
