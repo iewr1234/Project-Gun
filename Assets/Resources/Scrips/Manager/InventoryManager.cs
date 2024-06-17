@@ -193,15 +193,15 @@ public class InventoryManager : MonoBehaviour
                     var onSlot = onSlots[i];
                     if (onSlot.item != null && onSlot.item != holdingItem)
                     {
-                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        onSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
                     else if (onSlot.item != null && onSlot.item == holdingItem)
                     {
-                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        onSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
                     else
                     {
-                        onSlot.SetSlotColor(Color.white);
+                        onSlot.SetItemSlot(DataUtility.slot_noItemColor);
                     }
                 }
                 onSlots.Clear();
@@ -224,11 +224,14 @@ public class InventoryManager : MonoBehaviour
             }
             else if (onSlot != null && onSlot.item != null)
             {
+                if (popUp.gameObject.activeSelf)
+                {
+                    popUp.Button_PopUp_Close();
+                }
                 selectItem = onSlot.item;
                 popUp.PopUp_ItemInformation();
             }
         }
-
 
         void DoubleClick()
         {
@@ -266,6 +269,28 @@ public class InventoryManager : MonoBehaviour
         {
             var equipSlot = findEquips[i];
             equipSlot.outline.enabled = true;
+        }
+
+        var items = new List<ItemHandler>();
+        switch (item.itemData.type)
+        {
+            case ItemType.Bullet:
+                items = activeItem.FindAll(x => x.equipSlot == null
+                                             && x.itemData.type == ItemType.Magazine
+                                             && x.magData.loadedBullets.Count < x.magData.magSize
+                                             && x.magData.compatCaliber == item.bulletData.caliber);
+                break;
+            case ItemType.Magazine:
+                items = activeItem.FindAll(x => (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
+                                             && !x.weaponData.isMag && item.magData.compatModel.Contains(x.weaponData.model));
+                break;
+            default:
+                break;
+        }
+        for (int i = 0; i < items.Count; i++)
+        {
+            var _item = items[i];
+            _item.frameImage.enabled = true;
         }
     }
 
@@ -315,6 +340,7 @@ public class InventoryManager : MonoBehaviour
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
         item.SetItemInfo(itemData, count);
+        item.magData.loadedBullets = magData.loadedBullets;
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
@@ -345,6 +371,19 @@ public class InventoryManager : MonoBehaviour
         item.transform.localPosition = Vector3.zero;
     }
 
+    public bool CheckEquip(ItemHandler onItem, ItemHandler putItem)
+    {
+        if (onItem == putItem) return false;
+
+        switch (putItem.itemData.type)
+        {
+            case ItemType.Magazine:
+                return false;
+            default:
+                return false;
+        }
+    }
+
     public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
     {
         if (itemSplit && itemSlots.Find(x => x.item != null) == null
@@ -354,15 +393,29 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            var insertBullets = onSlot != null && onSlot.item != null
-                             && onSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet
-                             && onSlot.item.magData.compatCaliber == item.bulletData.caliber
-                             && onSlot.item.magData.loadedBullets.Count < onSlot.item.magData.magSize;
-            var itemNesting = onSlot != null && onSlot.item != null && onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
-                           && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
-            if (insertBullets || itemNesting)
+            if (onSlot != null && onSlot.item != null)
             {
-                ItemNesting();
+                var equipMagazine = onSlot.item != item
+                                 && (onSlot.item.itemData.type == ItemType.MainWeapon || onSlot.item.itemData.type == ItemType.SubWeapon)
+                                 && !onSlot.item.weaponData.isMag && item.itemData.type == ItemType.Magazine;
+                var insertBullets = onSlot.item.equipSlot == null
+                                 && onSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet
+                                 && onSlot.item.magData.compatCaliber == item.bulletData.caliber
+                                 && onSlot.item.magData.loadedBullets.Count < onSlot.item.magData.magSize;
+                var itemNesting = onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
+                               && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
+                if (equipMagazine)
+                {
+                    QuickEquip();
+                }
+                else if (insertBullets || itemNesting)
+                {
+                    ItemNesting();
+                }
+                else
+                {
+                    ItemMove(false);
+                }
             }
             else
             {
@@ -388,12 +441,7 @@ public class InventoryManager : MonoBehaviour
             switch (value)
             {
                 case true:
-                    for (int i = 0; i < item.itemSlots.Count; i++)
-                    {
-                        var itemSlot = item.itemSlots[i];
-                        itemSlot.item = null;
-                        itemSlot.SetSlotColor(Color.white);
-                    }
+                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
                     item.itemSlots = new List<ItemSlot>(itemSlots);
                     UnequipItem(item);
 
@@ -401,7 +449,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         var itemSlot = itemSlots[i];
                         itemSlot.item = item;
-                        itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
                     item.itemSlots = new List<ItemSlot>(itemSlots);
                     item.transform.SetParent(itemSlots[0].transform, false);
@@ -430,13 +478,13 @@ public class InventoryManager : MonoBehaviour
                     for (int i = 0; i < itemSlots.Count; i++)
                     {
                         var itemSlot = itemSlots[i];
-                        if (itemSlot.item != null)
+                        if (itemSlot.item == null)
                         {
-                            itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                            itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
                         }
                         else
                         {
-                            itemSlot.SetSlotColor(Color.white);
+                            itemSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
                         }
                     }
                     break;
@@ -450,11 +498,7 @@ public class InventoryManager : MonoBehaviour
 
         void ItemNesting()
         {
-            for (int i = 0; i < onSlot.item.itemSlots.Count; i++)
-            {
-                var _itemSlot = onSlot.item.itemSlots[i];
-                _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-            }
+            onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
 
             int newTotal;
             int maxValue;
@@ -471,22 +515,14 @@ public class InventoryManager : MonoBehaviour
 
             if (maxValue >= newTotal)
             {
-                for (int i = 0; i < item.itemSlots.Count; i++)
-                {
-                    var _itemSlot = item.itemSlots[i];
-                    _itemSlot.SetSlotColor(Color.white);
-                }
+                item.SetItemSlots(DataUtility.slot_noItemColor);
                 onSlot.item.SetTotalCount(newTotal);
                 InsertBullets(newTotal);
                 InActiveItem(item);
             }
             else
             {
-                for (int i = 0; i < item.itemSlots.Count; i++)
-                {
-                    var _itemSlot = item.itemSlots[i];
-                    _itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-                }
+                item.SetItemSlots(DataUtility.slot_onItemColor);
                 item.transform.SetParent(item.itemSlots[0].transform, false);
                 item.transform.localPosition = Vector3.zero;
                 item.SetTotalCount(newTotal - maxValue);
@@ -506,13 +542,27 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
+        void QuickEquip()
+        {
+            onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
+            item.SetItemSlots(null, DataUtility.slot_noItemColor);
+            switch (item.itemData.type)
+            {
+                case ItemType.Magazine:
+                    onSlot.item.weaponData.equipMag = item.magData;
+                    onSlot.item.weaponData.isMag = true;
+                    break;
+                default:
+                    break;
+            }
+            onSlot.item.SetPartsSample();
+            InActiveItem(item);
+            onSlot.item.targetImage.raycastTarget = true;
+        }
+
         void ItemSplit()
         {
-            for (int i = 0; i < item.itemSlots.Count; i++)
-            {
-                var itemSlot = item.itemSlots[i];
-                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-            }
+            item.SetItemSlots(DataUtility.slot_onItemColor);
             item.transform.SetParent(item.itemSlots[0].transform, false);
             item.transform.localPosition = Vector3.zero;
 
@@ -535,12 +585,7 @@ public class InventoryManager : MonoBehaviour
 
             item.countText.enabled = false;
             item.equipSlot = equipSlot;
-            for (int i = 0; i < item.itemSlots.Count; i++)
-            {
-                var _itemSlot = item.itemSlots[i];
-                _itemSlot.SetSlotColor(Color.white);
-                _itemSlot.item = null;
-            }
+            item.SetItemSlots(null, DataUtility.slot_noItemColor);
             item.itemSlots.Clear();
 
             item.ChangeRectPivot(true);
@@ -575,11 +620,13 @@ public class InventoryManager : MonoBehaviour
                     }
                     equipSlot.countText.enabled = false;
                     popUp.item.weaponData.chamberBullet = item.bulletData;
+                    popUp.item.weaponData.isChamber = true;
                     break;
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
                     equipSlot.countText.text = $"{item.TotalCount}";
                     popUp.item.weaponData.equipMag = item.magData;
+                    popUp.item.weaponData.isMag = true;
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
@@ -627,13 +674,9 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
+            item.SetItemSlots(DataUtility.slot_onItemColor);
             item.transform.SetParent(item.itemSlots[0].transform, false);
             item.transform.position = item.itemSlots[0].transform.position;
-            for (int i = 0; i < item.itemSlots.Count; i++)
-            {
-                var itemSlot = item.itemSlots[i];
-                itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-            }
         }
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
         item.targetImage.color = Color.clear;
@@ -651,18 +694,12 @@ public class InventoryManager : MonoBehaviour
         {
             case ItemType.Bullet:
                 popUp.item.weaponData.chamberBullet = null;
-                //if (gameMgr != null && gameMgr.playerList.Count > 0)
-                //{
-                //    var playerCtr = gameMgr.playerList[0];
-                //    var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
-                //    if (weapon != null)
-                //    {
-                //        weapon.weaponData.chamberBullet = null;
-                //    }
-                //}
+                popUp.item.weaponData.isChamber = false;
                 break;
             case ItemType.Magazine:
+                item.SetTotalCount(item.magData.loadedBullets.Count);
                 popUp.item.weaponData.equipMag = null;
+                popUp.item.weaponData.isMag = false;
                 if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
                     var playerCtr = gameMgr.playerList[0];
@@ -735,12 +772,8 @@ public class InventoryManager : MonoBehaviour
             item.equipSlot.item = null;
             item.equipSlot = null;
         }
-        if (item.itemSlots.Count > 0)
-        {
-            item.itemSlots[0].item = null;
-            item.itemSlots[0].SetSlotColor(Color.white);
-            item.itemSlots.Clear();
-        }
+        //item.SetItemSlots(null, DataUtility.slot_noItemColor);
+        item.itemSlots.Clear();
         item.transform.SetParent(itemPool, false);
 
         if (item.activeSample != null)
@@ -761,6 +794,11 @@ public class InventoryManager : MonoBehaviour
         {
             var equipSlot = allEquips[i];
             equipSlot.outline.enabled = false;
+        }
+        for (int i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
+            item.frameImage.enabled = false;
         }
     }
 

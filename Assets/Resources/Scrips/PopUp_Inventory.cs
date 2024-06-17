@@ -151,7 +151,7 @@ public class PopUp_Inventory : MonoBehaviour
                 for (int i = 0; i < itemSlots.Count; i++)
                 {
                     var itemSlot = itemSlots[i];
-                    itemSlot.SetSlotColor(Color.white);
+                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
                 }
                 itemSlots.Clear();
                 break;
@@ -209,7 +209,7 @@ public class PopUp_Inventory : MonoBehaviour
             for (int i = 0; i < itemSlots.Count; i++)
             {
                 var itemSlot = itemSlots[i];
-                itemSlot.SetSlotColor(Color.white);
+                itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
             }
         }
         split.uiObject.SetActive(false);
@@ -497,15 +497,10 @@ public class PopUp_Inventory : MonoBehaviour
                             smaple.SetActive(true);
                         }
                     }
-                    else if (equipSlot.item)
+                    else
                     {
-                        if (equipSlot.item.itemSlots.Count == 0)
-                        {
-                            invenMgr.InActiveItem(equipSlot.item);
-                        }
                         equipSlot.slotText.enabled = true;
                         equipSlot.countText.enabled = false;
-                        equipSlot.item = null;
                     }
                     break;
                 default:

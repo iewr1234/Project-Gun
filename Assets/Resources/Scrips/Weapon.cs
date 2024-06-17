@@ -240,7 +240,7 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
-        if (weaponData.chamberBullet == null || weaponData.chamberBullet.level == 0)
+        if (!weaponData.isChamber)
         {
             if (weaponData.equipMag.loadedBullets.Count == 0)
             {
@@ -250,6 +250,7 @@ public class Weapon : MonoBehaviour
 
             var bulletData = weaponData.equipMag.loadedBullets[0];
             weaponData.chamberBullet = bulletData;
+            weaponData.isChamber = true;
             weaponData.equipMag.loadedBullets.RemoveAt(0);
         }
 
@@ -282,6 +283,7 @@ public class Weapon : MonoBehaviour
         else
         {
             weaponData.chamberBullet = null;
+            weaponData.isChamber = false;
         }
     }
 

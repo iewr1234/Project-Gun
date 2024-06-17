@@ -40,7 +40,9 @@ public class WeaponDataInfo
     [Space(5f)]
 
     [Tooltip("¾à½Ç ÅºÈ¯")] public BulletDataInfo chamberBullet = null;
+    [HideInInspector] public bool isChamber;
     [Tooltip("ÀåÂø ÅºÃ¢")] public MagazineDataInfo equipMag = null;
+    [HideInInspector] public bool isMag;
     [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList = new List<WeaponPartsDataInfo>();
 
     public WeaponDataInfo CopyData()
@@ -71,7 +73,9 @@ public class WeaponDataInfo
             useRail = new List<WeaponPartsSize>(useRail),
 
             chamberBullet = chamberBullet,
+            isChamber = isChamber,
             equipMag = equipMag,
+            isMag = isMag,
             equipPartsList = new List<WeaponPartsDataInfo>(equipPartsList),
         };
 

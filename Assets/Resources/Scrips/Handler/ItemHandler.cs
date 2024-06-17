@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -53,6 +54,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         partsData = null;
 
         rect = GetComponent<RectTransform>();
+        frameImage = transform.Find("Frame").GetComponent<Image>();
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
 
@@ -276,6 +278,25 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 rect.anchorMin = new Vector2(0f, 1f);
                 rect.pivot = new Vector2(0f, 1f);
                 break;
+        }
+    }
+
+    public void SetItemSlots(Color color)
+    {
+        for (int i = 0; i < itemSlots.Count; i++)
+        {
+            var itemSlot = itemSlots[i];
+            itemSlot.SetItemSlot(color);
+        }
+    }
+
+    public void SetItemSlots(ItemHandler item, Color color)
+    {
+        for (int i = 0; i < itemSlots.Count; i++)
+        {
+            var itemSlot = itemSlots[i];
+            itemSlot.item = item;
+            itemSlot.SetItemSlot(color);
         }
     }
 

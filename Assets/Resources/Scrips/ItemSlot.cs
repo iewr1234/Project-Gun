@@ -49,7 +49,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
     }
 
-    public void SetSlotColor(Color color)
+    public void SetItemSlot(Color color)
     {
         slotImage.color = color;
     }
@@ -81,40 +81,35 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
             invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item, startIndex);
             var sizeCount = item.size.x * item.size.y;
             var findSlot = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
+
+            var itemNesting = invenMgr.onSlot.item != null && invenMgr.onSlot.item != item
+                           && invenMgr.onSlot.item.itemData.ID == item.itemData.ID
+                           && invenMgr.onSlot.item.itemData.maxNesting > 1
+                           && invenMgr.onSlot.item.TotalCount < invenMgr.onSlot.item.itemData.maxNesting;
+            var insertBullets = findSlot && findSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet;
+            var equipMagazine = findSlot && findSlot.item.itemSlots.Contains(invenMgr.onSlot)
+                             && item.itemData.type == ItemType.Magazine
+                             && (findSlot.item.itemData.type == ItemType.MainWeapon || findSlot.item.itemData.type == ItemType.SubWeapon);
+            var canMove = !findSlot && sizeCount == invenMgr.onSlots.Count;
             for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
                 var onSlot = invenMgr.onSlots[i];
-                if (invenMgr.onSlot.item != null && invenMgr.onSlot.item != item && invenMgr.onSlot.item.itemData.ID == item.itemData.ID
-                 && invenMgr.onSlot.item.itemData.maxNesting > 1 && invenMgr.onSlot.item.TotalCount < invenMgr.onSlot.item.itemData.maxNesting)
+                if (itemNesting || canMove)
                 {
-                    for (int j = 0; j < invenMgr.onSlot.item.itemSlots.Count; j++)
-                    {
-                        var itemSlot = invenMgr.onSlot.item.itemSlots[j];
-                        itemSlot.SetSlotColor(DataUtility.slot_moveColor);
-                    }
+                    onSlot.SetItemSlot(DataUtility.slot_moveColor);
                 }
-                else if (findSlot && findSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet)
+                else if (insertBullets)
                 {
-                    for (int j = 0; j < findSlot.item.itemSlots.Count; j++)
-                    {
-                        var itemSlot = findSlot.item.itemSlots[j];
-                        if (findSlot.item.magData.loadedBullets.Count < findSlot.item.magData.magSize)
-                        {
-                            itemSlot.SetSlotColor(DataUtility.slot_moveColor);
-                        }
-                        else
-                        {
-                            itemSlot.SetSlotColor(DataUtility.slot_unMoveColor);
-                        }
-                    }
+                    findSlot.item.SetItemSlots(findSlot.item.magData.loadedBullets.Count < findSlot.item.magData.magSize ? DataUtility.slot_moveColor : DataUtility.slot_unMoveColor);
                 }
-                else if (findSlot || sizeCount > invenMgr.onSlots.Count)
+                else if (equipMagazine)
                 {
-                    onSlot.SetSlotColor(DataUtility.slot_unMoveColor);
+                    findSlot.item.SetItemSlots(!findSlot.item.weaponData.isMag
+                                            && item.magData.compatModel.Contains(findSlot.item.weaponData.model) ? DataUtility.slot_moveColor : DataUtility.slot_unMoveColor);
                 }
                 else
                 {
-                    onSlot.SetSlotColor(DataUtility.slot_moveColor);
+                    onSlot.SetItemSlot(DataUtility.slot_unMoveColor);
                 }
             }
         }
@@ -133,16 +128,15 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                     var onSlot = invenMgr.onSlots[i];
                     if (onSlot.item != null && onSlot.item != invenMgr.holdingItem)
                     {
-                        //onSlot.item.targetImage.color = DataUtility.slot_onItemColor;
-                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
                     }
                     else if (onSlot.item != null && onSlot.item == invenMgr.holdingItem)
                     {
-                        onSlot.SetSlotColor(DataUtility.slot_onItemColor);
+                        onSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
                     else
                     {
-                        onSlot.SetSlotColor(Color.white);
+                        onSlot.SetItemSlot(DataUtility.slot_noItemColor);
                     }
                 }
                 invenMgr.onSlots.Clear();
@@ -150,15 +144,11 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 
             if (item == null)
             {
-                SetSlotColor(Color.white);
+                SetItemSlot(DataUtility.slot_noItemColor);
             }
             else
             {
-                for (int j = 0; j < item.itemSlots.Count; j++)
-                {
-                    var itemSlot = item.itemSlots[j];
-                    itemSlot.SetSlotColor(DataUtility.slot_onItemColor);
-                }
+                item.SetItemSlots(DataUtility.slot_onItemColor);
             }
         }
         else if (item != null)

@@ -320,8 +320,7 @@ public class GameManager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     var weapon = selectChar.currentWeapon;
-                    if ((weapon.weaponData.equipMag == null || weapon.weaponData.equipMag.loadedBullets.Count == 0)
-                     && (weapon.weaponData.chamberBullet == null || weapon.weaponData.chamberBullet.level == 0))
+                    if (!weapon.weaponData.isMag && !weapon.weaponData.isChamber)
                     {
                         Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
                         return;
@@ -405,7 +404,7 @@ public class GameManager : MonoBehaviour
                     }
                     var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (selectChar.fireRateNum + 1));
                     var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-                    if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
+                    if (weapon.weaponData.isChamber) loadedAmmo++;
 
                     if (shootNum > loadedAmmo)
                     {

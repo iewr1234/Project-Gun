@@ -87,17 +87,9 @@ public class UserInterfaceManager : MonoBehaviour
         var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fireRateNum + 1));
 
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-        if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
+        if (weapon.weaponData.isChamber) loadedAmmo++;
 
-        //var loadedAmmo = weapon.chamberBullet ? weapon.loadedAmmo + 1 : weapon.loadedAmmo;
-        if (shootNum > loadedAmmo)
-        {
-            shootNumText.color = Color.red;
-        }
-        else
-        {
-            shootNumText.color = Color.black;
-        }
+        shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";
     }
 

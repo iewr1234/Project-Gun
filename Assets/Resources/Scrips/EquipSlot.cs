@@ -75,9 +75,13 @@ public class EquipSlot : MonoBehaviour
                 return item.itemData.type == ItemType.Bullet
                     && item.bulletData != null;
             case EquipType.Magazine:
-                return item.itemData.type == ItemType.Magazine
-                    && item.magData != null
-                    && item.magData.compatModel.Contains(model);
+                if (item.itemData.type == ItemType.Magazine)
+                {
+                    return this.item == null
+                        && item.magData != null
+                        && item.magData.compatModel.Contains(model);
+                }
+                return false;
             case EquipType.Sight:
                 return item.itemData.type == ItemType.Sight
                     && item.partsData != null
