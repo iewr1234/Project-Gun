@@ -140,6 +140,7 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
             itemSplit = false;
+            gameMgr.uiMgr.bottomUI.SetActive(false);
             ShowInventory();
         }
 
@@ -170,7 +171,6 @@ public class InventoryManager : MonoBehaviour
         invenUI.gameObject.SetActive(value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
-        gameMgr.uiMgr.SetActiveGameUI(!value);
         if (gameMgr.mapEdt != null)
         {
             gameMgr.mapEdt.gameObject.SetActive(!value);
@@ -222,12 +222,13 @@ public class InventoryManager : MonoBehaviour
                 click = true;
                 clickTime = 0f;
             }
+            else if (onEquip != null && onEquip.item != null)
+            {
+                selectItem = onEquip.item;
+                popUp.PopUp_ItemInformation();
+            }
             else if (onSlot != null && onSlot.item != null)
             {
-                if (popUp.gameObject.activeSelf)
-                {
-                    popUp.Button_PopUp_Close();
-                }
                 selectItem = onSlot.item;
                 popUp.PopUp_ItemInformation();
             }
@@ -271,22 +272,7 @@ public class InventoryManager : MonoBehaviour
             equipSlot.outline.enabled = true;
         }
 
-        var items = new List<ItemHandler>();
-        switch (item.itemData.type)
-        {
-            case ItemType.Bullet:
-                items = activeItem.FindAll(x => x.equipSlot == null
-                                             && x.itemData.type == ItemType.Magazine
-                                             && x.magData.loadedBullets.Count < x.magData.magSize
-                                             && x.magData.compatCaliber == item.bulletData.caliber);
-                break;
-            case ItemType.Magazine:
-                items = activeItem.FindAll(x => (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
-                                             && !x.weaponData.isMag && item.magData.compatModel.Contains(x.weaponData.model));
-                break;
-            default:
-                break;
-        }
+        var items = activeItem.FindAll(x => x.equipSlot == null && CheckEquip(x, item));
         for (int i = 0; i < items.Count; i++)
         {
             var _item = items[i];
@@ -377,8 +363,26 @@ public class InventoryManager : MonoBehaviour
 
         switch (putItem.itemData.type)
         {
+            case ItemType.Bullet:
+                if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                {
+                    return !onItem.weaponData.isChamber && onItem.weaponData.caliber == putItem.bulletData.caliber;
+                }
+                else if (onItem.itemData.type == ItemType.Magazine)
+                {
+                    return onItem.magData.loadedBullets.Count < onItem.magData.magSize && onItem.magData.compatCaliber == putItem.bulletData.caliber;
+                }
+                else
+                {
+                    return false;
+                }
             case ItemType.Magazine:
-                return false;
+                return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                    && !onItem.weaponData.isMag && putItem.magData.compatModel.Contains(onItem.weaponData.model);
+            case ItemType.Sight:
+                return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                    && onItem.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null
+                    && putItem.partsData.compatModel.Contains(onItem.weaponData.model);
             default:
                 return false;
         }
@@ -395,22 +399,15 @@ public class InventoryManager : MonoBehaviour
         {
             if (onSlot != null && onSlot.item != null)
             {
-                var equipMagazine = onSlot.item != item
-                                 && (onSlot.item.itemData.type == ItemType.MainWeapon || onSlot.item.itemData.type == ItemType.SubWeapon)
-                                 && !onSlot.item.weaponData.isMag && item.itemData.type == ItemType.Magazine;
-                var insertBullets = onSlot.item.equipSlot == null
-                                 && onSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet
-                                 && onSlot.item.magData.compatCaliber == item.bulletData.caliber
-                                 && onSlot.item.magData.loadedBullets.Count < onSlot.item.magData.magSize;
                 var itemNesting = onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
                                && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
-                if (equipMagazine)
-                {
-                    QuickEquip();
-                }
-                else if (insertBullets || itemNesting)
+                if (itemNesting)
                 {
                     ItemNesting();
+                }
+                else if (CheckEquip(onSlot.item, item))
+                {
+                    QuickEquip();
                 }
                 else
                 {
@@ -451,7 +448,10 @@ public class InventoryManager : MonoBehaviour
                         itemSlot.item = item;
                         itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
+
                     item.itemSlots = new List<ItemSlot>(itemSlots);
+                    item.SetItemScale(false);
+                    item.ChangeRectPivot(false);
                     item.transform.SetParent(itemSlots[0].transform, false);
                     item.transform.localPosition = Vector3.zero;
                     if (item.itemData.type == ItemType.Magazine)
@@ -499,25 +499,12 @@ public class InventoryManager : MonoBehaviour
         void ItemNesting()
         {
             onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
-
-            int newTotal;
-            int maxValue;
-            if (onSlot.item.itemData.type == ItemType.Magazine)
-            {
-                newTotal = onSlot.item.magData.loadedBullets.Count + item.TotalCount;
-                maxValue = onSlot.item.magData.magSize;
-            }
-            else
-            {
-                newTotal = onSlot.item.TotalCount + item.TotalCount;
-                maxValue = onSlot.item.itemData.maxNesting;
-            }
-
+            var newTotal = onSlot.item.TotalCount + item.TotalCount;
+            var maxValue = onSlot.item.itemData.maxNesting;
             if (maxValue >= newTotal)
             {
                 item.SetItemSlots(DataUtility.slot_noItemColor);
                 onSlot.item.SetTotalCount(newTotal);
-                InsertBullets(newTotal);
                 InActiveItem(item);
             }
             else
@@ -527,37 +514,79 @@ public class InventoryManager : MonoBehaviour
                 item.transform.localPosition = Vector3.zero;
                 item.SetTotalCount(newTotal - maxValue);
                 onSlot.item.SetTotalCount(maxValue);
-                InsertBullets(maxValue);
             }
             onSlot.item.targetImage.raycastTarget = true;
-
-            void InsertBullets(int num)
-            {
-                if (onSlot.item.itemData.type != ItemType.Magazine || item.itemData.type != ItemType.Bullet) return;
-
-                for (int i = 0; i < num; i++)
-                {
-                    onSlot.item.magData.loadedBullets.Add(item.bulletData);
-                }
-            }
         }
 
         void QuickEquip()
         {
             onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
-            item.SetItemSlots(null, DataUtility.slot_noItemColor);
             switch (item.itemData.type)
             {
+                case ItemType.Bullet:
+                    if (onSlot.item.itemData.type == ItemType.MainWeapon || onSlot.item.itemData.type == ItemType.SubWeapon)
+                    {
+                        onSlot.item.weaponData.chamberBullet = item.bulletData;
+                        onSlot.item.weaponData.isChamber = true;
+                        if (item.TotalCount > 1)
+                        {
+                            item.transform.SetParent(item.itemSlots[0].transform, false);
+                            item.transform.localPosition = Vector3.zero;
+                            item.SetTotalCount(item.TotalCount - 1);
+                        }
+                        else
+                        {
+                            item.SetItemSlots(null, DataUtility.slot_noItemColor);
+                            InActiveItem(item);
+                        }
+                    }
+                    else if (onSlot.item.itemData.type == ItemType.Magazine)
+                    {
+                        var newTotal = onSlot.item.magData.loadedBullets.Count + item.TotalCount;
+                        if (onSlot.item.magData.magSize >= newTotal)
+                        {
+                            for (int i = 0; i < newTotal; i++)
+                            {
+                                onSlot.item.magData.loadedBullets.Add(item.bulletData);
+                            }
+                            item.SetItemSlots(null, DataUtility.slot_noItemColor);
+                            InActiveItem(item);
+                        }
+                        else
+                        {
+                            var num = onSlot.item.magData.magSize - onSlot.item.magData.loadedBullets.Count;
+                            for (int i = 0; i < num; i++)
+                            {
+                                onSlot.item.magData.loadedBullets.Add(item.bulletData);
+                            }
+                            item.transform.SetParent(item.itemSlots[0].transform, false);
+                            item.transform.localPosition = Vector3.zero;
+                            item.SetTotalCount(item.TotalCount - num);
+                        }
+                        onSlot.item.SetTotalCount(onSlot.item.magData.loadedBullets.Count);
+                    }
+                    break;
                 case ItemType.Magazine:
                     onSlot.item.weaponData.equipMag = item.magData;
                     onSlot.item.weaponData.isMag = true;
+                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
+                    InActiveItem(item);
+                    onSlot.item.SetPartsSample();
+                    break;
+                case ItemType.Sight:
+                    onSlot.item.weaponData.equipPartsList.Add(item.partsData);
+                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
+                    InActiveItem(item);
+                    onSlot.item.SetPartsSample();
                     break;
                 default:
                     break;
             }
-            onSlot.item.SetPartsSample();
-            InActiveItem(item);
             onSlot.item.targetImage.raycastTarget = true;
+            if (popUp.gameObject.activeSelf && selectItem == onSlot.item)
+            {
+                popUp.PopUp_ItemInformation();
+            }
         }
 
         void ItemSplit()
@@ -681,7 +710,6 @@ public class InventoryManager : MonoBehaviour
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
         item.targetImage.color = Color.clear;
 
-        onEquip = null;
         holdingItem = null;
         InactiveSampleItem();
     }
@@ -728,13 +756,13 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
 
+        item.equipSlot.item = null;
+        item.equipSlot = null;
         if (popUp.item != null)
         {
             popUp.item.SetPartsSample();
             popUp.SetPartsSample();
         }
-        item.equipSlot.item = null;
-        item.equipSlot = null;
 
         if (gameMgr != null && gameMgr.playerList.Count > 0
          && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))

@@ -10,7 +10,10 @@ public class UserInterfaceManager : MonoBehaviour
     [Header("---Access Script---")]
     private GameManager gameMgr;
 
-    [Header("---Access Component---\n[BottomUI]")]
+    [Header("---Access Component---")]
+    [SerializeField] private Canvas canvas;
+
+    [Header("[BottomUI]")]
     public GameObject bottomUI;
     [HideInInspector] public TextMeshProUGUI magNumText;
     public List<ActionBlock> actionBlocks;
@@ -32,6 +35,7 @@ public class UserInterfaceManager : MonoBehaviour
     public void SetComponents(GameManager _gameMgr)
     {
         gameMgr = _gameMgr;
+        canvas = GetComponent<Canvas>();
 
         bottomUI = transform.Find("BottomUI").gameObject;
         magNumText = transform.Find("BottomUI/MagNum").GetComponent<TextMeshProUGUI>();
@@ -42,6 +46,7 @@ public class UserInterfaceManager : MonoBehaviour
             var actionBlock = actionBlocks[i];
             actionBlock.SetComponents();
         }
+        bottomUI.gameObject.SetActive(false);
 
         aimUI = transform.Find("AimUI").gameObject;
         shootNumText = transform.Find("AimUI/ShootNum").GetComponent<TextMeshProUGUI>();
@@ -53,11 +58,6 @@ public class UserInterfaceManager : MonoBehaviour
         healthGauge = transform.Find("AimUI/TargetInfo/HealthGauge").GetComponent<Slider>();
         staminaGauge = transform.Find("AimUI/TargetInfo/StaminaGauge").GetComponent<Slider>();
         aimUI.SetActive(false);
-    }
-
-    public void SetActiveGameUI(bool value)
-    {
-        bottomUI.SetActive(value);
     }
 
     public void SetMagNum(CharacterController charCtr)

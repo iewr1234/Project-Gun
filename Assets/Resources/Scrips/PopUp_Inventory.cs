@@ -142,37 +142,6 @@ public class PopUp_Inventory : MonoBehaviour
         }
     }
 
-    public void Button_PopUp_Close()
-    {
-        switch (state)
-        {
-            case PopUpState.Split:
-                invenMgr.InactiveSampleItem();
-                for (int i = 0; i < itemSlots.Count; i++)
-                {
-                    var itemSlot = itemSlots[i];
-                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
-                }
-                itemSlots.Clear();
-                break;
-            case PopUpState.ItemInformation:
-                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
-                {
-                    var equipSlot = itemInfo.equipSlots[i];
-                    if (equipSlot.item == null) continue;
-
-                    invenMgr.InActiveItem(equipSlot.item);
-                }
-                invenMgr.selectItem = null;
-                item = null;
-                break;
-            default:
-                break;
-        }
-        gameObject.SetActive(false);
-        state = PopUpState.None;
-    }
-
     #region Split
     public void PopUp_Split(ItemHandler _item, List<ItemSlot> _itemSlots)
     {
@@ -226,7 +195,20 @@ public class PopUp_Inventory : MonoBehaviour
     #region ItemInformation
     public void PopUp_ItemInformation()
     {
-        gameObject.SetActive(true);
+        if (gameObject.activeSelf)
+        {
+            for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+            {
+                var equipSlot = itemInfo.equipSlots[i];
+                if (equipSlot.item == null) continue;
+
+                invenMgr.InActiveItem(equipSlot.item);
+            }
+        }
+        else
+        {
+            gameObject.SetActive(true);
+        }
         transform.localPosition = defaultPos_itemInfo;
         topText.text = $"{invenMgr.selectItem.itemData.itemName}";
         state = PopUpState.ItemInformation;
@@ -439,23 +421,15 @@ public class PopUp_Inventory : MonoBehaviour
         for (int i = 0; i < itemInfo.equipSlots.Count; i++)
         {
             var equipSlot = itemInfo.equipSlots[i];
+            if (equipSlot.item != null) continue;
+
             switch (equipSlot.type)
             {
                 case EquipType.Chamber:
                     var bulletData = item.weaponData.chamberBullet;
-                    if (equipSlot.CheckEquip(bulletData))
+                    if (item.weaponData.isChamber && equipSlot.CheckEquip(bulletData))
                     {
-                        if (equipSlot.item && equipSlot.item.bulletData != bulletData)
-                        {
-                            var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == bulletData.ID);
-                            equipSlot.item.SetItemInfo(itemData, 1);
-                            equipSlot.item.countText.enabled = false;
-                        }
-                        else if (!equipSlot.item)
-                        {
-                            invenMgr.SetItemInEquipSlot(bulletData, 1, equipSlot);
-                        }
-
+                        invenMgr.SetItemInEquipSlot(bulletData, 1, equipSlot);
                         var smaples = itemInfo.partsSamples.FindAll(x => x.name == bulletData.ID);
                         for (int j = 0; j < smaples.Count; j++)
                         {
@@ -463,39 +437,24 @@ public class PopUp_Inventory : MonoBehaviour
                             smaple.SetActive(true);
                         }
                     }
-                    else if (equipSlot.item)
+                    else
                     {
-                        if (equipSlot.item.itemSlots.Count == 0)
-                        {
-                            invenMgr.InActiveItem(equipSlot.item);
-                        }
                         equipSlot.slotText.enabled = true;
                         equipSlot.countText.enabled = false;
-                        equipSlot.item = null;
                     }
                     break;
                 case EquipType.Magazine:
                     var magData = item.weaponData.equipMag;
-                    if (equipSlot.CheckEquip(magData))
+                    if (item.weaponData.isMag && equipSlot.CheckEquip(magData))
                     {
-                        if (equipSlot.item && equipSlot.item.magData != magData)
-                        {
-                            var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
-                            equipSlot.item.SetItemInfo(itemData, 1);
-                            equipSlot.item.countText.enabled = false;
-                        }
-                        else if (!equipSlot.item)
-                        {
-                            invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
-                        }
-                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
-
+                        invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
                         var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.ID);
                         for (int j = 0; j < smaples.Count; j++)
                         {
                             var smaple = smaples[j];
                             smaple.SetActive(true);
                         }
+                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
                     }
                     else
                     {
@@ -583,5 +542,36 @@ public class PopUp_Inventory : MonoBehaviour
     public void OnDrag_PopUp()
     {
         FollowMouse();
+    }
+
+    public void Button_PopUp_Close()
+    {
+        switch (state)
+        {
+            case PopUpState.Split:
+                invenMgr.InactiveSampleItem();
+                for (int i = 0; i < itemSlots.Count; i++)
+                {
+                    var itemSlot = itemSlots[i];
+                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
+                }
+                itemSlots.Clear();
+                break;
+            case PopUpState.ItemInformation:
+                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+                {
+                    var equipSlot = itemInfo.equipSlots[i];
+                    if (equipSlot.item == null) continue;
+
+                    invenMgr.InActiveItem(equipSlot.item);
+                }
+                invenMgr.selectItem = null;
+                item = null;
+                break;
+            default:
+                break;
+        }
+        gameObject.SetActive(false);
+        state = PopUpState.None;
     }
 }

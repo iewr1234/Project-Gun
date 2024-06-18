@@ -765,12 +765,20 @@ public class GameManager : MonoBehaviour
                     var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(movableNodes);
                 }
+                if (selectChar.ownerType == CharacterOwner.Player)
+                {
+                    uiMgr.bottomUI.gameObject.SetActive(true);
+                }
                 break;
             case false:
                 for (int i = 0; i < movableNodes.Count; i++)
                 {
                     var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(false);
+                }
+                if (selectChar.ownerType == CharacterOwner.Player)
+                {
+                    uiMgr.bottomUI.gameObject.SetActive(false);
                 }
                 movableNodes.Clear();
                 break;

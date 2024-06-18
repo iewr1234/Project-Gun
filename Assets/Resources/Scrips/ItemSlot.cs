@@ -86,10 +86,6 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                            && invenMgr.onSlot.item.itemData.ID == item.itemData.ID
                            && invenMgr.onSlot.item.itemData.maxNesting > 1
                            && invenMgr.onSlot.item.TotalCount < invenMgr.onSlot.item.itemData.maxNesting;
-            var insertBullets = findSlot && findSlot.item.itemData.type == ItemType.Magazine && item.itemData.type == ItemType.Bullet;
-            var equipMagazine = findSlot && findSlot.item.itemSlots.Contains(invenMgr.onSlot)
-                             && item.itemData.type == ItemType.Magazine
-                             && (findSlot.item.itemData.type == ItemType.MainWeapon || findSlot.item.itemData.type == ItemType.SubWeapon);
             var canMove = !findSlot && sizeCount == invenMgr.onSlots.Count;
             for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
@@ -98,14 +94,9 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                 {
                     onSlot.SetItemSlot(DataUtility.slot_moveColor);
                 }
-                else if (insertBullets)
+                else if (findSlot && findSlot.item.itemSlots.Contains(invenMgr.onSlot))
                 {
-                    findSlot.item.SetItemSlots(findSlot.item.magData.loadedBullets.Count < findSlot.item.magData.magSize ? DataUtility.slot_moveColor : DataUtility.slot_unMoveColor);
-                }
-                else if (equipMagazine)
-                {
-                    findSlot.item.SetItemSlots(!findSlot.item.weaponData.isMag
-                                            && item.magData.compatModel.Contains(findSlot.item.weaponData.model) ? DataUtility.slot_moveColor : DataUtility.slot_unMoveColor);
+                    findSlot.item.SetItemSlots(invenMgr.CheckEquip(findSlot.item, item) ? DataUtility.slot_moveColor : DataUtility.slot_unMoveColor);
                 }
                 else
                 {
