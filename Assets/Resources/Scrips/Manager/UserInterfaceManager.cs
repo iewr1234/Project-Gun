@@ -18,6 +18,13 @@ public class UserInterfaceManager : MonoBehaviour
     [HideInInspector] public TextMeshProUGUI magNumText;
     public List<ActionBlock> actionBlocks;
 
+    public ActionButton watchButton;
+    public ActionButton shootButton;
+    public ActionButton reloadButton;
+
+    [HideInInspector] public GameObject magIcons;
+    [HideInInspector] public List<MagazineIcon> magIconList;
+
     [Header("[AimUI]")]
     public GameObject aimUI;
     [HideInInspector] public TextMeshProUGUI shootNumText;
@@ -29,6 +36,9 @@ public class UserInterfaceManager : MonoBehaviour
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
 
+    [Header("--- Assignment Variable---")]
+    public Button onButton;
+
     private readonly string aimUIGaugePath = "Sprites/SightGauge/Gauge_SightAp";
     private readonly int aimUIGaugeMax = 4;
 
@@ -38,7 +48,7 @@ public class UserInterfaceManager : MonoBehaviour
         canvas = GetComponent<Canvas>();
 
         bottomUI = transform.Find("BottomUI").gameObject;
-        magNumText = transform.Find("BottomUI/MagNum").GetComponent<TextMeshProUGUI>();
+        magNumText = bottomUI.transform.Find("MagNum").GetComponent<TextMeshProUGUI>();
         magNumText.enabled = false;
         actionBlocks = bottomUI.transform.Find("ActionPoint").GetComponentsInChildren<ActionBlock>().ToList();
         for (int i = 0; i < actionBlocks.Count; i++)
@@ -46,6 +56,14 @@ public class UserInterfaceManager : MonoBehaviour
             var actionBlock = actionBlocks[i];
             actionBlock.SetComponents();
         }
+        magIcons = bottomUI.transform.Find("Magazines").gameObject;
+        magIconList = magIcons.GetComponentsInChildren<MagazineIcon>().ToList();
+        for (int i = 0; i < magIconList.Count; i++)
+        {
+            var magIcon = magIconList[i];
+            magIcon.SetComponents();
+        }
+        magIcons.gameObject.SetActive(false);
         bottomUI.gameObject.SetActive(false);
 
         aimUI = transform.Find("AimUI").gameObject;
@@ -58,6 +76,27 @@ public class UserInterfaceManager : MonoBehaviour
         healthGauge = transform.Find("AimUI/TargetInfo/HealthGauge").GetComponent<Slider>();
         staminaGauge = transform.Find("AimUI/TargetInfo/StaminaGauge").GetComponent<Slider>();
         aimUI.SetActive(false);
+
+        var actionButtons = bottomUI.transform.Find("ActionButtons").GetComponentsInChildren<ActionButton>().ToList();
+        for (int i = 0; i < actionButtons.Count; i++)
+        {
+            var actionButton = actionButtons[i];
+            actionButton.SetComponents(gameMgr);
+            switch (actionButton.type)
+            {
+                case GameState.Shoot:
+                    shootButton = actionButton;
+                    break;
+                case GameState.Reload:
+                    reloadButton = actionButton;
+                    break;
+                case GameState.Watch:
+                    watchButton = actionButton;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public void SetMagNum(CharacterController charCtr)
@@ -91,6 +130,28 @@ public class UserInterfaceManager : MonoBehaviour
 
         shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";
+    }
+
+    public void SetActiveMagazineIcon(bool value)
+    {
+        switch (value)
+        {
+            case true:
+                magIcons.SetActive(true);
+                break;
+            case false:
+                magIcons.SetActive(false);
+                var activeIcons = magIconList.FindAll(x => x.gameObject.activeSelf);
+                if (activeIcons.Count > 0)
+                {
+                    for (int i = 0; i < activeIcons.Count; i++)
+                    {
+                        var activeIcon = activeIcons[i];
+                        activeIcon.gameObject.SetActive(false);
+                    }
+                }
+                break;
+        }
     }
 
     public void SetActionPoint_Bottom(CharacterController charCtr)

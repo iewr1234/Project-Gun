@@ -1540,6 +1540,8 @@ public class CharacterController : MonoBehaviour
     public void FindTargets(FieldNode node)
     {
         targetList.Clear();
+        if (currentWeapon == null) return;
+
         var currentNode = node;
         var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         for (int i = 0; i < _targetList.Count; i++)

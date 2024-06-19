@@ -109,9 +109,14 @@ public class InventoryManager : MonoBehaviour
 
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
         SetItemInStorage("T0001", 1, otherStorage.itemSlots);
+
         SetItemInStorage("T0002", 1, otherStorage.itemSlots);
+
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
         SetItemInStorage("T0003", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
+        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
+
         SetItemInStorage("T0004", 100, otherStorage.itemSlots);
     }
 
@@ -163,7 +168,7 @@ public class InventoryManager : MonoBehaviour
 
     public void ShowInventory()
     {
-        if (gameMgr.gameState == GameState.Shot || gameMgr.gameState == GameState.Watch) return;
+        if (gameMgr.gameState == GameState.Shoot || gameMgr.gameState == GameState.Watch) return;
 
         var value = !invenCam.enabled;
         invenCam.enabled = value;

@@ -183,6 +183,8 @@ public class PopUp_Inventory : MonoBehaviour
         }
         split.uiObject.SetActive(false);
         gameObject.SetActive(false);
+
+        item = null;
         state = PopUpState.None;
     }
 
@@ -566,12 +568,13 @@ public class PopUp_Inventory : MonoBehaviour
                     invenMgr.InActiveItem(equipSlot.item);
                 }
                 invenMgr.selectItem = null;
-                item = null;
                 break;
             default:
                 break;
         }
         gameObject.SetActive(false);
+
+        item = null;
         state = PopUpState.None;
     }
 }

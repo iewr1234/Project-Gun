@@ -175,6 +175,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             activeSample.SetActive(false);
         }
 
+        if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
+
         if (weaponData.isMag)
         {
             var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.ID);
