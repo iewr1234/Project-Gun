@@ -135,6 +135,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemInfo(MagazineDataInfo magData)
     {
         itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
+        size = itemData.size;
         this.magData = magData.CopyData();
         countText.enabled = true;
         SetTotalCount(magData.loadedBullets.Count);

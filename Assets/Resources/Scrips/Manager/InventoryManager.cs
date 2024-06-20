@@ -321,11 +321,12 @@ public class InventoryManager : MonoBehaviour
             if (emptySlot.item != null)
             {
                 index++;
+                emptySlot = null;
                 continue;
             }
 
             emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
-            if (emptySlots.Count == item.size.x * item.size.y)
+            if (emptySlots.Find(x => x.item != null) == null && emptySlots.Count == item.size.x * item.size.y)
             {
                 break;
             }
@@ -357,7 +358,8 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < rigStorages.Count; i++)
         {
             var rigStorage = rigStorages[i];
-            emptySlots = FindEmptySlots(item, rigStorage.itemSlots);
+            var itemSlots = rigStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
+            emptySlots = FindEmptySlots(item, itemSlots);
             if (emptySlots == null)
             {
                 continue;
@@ -370,7 +372,8 @@ public class InventoryManager : MonoBehaviour
 
         if (emptySlots == null)
         {
-            emptySlots = FindEmptySlots(item, otherStorage.itemSlots);
+            var itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
+            emptySlots = FindEmptySlots(item, itemSlots);
         }
         PutTheItem(item, emptySlots);
     }

@@ -543,12 +543,6 @@ public class GameManager : MonoBehaviour
             magIcon.SetMagazineSlider(rigMag.magData.magSize, rigMag.magData.loadedBullets.Count);
             magIcon.SetImageScale(i == 0);
         }
-
-        //ClearLine();
-        //selectChar.AddCommand(CommandType.Reload);
-        //SwitchMovableNodes(false);
-        //selectChar = null;
-        //gameState = GameState.None;
     }
 
     public void ReloadAction_Reload()
