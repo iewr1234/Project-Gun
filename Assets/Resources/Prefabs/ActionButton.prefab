@@ -54,8 +54,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bb124756939f624c8a15635403adec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiMgr: {fileID: 0}
-  button: {fileID: 0}
+  type: 0
 --- !u!114 &7122658109028253642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,7 +101,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8743031838104962044}
         m_TargetAssemblyTypeName: ActionButton, Assembly-CSharp
-        m_MethodName: OnClick_ActionButton
+        m_MethodName: Button_ActionButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

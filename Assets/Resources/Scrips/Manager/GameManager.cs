@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
     private LineRenderer moveLine;
 
     [Header("[Reload]")]
-    private List<ItemHandler> rigMags;
+    private List<ItemHandler> rigMags = new List<ItemHandler>();
     private int magIndex;
 
     [Header("[Character]")]
@@ -325,11 +325,11 @@ public class GameManager : MonoBehaviour
             case GameState.Move:
                 if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    ShootingAction();
+                    ShootingAction_Move();
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
-                    ReloadAction();
+                    ReloadAction_Move();
                 }
                 else if (Input.GetKeyDown(KeyCode.X) && selectChar.weapons.Count > 1)
                 {
@@ -428,20 +428,34 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameState.Reload:
-                if (Input.GetKeyDown(KeyCode.Tab))
+                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
                 {
                     if (rigMags.Count < 2) return;
 
                     uiMgr.magIconList[magIndex].SetImageScale(false);
-                    magIndex++;
-                    if (magIndex == rigMags.Count)
+                    if (Input.GetKeyDown(KeyCode.A))
                     {
-                        magIndex = 0;
+                        magIndex--;
+                        if (magIndex < 0)
+                        {
+                            magIndex = rigMags.Count - 1;
+                        }
+                    }
+                    else
+                    {
+                        magIndex++;
+                        if (magIndex == rigMags.Count)
+                        {
+                            magIndex = 0;
+                        }
                     }
                     uiMgr.magIconList[magIndex].SetImageScale(true);
                 }
-
                 else if (Input.GetKeyDown(KeyCode.R))
+                {
+                    ReloadAction_Reload();
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
                 {
                     uiMgr.SetActiveMagazineIcon(false);
                     uiMgr.reloadButton.SetActiveButton(false);
@@ -470,14 +484,9 @@ public class GameManager : MonoBehaviour
             default:
                 break;
         }
-
-        if (Input.GetKeyDown(KeyCode.F12))
-        {
-            Debug.Log($"{playerList[0].currentWeapon.weaponData.chamberBullet.ID}");
-        }
     }
 
-    public void ShootingAction()
+    public void ShootingAction_Move()
     {
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
@@ -504,16 +513,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ReloadAction()
+    public void ReloadAction_Move()
     {
         if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
-        if (selectChar.currentWeapon == null) return;
 
         gameState = GameState.Reload;
         uiMgr.reloadButton.SetActiveButton(true);
+        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
         SwitchMovableNodes(false);
         ClearLine();
         RemoveTargetNode();
+        if (selectChar.currentWeapon == null) return;
 
         rigMags = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
                                                 && x.itemSlots[0].myStorage.type == MyStorageType.Rig
@@ -539,6 +549,33 @@ public class GameManager : MonoBehaviour
         //SwitchMovableNodes(false);
         //selectChar = null;
         //gameState = GameState.None;
+    }
+
+    public void ReloadAction_Reload()
+    {
+        if (rigMags.Count == 0) return;
+
+        var weapon = selectChar.currentWeapon;
+        if (weapon == null) return;
+
+        var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
+                                                    && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
+                                                    && x.weaponData.ID == weapon.weaponData.ID);
+        var rigMag = rigMags[magIndex];
+        if (weapon.weaponData.isMag)
+        {
+            var equipMag = weapon.weaponData.equipMag;
+            invenMgr.SetItemInStorage(equipMag);
+        }
+        invenMgr.QuickEquip(weaponItem, rigMag);
+
+        selectChar.AddCommand(CommandType.Reload);
+        selectChar = null;
+
+        uiMgr.SetActiveMagazineIcon(false);
+        uiMgr.reloadButton.SetActiveButton(false);
+        rigMags.Clear();
+        gameState = GameState.None;
     }
 
     private void SwitchCharacterUI(bool value)
@@ -834,20 +871,12 @@ public class GameManager : MonoBehaviour
                     var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(movableNodes);
                 }
-                if (selectChar.ownerType == CharacterOwner.Player && gameState != GameState.Reload)
-                {
-                    uiMgr.bottomUI.gameObject.SetActive(true);
-                }
                 break;
             case false:
                 for (int i = 0; i < movableNodes.Count; i++)
                 {
                     var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(false);
-                }
-                if (selectChar.ownerType == CharacterOwner.Player && gameState != GameState.Reload)
-                {
-                    uiMgr.bottomUI.gameObject.SetActive(false);
                 }
                 movableNodes.Clear();
                 break;

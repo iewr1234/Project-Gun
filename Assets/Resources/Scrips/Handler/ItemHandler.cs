@@ -132,6 +132,27 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
+    public void SetItemInfo(MagazineDataInfo magData)
+    {
+        itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
+        this.magData = magData.CopyData();
+        countText.enabled = true;
+        SetTotalCount(magData.loadedBullets.Count);
+
+        activeSample = samples.Find(x => x.name == itemData.dataID);
+        if (activeSample == null)
+        {
+            Debug.LogError("Not found Sample object");
+        }
+        activeSample.SetActive(true);
+        gameObject.SetActive(true);
+
+        if (!invenMgr.activeItem.Contains(this))
+        {
+            invenMgr.activeItem.Add(this);
+        }
+    }
+
     public void SetSampleItemInfo(ItemDataInfo _itemData, bool rotation)
     {
         itemData = _itemData;

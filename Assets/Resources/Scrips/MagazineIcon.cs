@@ -13,10 +13,10 @@ public class MagazineIcon : MonoBehaviour
 
     public void SetComponents()
     {
-        slider = GetComponent<Slider>();
+        slider = transform.Find("Slider").GetComponent<Slider>();
 
         frameImage = transform.Find("Frame").GetComponent<Image>();
-        backImage = transform.Find("BackGround").GetComponent<Image>();
+        backImage = slider.transform.GetComponent<Image>();
 
         gameObject.SetActive(false);
     }
@@ -40,5 +40,10 @@ public class MagazineIcon : MonoBehaviour
                 backImage.transform.localScale = Vector3.one;
                 break;
         }
+    }
+
+    public void Button_MagazineIcon()
+    {
+
     }
 }

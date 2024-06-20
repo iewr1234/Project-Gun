@@ -13,8 +13,8 @@ public class InventoryManager : MonoBehaviour
 
     [Space(5f)]
     public List<EquipSlot> allEquips = new List<EquipSlot>();
-    [SerializeField] private List<MyStorage> myStorages = new List<MyStorage>();
-    [SerializeField] private OtherStorage otherStorage;
+    public List<MyStorage> myStorages = new List<MyStorage>();
+    public OtherStorage otherStorage;
 
     [Header("---Access Component---")]
     public ItemHandler sampleItem;
@@ -174,6 +174,8 @@ public class InventoryManager : MonoBehaviour
         invenCam.enabled = value;
         subCam.enabled = value;
         invenUI.gameObject.SetActive(value);
+
+        gameMgr.uiMgr.bottomUI.SetActive(!value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         if (gameMgr.mapEdt != null)
@@ -296,9 +298,46 @@ public class InventoryManager : MonoBehaviour
 
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(itemData, count);
-        var emptySlot = itemSlots.Find(x => x.item == null);
-        var emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
-        PutTheItem(item, emptySlots);
+
+        var emptySlots = FindEmptySlots(item, itemSlots);
+        if (emptySlots == null)
+        {
+            Debug.Log("not found ItemSlot");
+            InActiveItem(item);
+        }
+        else
+        {
+            PutTheItem(item, emptySlots);
+        }
+    }
+
+    private List<ItemSlot> FindEmptySlots(ItemHandler item, List<ItemSlot> itemSlots)
+    {
+        int index = 0;
+        List<ItemSlot> emptySlots = null;
+        while (index != itemSlots.Count)
+        {
+            var emptySlot = itemSlots[index];
+            if (emptySlot.item != null)
+            {
+                index++;
+                continue;
+            }
+
+            emptySlots = FindAllMultiSizeSlots(itemSlots, item, emptySlot.slotIndex);
+            if (emptySlots.Count == item.size.x * item.size.y)
+            {
+                break;
+            }
+            else
+            {
+                index++;
+                emptySlots = null;
+                continue;
+            }
+        }
+
+        return emptySlots;
     }
 
     public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots)
@@ -306,6 +345,34 @@ public class InventoryManager : MonoBehaviour
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(itemData, count);
         PutTheItem(item, itemSlots);
+    }
+
+    public void SetItemInStorage(MagazineDataInfo magData)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(magData);
+
+        List<ItemSlot> emptySlots = null;
+        var rigStorages = myStorages.FindAll(x => x.type == MyStorageType.Rig);
+        for (int i = 0; i < rigStorages.Count; i++)
+        {
+            var rigStorage = rigStorages[i];
+            emptySlots = FindEmptySlots(item, rigStorage.itemSlots);
+            if (emptySlots == null)
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (emptySlots == null)
+        {
+            emptySlots = FindEmptySlots(item, otherStorage.itemSlots);
+        }
+        PutTheItem(item, emptySlots);
     }
 
     public void SetItemInEquipSlot(BulletDataInfo bulletData, int count, EquipSlot equipSlot)
@@ -412,7 +479,7 @@ public class InventoryManager : MonoBehaviour
                 }
                 else if (CheckEquip(onSlot.item, item))
                 {
-                    QuickEquip();
+                    QuickEquip(onSlot.item, item);
                 }
                 else
                 {
@@ -521,77 +588,6 @@ public class InventoryManager : MonoBehaviour
                 onSlot.item.SetTotalCount(maxValue);
             }
             onSlot.item.targetImage.raycastTarget = true;
-        }
-
-        void QuickEquip()
-        {
-            onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
-            switch (item.itemData.type)
-            {
-                case ItemType.Bullet:
-                    if (onSlot.item.itemData.type == ItemType.MainWeapon || onSlot.item.itemData.type == ItemType.SubWeapon)
-                    {
-                        onSlot.item.weaponData.chamberBullet = item.bulletData;
-                        onSlot.item.weaponData.isChamber = true;
-                        if (item.TotalCount > 1)
-                        {
-                            item.transform.SetParent(item.itemSlots[0].transform, false);
-                            item.transform.localPosition = Vector3.zero;
-                            item.SetTotalCount(item.TotalCount - 1);
-                        }
-                        else
-                        {
-                            item.SetItemSlots(null, DataUtility.slot_noItemColor);
-                            InActiveItem(item);
-                        }
-                    }
-                    else if (onSlot.item.itemData.type == ItemType.Magazine)
-                    {
-                        var newTotal = onSlot.item.magData.loadedBullets.Count + item.TotalCount;
-                        if (onSlot.item.magData.magSize >= newTotal)
-                        {
-                            for (int i = 0; i < newTotal; i++)
-                            {
-                                onSlot.item.magData.loadedBullets.Add(item.bulletData);
-                            }
-                            item.SetItemSlots(null, DataUtility.slot_noItemColor);
-                            InActiveItem(item);
-                        }
-                        else
-                        {
-                            var num = onSlot.item.magData.magSize - onSlot.item.magData.loadedBullets.Count;
-                            for (int i = 0; i < num; i++)
-                            {
-                                onSlot.item.magData.loadedBullets.Add(item.bulletData);
-                            }
-                            item.transform.SetParent(item.itemSlots[0].transform, false);
-                            item.transform.localPosition = Vector3.zero;
-                            item.SetTotalCount(item.TotalCount - num);
-                        }
-                        onSlot.item.SetTotalCount(onSlot.item.magData.loadedBullets.Count);
-                    }
-                    break;
-                case ItemType.Magazine:
-                    onSlot.item.weaponData.equipMag = item.magData;
-                    onSlot.item.weaponData.isMag = true;
-                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
-                    InActiveItem(item);
-                    onSlot.item.SetPartsSample();
-                    break;
-                case ItemType.Sight:
-                    onSlot.item.weaponData.equipPartsList.Add(item.partsData);
-                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
-                    InActiveItem(item);
-                    onSlot.item.SetPartsSample();
-                    break;
-                default:
-                    break;
-            }
-            onSlot.item.targetImage.raycastTarget = true;
-            if (popUp.gameObject.activeSelf && selectItem == onSlot.item)
-            {
-                popUp.PopUp_ItemInformation();
-            }
         }
 
         void ItemSplit()
@@ -717,6 +713,78 @@ public class InventoryManager : MonoBehaviour
 
         holdingItem = null;
         InactiveSampleItem();
+    }
+
+    public void QuickEquip(ItemHandler onItem, ItemHandler putItem)
+    {
+        onItem.SetItemSlots(DataUtility.slot_onItemColor);
+        switch (putItem.itemData.type)
+        {
+            case ItemType.Bullet:
+                if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                {
+                    onItem.weaponData.chamberBullet = putItem.bulletData;
+                    onItem.weaponData.isChamber = true;
+                    if (putItem.TotalCount > 1)
+                    {
+                        putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
+                        putItem.transform.localPosition = Vector3.zero;
+                        putItem.SetTotalCount(putItem.TotalCount - 1);
+                    }
+                    else
+                    {
+                        putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                        InActiveItem(putItem);
+                    }
+                }
+                else if (onItem.itemData.type == ItemType.Magazine)
+                {
+                    var newTotal = onItem.magData.loadedBullets.Count + putItem.TotalCount;
+                    if (onItem.magData.magSize >= newTotal)
+                    {
+                        for (int i = 0; i < newTotal; i++)
+                        {
+                            onItem.magData.loadedBullets.Add(putItem.bulletData);
+                        }
+                        putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                        InActiveItem(putItem);
+                    }
+                    else
+                    {
+                        var num = onItem.magData.magSize - onItem.magData.loadedBullets.Count;
+                        for (int i = 0; i < num; i++)
+                        {
+                            onItem.magData.loadedBullets.Add(putItem.bulletData);
+                        }
+                        putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
+                        putItem.transform.localPosition = Vector3.zero;
+                        putItem.SetTotalCount(putItem.TotalCount - num);
+                    }
+                    onItem.SetTotalCount(onItem.magData.loadedBullets.Count);
+                }
+                break;
+            case ItemType.Magazine:
+                onItem.weaponData.equipMag = putItem.magData;
+                onItem.weaponData.isMag = true;
+                putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                InActiveItem(putItem);
+                onItem.SetPartsSample();
+                break;
+            case ItemType.Sight:
+                onItem.weaponData.equipPartsList.Add(putItem.partsData);
+                putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                InActiveItem(putItem);
+                onItem.SetPartsSample();
+                break;
+            default:
+                break;
+        }
+
+        onItem.targetImage.raycastTarget = true;
+        if (popUp.gameObject.activeSelf && selectItem == onItem)
+        {
+            popUp.PopUp_ItemInformation();
+        }
     }
 
     public void UnequipItem(ItemHandler item)

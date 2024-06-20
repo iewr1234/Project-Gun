@@ -64,7 +64,6 @@ public class UserInterfaceManager : MonoBehaviour
             magIcon.SetComponents();
         }
         magIcons.gameObject.SetActive(false);
-        bottomUI.gameObject.SetActive(false);
 
         aimUI = transform.Find("AimUI").gameObject;
         shootNumText = transform.Find("AimUI/ShootNum").GetComponent<TextMeshProUGUI>();

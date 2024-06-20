@@ -39,16 +39,16 @@ public class ActionButton : MonoBehaviour
         }
     }
 
-    public void OnClick_ActionButton()
+    public void Button_ActionButton()
     {
         switch (type)
         {
             case GameState.Shoot:
-                gameMgr.ShootingAction();
+                gameMgr.ShootingAction_Move();
                 SetActiveButton(false);
                 break;
             case GameState.Reload:
-                gameMgr.ReloadAction();
+                gameMgr.ReloadAction_Move();
                 SetActiveButton(true);
                 break;
             default:

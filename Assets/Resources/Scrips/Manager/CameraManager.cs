@@ -65,7 +65,11 @@ public class CameraManager : MonoBehaviour
     {
         var canOperation = !actionCam && gameMgr.fieldNodes.Count > 0;
         if (!canOperation) return;
-        if (gameMgr.gameState == GameState.Shoot || gameMgr.gameState == GameState.Inventory) return;
+
+        var canMoveCam = gameMgr.gameState == GameState.None
+                      || gameMgr.gameState == GameState.Move
+                      || gameMgr.gameState == GameState.Watch;
+        if (!canMoveCam) return;
 
         CameraMove();
         CameraRotate();
