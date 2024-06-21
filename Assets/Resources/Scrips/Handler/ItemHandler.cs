@@ -138,6 +138,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         size = itemData.size;
         this.magData = magData.CopyData();
         countText.enabled = true;
+        SetItemRotation(false);
         SetTotalCount(magData.loadedBullets.Count);
 
         activeSample = samples.Find(x => x.name == itemData.dataID);

@@ -321,7 +321,7 @@ public class InventoryManager : MonoBehaviour
             if (emptySlot.item != null)
             {
                 index++;
-                emptySlot = null;
+                emptySlots = null;
                 continue;
             }
 
