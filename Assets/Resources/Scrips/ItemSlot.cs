@@ -112,26 +112,23 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         invenMgr.onSlot = null;
         if (invenMgr.holdingItem != null)
         {
-            if (invenMgr.onSlots.Count > 0)
+            for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
-                for (int i = 0; i < invenMgr.onSlots.Count; i++)
+                var onSlot = invenMgr.onSlots[i];
+                if (onSlot.item != null && onSlot.item != invenMgr.holdingItem)
                 {
-                    var onSlot = invenMgr.onSlots[i];
-                    if (onSlot.item != null && onSlot.item != invenMgr.holdingItem)
-                    {
-                        onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
-                    }
-                    else if (onSlot.item != null && onSlot.item == invenMgr.holdingItem)
-                    {
-                        onSlot.SetItemSlot(DataUtility.slot_onItemColor);
-                    }
-                    else
-                    {
-                        onSlot.SetItemSlot(DataUtility.slot_noItemColor);
-                    }
+                    onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
                 }
-                invenMgr.onSlots.Clear();
+                else if (onSlot.item != null && onSlot.item == invenMgr.holdingItem)
+                {
+                    onSlot.SetItemSlot(DataUtility.slot_onItemColor);
+                }
+                else
+                {
+                    onSlot.SetItemSlot(DataUtility.slot_noItemColor);
+                }
             }
+            invenMgr.onSlots.Clear();
 
             if (item == null)
             {

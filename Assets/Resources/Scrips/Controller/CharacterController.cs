@@ -2120,7 +2120,10 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Shoot:
-                if (currentWeapon.weaponData.chamberBullet == null || currentWeapon.weaponData.chamberBullet.level == 0) return;
+                //if (currentWeapon.weaponData.chamberBullet == null || currentWeapon.weaponData.chamberBullet.level == 0) return;
+                if (currentWeapon == null) return;
+                if (!currentWeapon.weaponData.isMag) return;
+                if (currentWeapon.weaponData.equipMag.loadedBullets.Count == 0) return;
 
                 target.animator.speed = 0f;
                 target.pause = true;

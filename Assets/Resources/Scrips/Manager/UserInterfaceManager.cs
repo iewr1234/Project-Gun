@@ -104,7 +104,7 @@ public class UserInterfaceManager : MonoBehaviour
 
         var weapon = charCtr.currentWeapon;
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-        if (weapon.weaponData.chamberBullet != null && weapon.weaponData.chamberBullet.level > 0) loadedAmmo++;
+        //if (weapon.weaponData.isChamber) loadedAmmo++;
 
         magNumText.enabled = true;
         magNumText.text = $"{loadedAmmo}/{weapon.weaponData.equipMag.magSize}";
@@ -125,7 +125,7 @@ public class UserInterfaceManager : MonoBehaviour
         var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fireRateNum + 1));
 
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-        if (weapon.weaponData.isChamber) loadedAmmo++;
+        //if (weapon.weaponData.isChamber) loadedAmmo++;
 
         shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";

@@ -240,20 +240,21 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
-        if (!weaponData.isChamber)
-        {
-            if (weaponData.equipMag.loadedBullets.Count == 0)
-            {
-                Debug.Log($"{charCtr.name}: Magazine empty");
-                return;
-            }
+        //if (!weaponData.isChamber)
+        //{
+        //    if (weaponData.equipMag.loadedBullets.Count == 0)
+        //    {
+        //        Debug.Log($"{charCtr.name}: Magazine empty");
+        //        return;
+        //    }
 
-            var bulletData = weaponData.equipMag.loadedBullets[0];
-            weaponData.chamberBullet = bulletData;
-            weaponData.isChamber = true;
-            weaponData.equipMag.loadedBullets.RemoveAt(0);
-        }
+        //    var bulletData = weaponData.equipMag.loadedBullets[0];
+        //    weaponData.chamberBullet = bulletData;
+        //    weaponData.isChamber = true;
+        //    weaponData.equipMag.loadedBullets.RemoveAt(0);
+        //}
 
+        var bulletData = weaponData.equipMag.loadedBullets[0];
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
         {
@@ -271,20 +272,21 @@ public class Weapon : MonoBehaviour
         bullet.transform.LookAt(aimPos);
 
         var isHit = hitList[0];
-        bullet.SetComponents(weaponData.chamberBullet, target, isHit);
+        bullet.SetComponents(/*weaponData.chamberBullet*/ bulletData, target, isHit);
         hitList.RemoveAt(0);
-      
-        if (weaponData.equipMag.loadedBullets.Count > 0)
-        {
-            var bulletData = weaponData.equipMag.loadedBullets[0];
-            weaponData.chamberBullet = bulletData;
-            weaponData.equipMag.loadedBullets.RemoveAt(0);
-        }
-        else
-        {
-            weaponData.chamberBullet = null;
-            weaponData.isChamber = false;
-        }
+        weaponData.equipMag.loadedBullets.RemoveAt(0);
+
+        //if (weaponData.equipMag.loadedBullets.Count > 0)
+        //{
+        //    var bulletData = weaponData.equipMag.loadedBullets[0];
+        //    weaponData.chamberBullet = bulletData;
+        //    weaponData.equipMag.loadedBullets.RemoveAt(0);
+        //}
+        //else
+        //{
+        //    weaponData.chamberBullet = null;
+        //    weaponData.isChamber = false;
+        //}
     }
 
     public CharacterController CharCtr

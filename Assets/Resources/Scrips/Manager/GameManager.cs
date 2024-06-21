@@ -384,7 +384,7 @@ public class GameManager : MonoBehaviour
                     }
                     var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (selectChar.fireRateNum + 1));
                     var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-                    if (weapon.weaponData.isChamber) loadedAmmo++;
+                    //if (weapon.weaponData.isChamber) loadedAmmo++;
 
                     if (shootNum > loadedAmmo)
                     {
@@ -491,7 +491,7 @@ public class GameManager : MonoBehaviour
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
         var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isMag && !weapon.weaponData.isChamber)
+        if (!weapon.weaponData.isMag /*&& !weapon.weaponData.isChamber*/)
         {
             Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
             return;

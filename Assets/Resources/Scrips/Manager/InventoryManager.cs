@@ -321,7 +321,7 @@ public class InventoryManager : MonoBehaviour
             if (emptySlot.item != null)
             {
                 index++;
-                emptySlot = null;
+                emptySlots = null;
                 continue;
             }
 
@@ -439,11 +439,11 @@ public class InventoryManager : MonoBehaviour
         switch (putItem.itemData.type)
         {
             case ItemType.Bullet:
-                if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
-                {
-                    return !onItem.weaponData.isChamber && onItem.weaponData.caliber == putItem.bulletData.caliber;
-                }
-                else if (onItem.itemData.type == ItemType.Magazine)
+                //if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                //{
+                //    return !onItem.weaponData.isChamber && onItem.weaponData.caliber == putItem.bulletData.caliber;
+                //}
+                /*else */if (onItem.itemData.type == ItemType.Magazine)
                 {
                     return onItem.magData.loadedBullets.Count < onItem.magData.magSize && onItem.magData.compatCaliber == putItem.bulletData.caliber;
                 }
@@ -644,17 +644,17 @@ public class InventoryManager : MonoBehaviour
                         playerCtr.AddWeapon(item.weaponData);
                     }
                     break;
-                case ItemType.Bullet:
-                    if (item.TotalCount > 1)
-                    {
-                        var count = item.TotalCount - 1;
-                        SetItemInStorage(item.itemData, count, itemSlots);
-                        item.SetTotalCount(1);
-                    }
-                    equipSlot.countText.enabled = false;
-                    popUp.item.weaponData.chamberBullet = item.bulletData;
-                    popUp.item.weaponData.isChamber = true;
-                    break;
+                //case ItemType.Bullet:
+                //    if (item.TotalCount > 1)
+                //    {
+                //        var count = item.TotalCount - 1;
+                //        SetItemInStorage(item.itemData, count, itemSlots);
+                //        item.SetTotalCount(1);
+                //    }
+                //    equipSlot.countText.enabled = false;
+                //    popUp.item.weaponData.chamberBullet = item.bulletData;
+                //    popUp.item.weaponData.isChamber = true;
+                //    break;
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
                     equipSlot.countText.text = $"{item.TotalCount}";
@@ -724,23 +724,23 @@ public class InventoryManager : MonoBehaviour
         switch (putItem.itemData.type)
         {
             case ItemType.Bullet:
-                if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
-                {
-                    onItem.weaponData.chamberBullet = putItem.bulletData;
-                    onItem.weaponData.isChamber = true;
-                    if (putItem.TotalCount > 1)
-                    {
-                        putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
-                        putItem.transform.localPosition = Vector3.zero;
-                        putItem.SetTotalCount(putItem.TotalCount - 1);
-                    }
-                    else
-                    {
-                        putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
-                        InActiveItem(putItem);
-                    }
-                }
-                else if (onItem.itemData.type == ItemType.Magazine)
+                //if (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                //{
+                //    onItem.weaponData.chamberBullet = putItem.bulletData;
+                //    onItem.weaponData.isChamber = true;
+                //    if (putItem.TotalCount > 1)
+                //    {
+                //        putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
+                //        putItem.transform.localPosition = Vector3.zero;
+                //        putItem.SetTotalCount(putItem.TotalCount - 1);
+                //    }
+                //    else
+                //    {
+                //        putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                //        InActiveItem(putItem);
+                //    }
+                //}
+                /*else*/ if (onItem.itemData.type == ItemType.Magazine)
                 {
                     var newTotal = onItem.magData.loadedBullets.Count + putItem.TotalCount;
                     if (onItem.magData.magSize >= newTotal)
@@ -796,10 +796,10 @@ public class InventoryManager : MonoBehaviour
 
         switch (item.itemData.type)
         {
-            case ItemType.Bullet:
-                popUp.item.weaponData.chamberBullet = null;
-                popUp.item.weaponData.isChamber = false;
-                break;
+            //case ItemType.Bullet:
+            //    popUp.item.weaponData.chamberBullet = null;
+            //    popUp.item.weaponData.isChamber = false;
+            //    break;
             case ItemType.Magazine:
                 item.SetTotalCount(item.magData.loadedBullets.Count);
                 popUp.item.weaponData.equipMag = null;

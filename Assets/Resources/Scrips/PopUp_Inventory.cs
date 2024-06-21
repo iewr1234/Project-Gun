@@ -286,7 +286,7 @@ public class PopUp_Inventory : MonoBehaviour
 
             EquipType[] type =
             {
-                EquipType.Chamber,
+                //EquipType.Chamber,
                 EquipType.Magazine,
                 EquipType.Muzzle,
                 EquipType.Sight,
@@ -301,10 +301,10 @@ public class PopUp_Inventory : MonoBehaviour
                 equipSlot.caliber = item.weaponData.caliber;
                 switch (type[i])
                 {
-                    case EquipType.Chamber:
-                        equipSlot.slotText.text = "약실";
-                        equipSlot.gameObject.SetActive(true);
-                        break;
+                    //case EquipType.Chamber:
+                    //    equipSlot.slotText.text = "약실";
+                    //    equipSlot.gameObject.SetActive(true);
+                    //    break;
                     case EquipType.Magazine:
                         if (item.weaponData.useMagazine.Count == 0)
                         {
@@ -427,24 +427,24 @@ public class PopUp_Inventory : MonoBehaviour
 
             switch (equipSlot.type)
             {
-                case EquipType.Chamber:
-                    var bulletData = item.weaponData.chamberBullet;
-                    if (item.weaponData.isChamber && equipSlot.CheckEquip(bulletData))
-                    {
-                        invenMgr.SetItemInEquipSlot(bulletData, 1, equipSlot);
-                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == bulletData.ID);
-                        for (int j = 0; j < smaples.Count; j++)
-                        {
-                            var smaple = smaples[j];
-                            smaple.SetActive(true);
-                        }
-                    }
-                    else
-                    {
-                        equipSlot.slotText.enabled = true;
-                        equipSlot.countText.enabled = false;
-                    }
-                    break;
+                //case EquipType.Chamber:
+                //    var bulletData = item.weaponData.chamberBullet;
+                //    if (item.weaponData.isChamber && equipSlot.CheckEquip(bulletData))
+                //    {
+                //        invenMgr.SetItemInEquipSlot(bulletData, 1, equipSlot);
+                //        var smaples = itemInfo.partsSamples.FindAll(x => x.name == bulletData.ID);
+                //        for (int j = 0; j < smaples.Count; j++)
+                //        {
+                //            var smaple = smaples[j];
+                //            smaple.SetActive(true);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        equipSlot.slotText.enabled = true;
+                //        equipSlot.countText.enabled = false;
+                //    }
+                //    break;
                 case EquipType.Magazine:
                     var magData = item.weaponData.equipMag;
                     if (item.weaponData.isMag && equipSlot.CheckEquip(magData))

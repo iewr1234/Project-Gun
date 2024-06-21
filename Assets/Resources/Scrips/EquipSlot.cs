@@ -13,7 +13,7 @@ public enum EquipType
     Backpack,
     MainWeapon,
     SubWeapon,
-    Chamber,
+    //Chamber,
     Magazine,
     Muzzle,
     Sight,
@@ -71,9 +71,9 @@ public class EquipSlot : MonoBehaviour
                 return item.itemData.type == ItemType.MainWeapon;
             case EquipType.SubWeapon:
                 return item.itemData.type == ItemType.SubWeapon;
-            case EquipType.Chamber:
-                return item.itemData.type == ItemType.Bullet
-                    && item.bulletData != null;
+            //case EquipType.Chamber:
+            //    return item.itemData.type == ItemType.Bullet
+            //        && item.bulletData != null;
             case EquipType.Magazine:
                 if (item.itemData.type == ItemType.Magazine)
                 {
@@ -91,12 +91,12 @@ public class EquipSlot : MonoBehaviour
         }
     }
 
-    public bool CheckEquip(BulletDataInfo bulletData)
-    {
-        return type == EquipType.Chamber
-                    && bulletData != null
-                    && bulletData.caliber == caliber;
-    }
+    //public bool CheckEquip(BulletDataInfo bulletData)
+    //{
+    //    return type == EquipType.Chamber
+    //                && bulletData != null
+    //                && bulletData.caliber == caliber;
+    //}
 
     public bool CheckEquip(MagazineDataInfo magData)
     {
