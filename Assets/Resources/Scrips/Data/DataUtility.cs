@@ -44,6 +44,9 @@ public static class DataUtility
 
     public static readonly Color equip_defaultColor = new Color(25 / 255f, 25 / 255f, 25 / 255f);
 
+    public static readonly Vector3Int popUp_defaultPos = new Vector3Int(0, 350, -50);
+    public static readonly Vector3Int popUp_defaultPos_split = new Vector3Int(0, 150, -50);
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

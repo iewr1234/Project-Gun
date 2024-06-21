@@ -8,7 +8,12 @@ public class InventoryManager : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public DataManager dataMgr;
-    [HideInInspector] public PopUp_Inventory popUp;
+
+    [Space(5f)]
+    //[HideInInspector] public PopUp_Inventory popUp;
+    public List<PopUp_Inventory> activePopUp;
+    private List<PopUp_Inventory> popUpList;
+
     [HideInInspector] public ContextMenu contextMenu;
 
     [Space(5f)]
@@ -67,8 +72,14 @@ public class InventoryManager : MonoBehaviour
     {
         gameMgr = _gmaeMgr;
         dataMgr = _gmaeMgr.dataMgr;
-        popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
-        popUp.SetComponents(this);
+        //popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
+        //popUp.SetComponents(this);
+        popUpList = transform.Find("InventoryUI/PopUpList").GetComponentsInChildren<PopUp_Inventory>().ToList();
+        for (int i = 0; i < popUpList.Count; i++)
+        {
+            var popUp = popUpList[i];
+            popUp.SetComponents(this);
+        }
         contextMenu = transform.Find("InventoryUI/ContextMenu").GetComponent<ContextMenu>();
         contextMenu.SetComponents(this);
 
@@ -92,7 +103,7 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < charEquips.Count; i++)
         {
             var charEquip = charEquips[i];
-            charEquip.SetComponents(this);
+            charEquip.SetComponents(this, null);
         }
 
         myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
@@ -154,6 +165,10 @@ public class InventoryManager : MonoBehaviour
         if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
         {
             RotateItem();
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape) && activePopUp.Count > 0)
+        {
+            activePopUp[^1].Button_PopUp_Close();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -231,12 +246,18 @@ public class InventoryManager : MonoBehaviour
             }
             else if (onEquip != null && onEquip.item != null)
             {
+                if (activePopUp.Find(x => x.item == onEquip.item) != null) return;
+
                 selectItem = onEquip.item;
+                var popUp = GetPopUp(PopUpState.ItemInformation);
                 popUp.PopUp_ItemInformation();
             }
             else if (onSlot != null && onSlot.item != null)
             {
+                if (activePopUp.Find(x => x.item == onSlot.item) != null) return;
+
                 selectItem = onSlot.item;
+                var popUp = GetPopUp(PopUpState.ItemInformation);
                 popUp.PopUp_ItemInformation();
             }
         }
@@ -443,7 +464,8 @@ public class InventoryManager : MonoBehaviour
                 //{
                 //    return !onItem.weaponData.isChamber && onItem.weaponData.caliber == putItem.bulletData.caliber;
                 //}
-                /*else */if (onItem.itemData.type == ItemType.Magazine)
+                /*else */
+                if (onItem.itemData.type == ItemType.Magazine)
                 {
                     return onItem.magData.loadedBullets.Count < onItem.magData.magSize && onItem.magData.compatCaliber == putItem.bulletData.caliber;
                 }
@@ -599,6 +621,7 @@ public class InventoryManager : MonoBehaviour
             item.transform.SetParent(item.itemSlots[0].transform, false);
             item.transform.localPosition = Vector3.zero;
 
+            var popUp = GetPopUp(PopUpState.Split);
             popUp.PopUp_Split(item, onSlots);
 
             holdingItem = null;
@@ -658,12 +681,12 @@ public class InventoryManager : MonoBehaviour
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
                     equipSlot.countText.text = $"{item.TotalCount}";
-                    popUp.item.weaponData.equipMag = item.magData;
-                    popUp.item.weaponData.isMag = true;
+                    equipSlot.popUp.item.weaponData.equipMag = item.magData;
+                    equipSlot.popUp.item.weaponData.isMag = true;
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                        var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                         if (weapon != null)
                         {
                             weapon.SetParts(item.magData.ID, true);
@@ -674,14 +697,14 @@ public class InventoryManager : MonoBehaviour
                     equipSlot.countText.enabled = false;
                     if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
                     {
-                        if (popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
+                        if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
                         {
-                            popUp.item.weaponData.equipPartsList.Add(item.partsData);
+                            equipSlot.popUp.item.weaponData.equipPartsList.Add(item.partsData);
                         }
                         if (gameMgr != null && gameMgr.playerList.Count > 0)
                         {
                             var playerCtr = gameMgr.playerList[0];
-                            var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                            var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                             if (weapon != null)
                             {
                                 weapon.SetParts(item.partsData.ID, true);
@@ -691,10 +714,10 @@ public class InventoryManager : MonoBehaviour
                     break;
             }
 
-            if (popUp.item != null)
+            if (activePopUp.Contains(equipSlot.popUp))
             {
-                popUp.item.SetPartsSample();
-                popUp.SetPartsSample();
+                equipSlot.popUp.item.SetPartsSample();
+                equipSlot.popUp.SetPartsSample();
             }
         }
         else if (item.equipSlot != null)
@@ -740,7 +763,8 @@ public class InventoryManager : MonoBehaviour
                 //        InActiveItem(putItem);
                 //    }
                 //}
-                /*else*/ if (onItem.itemData.type == ItemType.Magazine)
+                /*else*/
+                if (onItem.itemData.type == ItemType.Magazine)
                 {
                     var newTotal = onItem.magData.loadedBullets.Count + putItem.TotalCount;
                     if (onItem.magData.magSize >= newTotal)
@@ -784,7 +808,8 @@ public class InventoryManager : MonoBehaviour
         }
 
         onItem.targetImage.raycastTarget = true;
-        if (popUp.gameObject.activeSelf && selectItem == onItem)
+        var popUp = activePopUp.Find(x => x.state == PopUpState.ItemInformation && x.item == onItem);
+        if (popUp != null)
         {
             popUp.PopUp_ItemInformation();
         }
@@ -794,6 +819,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (item.equipSlot == null) return;
 
+        //var popUp = item.equipSlot.popUp;
         switch (item.itemData.type)
         {
             //case ItemType.Bullet:
@@ -802,12 +828,12 @@ public class InventoryManager : MonoBehaviour
             //    break;
             case ItemType.Magazine:
                 item.SetTotalCount(item.magData.loadedBullets.Count);
-                popUp.item.weaponData.equipMag = null;
-                popUp.item.weaponData.isMag = false;
+                item.equipSlot.popUp.item.weaponData.equipMag = null;
+                item.equipSlot.popUp.item.weaponData.isMag = false;
                 if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
                     var playerCtr = gameMgr.playerList[0];
-                    var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                    var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
                     if (weapon != null)
                     {
                         weapon.SetParts(item.magData.ID, false);
@@ -817,12 +843,12 @@ public class InventoryManager : MonoBehaviour
             default:
                 if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
                 {
-                    var find = popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
-                    popUp.item.weaponData.equipPartsList.Remove(find);
+                    var find = item.equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
+                    item.equipSlot.popUp.item.weaponData.equipPartsList.Remove(find);
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        var weapon = playerCtr.weapons.Find(x => x.weaponData == popUp.item.weaponData);
+                        var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
                         if (weapon != null)
                         {
                             weapon.SetParts(item.partsData.ID, true);
@@ -834,10 +860,10 @@ public class InventoryManager : MonoBehaviour
 
         item.equipSlot.item = null;
         item.equipSlot = null;
-        if (popUp.item != null)
+        if (activePopUp.Contains(item.equipSlot.popUp))
         {
-            popUp.item.SetPartsSample();
-            popUp.SetPartsSample();
+            item.equipSlot.popUp.item.SetPartsSample();
+            item.equipSlot.popUp.SetPartsSample();
         }
 
         if (gameMgr != null && gameMgr.playerList.Count > 0
@@ -863,6 +889,68 @@ public class InventoryManager : MonoBehaviour
         sampleItem.transform.SetParent(item.transform.parent, false);
         sampleItem.transform.localPosition = Vector3.zero;
         sampleItem.SetSampleItemInfo(item.itemData, item.rotation);
+    }
+
+    public PopUp_Inventory GetPopUp(PopUpState state)
+    {
+        PopUp_Inventory popUp = null;
+        var activePopUps = activePopUp.FindAll(x => x.state == state);
+        if (activePopUps.Count < 3)
+        {
+            popUp = popUpList.Find(x => !x.gameObject.activeSelf);
+        }
+        else
+        {
+            popUp = activePopUps[0];
+            activePopUps.RemoveAt(0);
+            RemoveActivePopUp(popUp);
+        }
+
+        popUp.transform.SetSiblingIndex(activePopUp.Count);
+        popUp.index = activePopUp.Count;
+        switch (state)
+        {
+            case PopUpState.Split:
+                popUp.transform.localPosition = DataUtility.popUp_defaultPos_split;
+                break;
+            default:
+                if (activePopUps.Count > 0)
+                {
+                    var prevPopUp = activePopUps.OrderByDescending(x => x.index).First();
+                    var offset = new Vector3(50f, -50f, 0f);
+                    popUp.transform.localPosition = prevPopUp.transform.localPosition + offset;
+                }
+                else
+                {
+                    popUp.transform.localPosition = DataUtility.popUp_defaultPos;
+                }
+                break;
+        }
+        popUp.SetPopUpPosition();
+        activePopUp.Add(popUp);
+
+        return popUp;
+    }
+
+    public void RemoveActivePopUp(PopUp_Inventory removePopUp)
+    {
+        removePopUp.item = null;
+        removePopUp.state = PopUpState.None;
+        removePopUp.gameObject.SetActive(false);
+        activePopUp.Remove(removePopUp);
+
+        ResetActivePopUp();
+    }
+
+    public void ResetActivePopUp()
+    {
+        for (int i = 0; i < activePopUp.Count; i++)
+        {
+            var popUp = activePopUp[i];
+            popUp.transform.SetSiblingIndex(i);
+            popUp.index = i;
+            popUp.SetPopUpPosition();
+        }
     }
 
     public void InActiveItem(ItemHandler item)

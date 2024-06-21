@@ -327,7 +327,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private bool CheckItemDrag()
     {
         if (invenMgr == null) return false;
-        if (invenMgr.popUp.state == PopUpState.Split) return false;
         if (Input.GetMouseButton(1)) return false;
 
         return true;

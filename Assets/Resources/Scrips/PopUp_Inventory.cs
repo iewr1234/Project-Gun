@@ -51,10 +51,7 @@ public class PopUp_Inventory : MonoBehaviour
     public ItemHandler item;
     public List<ItemSlot> itemSlots;
 
-    private Vector3 offset;
-
-    private readonly Vector3Int defaultPos_split = new Vector3Int(0, 150, -50);
-    private readonly Vector3Int defaultPos_itemInfo = new Vector3Int(0, 350, -50);
+    [HideInInspector] public int index;
 
     public void SetComponents(InventoryManager _invenMgr)
     {
@@ -100,7 +97,7 @@ public class PopUp_Inventory : MonoBehaviour
             for (int i = 0; i < equipSlots.Length; i++)
             {
                 var equipSlot = equipSlots[i];
-                equipSlot.SetComponents(invenMgr);
+                equipSlot.SetComponents(invenMgr, this);
             }
 
             return equipSlots.ToList();
@@ -134,19 +131,19 @@ public class PopUp_Inventory : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Button_PopUp_Close();
-        }
-    }
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Escape))
+    //    {
+    //        Button_PopUp_Close();
+    //    }
+    //}
 
     #region Split
     public void PopUp_Split(ItemHandler _item, List<ItemSlot> _itemSlots)
     {
         gameObject.SetActive(true);
-        transform.localPosition = defaultPos_split;
+        //transform.localPosition = DataUtility.popUp_defaultPos_split;
         topText.text = "아이템 나누기";
         state = PopUpState.Split;
 
@@ -211,7 +208,16 @@ public class PopUp_Inventory : MonoBehaviour
         {
             gameObject.SetActive(true);
         }
-        transform.localPosition = defaultPos_itemInfo;
+
+        //if (invenMgr.activePopUp.Count > 1)
+        //{
+        //    var offset = new Vector3(50f, -50f, 0f);
+        //    SetPopUpPosition(invenMgr.activePopUp[^1].transform.position);
+        //}
+        //else
+        //{
+        //    transform.localPosition = defaultPos_itemInfo;
+        //}
         topText.text = $"{invenMgr.selectItem.itemData.itemName}";
         state = PopUpState.ItemInformation;
 
@@ -501,12 +507,24 @@ public class PopUp_Inventory : MonoBehaviour
     }
     #endregion
 
+    public void SetPopUpPosition(Vector3 newPos)
+    {
+        transform.position = newPos;
+
+        SetPopUpPosition();
+    }
+
     private void FollowMouse()
     {
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
         var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, invenMgr.GetCanvasDistance()));
         transform.position = worldPos;
 
+        SetPopUpPosition();
+    }
+
+    public void SetPopUpPosition()
+    {
         var pos = transform.localPosition;
         if (split.uiObject.activeSelf && pos.y < -260f)
         {
@@ -530,14 +548,20 @@ public class PopUp_Inventory : MonoBehaviour
             pos.x = -635f;
         }
 
-        pos.z = -50f;
+        pos.z = -50f - (index * 150);
         transform.localPosition = pos;
     }
 
     public void BeginDrag_PopUp()
     {
-        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        offset = mousePos - transform.position;
+        var activePopUps = invenMgr.activePopUp.FindAll(x => x.state == state);
+        if (activePopUps.Count > 1 && activePopUps[^1] != this)
+        {
+            invenMgr.activePopUp.Remove(this);
+            invenMgr.activePopUp.Add(this);
+            invenMgr.ResetActivePopUp();
+        }
+
         FollowMouse();
     }
 
@@ -572,9 +596,6 @@ public class PopUp_Inventory : MonoBehaviour
             default:
                 break;
         }
-        gameObject.SetActive(false);
-
-        item = null;
-        state = PopUpState.None;
+        invenMgr.RemoveActivePopUp(this);
     }
 }

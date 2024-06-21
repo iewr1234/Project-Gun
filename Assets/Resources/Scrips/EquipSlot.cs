@@ -25,6 +25,7 @@ public class EquipSlot : MonoBehaviour
 {
     [Header("---Access Script---")]
     private InventoryManager invenMgr;
+    [HideInInspector] public PopUp_Inventory popUp;
 
     [Header("---Access Component---")]
     public Image outline;
@@ -39,9 +40,10 @@ public class EquipSlot : MonoBehaviour
     public float caliber;
     public ItemHandler item;
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(InventoryManager _invenMgr, PopUp_Inventory _popUp)
     {
         invenMgr = _invenMgr;
+        popUp = _popUp;
 
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;

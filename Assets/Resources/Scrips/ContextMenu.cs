@@ -38,7 +38,11 @@ public class ContextMenu : MonoBehaviour
 
     public void Button_ContextMenu_ItemInformation()
     {
-        invenMgr.popUp.PopUp_ItemInformation();
+        if (invenMgr.activePopUp.Find(x => x.item == invenMgr.selectItem) == null)
+        {
+            var popUp = invenMgr.GetPopUp(PopUpState.ItemInformation);
+            popUp.PopUp_ItemInformation();
+        }
         gameObject.SetActive(false);
     }
 }
