@@ -219,26 +219,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
-  scopeTf: {fileID: 0}
-  bulletTf: {fileID: 0}
-  meshs: []
-  type: 0
-  damage: 0
-  penetrate: 0
-  armorBreak: 0
-  critical: 0
-  rpm: 0
-  range: 0
-  watchAngle: 0
-  MOA: 0
-  stability: 0
-  rebound: 0
-  actionCost: 0
+  partsObjects: []
+  weaponData:
+    indexName: 
+    ID: 
+    prefabName: 
+    weaponName: 
+    model: 0
+    caliber: 0
+    type: 0
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    actionCost: 0
+    useMagazine: 
+    useMuzzle: 
+    useSight: 
+    useUnderRail: 
+    useRail: 
+    equipMag:
+      indexName: 
+      ID: 
+      prefabName: 
+      magName: 
+      compatModel: 
+      compatCaliber: 0
+      magSize: 0
+      loadedBullets: []
+    isMag: 0
+    equipPartsList: []
+  weight: 0
   fireMode: 1
   autoFireNum: 3
-  magMax: 0
-  loadedAmmo: 0
-  chamberBullet: 0
   hitList: 
 --- !u!33 &1721533729907552870
 MeshFilter:
@@ -397,7 +412,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2162635948887494776}
   m_Layer: 0
-  m_Name: Muzzle
+  m_Name: BulletTransform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

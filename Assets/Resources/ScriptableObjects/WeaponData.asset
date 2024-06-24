@@ -29,20 +29,9 @@ MonoBehaviour:
     actionCost: 4
     useMagazine: 01000000
     useMuzzle: 
-    useSight: 0100000002000000
+    useSight: 01000000
     useUnderRail: 
     useRail: 
-    chamberBullet:
-      indexName: 
-      ID: 
-      bulletName: 
-      level: 0
-      caliber: 0
-      propellant: 0
-      damage: 0
-      penetrate: 0
-      armorBreak: 0
-      critical: 0
     equipMag:
       indexName: 
       ID: 
@@ -52,6 +41,7 @@ MonoBehaviour:
       compatCaliber: 0
       magSize: 0
       loadedBullets: []
+    isMag: 0
     equipPartsList: []
   - indexName: 'W0002: Rifle_02'
     ID: W0002
@@ -69,20 +59,9 @@ MonoBehaviour:
     actionCost: 4
     useMagazine: 01000000
     useMuzzle: 
-    useSight: 
+    useSight: 02000000
     useUnderRail: 
     useRail: 
-    chamberBullet:
-      indexName: 
-      ID: 
-      bulletName: 
-      level: 0
-      caliber: 0
-      propellant: 0
-      damage: 0
-      penetrate: 0
-      armorBreak: 0
-      critical: 0
     equipMag:
       indexName: 
       ID: 
@@ -92,6 +71,7 @@ MonoBehaviour:
       compatCaliber: 0
       magSize: 0
       loadedBullets: []
+    isMag: 0
     equipPartsList: []
   - indexName: 'W0003: Pistol_01'
     ID: W0003
@@ -112,17 +92,6 @@ MonoBehaviour:
     useSight: 
     useUnderRail: 
     useRail: 
-    chamberBullet:
-      indexName: 
-      ID: 
-      bulletName: 
-      level: 0
-      caliber: 0
-      propellant: 0
-      damage: 0
-      penetrate: 0
-      armorBreak: 0
-      critical: 0
     equipMag:
       indexName: 
       ID: 
@@ -132,4 +101,5 @@ MonoBehaviour:
       compatCaliber: 0
       magSize: 0
       loadedBullets: []
+    isMag: 0
     equipPartsList: []

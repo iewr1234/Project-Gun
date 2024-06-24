@@ -2289,11 +2289,15 @@ public class CharacterController : MonoBehaviour
     {
         var weapon = weaponPool.Find(x => x.name == weaponData.weaponName);
         weapon.SetComponets(this, weaponData);
+        weapon.EquipWeapon();
         if (currentWeapon == null)
         {
-            weapon.EquipWeapon();
             weapon.WeaponSwitching("Right");
             currentWeapon = weapon;
+        }
+        else
+        {
+            weapon.WeaponSwitching("Holster");
         }
     }
 

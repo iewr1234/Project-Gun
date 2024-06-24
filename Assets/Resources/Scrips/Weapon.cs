@@ -65,6 +65,15 @@ public class Weapon : MonoBehaviour
         SetWeaponPositionAndRotation();
 
         //magMax = 30;
+        if (weaponData.isMag)
+        {
+            SetParts(weaponData.equipMag.ID, true);
+        }
+        for (int i = 0; i < weaponData.equipPartsList.Count; i++)
+        {
+            var partsData = weaponData.equipPartsList[i];
+            SetParts(partsData.ID, true);
+        }
         Reload();
 
         void AddWeaponPartsObjects()
@@ -80,10 +89,10 @@ public class Weapon : MonoBehaviour
                 parts.Add(sample);
             }
 
-            var scopeTf = partsTf.Find("Scope");
-            for (int i = 0; i < scopeTf.childCount; i++)
+            var sightTf = partsTf.Find("Sight");
+            for (int i = 0; i < sightTf.childCount; i++)
             {
-                var sample = scopeTf.GetChild(i).gameObject;
+                var sample = sightTf.GetChild(i).gameObject;
                 sample.SetActive(false);
                 parts.Add(sample);
             }
@@ -143,6 +152,12 @@ public class Weapon : MonoBehaviour
         charCtr = null;
 
         weaponData = null;
+        var activeParts = partsObjects.FindAll(x => x.gameObject.activeSelf);
+        for (int i = 0; i < activeParts.Count; i++)
+        {
+            var parts = activeParts[i];
+            parts.gameObject.SetActive(false);
+        }
         gameObject.SetActive(false);
     }
 
@@ -164,9 +179,10 @@ public class Weapon : MonoBehaviour
 
     public void SetParts(string partsID, bool value)
     {
-        var parts = partsObjects.Find(x => x.name == partsID);
-        if (parts != null)
+        var partsList = partsObjects.FindAll(x => x.name == partsID);
+        for (int i = 0; i < partsList.Count; i++)
         {
+            var parts = partsList[i];
             parts.gameObject.SetActive(value);
         }
     }
@@ -254,7 +270,7 @@ public class Weapon : MonoBehaviour
         //    weaponData.equipMag.loadedBullets.RemoveAt(0);
         //}
 
-        var bulletData = weaponData.equipMag.loadedBullets[0];
+        var loadedBullet = weaponData.equipMag.loadedBullets[^1];
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
         {
@@ -272,9 +288,9 @@ public class Weapon : MonoBehaviour
         bullet.transform.LookAt(aimPos);
 
         var isHit = hitList[0];
-        bullet.SetComponents(/*weaponData.chamberBullet*/ bulletData, target, isHit);
+        bullet.SetComponents(/*weaponData.chamberBullet*/ loadedBullet, target, isHit);
         hitList.RemoveAt(0);
-        weaponData.equipMag.loadedBullets.RemoveAt(0);
+        weaponData.equipMag.loadedBullets.Remove(loadedBullet);
 
         //if (weaponData.equipMag.loadedBullets.Count > 0)
         //{

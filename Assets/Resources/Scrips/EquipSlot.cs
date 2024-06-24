@@ -57,6 +57,7 @@ public class EquipSlot : MonoBehaviour
 
     public bool CheckEquip(ItemHandler item)
     {
+        if (this.item != null && this.item != item) return false;
         if (item == null || item.itemData == null) return false;
 
         switch (type)

@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -211,9 +210,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            var smaple = partsSamples.Find(x => x.name == partsData.ID);
-            if (smaple)
+            var smaples = partsSamples.FindAll(x => x.name == partsData.ID);
+            for (int j = 0; j < smaples.Count; j++)
             {
+                var smaple = smaples[j];
                 smaple.SetActive(true);
             }
         }

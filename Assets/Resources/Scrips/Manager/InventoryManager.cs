@@ -118,17 +118,19 @@ public class InventoryManager : MonoBehaviour
         CreateItems();
         invenUI.gameObject.SetActive(false);
 
-        SetItemInStorage("T0001", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0001", 1, otherStorage.itemSlots);
+        SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots);
 
-        SetItemInStorage("T0002", 1, otherStorage.itemSlots);
+        SetItemInStorage("Scope_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Scope_2", 1, otherStorage.itemSlots);
 
-        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
-        SetItemInStorage("T0003", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
 
-        SetItemInStorage("T0004", 100, otherStorage.itemSlots);
+        SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots);
+        SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -169,6 +171,7 @@ public class InventoryManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Escape) && activePopUp.Count > 0)
         {
             activePopUp[^1].Button_PopUp_Close();
+            RemoveActivePopUp(activePopUp[^1]);
         }
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -193,6 +196,15 @@ public class InventoryManager : MonoBehaviour
         gameMgr.uiMgr.bottomUI.SetActive(!value);
         gameMgr.DeselectCharacter();
         gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
+        if (!value && activePopUp.Count > 0)
+        {
+            for (int i = activePopUp.Count - 1; i >= 0; i--)
+            {
+                var popUp = activePopUp[i];
+                popUp.Button_PopUp_Close();
+            }
+        }
+
         if (gameMgr.mapEdt != null)
         {
             gameMgr.mapEdt.gameObject.SetActive(!value);
@@ -246,7 +258,7 @@ public class InventoryManager : MonoBehaviour
             }
             else if (onEquip != null && onEquip.item != null)
             {
-                if (activePopUp.Find(x => x.item == onEquip.item) != null) return;
+                //if (activePopUp.Find(x => x.item == onEquip.item) != null) return;
 
                 selectItem = onEquip.item;
                 var popUp = GetPopUp(PopUpState.ItemInformation);
@@ -254,7 +266,7 @@ public class InventoryManager : MonoBehaviour
             }
             else if (onSlot != null && onSlot.item != null)
             {
-                if (activePopUp.Find(x => x.item == onSlot.item) != null) return;
+                //if (activePopUp.Find(x => x.item == onSlot.item) != null) return;
 
                 selectItem = onSlot.item;
                 var popUp = GetPopUp(PopUpState.ItemInformation);
@@ -308,9 +320,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetItemInStorage(string itemID, int count, List<ItemSlot> itemSlots)
+    public void SetItemInStorage(string itemName, int count, List<ItemSlot> itemSlots)
     {
-        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemID);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.itemName == itemName);
         if (itemData == null)
         {
             Debug.Log("Not found item");
@@ -635,6 +647,11 @@ public class InventoryManager : MonoBehaviour
     {
         if (equipSlot.CheckEquip(item))
         {
+            if (item.equipSlot != null)
+            {
+                UnequipItem(item);
+            }
+
             var itemSlots = new List<ItemSlot>(item.itemSlots);
             equipSlot.item = item;
             equipSlot.slotText.enabled = false;
@@ -743,6 +760,11 @@ public class InventoryManager : MonoBehaviour
 
     public void QuickEquip(ItemHandler onItem, ItemHandler putItem)
     {
+        if (putItem.equipSlot != null)
+        {
+            UnequipItem(putItem);
+        }
+
         onItem.SetItemSlots(DataUtility.slot_onItemColor);
         switch (putItem.itemData.type)
         {
@@ -858,13 +880,13 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
 
-        item.equipSlot.item = null;
-        item.equipSlot = null;
         if (activePopUp.Contains(item.equipSlot.popUp))
         {
             item.equipSlot.popUp.item.SetPartsSample();
             item.equipSlot.popUp.SetPartsSample();
         }
+        item.equipSlot.item = null;
+        item.equipSlot = null;
 
         if (gameMgr != null && gameMgr.playerList.Count > 0
          && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
@@ -894,8 +916,19 @@ public class InventoryManager : MonoBehaviour
     public PopUp_Inventory GetPopUp(PopUpState state)
     {
         PopUp_Inventory popUp = null;
+        var activeItemInfo = activePopUp.Find(x => x.item == selectItem && x.state == PopUpState.ItemInformation);
         var activePopUps = activePopUp.FindAll(x => x.state == state);
-        if (activePopUps.Count < 3)
+        if (activeItemInfo)
+        {
+            popUp = activeItemInfo;
+            RemoveActivePopUp(popUp);
+            popUp.transform.SetSiblingIndex(activePopUp.Count);
+            popUp.index = activePopUp.Count;
+            popUp.SetPopUpPosition();
+            activePopUp.Add(popUp);
+            return popUp;
+        }
+        else if (activePopUps.Count < 3)
         {
             popUp = popUpList.Find(x => !x.gameObject.activeSelf);
         }
