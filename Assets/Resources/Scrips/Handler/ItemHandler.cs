@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Linq;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -61,6 +62,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < samplesTf.childCount; i++)
         {
             var sample = samplesTf.GetChild(i).gameObject;
+            if (gameObject.layer == LayerMask.NameToLayer("Sample"))
+            {
+                var meshs = sample.transform.GetComponentsInChildren<MeshRenderer>().ToList();
+                for (int j = 0; j < meshs.Count; j++)
+                {
+                    var mesh = meshs[j];
+                    mesh.material = new Material(mesh.material);
+                    mesh.material.shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                    mesh.material.color = new Color(1f, 1f, 1f, 100 / 255f);
+                }
+            }
+
             if (sample.name[0] == 'W')
             {
                 var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
@@ -86,8 +99,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         switch (itemData.type)
         {
             case ItemType.MainWeapon:
-                var _weaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _weaponData.CopyData();
+                var _mainWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _mainWeaponData.CopyData();
+                break;
+            case ItemType.SubWeapon:
+                var _subWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _subWeaponData.CopyData();
                 break;
             case ItemType.Bullet:
                 var _bulletData = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
@@ -153,9 +170,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetSampleItemInfo(ItemDataInfo _itemData, bool rotation)
+    public void SetSampleItemInfo(ItemHandler item)
     {
-        itemData = _itemData;
+        itemData = item.itemData;
         size = itemData.size;
         switch (itemData.type)
         {
@@ -172,7 +189,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             default:
                 break;
         }
-        SetItemRotation(rotation);
+        SetItemRotation(item.rotation);
 
         if (activeSample != null)
         {
@@ -183,11 +200,44 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             Debug.LogError("Not found Sample object");
         }
+        SetPartsSample(item.weaponData);
         activeSample.SetActive(true);
         gameObject.SetActive(true);
     }
 
     public void SetPartsSample()
+    {
+        var activeSamples = partsSamples.FindAll(x => x.activeSelf);
+        for (int i = 0; i < activeSamples.Count; i++)
+        {
+            var activeSample = activeSamples[i];
+            activeSample.SetActive(false);
+        }
+
+        if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
+
+        if (weaponData.isMag)
+        {
+            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.ID);
+            if (smaple)
+            {
+                smaple.SetActive(true);
+            }
+        }
+
+        for (int i = 0; i < weaponData.equipPartsList.Count; i++)
+        {
+            var partsData = weaponData.equipPartsList[i];
+            var smaples = partsSamples.FindAll(x => x.name == partsData.ID);
+            for (int j = 0; j < smaples.Count; j++)
+            {
+                var smaple = smaples[j];
+                smaple.SetActive(true);
+            }
+        }
+    }
+
+    public void SetPartsSample(WeaponDataInfo weaponData)
     {
         var activeSamples = partsSamples.FindAll(x => x.activeSelf);
         for (int i = 0; i < activeSamples.Count; i++)
@@ -375,7 +425,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            invenMgr.OpenContextMenu(this);
+            invenMgr.contextMenu.OpenTheContextMenu(this);
         }
     }
 

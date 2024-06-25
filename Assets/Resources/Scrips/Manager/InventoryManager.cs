@@ -120,6 +120,7 @@ public class InventoryManager : MonoBehaviour
 
         SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots);
         SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots);
+        SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots);
 
         SetItemInStorage("Scope_1", 1, otherStorage.itemSlots);
         SetItemInStorage("Scope_2", 1, otherStorage.itemSlots);
@@ -128,9 +129,11 @@ public class InventoryManager : MonoBehaviour
         SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
         SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
         SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots);
 
         SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots);
         SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots);
+        SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -467,6 +470,7 @@ public class InventoryManager : MonoBehaviour
 
     public bool CheckEquip(ItemHandler onItem, ItemHandler putItem)
     {
+        if (onItem == null) return false;
         if (onItem == putItem) return false;
 
         switch (putItem.itemData.type)
@@ -910,7 +914,7 @@ public class InventoryManager : MonoBehaviour
     {
         sampleItem.transform.SetParent(item.transform.parent, false);
         sampleItem.transform.localPosition = Vector3.zero;
-        sampleItem.SetSampleItemInfo(item.itemData, item.rotation);
+        sampleItem.SetSampleItemInfo(item);
     }
 
     public PopUp_Inventory GetPopUp(PopUpState state)
@@ -1037,14 +1041,5 @@ public class InventoryManager : MonoBehaviour
         {
             return 0;
         }
-    }
-
-    public void OpenContextMenu(ItemHandler item)
-    {
-        selectItem = item;
-        var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, contextMenu.transform.position.z);
-        var worldPos = invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, GetCanvasDistance()));
-        contextMenu.transform.position = worldPos;
-        contextMenu.gameObject.SetActive(true);
     }
 }

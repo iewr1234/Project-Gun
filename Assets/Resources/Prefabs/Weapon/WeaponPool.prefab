@@ -32,6 +32,7 @@ Transform:
   - {fileID: 5095302506278715631}
   - {fileID: 5193715837618252403}
   - {fileID: 163108115894302107}
+  - {fileID: 8835953341223417482}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -44,7 +45,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4507883397412980380, guid: 17b1c4fef300d8748bad10befd3c2cac, type: 3}
       propertyPath: m_Name
-      value: Rifle_01
+      value: Rifle_1
       objectReference: {fileID: 0}
     - target: {fileID: 4511107095416794628, guid: 17b1c4fef300d8748bad10befd3c2cac, type: 3}
       propertyPath: m_RootOrder
@@ -106,7 +107,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3910580671679154324, guid: 0b23ab5eb2031174285468d7f494c123, type: 3}
       propertyPath: m_Name
-      value: Rifle_02
+      value: Rifle_2
       objectReference: {fileID: 0}
     - target: {fileID: 3913301265293113860, guid: 0b23ab5eb2031174285468d7f494c123, type: 3}
       propertyPath: m_RootOrder
@@ -159,6 +160,68 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3913301265293113860, guid: 0b23ab5eb2031174285468d7f494c123, type: 3}
   m_PrefabInstance: {fileID: 3750846702328549279}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7859521347053246770
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 6189020304964383369}
+    m_Modifications:
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1700573768158826580, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+      propertyPath: m_Name
+      value: Pistol_1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+--- !u!4 &8835953341223417482 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1697080502323343288, guid: a1d046508b60f0b44a6ccbf14bc724d7, type: 3}
+  m_PrefabInstance: {fileID: 7859521347053246770}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8659448615068593899
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -168,7 +231,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4507883397412980380, guid: 17b1c4fef300d8748bad10befd3c2cac, type: 3}
       propertyPath: m_Name
-      value: Rifle_01
+      value: Rifle_1
       objectReference: {fileID: 0}
     - target: {fileID: 4511107095416794628, guid: 17b1c4fef300d8748bad10befd3c2cac, type: 3}
       propertyPath: m_RootOrder
@@ -230,7 +293,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3910580671679154324, guid: 0b23ab5eb2031174285468d7f494c123, type: 3}
       propertyPath: m_Name
-      value: Rifle_02
+      value: Rifle_2
       objectReference: {fileID: 0}
     - target: {fileID: 3913301265293113860, guid: 0b23ab5eb2031174285468d7f494c123, type: 3}
       propertyPath: m_RootOrder

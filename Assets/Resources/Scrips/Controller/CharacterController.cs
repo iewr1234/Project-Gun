@@ -169,7 +169,7 @@ public class CharacterController : MonoBehaviour
     public WatchInfo watchInfo;
     [Space(5f)]
 
-    [SerializeField] private List<CharacterCommand> commandList = new List<CharacterCommand>();
+    public List<CharacterCommand> commandList = new List<CharacterCommand>();
 
     [HideInInspector] public bool pause;
     private float timer;
@@ -414,6 +414,11 @@ public class CharacterController : MonoBehaviour
 
         AimProcess();
         CommandApplication();
+
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            animator.Play("Idle");
+        }
     }
 
     /// <summary>
@@ -598,6 +603,10 @@ public class CharacterController : MonoBehaviour
                 {
                     animator.SetBool("isMove", false);
                     commandList.Remove(command);
+                    if (commandList.Count == 0)
+                    {
+                        AddCommand(CommandType.TakeCover);
+                    }
                 }
             }
         }
@@ -2289,10 +2298,10 @@ public class CharacterController : MonoBehaviour
     {
         var weapon = weaponPool.Find(x => x.name == weaponData.weaponName);
         weapon.SetComponets(this, weaponData);
-        weapon.EquipWeapon();
         if (currentWeapon == null)
         {
             weapon.WeaponSwitching("Right");
+            weapon.EquipWeapon();
             currentWeapon = weapon;
         }
         else

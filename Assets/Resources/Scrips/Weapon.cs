@@ -33,7 +33,6 @@ public class Weapon : MonoBehaviour
     //[Tooltip("장전된 탄환 수")] public int loadedAmmo;
     //[Tooltip("약실 내 탄환")] public BulletDataInfo chamberBullet = null;
 
-    private List<WeaponPartsDataInfo> partsList = new List<WeaponPartsDataInfo>();
     [SerializeField] private List<bool> hitList = new List<bool>();
 
     private Vector3 holsterPos;
@@ -64,7 +63,6 @@ public class Weapon : MonoBehaviour
         weaponData = _weaponData;
         SetWeaponPositionAndRotation();
 
-        //magMax = 30;
         if (weaponData.isMag)
         {
             SetParts(weaponData.equipMag.ID, true);
@@ -74,7 +72,6 @@ public class Weapon : MonoBehaviour
             var partsData = weaponData.equipPartsList[i];
             SetParts(partsData.ID, true);
         }
-        Reload();
 
         void AddWeaponPartsObjects()
         {
@@ -163,6 +160,9 @@ public class Weapon : MonoBehaviour
 
     public void EquipWeapon()
     {
+        var isCover = charCtr.animator.GetBool("isCover");
+        var fullCover = charCtr.animator.GetBool("fullCover");
+        var isRight = charCtr.animator.GetBool("isRight");
         switch (weaponData.type)
         {
             case WeaponType.Pistol:
@@ -175,6 +175,28 @@ public class Weapon : MonoBehaviour
                 break;
         }
         charCtr.SetRig(weaponData.type);
+
+        charCtr.animator.SetBool("isCover", isCover);
+        charCtr.animator.SetBool("fullCover", fullCover);
+        charCtr.animator.SetBool("isRight", isRight);
+        if (isCover)
+        {
+            if (fullCover)
+            {
+                if (isRight)
+                {
+                    charCtr.animator.Play("Base Layer.Cover.FullCover.CoverRight");
+                }
+                else
+                {
+                    charCtr.animator.Play("Base Layer.Cover.FullCover.CoverLeft");
+                }
+            }
+            else
+            {
+                charCtr.animator.Play("Base Layer.Cover.HalfCover.CoverIdle");
+            }
+        }
     }
 
     public void SetParts(string partsID, bool value)

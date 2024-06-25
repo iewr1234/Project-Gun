@@ -249,6 +249,9 @@ public class PopUp_Inventory : MonoBehaviour
             case ItemType.MainWeapon:
                 WeaponInfo();
                 break;
+            case ItemType.SubWeapon:
+                WeaponInfo();
+                break;
             case ItemType.Sight:
                 WeaponPartsInfo();
                 break;

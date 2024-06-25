@@ -141,10 +141,10 @@ public class GameManager : MonoBehaviour
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
-                var mainWeapons = invenMgr.allEquips.FindAll(x => x.type == EquipType.MainWeapon && x.item != null);
-                for (int i = 0; i < mainWeapons.Count; i++)
+                var weapons = invenMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
+                for (int i = 0; i < weapons.Count; i++)
                 {
-                    var weaponData = mainWeapons[i].item.weaponData;
+                    var weaponData = weapons[i].item.weaponData;
                     if (weaponData.type == WeaponType.None) continue;
 
                     var weapon = charCtr.GetWeapon(weaponData.weaponName);
@@ -884,7 +884,7 @@ public class GameManager : MonoBehaviour
     /// <param name="targetNode"></param>
     private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
     {
-        if (charCtr.animator.GetBool("isMove")) return;
+        if (charCtr.commandList.Count > 0) return;
 
         //for (int i = 0; i < movableNodes.Count; i++)
         //{
