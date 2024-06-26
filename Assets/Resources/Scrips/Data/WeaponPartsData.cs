@@ -33,9 +33,9 @@ public class WeaponPartsDataInfo
     [Space(5f)]
 
     public List<int> compatModel;
+    public float weight;
     public WeaponPartsType type;
     public WeaponPartsSize size;
-    public float weight;
     [Space(5f)]
 
     public int RPM;
@@ -59,9 +59,9 @@ public class WeaponPartsDataInfo
             partsName = partsName,
 
             compatModel = new List<int>(compatModel),
+            weight = weight,
             type = type,
             size = size,
-            weight = weight,
 
             RPM = RPM,
             range = range,

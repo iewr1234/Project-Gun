@@ -10,10 +10,11 @@ public class BulletDataInfo
 
     public string ID;
     public string bulletName;
-    public int level;
     [Space(5f)]
 
+    public int level;
     [Tooltip("구경")] public float caliber;
+    [Tooltip("구경")] public float weight;
     [Tooltip("장약")] public int propellant;
     [Tooltip("피해량")] public int damage;
     [Tooltip("관통")] public int penetrate;
@@ -28,9 +29,10 @@ public class BulletDataInfo
 
             ID = ID,
             bulletName = bulletName,
-            level = level,
 
+            level = level,
             caliber = caliber,
+            weight = weight,
             propellant = propellant,
             damage = damage,
             penetrate = penetrate,

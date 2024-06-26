@@ -331,8 +331,12 @@ public class GameManager : MonoBehaviour
                 {
                     ReloadAction_Move();
                 }
-                else if (Input.GetKeyDown(KeyCode.X) && selectChar.weapons.Count > 1)
+                else if (Input.GetKeyDown(KeyCode.X))
                 {
+                    if (selectChar.commandList.Count > 0) return;
+                    if (selectChar.weapons.Count < 2) return;
+                    if (!selectChar.animator.GetCurrentAnimatorStateInfo(selectChar.upperIndex).IsTag("None")) return;
+
                     selectChar.AddCommand(CommandType.ChangeWeapon);
                 }
                 else if (Input.GetKeyDown(KeyCode.T))
@@ -903,7 +907,7 @@ public class GameManager : MonoBehaviour
             ClearPassPoint();
         }
 
-        if (charCtr.animator.GetCurrentAnimatorStateInfo(0).IsTag("Cover"))
+        if (charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.baseIndex).IsTag("Cover"))
         {
             charCtr.AddCommand(CommandType.LeaveCover);
         }

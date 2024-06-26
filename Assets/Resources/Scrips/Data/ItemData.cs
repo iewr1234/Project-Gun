@@ -39,7 +39,6 @@ public class ItemDataInfo
     public string itemName;
     public ItemType type;
     public ItemRarity rarity;
-    public float weight;
     public int maxNesting;
     public int price;
     public Vector2Int size;
@@ -54,7 +53,6 @@ public class ItemDataInfo
             itemName = itemName,
             type = type,
             rarity = rarity,
-            weight = weight,
             maxNesting = maxNesting,
             price = price,
             size = size,

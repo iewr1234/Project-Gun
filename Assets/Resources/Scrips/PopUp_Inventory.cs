@@ -274,7 +274,7 @@ public class PopUp_Inventory : MonoBehaviour
             };
             string[] values =
             {
-                $"{item.itemData.weight}",
+                $"{item.weaponData.GetWeaponWeight()}",
                 $"{item.weaponData.RPM}",
                 $"{item.weaponData.range}",
                 $"{item.weaponData.watchAngle}¡Æ",
@@ -398,7 +398,7 @@ public class PopUp_Inventory : MonoBehaviour
             };
             string[] values =
             {
-                $"{item.itemData.weight}",
+                $"{item.partsData.weight}",
                 $"{item.partsData.RPM}",
                 $"{item.partsData.range}",
                 $"{item.partsData.watchAngle}¡Æ",

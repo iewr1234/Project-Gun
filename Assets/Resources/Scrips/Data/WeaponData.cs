@@ -22,6 +22,7 @@ public class WeaponDataInfo
 
     [Tooltip("모델")] public int model;
     [Tooltip("구경")] public float caliber;
+    [Tooltip("무게")] public float weight;
     [Tooltip("무기분류")] public WeaponType type;
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
@@ -57,6 +58,7 @@ public class WeaponDataInfo
 
             model = model,
             caliber = caliber,
+            weight = weight,
             type = type,
             RPM = RPM,
             range = range,
@@ -80,6 +82,27 @@ public class WeaponDataInfo
         };
 
         return weaponData;
+    }
+
+    public float GetWeaponWeight()
+    {
+        var totalWegiht = weight;
+        if (isMag)
+        {
+            totalWegiht += equipMag.weight;
+            for (int i = 0; i < equipMag.loadedBullets.Count; i++)
+            {
+                var bullet = equipMag.loadedBullets[i];
+                totalWegiht += bullet.weight;
+            }
+        }
+        for (int i = 0; i < equipPartsList.Count; i++)
+        {
+            var parts = equipPartsList[i];
+            totalWegiht += parts.weight;
+        }
+
+        return DataUtility.GetFloorValue(totalWegiht, 1);
     }
 }
 

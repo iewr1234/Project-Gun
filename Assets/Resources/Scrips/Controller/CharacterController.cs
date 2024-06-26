@@ -149,6 +149,9 @@ public class CharacterController : MonoBehaviour
     [Tooltip("조준")] public int aiming;
     [Tooltip("반응")] public int reaction;
 
+    [HideInInspector] public int baseIndex;
+    [HideInInspector] public int upperIndex;
+
     [Space(5f)]
     public Weapon currentWeapon;
     [HideInInspector] public int fireRateNum;
@@ -558,7 +561,7 @@ public class CharacterController : MonoBehaviour
                 currentNode.charCtr = this;
             }
 
-            var canLook = animator.GetCurrentAnimatorStateInfo(0).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(0).IsTag("Move");
+            var canLook = animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Move");
             if (canLook && !moving)
             {
                 CheckLineCover();
@@ -568,11 +571,11 @@ public class CharacterController : MonoBehaviour
 
             var pos = transform.position;
             var targetPos = targetNode.transform.position;
-            if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Move") && pos != targetPos)
+            if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Move") && pos != targetPos)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
             }
-            else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump") && pos != targetPos)
+            else if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Jump") && pos != targetPos)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, jumpSpeed * Time.deltaTime);
             }
@@ -1086,7 +1089,7 @@ public class CharacterController : MonoBehaviour
                 }
                 covering = true;
             }
-            else if (animator.GetCurrentAnimatorStateInfo(0).IsTag("Aim"))
+            else if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Aim"))
             {
                 animator.SetBool("isAim", true);
                 chestAim = true;
@@ -1141,7 +1144,7 @@ public class CharacterController : MonoBehaviour
             var errorInterval = 1f;
             aimInterval = dir * errorInterval;
             aimInterval.y += DataUtility.aimPointY;
-            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
             {
                 targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
             }
@@ -1163,7 +1166,7 @@ public class CharacterController : MonoBehaviour
         if (shootNum == 0) return;
 
         timer += Time.deltaTime;
-        if (timer > aimTime && animator.GetCurrentAnimatorStateInfo(1).IsTag("Aim"))
+        if (timer > aimTime && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
             if (!animator.GetBool("fireTrigger"))
             {
@@ -1185,7 +1188,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void ReloadPrecess(CharacterCommand command)
     {
-        if (!reloading && animator.GetCurrentAnimatorStateInfo(1).IsTag("None"))
+        if (!reloading && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("None"))
         {
             animator.SetTrigger("reload");
             currentWeapon.Reload();
@@ -2244,7 +2247,7 @@ public class CharacterController : MonoBehaviour
         {
             CharacterDead();
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit") && !animator.GetBool("isMove"))
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
         {
             animator.SetTrigger("isHit");
         }
@@ -2294,10 +2297,10 @@ public class CharacterController : MonoBehaviour
         timer = 0f;
     }
 
-    public void AddWeapon(WeaponDataInfo weaponData)
+    public void AddWeapon(ItemHandler item)
     {
-        var weapon = weaponPool.Find(x => x.name == weaponData.weaponName);
-        weapon.SetComponets(this, weaponData);
+        var weapon = weaponPool.Find(x => x.name == item.weaponData.weaponName);
+        weapon.SetComponets(this, item.weaponData);
         if (currentWeapon == null)
         {
             weapon.WeaponSwitching("Right");
@@ -2341,7 +2344,7 @@ public class CharacterController : MonoBehaviour
         switch (state)
         {
             case CharacterState.None:
-                if (target.animator.GetCurrentAnimatorStateInfo(0).IsTag("Targeting"))
+                if (target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
                 {
                     target.AddCommand(CommandType.Targeting, false, transform);
                 }

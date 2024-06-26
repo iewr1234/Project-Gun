@@ -325,7 +325,7 @@ public class DataManager : MonoBehaviour
 
     #region Item Data
     [HideInInspector] public ItemData itemData;
-    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:J";
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:I";
     private enum ItemVariable
     {
         ID,
@@ -333,7 +333,6 @@ public class DataManager : MonoBehaviour
         ItemName,
         Type,
         Rarity,
-        Weight,
         MaxNesting,
         Price,
         X_Size,
@@ -371,7 +370,6 @@ public class DataManager : MonoBehaviour
                     itemName = data[(int)ItemVariable.ItemName],
                     type = (ItemType)int.Parse(data[(int)ItemVariable.Type]),
                     rarity = (ItemRarity)int.Parse(data[(int)ItemVariable.Rarity]),
-                    weight = float.Parse(data[(int)ItemVariable.Weight]),
                     maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
                     price = int.Parse(data[(int)ItemVariable.Price]),
                     size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
@@ -385,7 +383,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:R";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:S";
     private enum WeaponVariable
     {
         ID,
@@ -393,6 +391,7 @@ public class DataManager : MonoBehaviour
         WeaponName,
         Model,
         Caliber,
+        Weight,
         WeaponType,
         RPM,
         Range,
@@ -439,6 +438,7 @@ public class DataManager : MonoBehaviour
                     weaponName = data[(int)WeaponVariable.WeaponName],
                     model = int.Parse(data[(int)WeaponVariable.Model]),
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
+                    weight = float.Parse(data[(int)WeaponVariable.Weight]),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
@@ -478,13 +478,14 @@ public class DataManager : MonoBehaviour
 
     #region WeaponParts Data
     [HideInInspector] public WeaponPartsData partsData;
-    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:O";
+    private readonly string partsDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1233203314&range=A2:P";
     private enum WeaponPartsVariable
     {
         ID,
         PrefabName,
         PartsName,
         CompatModel,
+        Weight,
         PartsType,
         Size,
         RPM,
@@ -528,6 +529,7 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)WeaponPartsVariable.PrefabName],
                     partsName = data[(int)WeaponPartsVariable.PartsName],
                     compatModel = ReadCompatModelInfo(data[(int)WeaponPartsVariable.CompatModel]),
+                    weight = float.Parse(data[(int)WeaponPartsVariable.Weight]),
                     type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
                     size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
                     RPM = int.Parse(data[(int)WeaponPartsVariable.RPM]),
@@ -549,7 +551,7 @@ public class DataManager : MonoBehaviour
 
     #region Magazine Data
     [HideInInspector] public MagazineData magData;
-    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:F";
+    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:G";
     private enum MagazineVariable
     {
         ID,
@@ -557,6 +559,7 @@ public class DataManager : MonoBehaviour
         MagazineName,
         CompatModel,
         CompatCaliber,
+        Weight,
         MagazineSize,
     }
 
@@ -591,6 +594,7 @@ public class DataManager : MonoBehaviour
                     magName = data[(int)MagazineVariable.MagazineName],
                     compatModel = ReadCompatModelInfo(data[(int)MagazineVariable.CompatModel]),
                     compatCaliber = float.Parse(data[(int)MagazineVariable.CompatCaliber]),
+                    weight = float.Parse(data[(int)MagazineVariable.Weight]),
                     magSize = int.Parse(data[(int)MagazineVariable.MagazineSize]),
                 };
                 magData.magInfos.Add(magInfo);
@@ -602,13 +606,14 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:I";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:J";
     private enum BulletVariable
     {
         ID,
         BulletName,
         Level,
         Caliber,
+        Weight,
         Propellant,
         Damage,
         Penetrate,
@@ -646,6 +651,7 @@ public class DataManager : MonoBehaviour
                     bulletName = data[(int)BulletVariable.BulletName],
                     level = int.Parse(data[(int)BulletVariable.Level]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
+                    weight = float.Parse(data[(int)BulletVariable.Weight]),
                     propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     damage = int.Parse(data[(int)BulletVariable.Damage]),
                     penetrate = int.Parse(data[(int)BulletVariable.Penetrate]),

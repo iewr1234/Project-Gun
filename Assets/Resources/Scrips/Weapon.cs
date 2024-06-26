@@ -11,6 +11,15 @@ public enum FireModeType
 
 public class Weapon : MonoBehaviour
 {
+    private enum AnumationLayers_CharacterA
+    {
+        Base,
+        Pistol_A_Base,
+        Pistol_A_Upper,
+        Rifle_A_Base,
+        Rifle_A_Upper,
+    }
+
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [SerializeField] private CharacterController charCtr;
@@ -22,7 +31,6 @@ public class Weapon : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public WeaponDataInfo weaponData;
-    public float weight;
     [Space(5f)]
 
     [Tooltip("사격타입")] public FireModeType fireMode;
@@ -160,43 +168,55 @@ public class Weapon : MonoBehaviour
 
     public void EquipWeapon()
     {
-        var isCover = charCtr.animator.GetBool("isCover");
-        var fullCover = charCtr.animator.GetBool("fullCover");
-        var isRight = charCtr.animator.GetBool("isRight");
+        //var isCover = charCtr.animator.GetBool("isCover");
+        //var fullCover = charCtr.animator.GetBool("fullCover");
+        //var isRight = charCtr.animator.GetBool("isRight");
+        if (charCtr.baseIndex > 0 && charCtr.upperIndex > 0)
+        {
+            charCtr.animator.SetLayerWeight(charCtr.baseIndex, 0f);
+            charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
+        }
+
         switch (weaponData.type)
         {
             case WeaponType.Pistol:
-                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
+                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
+                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Pistol_A_Upper;
+                //charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
                 break;
             case WeaponType.Rifle:
-                charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
+                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Rifle_A_Base;
+                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Rifle_A_Upper;
+                //charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
                 break;
             default:
                 break;
         }
+        charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
+        charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
         charCtr.SetRig(weaponData.type);
 
-        charCtr.animator.SetBool("isCover", isCover);
-        charCtr.animator.SetBool("fullCover", fullCover);
-        charCtr.animator.SetBool("isRight", isRight);
-        if (isCover)
-        {
-            if (fullCover)
-            {
-                if (isRight)
-                {
-                    charCtr.animator.Play("Base Layer.Cover.FullCover.CoverRight");
-                }
-                else
-                {
-                    charCtr.animator.Play("Base Layer.Cover.FullCover.CoverLeft");
-                }
-            }
-            else
-            {
-                charCtr.animator.Play("Base Layer.Cover.HalfCover.CoverIdle");
-            }
-        }
+        //charCtr.animator.SetBool("isCover", isCover);
+        //charCtr.animator.SetBool("fullCover", fullCover);
+        //charCtr.animator.SetBool("isRight", isRight);
+        //if (isCover)
+        //{
+        //    if (fullCover)
+        //    {
+        //        if (isRight)
+        //        {
+        //            charCtr.animator.Play("Base Layer.Cover.FullCover.CoverRight");
+        //        }
+        //        else
+        //        {
+        //            charCtr.animator.Play("Base Layer.Cover.FullCover.CoverLeft");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        charCtr.animator.Play("Base Layer.Cover.HalfCover.CoverIdle");
+        //    }
+        //}
     }
 
     public void SetParts(string partsID, bool value)

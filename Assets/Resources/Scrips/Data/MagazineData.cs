@@ -11,8 +11,11 @@ public class MagazineDataInfo
     public string ID;
     public string prefabName;
     public string magName;
+    [Space(5f)]
+
     public List<int> compatModel;
     public float compatCaliber;
+    public float weight;
     public int magSize;
     [Space(5f)]
 
@@ -28,6 +31,7 @@ public class MagazineDataInfo
             magName = magName,
             compatModel = new List<int>(compatModel),
             compatCaliber = compatCaliber,
+            weight = weight,
             magSize = magSize,
 
             loadedBullets = new List<BulletDataInfo>(loadedBullets),

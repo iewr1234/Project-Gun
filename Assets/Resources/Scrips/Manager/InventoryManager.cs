@@ -647,45 +647,45 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void EquipItem(ItemHandler item, EquipSlot equipSlot)
+    public void EquipItem(ItemHandler putItem, EquipSlot equipSlot)
     {
-        if (equipSlot.CheckEquip(item))
+        if (equipSlot.CheckEquip(putItem))
         {
-            if (item.equipSlot != null)
+            if (putItem.equipSlot != null)
             {
-                UnequipItem(item);
+                UnequipItem(putItem);
             }
 
-            var itemSlots = new List<ItemSlot>(item.itemSlots);
-            equipSlot.item = item;
+            var itemSlots = new List<ItemSlot>(putItem.itemSlots);
+            equipSlot.item = putItem;
             equipSlot.slotText.enabled = false;
 
-            item.countText.enabled = false;
-            item.equipSlot = equipSlot;
-            item.SetItemSlots(null, DataUtility.slot_noItemColor);
-            item.itemSlots.Clear();
+            putItem.countText.enabled = false;
+            putItem.equipSlot = equipSlot;
+            putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+            putItem.itemSlots.Clear();
 
-            item.ChangeRectPivot(true);
-            item.SetItemRotation(false);
-            item.transform.SetParent(equipSlot.transform, false);
-            item.transform.localPosition = Vector3.zero;
-            item.targetImage.raycastTarget = true;
-            item.SetItemScale(true);
-
-            switch (item.itemData.type)
+            putItem.ChangeRectPivot(true);
+            putItem.SetItemRotation(false);
+            putItem.transform.SetParent(equipSlot.transform, false);
+            putItem.transform.localPosition = Vector3.zero;
+            putItem.targetImage.raycastTarget = true;
+            putItem.SetItemScale(true);
+     
+            switch (putItem.itemData.type)
             {
                 case ItemType.MainWeapon:
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        playerCtr.AddWeapon(item.weaponData);
+                        playerCtr.AddWeapon(putItem);
                     }
                     break;
                 case ItemType.SubWeapon:
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        playerCtr.AddWeapon(item.weaponData);
+                        playerCtr.AddWeapon(putItem);
                     }
                     break;
                 //case ItemType.Bullet:
@@ -701,8 +701,8 @@ public class InventoryManager : MonoBehaviour
                 //    break;
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
-                    equipSlot.countText.text = $"{item.TotalCount}";
-                    equipSlot.popUp.item.weaponData.equipMag = item.magData;
+                    equipSlot.countText.text = $"{putItem.TotalCount}";
+                    equipSlot.popUp.item.weaponData.equipMag = putItem.magData;
                     equipSlot.popUp.item.weaponData.isMag = true;
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
@@ -710,17 +710,17 @@ public class InventoryManager : MonoBehaviour
                         var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                         if (weapon != null)
                         {
-                            weapon.SetParts(item.magData.ID, true);
+                            weapon.SetParts(putItem.magData.ID, true);
                         }
                     }
                     break;
                 default:
                     equipSlot.countText.enabled = false;
-                    if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
+                    if (putItem.partsData != null && putItem.partsData.type != WeaponPartsType.None)
                     {
-                        if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID) == null)
+                        if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
                         {
-                            equipSlot.popUp.item.weaponData.equipPartsList.Add(item.partsData);
+                            equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
                         }
                         if (gameMgr != null && gameMgr.playerList.Count > 0)
                         {
@@ -728,7 +728,7 @@ public class InventoryManager : MonoBehaviour
                             var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                             if (weapon != null)
                             {
-                                weapon.SetParts(item.partsData.ID, true);
+                                weapon.SetParts(putItem.partsData.ID, true);
                             }
                         }
                     }
@@ -738,25 +738,25 @@ public class InventoryManager : MonoBehaviour
             if (activePopUp.Contains(equipSlot.popUp))
             {
                 equipSlot.popUp.item.SetPartsSample();
-                equipSlot.popUp.SetPartsSample();
+                equipSlot.popUp.PopUp_ItemInformation();
             }
         }
-        else if (item.equipSlot != null)
+        else if (putItem.equipSlot != null)
         {
-            item.equipSlot.slotText.enabled = false;
-            item.SetItemScale(true);
-            item.ChangeRectPivot(true);
-            item.transform.SetParent(item.equipSlot.transform, false);
-            item.transform.localPosition = Vector3.zero;
+            putItem.equipSlot.slotText.enabled = false;
+            putItem.SetItemScale(true);
+            putItem.ChangeRectPivot(true);
+            putItem.transform.SetParent(putItem.equipSlot.transform, false);
+            putItem.transform.localPosition = Vector3.zero;
         }
         else
         {
-            item.SetItemSlots(DataUtility.slot_onItemColor);
-            item.transform.SetParent(item.itemSlots[0].transform, false);
-            item.transform.position = item.itemSlots[0].transform.position;
+            putItem.SetItemSlots(DataUtility.slot_onItemColor);
+            putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
+            putItem.transform.position = putItem.itemSlots[0].transform.position;
         }
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
-        item.targetImage.color = Color.clear;
+        putItem.targetImage.color = Color.clear;
 
         holdingItem = null;
         InactiveSampleItem();
@@ -887,9 +887,9 @@ public class InventoryManager : MonoBehaviour
         if (activePopUp.Contains(item.equipSlot.popUp))
         {
             item.equipSlot.popUp.item.SetPartsSample();
-            item.equipSlot.popUp.SetPartsSample();
+            item.equipSlot.item = null;
+            item.equipSlot.popUp.PopUp_ItemInformation();
         }
-        item.equipSlot.item = null;
         item.equipSlot = null;
 
         if (gameMgr != null && gameMgr.playerList.Count > 0
