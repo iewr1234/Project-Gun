@@ -104,6 +104,19 @@ public class WeaponDataInfo
 
         return DataUtility.GetFloorValue(totalWegiht, 1);
     }
+
+    public int GetWeaponRebound()
+    {
+        var totalRebound = rebound;
+        totalRebound += equipMag.loadedBullets[^1].propellant;
+        for (int i = 0; i < equipPartsList.Count; i++)
+        {
+            var parts = equipPartsList[i];
+            totalRebound += parts.rebound;
+        }
+
+        return totalRebound;
+    }
 }
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Object/WeaponData")]

@@ -112,6 +112,20 @@ public static class DataUtility
     }
 
     /// <summary>
+    /// 조준 시 스테미나 사용량 계산
+    /// </summary>
+    /// <returns></returns>
+    public static int GetAimStaminaCost(CharacterController charCtr)
+    {
+        var rebound = charCtr.currentWeapon.weaponData.GetWeaponRebound();
+        var weight = charCtr.currentWeapon.weaponData.GetWeaponWeight();
+        var strength = charCtr.strength;
+        var result = 3 + (rebound * weight * 0.01f) * (1 / (1 + strength * 0.01f));
+
+        return Mathf.CeilToInt(result);
+    }
+
+    /// <summary>
     /// 명중률 계산
     /// </summary>
     /// <param name="charCtr"></param>
@@ -162,6 +176,20 @@ public static class DataUtility
                 return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
             }
         }
+    }
+
+    /// <summary>
+    /// 반동 명중 감소량 계산
+    /// </summary>
+    /// <param name="charCtr"></param>
+    /// <param name="dist"></param>
+    /// <returns></returns>
+    public static float GetHitAccuracyReduction(CharacterController charCtr, float dist)
+    {
+        var rebound = charCtr.currentWeapon.weaponData.GetWeaponRebound();
+        var result = Mathf.Pow(2, dist / 5) * (rebound * 0.1f);
+
+        return GetFloorValue(result, 2);
     }
 
     public static Vector3 GetAimPosition(Transform charTf, bool isRight)
