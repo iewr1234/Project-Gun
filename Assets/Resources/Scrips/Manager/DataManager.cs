@@ -728,75 +728,75 @@ public class DataManager : MonoBehaviour
         return compatModels;
     }
 
-    #region Custom Editor
-    [CustomEditor(typeof(DataManager))]
-    public class DataEditor : Editor
-    {
-        private DataManager dataMgr;
+    //#region Custom Editor
+    //[CustomEditor(typeof(DataManager))]
+    //public class DataEditor : Editor
+    //{
+    //    private DataManager dataMgr;
 
-        private void OnEnable()
-        {
-            dataMgr = (DataManager)target;
-        }
+    //    private void OnEnable()
+    //    {
+    //        dataMgr = (DataManager)target;
+    //    }
 
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-            GUILayout.Label('\n' + "---Read GoogleSheet Data---");
-            if (GUILayout.Button("Update the Character Database"))
-            {
-                dataMgr.UpdateCharacterData();
-                EditorUtility.SetDirty(dataMgr.charData);
-            }
-            if (GUILayout.Button("Update the Item Database"))
-            {
-                dataMgr.UpdateItemData();
-                EditorUtility.SetDirty(dataMgr.itemData);
-            }
-            if (GUILayout.Button("Update the Weapon Database"))
-            {
-                dataMgr.UpdateWeaponData();
-                EditorUtility.SetDirty(dataMgr.weaponData);
-            }
-            if (GUILayout.Button("Update the WeaponParts Database"))
-            {
-                dataMgr.UpdateWeaponPartsData();
-                EditorUtility.SetDirty(dataMgr.partsData);
-            }
-            if (GUILayout.Button("Update the Magazine Database"))
-            {
-                dataMgr.UpdateMagazineData();
-                EditorUtility.SetDirty(dataMgr.magData);
-            }
-            if (GUILayout.Button("Update the Bullet Database"))
-            {
-                dataMgr.UpdateBulletData();
-                EditorUtility.SetDirty(dataMgr.bulletData);
-            }
-            if (GUILayout.Button("Update the Armor Database"))
-            {
-                dataMgr.UpdateArmorData();
-                EditorUtility.SetDirty(dataMgr.armorData);
-            }
-            GUILayout.Label(" ");
-            if (GUILayout.Button("Update All Database"))
-            {
-                dataMgr.UpdateCharacterData();
-                EditorUtility.SetDirty(dataMgr.charData);
-                dataMgr.UpdateItemData();
-                EditorUtility.SetDirty(dataMgr.itemData);
-                dataMgr.UpdateWeaponData();
-                EditorUtility.SetDirty(dataMgr.weaponData);
-                dataMgr.UpdateWeaponPartsData();
-                EditorUtility.SetDirty(dataMgr.partsData);
-                dataMgr.UpdateMagazineData();
-                EditorUtility.SetDirty(dataMgr.magData);
-                dataMgr.UpdateBulletData();
-                EditorUtility.SetDirty(dataMgr.bulletData);
-                dataMgr.UpdateArmorData();
-                EditorUtility.SetDirty(dataMgr.armorData);
-            }
-        }
-    }
-    #endregion
+    //    public override void OnInspectorGUI()
+    //    {
+    //        base.OnInspectorGUI();
+    //        GUILayout.Label('\n' + "---Read GoogleSheet Data---");
+    //        if (GUILayout.Button("Update the Character Database"))
+    //        {
+    //            dataMgr.UpdateCharacterData();
+    //            EditorUtility.SetDirty(dataMgr.charData);
+    //        }
+    //        if (GUILayout.Button("Update the Item Database"))
+    //        {
+    //            dataMgr.UpdateItemData();
+    //            EditorUtility.SetDirty(dataMgr.itemData);
+    //        }
+    //        if (GUILayout.Button("Update the Weapon Database"))
+    //        {
+    //            dataMgr.UpdateWeaponData();
+    //            EditorUtility.SetDirty(dataMgr.weaponData);
+    //        }
+    //        if (GUILayout.Button("Update the WeaponParts Database"))
+    //        {
+    //            dataMgr.UpdateWeaponPartsData();
+    //            EditorUtility.SetDirty(dataMgr.partsData);
+    //        }
+    //        if (GUILayout.Button("Update the Magazine Database"))
+    //        {
+    //            dataMgr.UpdateMagazineData();
+    //            EditorUtility.SetDirty(dataMgr.magData);
+    //        }
+    //        if (GUILayout.Button("Update the Bullet Database"))
+    //        {
+    //            dataMgr.UpdateBulletData();
+    //            EditorUtility.SetDirty(dataMgr.bulletData);
+    //        }
+    //        if (GUILayout.Button("Update the Armor Database"))
+    //        {
+    //            dataMgr.UpdateArmorData();
+    //            EditorUtility.SetDirty(dataMgr.armorData);
+    //        }
+    //        GUILayout.Label(" ");
+    //        if (GUILayout.Button("Update All Database"))
+    //        {
+    //            dataMgr.UpdateCharacterData();
+    //            EditorUtility.SetDirty(dataMgr.charData);
+    //            dataMgr.UpdateItemData();
+    //            EditorUtility.SetDirty(dataMgr.itemData);
+    //            dataMgr.UpdateWeaponData();
+    //            EditorUtility.SetDirty(dataMgr.weaponData);
+    //            dataMgr.UpdateWeaponPartsData();
+    //            EditorUtility.SetDirty(dataMgr.partsData);
+    //            dataMgr.UpdateMagazineData();
+    //            EditorUtility.SetDirty(dataMgr.magData);
+    //            dataMgr.UpdateBulletData();
+    //            EditorUtility.SetDirty(dataMgr.bulletData);
+    //            dataMgr.UpdateArmorData();
+    //            EditorUtility.SetDirty(dataMgr.armorData);
+    //        }
+    //    }
+    //}
+    //#endregion
 }
