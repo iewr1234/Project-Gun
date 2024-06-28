@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class CharacterDataInfo
+public class PlayerDataInfo
 {
     public string indexName;
     [Space(5f)]
@@ -35,8 +35,8 @@ public class CharacterDataInfo
     public string armorID;
 }
 
-[CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable Object/CharacterData")]
-public class CharacterData : ScriptableObject
+[CreateAssetMenu(fileName = "PlayerData", menuName = "Scriptable Object/PlayerData")]
+public class PlayerData : ScriptableObject
 {
-    public List<CharacterDataInfo> charInfos = new List<CharacterDataInfo>();
+    public List<PlayerDataInfo> playerInfos = new List<PlayerDataInfo>();
 }

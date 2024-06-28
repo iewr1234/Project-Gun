@@ -37,15 +37,18 @@ public class CharacterUI : MonoBehaviour
         armorText = armorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
-        if (charCtr.armor != null)
-        {
-            armorGauge.maxValue = charCtr.armor.maxDurability;
-            armorGauge.value = charCtr.armor.durability;
-        }
-        else
-        {
-            armorGauge.gameObject.SetActive(false);
-        }
+
+        //if (charCtr.armor != null)
+        //{
+        //    armorGauge.maxValue = charCtr.armor.maxDurability;
+        //    armorGauge.value = charCtr.armor.durability;
+        //}
+        //else
+        //{
+        //    armorGauge.gameObject.SetActive(false);
+        //}
+        armorGauge.gameObject.SetActive(false);
+
         healthGauge.maxValue = charCtr.maxHealth;
         healthGauge.value = charCtr.health;
         staminaGauge.maxValue = charCtr.maxStamina;

@@ -97,6 +97,7 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public CharacterUI charUI;
+    [HideInInspector] public AIHandler aiHlr;
     public List<Weapon> weapons;
     public Armor armor;
 
@@ -209,8 +210,9 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
+    /// <param name="playerData"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, CharacterDataInfo charData, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, PlayerDataInfo playerData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
         animator = GetComponent<Animator>();
@@ -253,28 +255,30 @@ public class CharacterController : MonoBehaviour
             weapon.gameObject.SetActive(false);
         }
 
-        var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
         var name = transform.name.Split(' ', '(', ')')[0];
-        transform.name = $"{name}_{charList.Count}";
-        charList.Add(this);
+        transform.name = $"{name}_{gameMgr.playerList.Count}";
+        gameMgr.playerList.Add(this);
 
-        strength = charData.strength;
-        vitality = charData.vitality;
-        intellect = charData.intellect;
-        wisdom = charData.wisdom;
-        agility = charData.agility;
-        dexterity = charData.dexterity;
+        strength = playerData.strength;
+        vitality = playerData.vitality;
+        intellect = playerData.intellect;
+        wisdom = playerData.wisdom;
+        agility = playerData.agility;
+        dexterity = playerData.dexterity;
         mobility = Mobility;
 
-        maxAction = charData.maxAction;
+        maxAction = playerData.maxAction;
         action = maxAction;
-        maxHealth = charData.maxHealth;
+        maxHealth = playerData.maxHealth;
         health = maxHealth;
-        maxStamina = charData.maxStamina;
+        maxStamina = playerData.maxStamina;
         stamina = maxStamina;
-        sight = charData.sight;
-        aiming = charData.aiming;
-        reaction = charData.reaction;
+        sight = playerData.sight;
+        aiming = playerData.aiming;
+        reaction = playerData.reaction;
+
+        baseIndex = 1;
+        upperIndex = 2;
 
         currentNode = _currentNode;
         currentNode.charCtr = this;
@@ -282,6 +286,90 @@ public class CharacterController : MonoBehaviour
         //ShowVisibleNodes(sight, currentNode);
     }
 
+    /// <summary>
+    /// 구성요소 설정
+    /// </summary>
+    /// <param name="_gameMgr"></param>
+    /// <param name="_ownerType"></param>
+    /// <param name="enemyData"></param>
+    /// <param name="_currentNode"></param>
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, EnemyDataInfo enemyData, FieldNode _currentNode)
+    {
+        gameMgr = _gameMgr;
+        animator = GetComponent<Animator>();
+        outlinable = this.AddComponent<Outlinable>();
+        cd = GetComponent<Collider>();
+
+        aimPoint = transform.Find("AimPoint");
+        headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
+        headRig.weight = 0f;
+        chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
+        chestRig.weight = 0f;
+
+        mainHolsterTf = transform.Find("Root/Hips/Spine_01/Spine_02");
+        subHolsterTf = transform.Find("Root/Hips/UpperLeg_R/Holster");
+        rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+        leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+
+        ownerType = _ownerType;
+        meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
+        sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
+        ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
+        for (int i = 0; i < ragdollCds.Count; i++)
+        {
+            var cd = ragdollCds[i];
+            cd.gameObject.layer = LayerMask.NameToLayer("BodyParts");
+            cd.isTrigger = true;
+        }
+        ragdollRbs = transform.Find("Root").GetComponentsInChildren<Rigidbody>().ToList();
+        for (int i = 0; i < ragdollRbs.Count; i++)
+        {
+            var rb = ragdollRbs[i];
+            rb.isKinematic = true;
+        }
+
+        weaponPoolTf = transform.Find("WeaponPool");
+        weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
+        for (int i = 0; i < weaponPool.Count; i++)
+        {
+            var weapon = weaponPool[i];
+            weapon.gameObject.SetActive(false);
+        }
+
+        var name = transform.name.Split(' ', '(', ')')[0];
+        transform.name = $"{name}_{gameMgr.enemyList.Count}";
+        gameMgr.enemyList.Add(this);
+
+        strength = enemyData.strength;
+        vitality = enemyData.vitality;
+        intellect = enemyData.intellect;
+        wisdom = enemyData.wisdom;
+        agility = enemyData.agility;
+        dexterity = enemyData.dexterity;
+        mobility = Mobility;
+
+        maxAction = enemyData.maxAction;
+        action = maxAction;
+        maxHealth = enemyData.maxHealth;
+        health = maxHealth;
+        maxStamina = enemyData.maxStamina;
+        stamina = maxStamina;
+        sight = enemyData.sight;
+        aiming = enemyData.aiming;
+        reaction = enemyData.reaction;
+
+        baseIndex = 1;
+        upperIndex = 2;
+
+        currentNode = _currentNode;
+        currentNode.charCtr = this;
+        currentNode.canMove = false;
+    }
+
+    /// <summary>
+    /// Rig 설정
+    /// </summary>
+    /// <param name="type"></param>
     public void SetRig(WeaponType type)
     {
         switch (type)
@@ -297,6 +385,9 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 외곽선 설정
+    /// </summary>
     public void SetOutlinable()
     {
         outlinable.RenderStyle = RenderStyle.FrontBack;
@@ -327,6 +418,10 @@ public class CharacterController : MonoBehaviour
         outlinable.AddAllChildRenderersToRenderingList();
     }
 
+    /// <summary>
+    /// 외곽선 활성화 설정
+    /// </summary>
+    /// <param name="value"></param>
     public void SetActiveOutline(bool value)
     {
         if (value)

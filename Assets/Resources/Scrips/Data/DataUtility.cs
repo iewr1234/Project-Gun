@@ -110,6 +110,17 @@ public static class DataUtility
     }
 
     /// <summary>
+    /// 이동칸 수에 따른 행동력 소모 계산
+    /// </summary>
+    /// <param name="moveRange"></param>
+    /// <param name="mobility"></param>
+    /// <returns></returns>
+    public static int GetMoveCost(int moveRange, float mobility)
+    {
+        return Mathf.CeilToInt(moveRange / mobility);
+    }
+
+    /// <summary>
     /// 조준 시 스테미나 사용량 계산
     /// </summary>
     /// <returns></returns>

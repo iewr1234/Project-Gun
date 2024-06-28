@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -127,54 +127,14 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charID)
     {
-        var charData = dataMgr.charData.charInfos.Find(x => x.ID == charID);
-        var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{charData.prefabName}"));
-        charCtr.transform.SetParent(characterTf, false);
-        var node = fieldNodes.Find(x => x.nodePos == nodePos);
-        charCtr.transform.position = node.transform.position;
-        if (ownerType == CharacterOwner.Enemy)
-        {
-            charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-        charCtr.SetComponents(this, ownerType, charData, node);
-
-        // Set Weapons
-        switch (charCtr.ownerType)
+        CharacterController charCtr = null;
+        switch (ownerType)
         {
             case CharacterOwner.Player:
-                var weapons = invenMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
-                for (int i = 0; i < weapons.Count; i++)
-                {
-                    var weaponData = weapons[i].item.weaponData;
-                    if (weaponData.type == WeaponType.None) continue;
-
-                    var weapon = charCtr.GetWeapon(weaponData.weaponName);
-                    weapon.SetComponets(charCtr, weaponData);
-                }
+                charCtr = CreatePlayer();
                 break;
             case CharacterOwner.Enemy:
-                var weaponIDs = new string[3] { charData.mainWeapon1_ID, charData.mainWeapon2_ID, charData.subWeapon_ID };
-                for (int i = 0; i < weaponIDs.Length; i++)
-                {
-                    var weaponID = weaponIDs[i];
-                    var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponID);
-                    if (weaponData != null)
-                    {
-                        Weapon weapon = null;
-                        switch (weaponData.type)
-                        {
-                            case WeaponType.Pistol:
-                                weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Pistol/{weaponData.prefabName}"));
-                                break;
-                            case WeaponType.Rifle:
-                                weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Rifle/{weaponData.prefabName}"));
-                                break;
-                            default:
-                                break;
-                        }
-                        weapon.SetComponets(charCtr, weaponData);
-                    }
-                }
+                charCtr = CreateEnemy();
                 break;
             default:
                 break;
@@ -196,20 +156,87 @@ public class GameManager : MonoBehaviour
         }
         charCtr.SetOutlinable();
 
-        // Set Armor
-        if (charData.armorID != "None")
-        {
-            var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
-            charCtr.armor = new Armor(armorData);
-        }
+        //// Set Armor
+        //if (charData.armorID != "None")
+        //{
+        //    var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
+        //    charCtr.armor = new Armor(armorData);
+        //}
 
         // Set CharacterUI
         var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
         charUI.transform.SetParent(characterTf, false);
         charUI.SetComponents(charCtr);
         CreateRange();
-
         uiMgr.SetMagNum(charCtr);
+
+        CharacterController CreatePlayer()
+        {
+            var playerData = dataMgr.playerData.playerInfos.Find(x => x.ID == charID);
+            var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{playerData.prefabName}"));
+            charCtr.transform.SetParent(characterTf, false);
+            var node = fieldNodes.Find(x => x.nodePos == nodePos);
+            charCtr.transform.position = node.transform.position;
+            charCtr.SetComponents(this, ownerType, playerData, node);
+
+            var weapons = invenMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
+            for (int i = 0; i < weapons.Count; i++)
+            {
+                var weaponData = weapons[i].item.weaponData;
+                if (weaponData.type == WeaponType.None) continue;
+
+                var weapon = charCtr.GetWeapon(weaponData.weaponName);
+                weapon.SetComponets(charCtr, weaponData);
+            }
+
+            return charCtr;
+        }
+
+        CharacterController CreateEnemy()
+        {
+            var enemyData = dataMgr.enemyData.enemyInfos.Find(x => x.ID == charID);
+            var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{enemyData.prefabName}"));
+            charCtr.transform.SetParent(characterTf, false);
+            var node = fieldNodes.Find(x => x.nodePos == nodePos);
+            charCtr.transform.position = node.transform.position;
+            charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            charCtr.SetComponents(this, ownerType, enemyData, node);
+
+            var weaponIDs = new string[3] { enemyData.mainWeapon1_ID, enemyData.mainWeapon2_ID, enemyData.subWeapon_ID };
+            var bulletsIDs = new string[3] { enemyData.mainBullet1_ID, enemyData.mainBullet2_ID, enemyData.subBullet_ID };
+            for (int i = 0; i < weaponIDs.Length; i++)
+            {
+                if (weaponIDs[i] == "None") continue;
+
+                var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponIDs[i]).CopyData(dataMgr);
+                if (weaponData != null)
+                {
+                    Weapon weapon = null;
+                    switch (weaponData.type)
+                    {
+                        case WeaponType.Pistol:
+                            weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Pistol/{weaponData.prefabName}"));
+                            break;
+                        case WeaponType.Rifle:
+                            weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Rifle/{weaponData.prefabName}"));
+                            break;
+                        default:
+                            break;
+                    }
+                    weapon.SetComponets(charCtr, weaponData);
+                    weapon.magMax = weapon.weaponData.equipMag.magSize;
+                    weapon.loadedNum = weapon.magMax;
+
+                    var bulletData = dataMgr.bulletData.bulletInfos.Find(x => x.ID == bulletsIDs[i]).CopyData();
+                    weapon.useBullet = bulletData;
+                }
+            }
+
+            var aiHlr = charCtr.AddComponent<AIHandler>();
+            aiHlr.SetComponents(charCtr, enemyData.aiType);
+
+            return charCtr;
+        }
     }
 
     /// <summary>
@@ -292,7 +319,9 @@ public class GameManager : MonoBehaviour
         PointerUpEvent();
         CreatePlayer();
         CreateEnemy();
+
         TurnEnd();
+        EnemysAction();
 
         void TurnEnd()
         {
@@ -311,6 +340,18 @@ public class GameManager : MonoBehaviour
                     var newStamina = 30 + (enemy.action * 10);
                     enemy.SetAction(enemy.maxAction);
                     enemy.SetStamina(newStamina);
+                }
+            }
+        }
+
+        void EnemysAction()
+        {
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                for (int i = 0; i < enemyList.Count; i++)
+                {
+                    var enemy = enemyList[0];
+
                 }
             }
         }
@@ -804,6 +845,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < nodesInCurrentRange; i++)
             {
                 FieldNode node = queue.Dequeue();
+                node.moveCost = DataUtility.GetMoveCost(moveRange, charCtr.Mobility);
                 movableNodes.Add(node); // 이동 가능 노드로 추가
 
                 foreach (FieldNode onAxisNode in node.onAxisNodes)
@@ -1011,6 +1053,7 @@ public class GameManager : MonoBehaviour
             {
                 var node = movePass.passNodes[i];
                 RanderAndCheck(node, i, movePass.passNodes);
+
                 if (i > 0) passNodes.Add(node);
             }
         }
@@ -1164,7 +1207,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.canMove)
                 {
-                    CreateCharacter(CharacterOwner.Player, node.nodePos, "C0001");
+                    CreateCharacter(CharacterOwner.Player, node.nodePos, "P0001");
                 }
             }
         }
@@ -1183,7 +1226,7 @@ public class GameManager : MonoBehaviour
                 var node = hit.collider.GetComponentInParent<FieldNode>();
                 if (node.canMove)
                 {
-                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "C0002");
+                    CreateCharacter(CharacterOwner.Enemy, node.nodePos, "E0001");
                 }
             }
         }

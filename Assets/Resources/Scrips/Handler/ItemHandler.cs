@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using System.Linq;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -100,11 +100,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             case ItemType.MainWeapon:
                 var _mainWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _mainWeaponData.CopyData();
+                weaponData = _mainWeaponData.CopyData(invenMgr.dataMgr);
+                SetPartsSample();
                 break;
             case ItemType.SubWeapon:
                 var _subWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _subWeaponData.CopyData();
+                weaponData = _subWeaponData.CopyData(invenMgr.dataMgr);
+                SetPartsSample();
                 break;
             case ItemType.Bullet:
                 var _bulletData = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);

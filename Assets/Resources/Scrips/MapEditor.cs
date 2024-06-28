@@ -692,48 +692,6 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    //private void CreateNodes(float xSize, float ySize)
-    //{
-    //    if (gameMgr.fieldNodes.Count > 0)
-    //    {
-    //        for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
-    //        {
-    //            var node = gameMgr.fieldNodes[i];
-    //            for (int j = 0; j < node.outlines.Count; j++)
-    //            {
-    //                var outline = node.outlines[j];
-    //                Destroy(outline.gameObject);
-    //            }
-    //            Destroy(node.gameObject);
-    //        }
-    //        gameMgr.fieldNodes.Clear();
-    //    }
-
-    //    mapSize = new Vector2(xSize, ySize);
-    //    var size = DataUtility.nodeSize;
-    //    var interval = DataUtility.nodeInterval;
-    //    for (int i = 0; i < mapSize.y; i++)
-    //    {
-    //        for (int j = 0; j < mapSize.x; j++)
-    //        {
-    //            var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
-    //            fieldNode.transform.SetParent(fieldNodeTf, false);
-    //            var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
-    //            fieldNode.transform.position = pos;
-    //            fieldNode.SetComponents(gameMgr, new Vector2Int(j, i));
-    //            //fieldNode.NodeColor = Color.gray;
-    //            gameMgr.fieldNodes.Add(fieldNode);
-    //        }
-    //    }
-
-    //    for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
-    //    {
-    //        var node = gameMgr.fieldNodes[i];
-    //        node.AddAdjacentNodes();
-    //        node.AddNodeOutline(nodeOutlineTf);
-    //    }
-    //}
-
     public void SelectMapItem(MapItem item)
     {
         selectNodes.Clear();
@@ -775,8 +733,11 @@ public class MapEditor : MonoBehaviour
 
                 float progress = (float)i / gameMgr.fieldNodes.Count * 100;
                 Debug.Log($"기존 노드 제거 진행률: {progress}%");
+                if (i % 50 == 0)
+                {
+                    yield return null;
+                }
             }
-            yield return null;
             gameMgr.fieldNodes.Clear();
         }
 
@@ -798,10 +759,13 @@ public class MapEditor : MonoBehaviour
                 gameMgr.fieldNodes.Add(fieldNode);
                 createdNodes++;
             }
-            yield return null;
 
             float progress = (float)createdNodes / totalNodes * 100;
             Debug.Log($"노드 생성 진행률: {progress}%");
+            if (i % 50 == 0)
+            {
+                yield return null;
+            }
         }
 
         for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
@@ -811,10 +775,10 @@ public class MapEditor : MonoBehaviour
             node.AddNodeOutline(nodeOutlineTf);
 
             float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-            if (progress % 10 == 0)
+            Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
+            if (i % 50 == 0)
             {
                 yield return null;
-                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
             }
         }
 
@@ -836,9 +800,12 @@ public class MapEditor : MonoBehaviour
                 Destroy(node.gameObject);
 
                 float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-                //Debug.Log($"기존 노드 제거 진행률: {progress}%");
+                Debug.Log($"기존 노드 제거 진행률: {progress}%");
+                if (i % 50 == 0)
+                {
+                    yield return null;
+                }
             }
-            yield return null;
             gameMgr.fieldNodes.Clear();
         }
 
@@ -860,10 +827,13 @@ public class MapEditor : MonoBehaviour
                 gameMgr.fieldNodes.Add(fieldNode);
                 createdNodes++;
             }
-            yield return null;
 
             float progress = (float)createdNodes / totalNodes * 100;
-            //Debug.Log($"노드 생성 진행률: {progress}%");
+            Debug.Log($"노드 생성 진행률: {progress}%");
+            if (i % 50 == 0)
+            {
+                yield return null;
+            }
         }
 
         for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
@@ -873,10 +843,10 @@ public class MapEditor : MonoBehaviour
             node.AddNodeOutline(nodeOutlineTf);
 
             float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-            if (progress % 10 == 0)
+            Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
+            if (i % 50 == 0)
             {
                 yield return null;
-                //Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
             }
         }
 
@@ -986,78 +956,8 @@ public class MapEditor : MonoBehaviour
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
-            //CreateNodes(mapData.mapSize.x, mapData.mapSize.y);
             StartCoroutine(Coroutine_MapLoad(mapData));
-            //for (int i = 0; i < mapData.nodeDatas.Length; i++)
-            //{
-            //    var nodeData = mapData.nodeDatas[i];
-            //    var node = gameMgr.fieldNodes[i];
-
-            //    // FloorData
-            //    if (nodeData.isMesh)
-            //    {
-            //        var floorItem = mapItems.Find(x => x.name == $"{nodeData.floorItemName}");
-            //        node.SetOnFloor(floorItem, nodeData.floorRot);
-            //    }
-
-            //    // NodeCover Data
-            //    if (nodeData.isNodeCover)
-            //    {
-            //        node.SetOnArea(nodeData.nCoverType);
-            //    }
-
-            //    // LineCover Data
-            //    if (nodeData.isLineCover)
-            //    {
-            //        for (int j = 0; j < nodeData.lCoverTypes.Length; j++)
-            //        {
-            //            var setDirection = nodeData.lCoverDirs[j];
-            //            var coverType = nodeData.lCoverTypes[j];
-            //            if (setDirection != TargetDirection.None && coverType != FindNodeType.None)
-            //            {
-            //                node.SetOnArea(setDirection, coverType);
-            //            }
-            //        }
-            //    }
-
-            //    // MarkerData
-            //    if (nodeData.isMarker)
-            //    {
-            //        var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
-            //        markerNodes.Add(node);
-            //        node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
-            //    }
-
-            //    // ObjectData
-            //    if (nodeData.isObject)
-            //    {
-            //        for (int j = 0; j < nodeData.objectDatas.Length; j++)
-            //        {
-            //            var objectData = nodeData.objectDatas[j];
-            //            var objectUI = GetObjectUI(objectData.objectType);
-            //            var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
-            //            node.SetOnObject(objectItem, objectData.setDir);
-            //        }
-            //    }
-            //}
         }
-
-        //GameObject GetObjectUI(MapEditorType type)
-        //{
-        //    switch (type)
-        //    {
-        //        case MapEditorType.FloorObject:
-        //            return floorObjectUI;
-        //        case MapEditorType.HalfCover:
-        //            return halfCoverUI;
-        //        case MapEditorType.FullCover:
-        //            return fullCoverUI;
-        //        case MapEditorType.SideObject:
-        //            return sideObjectUI;
-        //        default:
-        //            return null;
-        //    }
-        //}
     }
 
     public void Button_CreateNode()

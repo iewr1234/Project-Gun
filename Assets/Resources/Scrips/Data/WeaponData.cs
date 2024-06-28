@@ -40,13 +40,17 @@ public class WeaponDataInfo
     [Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
     [Space(5f)]
 
+    [Tooltip("ÀåÂøÅºÃ¢ID")] public string equipMagID;
+    [Tooltip("ÀåÂøºÎÇ°IDs")] public List<string> equipPartsIDs;
+    [Space(5f)]
+
     //[Tooltip("¾à½Ç ÅºÈ¯")] public BulletDataInfo chamberBullet = null;
     //[HideInInspector] public bool isChamber;
-    [Tooltip("ÀåÂø ÅºÃ¢")] public MagazineDataInfo equipMag = null;
+    [Tooltip("ÀåÂøÅºÃ¢")] public MagazineDataInfo equipMag = null;
     [HideInInspector] public bool isMag;
     [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList = new List<WeaponPartsDataInfo>();
 
-    public WeaponDataInfo CopyData()
+    public WeaponDataInfo CopyData(DataManager dataMgr)
     {
         var weaponData = new WeaponDataInfo()
         {
@@ -73,13 +77,24 @@ public class WeaponDataInfo
             useSight = new List<WeaponPartsSize>(useSight),
             useUnderRail = new List<WeaponPartsSize>(useUnderRail),
             useRail = new List<WeaponPartsSize>(useRail),
+            equipMagID = equipMagID,
+            equipPartsIDs = new List<string>(equipPartsIDs),
 
             //chamberBullet = chamberBullet,
             //isChamber = isChamber,
-            equipMag = equipMag,
-            isMag = isMag,
-            equipPartsList = new List<WeaponPartsDataInfo>(equipPartsList),
         };
+
+        if (weaponData.equipMagID != "None")
+        {
+            var magData = dataMgr.magData.magInfos.Find(x => x.ID == weaponData.equipMagID);
+            weaponData.equipMag = magData.CopyData();
+            weaponData.isMag = true;
+        }
+        for (int i = 0; i < weaponData.equipPartsIDs.Count; i++)
+        {
+            var partsData = dataMgr.partsData.partsInfos.Find(x => x.ID == weaponData.equipPartsIDs[i]);
+            weaponData.equipPartsList.Add(partsData);
+        }
 
         return weaponData;
     }

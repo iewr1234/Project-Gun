@@ -41,6 +41,7 @@ public class FieldNode : MonoBehaviour
 
     public bool canMove;
     public bool canShoot;
+    public int moveCost;
     [Space(5f)]
 
     [HideInInspector] public bool hitNode;

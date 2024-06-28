@@ -37,9 +37,9 @@ public class Weapon : MonoBehaviour
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
-    //[Tooltip("탄창용량")] public int magMax;
-    //[Tooltip("장전된 탄환 수")] public int loadedAmmo;
-    //[Tooltip("약실 내 탄환")] public BulletDataInfo chamberBullet = null;
+    [Tooltip("탄창용량")] public int magMax;
+    [Tooltip("장전된 탄환 수")] public int loadedNum;
+    [Tooltip("사용탄환")] public BulletDataInfo useBullet;
 
     [SerializeField] private List<bool> hitList = new List<bool>();
 
@@ -317,7 +317,19 @@ public class Weapon : MonoBehaviour
         //    weaponData.equipMag.loadedBullets.RemoveAt(0);
         //}
 
-        var loadedBullet = weaponData.equipMag.loadedBullets[^1];
+        BulletDataInfo loadedBullet = null;
+        switch (charCtr.ownerType)
+        {
+            case CharacterOwner.Player:
+                loadedBullet = weaponData.equipMag.loadedBullets[^1];
+                break;
+            case CharacterOwner.Enemy:
+                loadedBullet = useBullet;
+                break;
+            default:
+                break;
+        }
+
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
         {
@@ -337,7 +349,18 @@ public class Weapon : MonoBehaviour
         var isHit = hitList[0];
         bullet.SetComponents(/*weaponData.chamberBullet*/ loadedBullet, target, isHit);
         hitList.RemoveAt(0);
-        weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+
+        switch (charCtr.ownerType)
+        {
+            case CharacterOwner.Player:
+                weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+                break;
+            case CharacterOwner.Enemy:
+                loadedNum--;
+                break;
+            default:
+                break;
+        }
 
         //if (weaponData.equipMag.loadedBullets.Count > 0)
         //{

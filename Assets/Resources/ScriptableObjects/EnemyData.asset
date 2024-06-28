@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3012d5a60edc76b4c99a36c1e0fed08d, type: 3}
+  m_Name: EnemyData
+  m_EditorClassIdentifier: 
+  enemyInfos:
+  - indexName: 'E0001: Insurgent_A'
+    ID: E0001
+    prefabName: Insurgent_A
+    charName: Insurgent_A
+    strength: 2
+    vitality: 2
+    intellect: 2
+    wisdom: 2
+    agility: 2
+    dexterity: 2
+    maxAction: 10
+    maxHealth: 50
+    maxStamina: 50
+    sight: 5
+    aiming: 50
+    reaction: 10
+    headID: 
+    bodyID: 
+    mainWeapon1_ID: None
+    mainBullet1_ID: None
+    mainWeapon2_ID: W0002
+    mainBullet2_ID: None
+    subWeapon_ID: None
+    subBullet_ID: None

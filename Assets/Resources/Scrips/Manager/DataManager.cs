@@ -71,17 +71,15 @@ public class DataManager : MonoBehaviour
 
     private void SetComponents()
     {
-        if (charData == null)
-            charData = Resources.Load<CharacterData>("ScriptableObjects/CharacterData");
+        if (playerData == null) playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
 
-        if (weaponData == null)
-            weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
+        if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
 
-        if (armorData == null)
-            armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
+        if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
 
-        if (itemData == null)
-            itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
+        if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
+
+        if (itemData == null) itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
     }
 
     #region MapEditor
@@ -244,14 +242,14 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
-    #region Character Data
-    [HideInInspector] public CharacterData charData;
-    private readonly string charDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:S";
-    private enum CharacterVariable
+    #region Player Data
+    [HideInInspector] public PlayerData playerData;
+    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:S";
+    private enum PlayerVariable
     {
         ID,
         PrefabName,
-        CharacterName,
+        PlayerName,
         Strength,
         Vitality,
         Intellect,
@@ -270,22 +268,16 @@ public class DataManager : MonoBehaviour
         ArmorID,
     }
 
-    public void UpdateCharacterData()
+    public void UpdatePlayerData()
     {
-        if (charData == null)
-        {
-            charData = Resources.Load<CharacterData>("ScriptableObjects/CharacterData");
-        }
+        if (playerData == null) playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
+        if (playerData.playerInfos.Count > 0) playerData.playerInfos.Clear();
 
-        if (charData.charInfos.Count > 0)
-        {
-            charData.charInfos.Clear();
-        }
-        StartCoroutine(ReadCharacterData());
+        StartCoroutine(ReadPlayerData());
 
-        IEnumerator ReadCharacterData()
+        IEnumerator ReadPlayerData()
         {
-            UnityWebRequest www = UnityWebRequest.Get(charDB);
+            UnityWebRequest www = UnityWebRequest.Get(playerDB);
             yield return www.SendWebRequest();
 
             var text = www.downloadHandler.text;
@@ -293,32 +285,115 @@ public class DataManager : MonoBehaviour
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i].Split('\t');
-                var playerInfo = new CharacterDataInfo
+                var playerInfo = new PlayerDataInfo
                 {
-                    indexName = $"{data[(int)CharacterVariable.ID]}: {data[(int)CharacterVariable.CharacterName]}",
-                    ID = data[(int)CharacterVariable.ID],
-                    prefabName = data[(int)CharacterVariable.PrefabName],
-                    charName = data[(int)CharacterVariable.CharacterName],
-                    strength = int.Parse(data[(int)CharacterVariable.Strength]),
-                    vitality = int.Parse(data[(int)CharacterVariable.Vitality]),
-                    intellect = int.Parse(data[(int)CharacterVariable.Intellect]),
-                    wisdom = int.Parse(data[(int)CharacterVariable.Wisdom]),
-                    agility = int.Parse(data[(int)CharacterVariable.Agility]),
-                    dexterity = int.Parse(data[(int)CharacterVariable.Dexterity]),
-                    maxAction = int.Parse(data[(int)CharacterVariable.MaxAction]),
-                    maxHealth = int.Parse(data[(int)CharacterVariable.MaxHealth]),
-                    maxStamina = int.Parse(data[(int)CharacterVariable.MaxStamina]),
-                    sight = float.Parse(data[(int)CharacterVariable.Sight]),
-                    aiming = int.Parse(data[(int)CharacterVariable.Aiming]),
-                    reaction = int.Parse(data[(int)CharacterVariable.Reaction]),
-                    mainWeapon1_ID = data[(int)CharacterVariable.MainWeapon1_ID],
-                    mainWeapon2_ID = data[(int)CharacterVariable.MainWeapon2_ID],
-                    subWeapon_ID = data[(int)CharacterVariable.SubWeapon_ID],
-                    armorID = data[(int)CharacterVariable.ArmorID].Replace("\r", ""),
+                    indexName = $"{data[(int)PlayerVariable.ID]}: {data[(int)PlayerVariable.PlayerName]}",
+                    ID = data[(int)PlayerVariable.ID],
+                    prefabName = data[(int)PlayerVariable.PrefabName],
+                    charName = data[(int)PlayerVariable.PlayerName],
+                    strength = int.Parse(data[(int)PlayerVariable.Strength]),
+                    vitality = int.Parse(data[(int)PlayerVariable.Vitality]),
+                    intellect = int.Parse(data[(int)PlayerVariable.Intellect]),
+                    wisdom = int.Parse(data[(int)PlayerVariable.Wisdom]),
+                    agility = int.Parse(data[(int)PlayerVariable.Agility]),
+                    dexterity = int.Parse(data[(int)PlayerVariable.Dexterity]),
+                    maxAction = int.Parse(data[(int)PlayerVariable.MaxAction]),
+                    maxHealth = int.Parse(data[(int)PlayerVariable.MaxHealth]),
+                    maxStamina = int.Parse(data[(int)PlayerVariable.MaxStamina]),
+                    sight = float.Parse(data[(int)PlayerVariable.Sight]),
+                    aiming = int.Parse(data[(int)PlayerVariable.Aiming]),
+                    reaction = int.Parse(data[(int)PlayerVariable.Reaction]),
+                    mainWeapon1_ID = data[(int)PlayerVariable.MainWeapon1_ID],
+                    mainWeapon2_ID = data[(int)PlayerVariable.MainWeapon2_ID],
+                    subWeapon_ID = data[(int)PlayerVariable.SubWeapon_ID],
+                    armorID = data[(int)PlayerVariable.ArmorID].Replace("\r", ""),
                 };
-                charData.charInfos.Add(playerInfo);
+                playerData.playerInfos.Add(playerInfo);
             }
-            Debug.Log("Update Character Data");
+            Debug.Log("Update Player Data");
+        }
+    }
+    #endregion
+
+    #region Enemy Data
+    [HideInInspector] public EnemyData enemyData;
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:X";
+    private enum EnemyVariable
+    {
+        ID,
+        PrefabName,
+        EnemyName,
+        Strength,
+        Vitality,
+        Intellect,
+        Wisdom,
+        Agility,
+        Dexterity,
+        MaxAction,
+        MaxHealth,
+        MaxStamina,
+        Sight,
+        Aiming,
+        Reaction,
+        HeadID,
+        BodyID,
+        MainWeapon1_ID,
+        MainBullet1_ID,
+        MainWeapon2_ID,
+        MainBullet2_ID,
+        SubWeapon_ID,
+        SubBullet_ID,
+        AIType,
+    }
+
+    public void UpdateEnemyData()
+    {
+        if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
+        if (enemyData.enemyInfos.Count > 0) enemyData.enemyInfos.Clear();
+
+        StartCoroutine(ReadEnemyData());
+
+        IEnumerator ReadEnemyData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(enemyDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var enemyInfo = new EnemyDataInfo
+                {
+                    indexName = $"{data[(int)EnemyVariable.ID]}: {data[(int)EnemyVariable.EnemyName]}",
+                    ID = data[(int)EnemyVariable.ID],
+                    prefabName = data[(int)EnemyVariable.PrefabName],
+                    charName = data[(int)EnemyVariable.EnemyName],
+                    strength = int.Parse(data[(int)EnemyVariable.Strength]),
+                    vitality = int.Parse(data[(int)EnemyVariable.Vitality]),
+                    intellect = int.Parse(data[(int)EnemyVariable.Intellect]),
+                    wisdom = int.Parse(data[(int)EnemyVariable.Wisdom]),
+                    agility = int.Parse(data[(int)EnemyVariable.Agility]),
+                    dexterity = int.Parse(data[(int)EnemyVariable.Dexterity]),
+                    maxAction = int.Parse(data[(int)EnemyVariable.MaxAction]),
+                    maxHealth = int.Parse(data[(int)EnemyVariable.MaxHealth]),
+                    maxStamina = int.Parse(data[(int)EnemyVariable.MaxStamina]),
+                    sight = float.Parse(data[(int)EnemyVariable.Sight]),
+                    aiming = int.Parse(data[(int)EnemyVariable.Aiming]),
+                    reaction = int.Parse(data[(int)EnemyVariable.Reaction]),
+                    headID = data[(int)EnemyVariable.HeadID],
+                    bodyID = data[(int)EnemyVariable.BodyID],
+                    mainWeapon1_ID = data[(int)EnemyVariable.MainWeapon1_ID],
+                    mainBullet1_ID = data[(int)EnemyVariable.MainBullet1_ID],
+                    mainWeapon2_ID = data[(int)EnemyVariable.MainWeapon2_ID],
+                    mainBullet2_ID = data[(int)EnemyVariable.MainBullet2_ID],
+                    subWeapon_ID = data[(int)EnemyVariable.SubWeapon_ID],
+                    subBullet_ID = data[(int)EnemyVariable.SubBullet_ID],
+                    aiType = (AIType)int.Parse(data[(int)EnemyVariable.AIType]),
+                };
+                enemyData.enemyInfos.Add(enemyInfo);
+            }
+            Debug.Log("Update Enemy Data");
         }
     }
     #endregion
@@ -383,7 +458,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A2:S";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:U";
     private enum WeaponVariable
     {
         ID,
@@ -405,19 +480,15 @@ public class DataManager : MonoBehaviour
         UseScope,
         UseAttachment,
         UseUnderBarrel,
+        EquipMagID,
+        EquipPartsIDs,
     }
 
     public void UpdateWeaponData()
     {
-        if (weaponData == null)
-        {
-            weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
-        }
+        if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
+        if (weaponData.weaponInfos.Count > 0) weaponData.weaponInfos.Clear();
 
-        if (weaponData.weaponInfos.Count > 0)
-        {
-            weaponData.weaponInfos.Clear();
-        }
         StartCoroutine(ReadWeaponData());
 
         IEnumerator ReadWeaponData()
@@ -452,6 +523,8 @@ public class DataManager : MonoBehaviour
                     useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
                     useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
                     useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
+                    equipMagID = data[(int)WeaponVariable.EquipMagID],
+                    equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs])
                 };
                 weaponData.weaponInfos.Add(weaponInfo);
             }
@@ -459,7 +532,7 @@ public class DataManager : MonoBehaviour
 
             List<WeaponPartsSize> ReadUsePartsSize(string sizeData)
             {
-                var partSizeList = new List<WeaponPartsSize>();
+                var partsSizeList = new List<WeaponPartsSize>();
                 var sizeInfos = sizeData.Split(',');
                 for (int i = 0; i < sizeInfos.Length; i++)
                 {
@@ -467,10 +540,25 @@ public class DataManager : MonoBehaviour
                     var partsSize = (WeaponPartsSize)int.Parse(sizeInfo);
                     if (partsSize == WeaponPartsSize.None) break;
 
-                    partSizeList.Add(partsSize);
+                    partsSizeList.Add(partsSize);
                 }
 
-                return partSizeList;
+                return partsSizeList;
+            }
+
+            List<string> ReadEquipPartsID(string partsDatas)
+            {
+                var partsIDs = new List<string>();
+                var partsInfos = partsDatas.Split(',', '\r');
+                if (partsInfos[0] == "None") return null;
+
+                for (int i = 0; i < partsInfos.Length; i++)
+                {
+                    var partsID = partsInfos[i];
+                    partsIDs.Add(partsID);
+                }
+
+                return partsIDs;
             }
         }
     }
@@ -501,15 +589,9 @@ public class DataManager : MonoBehaviour
 
     public void UpdateWeaponPartsData()
     {
-        if (partsData == null)
-        {
-            partsData = Resources.Load<WeaponPartsData>("ScriptableObjects/WeaponPartsData");
-        }
+        if (partsData == null) partsData = Resources.Load<WeaponPartsData>("ScriptableObjects/WeaponPartsData");
+        if (partsData.partsInfos.Count > 0) partsData.partsInfos.Clear();
 
-        if (partsData.partsInfos.Count > 0)
-        {
-            partsData.partsInfos.Clear();
-        }
         StartCoroutine(ReadWeaponPartsData());
 
         IEnumerator ReadWeaponPartsData()
@@ -565,15 +647,9 @@ public class DataManager : MonoBehaviour
 
     public void UpdateMagazineData()
     {
-        if (magData == null)
-        {
-            magData = Resources.Load<MagazineData>("ScriptableObjects/MagazineData");
-        }
+        if (magData == null) magData = Resources.Load<MagazineData>("ScriptableObjects/MagazineData");
+        if (magData.magInfos.Count > 0) magData.magInfos.Clear();
 
-        if (magData.magInfos.Count > 0)
-        {
-            magData.magInfos.Clear();
-        }
         StartCoroutine(ReadMagazineData());
 
         IEnumerator ReadMagazineData()
@@ -678,15 +754,9 @@ public class DataManager : MonoBehaviour
 
     public void UpdateArmorData()
     {
-        if (armorData == null)
-        {
-            armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
-        }
+        if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
+        if (armorData.armorInfos.Count > 0) armorData.armorInfos.Clear();
 
-        if (armorData.armorInfos.Count > 0)
-        {
-            armorData.armorInfos.Clear();
-        }
         StartCoroutine(ReadArmorData());
 
         IEnumerator ReadArmorData()
@@ -728,75 +798,82 @@ public class DataManager : MonoBehaviour
         return compatModels;
     }
 
-    //#region Custom Editor
-    //[CustomEditor(typeof(DataManager))]
-    //public class DataEditor : Editor
-    //{
-    //    private DataManager dataMgr;
+    #region Custom Editor
+    [CustomEditor(typeof(DataManager))]
+    public class DataEditor : Editor
+    {
+        private DataManager dataMgr;
 
-    //    private void OnEnable()
-    //    {
-    //        dataMgr = (DataManager)target;
-    //    }
+        private void OnEnable()
+        {
+            dataMgr = (DataManager)target;
+        }
 
-    //    public override void OnInspectorGUI()
-    //    {
-    //        base.OnInspectorGUI();
-    //        GUILayout.Label('\n' + "---Read GoogleSheet Data---");
-    //        if (GUILayout.Button("Update the Character Database"))
-    //        {
-    //            dataMgr.UpdateCharacterData();
-    //            EditorUtility.SetDirty(dataMgr.charData);
-    //        }
-    //        if (GUILayout.Button("Update the Item Database"))
-    //        {
-    //            dataMgr.UpdateItemData();
-    //            EditorUtility.SetDirty(dataMgr.itemData);
-    //        }
-    //        if (GUILayout.Button("Update the Weapon Database"))
-    //        {
-    //            dataMgr.UpdateWeaponData();
-    //            EditorUtility.SetDirty(dataMgr.weaponData);
-    //        }
-    //        if (GUILayout.Button("Update the WeaponParts Database"))
-    //        {
-    //            dataMgr.UpdateWeaponPartsData();
-    //            EditorUtility.SetDirty(dataMgr.partsData);
-    //        }
-    //        if (GUILayout.Button("Update the Magazine Database"))
-    //        {
-    //            dataMgr.UpdateMagazineData();
-    //            EditorUtility.SetDirty(dataMgr.magData);
-    //        }
-    //        if (GUILayout.Button("Update the Bullet Database"))
-    //        {
-    //            dataMgr.UpdateBulletData();
-    //            EditorUtility.SetDirty(dataMgr.bulletData);
-    //        }
-    //        if (GUILayout.Button("Update the Armor Database"))
-    //        {
-    //            dataMgr.UpdateArmorData();
-    //            EditorUtility.SetDirty(dataMgr.armorData);
-    //        }
-    //        GUILayout.Label(" ");
-    //        if (GUILayout.Button("Update All Database"))
-    //        {
-    //            dataMgr.UpdateCharacterData();
-    //            EditorUtility.SetDirty(dataMgr.charData);
-    //            dataMgr.UpdateItemData();
-    //            EditorUtility.SetDirty(dataMgr.itemData);
-    //            dataMgr.UpdateWeaponData();
-    //            EditorUtility.SetDirty(dataMgr.weaponData);
-    //            dataMgr.UpdateWeaponPartsData();
-    //            EditorUtility.SetDirty(dataMgr.partsData);
-    //            dataMgr.UpdateMagazineData();
-    //            EditorUtility.SetDirty(dataMgr.magData);
-    //            dataMgr.UpdateBulletData();
-    //            EditorUtility.SetDirty(dataMgr.bulletData);
-    //            dataMgr.UpdateArmorData();
-    //            EditorUtility.SetDirty(dataMgr.armorData);
-    //        }
-    //    }
-    //}
-    //#endregion
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            GUILayout.Label('\n' + "---Read GoogleSheet Data---");
+            if (GUILayout.Button("Update the Player Database"))
+            {
+                dataMgr.UpdatePlayerData();
+                EditorUtility.SetDirty(dataMgr.playerData);
+            }
+            if (GUILayout.Button("Update the Enemy Database"))
+            {
+                dataMgr.UpdateEnemyData();
+                EditorUtility.SetDirty(dataMgr.enemyData);
+            }
+            if (GUILayout.Button("Update the Item Database"))
+            {
+                dataMgr.UpdateItemData();
+                EditorUtility.SetDirty(dataMgr.itemData);
+            }
+            if (GUILayout.Button("Update the Weapon Database"))
+            {
+                dataMgr.UpdateWeaponData();
+                EditorUtility.SetDirty(dataMgr.weaponData);
+            }
+            if (GUILayout.Button("Update the WeaponParts Database"))
+            {
+                dataMgr.UpdateWeaponPartsData();
+                EditorUtility.SetDirty(dataMgr.partsData);
+            }
+            if (GUILayout.Button("Update the Magazine Database"))
+            {
+                dataMgr.UpdateMagazineData();
+                EditorUtility.SetDirty(dataMgr.magData);
+            }
+            if (GUILayout.Button("Update the Bullet Database"))
+            {
+                dataMgr.UpdateBulletData();
+                EditorUtility.SetDirty(dataMgr.bulletData);
+            }
+            if (GUILayout.Button("Update the Armor Database"))
+            {
+                dataMgr.UpdateArmorData();
+                EditorUtility.SetDirty(dataMgr.armorData);
+            }
+            GUILayout.Label(" ");
+            if (GUILayout.Button("Update All Database"))
+            {
+                dataMgr.UpdatePlayerData();
+                EditorUtility.SetDirty(dataMgr.playerData);
+                dataMgr.UpdateEnemyData();
+                EditorUtility.SetDirty(dataMgr.enemyData);
+                dataMgr.UpdateItemData();
+                EditorUtility.SetDirty(dataMgr.itemData);
+                dataMgr.UpdateWeaponData();
+                EditorUtility.SetDirty(dataMgr.weaponData);
+                dataMgr.UpdateWeaponPartsData();
+                EditorUtility.SetDirty(dataMgr.partsData);
+                dataMgr.UpdateMagazineData();
+                EditorUtility.SetDirty(dataMgr.magData);
+                dataMgr.UpdateBulletData();
+                EditorUtility.SetDirty(dataMgr.bulletData);
+                dataMgr.UpdateArmorData();
+                EditorUtility.SetDirty(dataMgr.armorData);
+            }
+        }
+    }
+    #endregion
 }
