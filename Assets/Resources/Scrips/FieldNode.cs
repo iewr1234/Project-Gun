@@ -62,6 +62,8 @@ public class FieldNode : MonoBehaviour
     [HideInInspector] public float H;
     [HideInInspector] public float F => G + H;
 
+    [HideInInspector] public int aiScore;
+
     public void SetComponents(GameManager _gameMgr, Vector2Int _nodePos)
     {
         gameMgr = _gameMgr;
@@ -305,6 +307,8 @@ public class FieldNode : MonoBehaviour
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
             var onAxisNode = onAxisNodes[i];
+            if (onAxisNode == movableNodes[0]) continue;
+
             if (onAxisNode == null)
             {
                 if (canShoot || charCtr != null)
@@ -635,5 +639,11 @@ public class FieldNode : MonoBehaviour
     {
         private set { markerText = value; }
         get { return markerText; }
+    }
+
+    public TextMeshProUGUI PosText
+    {
+        private set { posText = value; }
+        get { return posText; }
     }
 }

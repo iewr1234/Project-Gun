@@ -97,7 +97,6 @@ public class CharacterController : MonoBehaviour
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public CharacterUI charUI;
-    [HideInInspector] public AIHandler aiHlr;
     public List<Weapon> weapons;
     public Armor armor;
 
@@ -163,6 +162,8 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Cover cover;
     [HideInInspector] public bool isCopy;
 
+    [Space(5f)]
+    public AIDataInfo aiData;
     //private List<FieldNode> visibleNodes = new List<FieldNode>();
 
     [Space(5f)]
@@ -357,6 +358,8 @@ public class CharacterController : MonoBehaviour
         sight = enemyData.sight;
         aiming = enemyData.aiming;
         reaction = enemyData.reaction;
+
+        aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
 
         baseIndex = 1;
         upperIndex = 2;
@@ -627,6 +630,10 @@ public class CharacterController : MonoBehaviour
             if (tagetInfo.shooterCover)
             {
                 AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
+                if (ownerType == CharacterOwner.Enemy)
+                {
+                    ProcessOfAI();
+                }
             }
             targetList.Clear();
         }
@@ -649,11 +656,7 @@ public class CharacterController : MonoBehaviour
             {
                 animator.SetBool("isAim", false);
                 animator.SetBool("isMove", true);
-                currentNode.canMove = true;
-                currentNode.charCtr = null;
                 currentNode = command.movePass[0];
-                currentNode.canMove = false;
-                currentNode.charCtr = this;
             }
 
             var canLook = animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Move");
@@ -735,6 +738,22 @@ public class CharacterController : MonoBehaviour
                 {
                     animator.SetTrigger("jump");
                 }
+            }
+        }
+
+        void ProcessOfAI()
+        {
+            targetIndex = Random.Range(0, targetList.Count);
+            if (targetList[targetIndex].shooterCover != null)
+            {
+                AddCommand(CommandType.Aim);
+                AddCommand(CommandType.Shoot);
+                AddCommand(CommandType.BackCover);
+            }
+            else
+            {
+                AddCommand(CommandType.Aim);
+                AddCommand(CommandType.Shoot);
             }
         }
     }
@@ -1644,7 +1663,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 사격 가능한 타겟 찾음
     /// </summary>
-    public void FindTargets(FieldNode node)
+    public void FindTargets(FieldNode node, bool noRange)
     {
         targetList.Clear();
         if (currentWeapon == null) return;
@@ -1657,7 +1676,7 @@ public class CharacterController : MonoBehaviour
             var pos = currentNode.transform.position;
             var targetPos = target.currentNode.transform.position;
             var distance = DataUtility.GetDistance(pos, targetPos);
-            if (distance < currentWeapon.weaponData.range)
+            if (noRange || distance < currentWeapon.weaponData.range)
             {
                 FieldNode RN = null;
                 FieldNode LN = null;
@@ -2150,16 +2169,20 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="movePass"></param>
-    public void AddCommand(CommandType type, int moveCost, List<FieldNode> movePass)
+    public void AddCommand(CommandType type, List<FieldNode> movePass)
     {
         switch (type)
         {
             case CommandType.Move:
+                currentNode.canMove = true;
+                currentNode.charCtr = null;
+                movePass[0].canMove = false;
+                movePass[0].charCtr = this;
                 var moveCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
                     type = CommandType.Move,
-                    moveCost = moveCost,
+                    moveCost = currentNode.moveCost,
                     movePass = new List<FieldNode>(movePass),
                 };
                 commandList.Add(moveCommand);

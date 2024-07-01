@@ -75,6 +75,8 @@ public class DataManager : MonoBehaviour
 
         if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
 
+        if (aiData == null) aiData = Resources.Load<AIData>("ScriptableObjects/AIData");
+
         if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
 
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
@@ -323,6 +325,7 @@ public class DataManager : MonoBehaviour
         ID,
         PrefabName,
         EnemyName,
+        AI_ID,
         Strength,
         Vitality,
         Intellect,
@@ -343,7 +346,6 @@ public class DataManager : MonoBehaviour
         MainBullet2_ID,
         SubWeapon_ID,
         SubBullet_ID,
-        AIType,
     }
 
     public void UpdateEnemyData()
@@ -369,6 +371,7 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)EnemyVariable.ID],
                     prefabName = data[(int)EnemyVariable.PrefabName],
                     charName = data[(int)EnemyVariable.EnemyName],
+                    aiID = data[(int)EnemyVariable.AI_ID],
                     strength = int.Parse(data[(int)EnemyVariable.Strength]),
                     vitality = int.Parse(data[(int)EnemyVariable.Vitality]),
                     intellect = int.Parse(data[(int)EnemyVariable.Intellect]),
@@ -389,11 +392,65 @@ public class DataManager : MonoBehaviour
                     mainBullet2_ID = data[(int)EnemyVariable.MainBullet2_ID],
                     subWeapon_ID = data[(int)EnemyVariable.SubWeapon_ID],
                     subBullet_ID = data[(int)EnemyVariable.SubBullet_ID],
-                    aiType = (AIType)int.Parse(data[(int)EnemyVariable.AIType]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
+        }
+    }
+    #endregion
+
+    #region AI Data
+    [HideInInspector] public AIData aiData;
+    private readonly string aiDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=590787557&range=A3:J";
+    private enum AIVariable
+    {
+        ID,
+        TypeName,
+        ActionType,
+        Score_move,
+        Score_noneCover,
+        Score_halfCover,
+        Score_fullCover,
+        Score_noneShoot,
+        Score_halfShoot,
+        Score_fullShoot,
+    }
+
+    public void UpdateAIData()
+    {
+        if (aiData == null) aiData = Resources.Load<AIData>("ScriptableObjects/AIData");
+        if (aiData.aiInfos.Count > 0) aiData.aiInfos.Clear();
+
+        StartCoroutine(ReadAIData());
+
+        IEnumerator ReadAIData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(aiDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var enemyInfo = new AIDataInfo
+                {
+                    indexName = $"{data[(int)AIVariable.ID]}: {data[(int)AIVariable.TypeName]}",
+                    ID = data[(int)AIVariable.ID],
+                    typeName = data[(int)AIVariable.TypeName],
+                    actionType = (UseActionType)int.Parse(data[(int)AIVariable.ActionType]),
+                    score_move = int.Parse(data[(int)AIVariable.Score_move]),
+                    score_noneCover = int.Parse(data[(int)AIVariable.Score_noneCover]),
+                    score_halfCover = int.Parse(data[(int)AIVariable.Score_halfCover]),
+                    score_fullCover = int.Parse(data[(int)AIVariable.Score_fullCover]),
+                    score_noneShoot = int.Parse(data[(int)AIVariable.Score_noneShoot]),
+                    score_halfShoot = int.Parse(data[(int)AIVariable.Score_halfShoot]),
+                    score_fullShoot = int.Parse(data[(int)AIVariable.Score_fullShoot]),
+                };
+                aiData.aiInfos.Add(enemyInfo);
+            }
+            Debug.Log("Update AI Data");
         }
     }
     #endregion
@@ -823,6 +880,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateEnemyData();
                 EditorUtility.SetDirty(dataMgr.enemyData);
             }
+            if (GUILayout.Button("Update the AI Database"))
+            {
+                dataMgr.UpdateAIData();
+                EditorUtility.SetDirty(dataMgr.aiData);
+            }
             if (GUILayout.Button("Update the Item Database"))
             {
                 dataMgr.UpdateItemData();
@@ -860,6 +922,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.playerData);
                 dataMgr.UpdateEnemyData();
                 EditorUtility.SetDirty(dataMgr.enemyData);
+                dataMgr.UpdateAIData();
+                EditorUtility.SetDirty(dataMgr.aiData);
                 dataMgr.UpdateItemData();
                 EditorUtility.SetDirty(dataMgr.itemData);
                 dataMgr.UpdateWeaponData();

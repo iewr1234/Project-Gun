@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -232,9 +232,6 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            var aiHlr = charCtr.AddComponent<AIHandler>();
-            aiHlr.SetComponents(charCtr, enemyData.aiType);
-
             return charCtr;
         }
     }
@@ -350,8 +347,8 @@ public class GameManager : MonoBehaviour
             {
                 for (int i = 0; i < enemyList.Count; i++)
                 {
-                    var enemy = enemyList[0];
-
+                    var enemy = enemyList[i];
+                    ActionProcessOfAI(enemy);
                 }
             }
         }
@@ -549,7 +546,7 @@ public class GameManager : MonoBehaviour
         }
 
         ClearLine();
-        selectChar.FindTargets(selectChar.currentNode);
+        selectChar.FindTargets(selectChar.currentNode, false);
         if (selectChar.SetTargetOn())
         {
             RemoveTargetNode();
@@ -743,7 +740,7 @@ public class GameManager : MonoBehaviour
                         moveLine.enabled = false;
                         ClearFireWarning();
                         RemoveTargetNode();
-                        selectChar.FindTargets(node);
+                        selectChar.FindTargets(node, false);
                         DrawAimLine(node);
                         node.CheckCoverNode(true);
                         targetNode = node;
@@ -757,7 +754,7 @@ public class GameManager : MonoBehaviour
                         ResultNodePass(selectChar, node);
                         DrawMoveLine();
 
-                        selectChar.FindTargets(node);
+                        selectChar.FindTargets(node, false);
                         DrawAimLine(node);
                         node.CheckCoverNode(true);
                         targetNode = node;
@@ -860,7 +857,11 @@ public class GameManager : MonoBehaviour
             }
             moveRange++;
         }
-        SwitchMovableNodes(true);
+
+        if (charCtr.ownerType == CharacterOwner.Player)
+        {
+            SwitchMovableNodes(true);
+        }
     }
 
     private void ShowMovableNodes(CharacterController charCtr, FieldNode currentNode)
@@ -954,7 +955,7 @@ public class GameManager : MonoBehaviour
         {
             charCtr.AddCommand(CommandType.LeaveCover);
         }
-        charCtr.AddCommand(CommandType.Move, arrowPointer.GetMoveCost(), movePass);
+        charCtr.AddCommand(CommandType.Move, movePass);
         //charCtr.AddCommand(CommandType.TakeCover);
     }
 
@@ -1231,4 +1232,93 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    #region AI
+    /// <summary>
+    /// AI행동 처리
+    /// </summary>
+    /// <param name="enemy"></param>
+    public void ActionProcessOfAI(CharacterController enemy)
+    {
+        ShowMovableNodes(enemy);
+        for (int i = 0; i < movableNodes.Count; i++)
+        {
+            var node = movableNodes[i];
+            node.aiScore = enemy.aiData.score_move - node.moveCost;
+
+            var coverScore = 99999;
+            var shootScore = -99999;
+            enemy.FindTargets(node, true);
+            if (enemy.targetList.Count == 0)
+            {
+                coverScore = enemy.aiData.score_noneCover;
+                shootScore = 0;
+            }
+            else
+            {
+                for (int j = 0; j < enemy.targetList.Count; j++)
+                {
+                    var targetInfo = enemy.targetList[j];
+                    if (targetInfo.shooterCover == null)
+                    {
+                        coverScore = enemy.aiData.score_noneCover;
+                    }
+                    else if (coverScore != enemy.aiData.score_noneCover)
+                    {
+                        switch (targetInfo.shooterCover.coverType)
+                        {
+                            case CoverType.Half:
+                                if (coverScore > enemy.aiData.score_halfCover) coverScore = enemy.aiData.score_halfCover;
+                                break;
+                            case CoverType.Full:
+                                if (coverScore > enemy.aiData.score_fullCover) coverScore = enemy.aiData.score_fullCover;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if (targetInfo.targetCover == null)
+                    {
+                        shootScore = enemy.aiData.score_fullShoot;
+                    }
+                    else if (shootScore != enemy.aiData.score_noneShoot)
+                    {
+                        switch (targetInfo.targetCover.coverType)
+                        {
+                            case CoverType.Half:
+                                if (shootScore < enemy.aiData.score_halfShoot) shootScore = enemy.aiData.score_halfShoot;
+                                break;
+                            case CoverType.Full:
+                                if (shootScore < enemy.aiData.score_fullShoot) shootScore = enemy.aiData.score_fullShoot;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if (coverScore == enemy.aiData.score_noneCover && shootScore == enemy.aiData.score_noneShoot) break;
+                }
+            }
+            node.aiScore += coverScore;
+            node.aiScore += node.canShoot ? shootScore * 2 : shootScore;
+
+            node.PosText.text = $"{node.aiScore}";
+        }
+
+        var maxScoreNode = movableNodes.OrderByDescending(n => n.aiScore).FirstOrDefault();
+        maxScoreNode.PosText.color = Color.red;
+        if (maxScoreNode != enemy.currentNode)
+        {
+            ResultNodePass(enemy, maxScoreNode);
+            CharacterMove(enemy, maxScoreNode);
+        }
+
+        enemy.targetList.Clear();
+        //if (maxScoreNode.canShoot)
+        //{
+        //    enemy.FindTargets(maxScoreNode, false);
+        //}
+    }
+    #endregion
 }

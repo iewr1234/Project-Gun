@@ -11,6 +11,7 @@ public class EnemyDataInfo
     public string ID;
     public string prefabName;
     public string charName;
+    public string aiID;
     [Space(5f)]
 
     public int strength;
@@ -37,9 +38,6 @@ public class EnemyDataInfo
     public string mainBullet2_ID;
     public string subWeapon_ID;
     public string subBullet_ID;
-    [Space(5f)]
-
-    public AIType aiType;
 }
 
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Object/EnemyData")]
