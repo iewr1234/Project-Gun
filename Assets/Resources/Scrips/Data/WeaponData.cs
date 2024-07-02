@@ -120,10 +120,10 @@ public class WeaponDataInfo
         return DataUtility.GetFloorValue(totalWegiht, 1);
     }
 
-    public int GetWeaponRebound()
+    public int GetWeaponRebound(BulletDataInfo loadedBullet)
     {
         var totalRebound = rebound;
-        totalRebound += equipMag.loadedBullets[^1].propellant;
+        totalRebound += loadedBullet.propellant;
         for (int i = 0; i < equipPartsList.Count; i++)
         {
             var parts = equipPartsList[i];

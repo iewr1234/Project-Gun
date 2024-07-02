@@ -46,7 +46,6 @@ public class CharacterCommand
     public float time;
 
     [Header("[Move]")]
-    public int moveCost;
     public List<FieldNode> movePass;
 
     [Header("[Cover]")]
@@ -154,8 +153,8 @@ public class CharacterController : MonoBehaviour
 
     [Space(5f)]
     public Weapon currentWeapon;
-    [HideInInspector] public int fireRateNum;
-    [HideInInspector] public int sightNum;
+    [HideInInspector] public int fiarRate;
+    [HideInInspector] public int sightRate;
 
     public FieldNode currentNode;
     private FieldNode prevNode;
@@ -280,6 +279,9 @@ public class CharacterController : MonoBehaviour
 
         baseIndex = 1;
         upperIndex = 2;
+
+        fiarRate = 0;
+        sightRate = 0;
 
         currentNode = _currentNode;
         currentNode.charCtr = this;
@@ -630,10 +632,6 @@ public class CharacterController : MonoBehaviour
             if (tagetInfo.shooterCover)
             {
                 AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
-                if (ownerType == CharacterOwner.Enemy)
-                {
-                    ProcessOfAI();
-                }
             }
             targetList.Clear();
         }
@@ -643,8 +641,6 @@ public class CharacterController : MonoBehaviour
         {
             prevNode = targetNode;
             command.movePass.Remove(targetNode);
-            SetAction(-command.moveCost);
-            SetStamina(-command.moveCost * 5);
             if (command.movePass.Count == 0)
             {
                 commandList.RemoveAt(0);
@@ -706,7 +702,24 @@ public class CharacterController : MonoBehaviour
                     commandList.Remove(command);
                     if (commandList.Count == 0)
                     {
-                        AddCommand(CommandType.TakeCover);
+                        switch (ownerType)
+                        {
+                            case CharacterOwner.Player:
+                                AddCommand(CommandType.TakeCover);
+                                break;
+                            case CharacterOwner.Enemy:
+                                if (state == CharacterState.Watch)
+                                {
+                                    gameMgr.EnemyAI_Watch(this, currentNode);
+                                }
+                                else
+                                {
+                                    gameMgr.EnemyAI_Shoot(this);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
@@ -738,22 +751,6 @@ public class CharacterController : MonoBehaviour
                 {
                     animator.SetTrigger("jump");
                 }
-            }
-        }
-
-        void ProcessOfAI()
-        {
-            targetIndex = Random.Range(0, targetList.Count);
-            if (targetList[targetIndex].shooterCover != null)
-            {
-                AddCommand(CommandType.Aim);
-                AddCommand(CommandType.Shoot);
-                AddCommand(CommandType.BackCover);
-            }
-            else
-            {
-                AddCommand(CommandType.Aim);
-                AddCommand(CommandType.Shoot);
             }
         }
     }
@@ -1495,6 +1492,12 @@ public class CharacterController : MonoBehaviour
         charUI.SetCharacterValue();
     }
 
+    public void PayTheMoveCost(int useAction)
+    {
+        SetAction(-useAction);
+        SetStamina(-useAction * 5);
+    }
+
     /// <summary>
     /// 경계자의 위치를 찾음
     /// </summary>
@@ -1868,6 +1871,8 @@ public class CharacterController : MonoBehaviour
 
         bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
         {
+            if (noRange) return true;
+
             bool canShoot;
             var interval = new Vector3(0f, 1f, 0f);
             pos += interval;
@@ -1971,8 +1976,8 @@ public class CharacterController : MonoBehaviour
         else
         {
             targetIndex = 0;
-            fireRateNum = 0;
-            sightNum = 0;
+            fiarRate = 0;
+            sightRate = 0;
             //ChangeTargetShader();
 
             var targetInfo = targetList[targetIndex];
@@ -2118,6 +2123,10 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void SetWatch()
     {
+        if (currentWeapon == null) return;
+        if (action < currentWeapon.weaponData.actionCost) return;
+
+        SetAction(-currentWeapon.weaponData.actionCost);
         if (animator.GetBool("isCover"))
         {
             if (watchInfo.shooterCover == null)
@@ -2176,13 +2185,15 @@ public class CharacterController : MonoBehaviour
             case CommandType.Move:
                 currentNode.canMove = true;
                 currentNode.charCtr = null;
-                movePass[0].canMove = false;
-                movePass[0].charCtr = this;
+                var targetNode = movePass[0];
+                targetNode.canMove = false;
+                targetNode.charCtr = this;
+                PayTheMoveCost(targetNode.moveCost);
+
                 var moveCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
                     type = CommandType.Move,
-                    moveCost = currentNode.moveCost,
                     movePass = new List<FieldNode>(movePass),
                 };
                 commandList.Add(moveCommand);
@@ -2227,6 +2238,8 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Targeting:
+                if (ownerType == CharacterOwner.Player) return;
+
                 var targetingCommand = new CharacterCommand
                 {
                     indexName = $"{type}",

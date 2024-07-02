@@ -348,7 +348,7 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < enemyList.Count; i++)
                 {
                     var enemy = enemyList[i];
-                    ActionProcessOfAI(enemy);
+                    EnemyAI_Move(enemy);
                 }
             }
         }
@@ -419,13 +419,13 @@ public class GameManager : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     var weapon = selectChar.currentWeapon;
-                    var totalCost = weapon.weaponData.actionCost + selectChar.fireRateNum + selectChar.sightNum;
+                    var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + selectChar.sightRate;
                     if (totalCost > selectChar.action)
                     {
                         Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
                         return;
                     }
-                    var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (selectChar.fireRateNum + 1));
+                    var shootNum = DataUtility.GetShootNum(weapon.weaponData.RPM, selectChar.fiarRate);
                     var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
                     //if (weapon.weaponData.isChamber) loadedAmmo++;
 
@@ -520,6 +520,7 @@ public class GameManager : MonoBehaviour
                 {
                     currentRange.gameObject.SetActive(false);
                     currentRange = null;
+                    selectChar.state = CharacterState.None;
                     selectChar = null;
                     gameState = GameState.None;
                 }
@@ -1238,7 +1239,7 @@ public class GameManager : MonoBehaviour
     /// AI행동 처리
     /// </summary>
     /// <param name="enemy"></param>
-    public void ActionProcessOfAI(CharacterController enemy)
+    public void EnemyAI_Move(CharacterController enemy)
     {
         ShowMovableNodes(enemy);
         for (int i = 0; i < movableNodes.Count; i++)
@@ -1278,6 +1279,13 @@ public class GameManager : MonoBehaviour
                         }
                     }
 
+                    var dist = DataUtility.GetDistance(node.transform.position, targetInfo.target.currentNode.transform.position);
+                    if (dist > enemy.currentWeapon.weaponData.range)
+                    {
+                        shootScore = 0;
+                        continue;
+                    }
+
                     if (targetInfo.targetCover == null)
                     {
                         shootScore = enemy.aiData.score_fullShoot;
@@ -1307,18 +1315,108 @@ public class GameManager : MonoBehaviour
         }
 
         var maxScoreNode = movableNodes.OrderByDescending(n => n.aiScore).FirstOrDefault();
-        maxScoreNode.PosText.color = Color.red;
-        if (maxScoreNode != enemy.currentNode)
+        if (maxScoreNode.aiScore <= 40)
         {
-            ResultNodePass(enemy, maxScoreNode);
-            CharacterMove(enemy, maxScoreNode);
+            var canWatchNode = movableNodes.FindAll(x => x.canShoot).OrderByDescending(n => n.aiScore).FirstOrDefault();
+            if (canWatchNode != enemy.currentNode)
+            {
+                ResultNodePass(enemy, canWatchNode);
+                CharacterMove(enemy, canWatchNode);
+            }
+            else
+            {
+                EnemyAI_Watch(enemy, enemy.currentNode);
+            }
+            enemy.state = CharacterState.Watch;
         }
-
+        else
+        {
+            maxScoreNode.PosText.color = Color.red;
+            if (maxScoreNode != enemy.currentNode)
+            {
+                ResultNodePass(enemy, maxScoreNode);
+                CharacterMove(enemy, maxScoreNode);
+            }
+            else
+            {
+                EnemyAI_Shoot(enemy);
+            }
+        }
         enemy.targetList.Clear();
-        //if (maxScoreNode.canShoot)
-        //{
-        //    enemy.FindTargets(maxScoreNode, false);
-        //}
+    }
+
+    public void EnemyAI_Watch(CharacterController enemy, FieldNode currentNode)
+    {
+        enemy.FindTargets(currentNode, true);
+        var targetNode = enemy.targetList.OrderBy(x => DataUtility.GetDistance(currentNode.transform.position, x.targetNode.transform.position)).FirstOrDefault().targetNode;
+
+        var range = rangePool.Find(x => !x.gameObject.activeSelf);
+        range.SetRange(enemy, targetNode);
+        range.transform.LookAt(targetNode.transform);
+        enemy.SetWatch();
+    }
+
+    public void EnemyAI_Shoot(CharacterController enemy)
+    {
+        enemy.FindTargets(enemy.currentNode, false);
+        if (enemy.aiData.actionType == UseActionType.Rest || enemy.targetList.Count == 0)
+        {
+            enemy.AddCommand(CommandType.TakeCover);
+        }
+        else
+        {
+            enemy.targetIndex = Random.Range(0, enemy.targetList.Count);
+            var targetInfo = enemy.targetList[enemy.targetIndex];
+            if (enemy.action < enemy.currentWeapon.weaponData.actionCost)
+            {
+                enemy.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
+            }
+            else
+            {
+                enemy.SetTargeting(targetInfo);
+                var totalCost = enemy.currentWeapon.weaponData.actionCost;
+                var remCost = enemy.action - totalCost;
+                if (remCost > 0)
+                {
+                    switch (enemy.aiData.actionType)
+                    {
+                        case UseActionType.Shoot:
+                            enemy.fiarRate = remCost;
+                            if (enemy.fiarRate > DataUtility.shootRateMax)
+                            {
+                                enemy.fiarRate = DataUtility.shootRateMax;
+                            }
+                            totalCost += enemy.fiarRate;
+                            break;
+                        case UseActionType.Aim:
+                            enemy.sightRate = remCost;
+                            if (enemy.sightRate > DataUtility.shootRateMax)
+                            {
+                                enemy.sightRate = DataUtility.shootRateMax;
+                            }
+                            totalCost += enemy.sightRate;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                var shootNum = DataUtility.GetShootNum(enemy.currentWeapon.weaponData.RPM, enemy.fiarRate);
+                enemy.animator.SetInteger("shootNum", shootNum);
+                enemy.SetAction(-totalCost);
+                if (targetInfo.shooterCover != null)
+                {
+                    enemy.AddCommand(CommandType.Aim);
+                    enemy.AddCommand(CommandType.Shoot);
+                    enemy.AddCommand(CommandType.BackCover);
+                }
+                else
+                {
+                    enemy.AddCommand(CommandType.Aim);
+                    enemy.AddCommand(CommandType.Shoot);
+                }
+            }
+        }
     }
     #endregion
 }

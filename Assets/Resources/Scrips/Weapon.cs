@@ -278,7 +278,7 @@ public class Weapon : MonoBehaviour
         var allMiss = true;
         for (int i = 0; i < shootNum; i++)
         {
-            charCtr.SetStamina(DataUtility.GetAimStaminaCost(charCtr));
+            charCtr.SetStamina(-DataUtility.GetAimStaminaCost(charCtr));
             var hitAccuracy = DataUtility.GetHitAccuracy(charCtr, targetInfo);
             if (i > 0)
             {

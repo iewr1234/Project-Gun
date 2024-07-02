@@ -727,14 +727,16 @@ public class MapEditor : MonoBehaviour
                 for (int j = 0; j < node.outlines.Count; j++)
                 {
                     var outline = node.outlines[j];
+                    if (outline == null) continue;
+
                     Destroy(outline.gameObject);
                 }
                 Destroy(node.gameObject);
 
-                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-                Debug.Log($"기존 노드 제거 진행률: {progress}%");
                 if (i % 50 == 0)
                 {
+                    float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                    Debug.Log($"기존 노드 제거 진행률: {progress}%");
                     yield return null;
                 }
             }
@@ -758,13 +760,13 @@ public class MapEditor : MonoBehaviour
                 //fieldNode.NodeColor = Color.gray;
                 gameMgr.fieldNodes.Add(fieldNode);
                 createdNodes++;
-            }
 
-            float progress = (float)createdNodes / totalNodes * 100;
-            Debug.Log($"노드 생성 진행률: {progress}%");
-            if (i % 50 == 0)
-            {
-                yield return null;
+                if ((i + j) % 50 == 0)
+                {
+                    float progress = (float)createdNodes / totalNodes * 100;
+                    Debug.Log($"노드 생성 진행률: {progress}%");
+                    yield return null;
+                }
             }
         }
 
@@ -774,10 +776,10 @@ public class MapEditor : MonoBehaviour
             node.AddAdjacentNodes();
             node.AddNodeOutline(nodeOutlineTf);
 
-            float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-            Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
             if (i % 50 == 0)
             {
+                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
                 yield return null;
             }
         }
@@ -795,14 +797,16 @@ public class MapEditor : MonoBehaviour
                 for (int j = 0; j < node.outlines.Count; j++)
                 {
                     var outline = node.outlines[j];
+                    if (outline == null) continue;
+
                     Destroy(outline.gameObject);
                 }
                 Destroy(node.gameObject);
 
-                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-                Debug.Log($"기존 노드 제거 진행률: {progress}%");
                 if (i % 50 == 0)
                 {
+                    float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                    Debug.Log($"기존 노드 제거 진행률: {progress}%");
                     yield return null;
                 }
             }
@@ -826,13 +830,13 @@ public class MapEditor : MonoBehaviour
                 //fieldNode.NodeColor = Color.gray;
                 gameMgr.fieldNodes.Add(fieldNode);
                 createdNodes++;
-            }
 
-            float progress = (float)createdNodes / totalNodes * 100;
-            Debug.Log($"노드 생성 진행률: {progress}%");
-            if (i % 50 == 0)
-            {
-                yield return null;
+                if ((i + j) % 50 == 0)
+                {
+                    float progress = (float)createdNodes / totalNodes * 100;
+                    Debug.Log($"노드 생성 진행률: {progress}%");
+                    yield return null;
+                }
             }
         }
 
@@ -842,10 +846,10 @@ public class MapEditor : MonoBehaviour
             node.AddAdjacentNodes();
             node.AddNodeOutline(nodeOutlineTf);
 
-            float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-            Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
             if (i % 50 == 0)
             {
+                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
                 yield return null;
             }
         }

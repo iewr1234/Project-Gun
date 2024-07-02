@@ -45,6 +45,8 @@ public static class DataUtility
     public static readonly Vector3Int popUp_defaultPos = new Vector3Int(0, 350, -50);
     public static readonly Vector3Int popUp_defaultPos_split = new Vector3Int(0, 150, -50);
 
+    public static readonly int shootRateMax = 4;
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
@@ -126,8 +128,11 @@ public static class DataUtility
     /// <returns></returns>
     public static int GetAimStaminaCost(CharacterController charCtr)
     {
-        var rebound = charCtr.currentWeapon.weaponData.GetWeaponRebound();
-        var weight = charCtr.currentWeapon.weaponData.GetWeaponWeight();
+        var weaponData = charCtr.currentWeapon.weaponData;
+        var rebound = charCtr.ownerType == CharacterOwner.Player
+                    ? weaponData.GetWeaponRebound(weaponData.equipMag.loadedBullets[^1])
+                    : weaponData.GetWeaponRebound(charCtr.currentWeapon.useBullet);
+        var weight = weaponData.GetWeaponWeight();
         var strength = charCtr.strength;
         var result = 3 + (rebound * weight * 0.01f) * (1 / (1 + strength * 0.01f));
 
@@ -151,7 +156,7 @@ public static class DataUtility
         {
             reboundCheck++;
         }
-        var value = Random.Range(0, 100);
+        //var value = Random.Range(0, 100);
         var shooterHit = charCtr.aiming - (weapon.weaponData.MOA * dist) + (15 / (dist / 3)) - (weapon.weaponData.rebound * reboundCheck);
         if (shooterHit < 0f)
         {
@@ -160,6 +165,7 @@ public static class DataUtility
         var coverBonus = GetCoverBonus();
         var reactionBonus = GetReactionBonus();
         var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
+
         return Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
 
         int GetCoverBonus()
@@ -195,10 +201,24 @@ public static class DataUtility
     /// <returns></returns>
     public static float GetHitAccuracyReduction(CharacterController charCtr, float dist)
     {
-        var rebound = charCtr.currentWeapon.weaponData.GetWeaponRebound();
+        var weaponData = charCtr.currentWeapon.weaponData;
+        var rebound = charCtr.ownerType == CharacterOwner.Player
+                    ? weaponData.GetWeaponRebound(weaponData.equipMag.loadedBullets[^1])
+                    : weaponData.GetWeaponRebound(charCtr.currentWeapon.useBullet);
         var result = Mathf.Pow(2, dist / 5) * (rebound * 0.1f);
 
         return GetFloorValue(result, 2);
+    }
+
+    /// <summary>
+    /// 발사수 계산
+    /// </summary>
+    /// <param name="RPM"></param>
+    /// <param name="fireRate"></param>
+    /// <returns></returns>
+    public static int GetShootNum(int RPM, int fireRate)
+    {
+        return (int)(((float)RPM / 200) * (fireRate + 1));
     }
 
     public static Vector3 GetAimPosition(Transform charTf, bool isRight)

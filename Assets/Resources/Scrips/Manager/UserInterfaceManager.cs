@@ -122,7 +122,7 @@ public class UserInterfaceManager : MonoBehaviour
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
-        var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fireRateNum + 1));
+        var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fiarRate + 1));
 
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
         //if (weapon.weaponData.isChamber) loadedAmmo++;
@@ -208,7 +208,7 @@ public class UserInterfaceManager : MonoBehaviour
 
     public void SetActionPoint_Aim(CharacterController charCtr)
     {
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
         if (totalCost > charCtr.action)
         {
             actionPointText.color = Color.red;
@@ -222,14 +222,14 @@ public class UserInterfaceManager : MonoBehaviour
 
     public void SetFireRateGauge(CharacterController charCtr)
     {
-        charCtr.fireRateNum++;
-        if (charCtr.fireRateNum > aimUIGaugeMax)
+        charCtr.fiarRate++;
+        if (charCtr.fiarRate > DataUtility.shootRateMax)
         {
-            charCtr.fireRateNum = 0;
+            charCtr.fiarRate = 0;
         }
 
-        fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fireRateNum + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fiarRate + 1}");
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
@@ -237,14 +237,14 @@ public class UserInterfaceManager : MonoBehaviour
 
     public void SetSightGauge(CharacterController charCtr)
     {
-        charCtr.sightNum++;
-        if (charCtr.sightNum > aimUIGaugeMax)
+        charCtr.sightRate++;
+        if (charCtr.sightRate > DataUtility.shootRateMax)
         {
-            charCtr.sightNum = 0;
+            charCtr.sightRate = 0;
         }
 
-        sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightNum + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fireRateNum + charCtr.sightNum;
+        sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightRate + 1}");
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetActionPoint_Aim(charCtr);
     }
