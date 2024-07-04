@@ -261,4 +261,9 @@ public class UserInterfaceManager : MonoBehaviour
         staminaGauge.maxValue = targetInfo.target.maxStamina;
         staminaGauge.value = targetInfo.target.stamina;
     }
+
+    public void Button_TurnEnd()
+    {
+        gameMgr.TurnEnd();
+    }
 }

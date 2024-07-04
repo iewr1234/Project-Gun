@@ -316,42 +316,6 @@ public class GameManager : MonoBehaviour
         PointerUpEvent();
         CreatePlayer();
         CreateEnemy();
-
-        TurnEnd();
-        EnemysAction();
-
-        void TurnEnd()
-        {
-            if (Input.GetKeyDown(KeyCode.F5))
-            {
-                for (int i = 0; i < playerList.Count; i++)
-                {
-                    var player = playerList[i];
-                    var newStamina = 30 + (player.action * 10);
-                    player.SetAction(player.maxAction);
-                    player.SetStamina(newStamina);
-                }
-                for (int i = 0; i < enemyList.Count; i++)
-                {
-                    var enemy = enemyList[i];
-                    var newStamina = 30 + (enemy.action * 10);
-                    enemy.SetAction(enemy.maxAction);
-                    enemy.SetStamina(newStamina);
-                }
-            }
-        }
-
-        void EnemysAction()
-        {
-            if (Input.GetKeyDown(KeyCode.F8))
-            {
-                for (int i = 0; i < enemyList.Count; i++)
-                {
-                    var enemy = enemyList[i];
-                    EnemyAI_Move(enemy);
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -527,6 +491,15 @@ public class GameManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            mapEdt.gameObject.SetActive(!mapEdt.gameObject.activeSelf);
+        }
+        else if (Input.GetKeyDown(KeyCode.End))
+        {
+            TurnEnd();
         }
     }
 
@@ -1234,6 +1207,43 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void TurnEnd()
+    {
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            var player = playerList[i];
+            Reset(player);
+        }
+        for (int i = 0; i < enemyList.Count; i++)
+        {
+            var enemy = enemyList[i];
+            Reset(enemy);
+            EnemyAI_Move(enemy);
+        }
+
+        void Reset(CharacterController charCtr)
+        {
+            var newStamina = 30 + (charCtr.action * 10);
+            charCtr.SetAction(charCtr.maxAction);
+            charCtr.SetStamina(newStamina);
+
+            switch (charCtr.state)
+            {
+                case CharacterState.Watch:
+                    charCtr.AimOff();
+                    if (charCtr.animator.GetBool("isCover"))
+                    {
+                        charCtr.AddCommand(CommandType.BackCover);
+                    }
+                    charCtr.watchInfo.drawRang.gameObject.SetActive(false);
+                    charCtr.state = CharacterState.None;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     #region AI
     /// <summary>
     /// AI행동 처리
@@ -1282,7 +1292,7 @@ public class GameManager : MonoBehaviour
                     var shooterPos = targetInfo.shooterNode.transform.position;
                     var targetPos = targetInfo.targetNode.transform.position;
                     var dist = DataUtility.GetDistance(shooterPos, targetPos);
-                    if (dist > enemy.currentWeapon.weaponData.range || !enemy.CheckTheCoverAlongPath(shooterPos, targetPos))
+                    if (!enemy.CheckTheCoverAlongPath(enemy.currentWeapon.weaponData.range, shooterPos, targetPos))
                     {
                         shootScore = 0;
                         continue;
@@ -1324,25 +1334,23 @@ public class GameManager : MonoBehaviour
             {
                 ResultNodePass(enemy, canWatchNode);
                 CharacterMove(enemy, canWatchNode);
+                enemy.state = CharacterState.Watch;
             }
             else
             {
                 EnemyAI_Watch(enemy, enemy.currentNode);
             }
-            enemy.state = CharacterState.Watch;
+        }
+
+        maxScoreNode.PosText.color = Color.red;
+        if (maxScoreNode != enemy.currentNode)
+        {
+            ResultNodePass(enemy, maxScoreNode);
+            CharacterMove(enemy, maxScoreNode);
         }
         else
         {
-            maxScoreNode.PosText.color = Color.red;
-            if (maxScoreNode != enemy.currentNode)
-            {
-                ResultNodePass(enemy, maxScoreNode);
-                CharacterMove(enemy, maxScoreNode);
-            }
-            else
-            {
-                EnemyAI_Shoot(enemy);
-            }
+            EnemyAI_Shoot(enemy);
         }
         enemy.targetList.Clear();
     }
@@ -1350,12 +1358,14 @@ public class GameManager : MonoBehaviour
     public void EnemyAI_Watch(CharacterController enemy, FieldNode currentNode)
     {
         enemy.FindTargets(currentNode, true);
-        var targetNode = enemy.targetList.OrderBy(x => DataUtility.GetDistance(currentNode.transform.position, x.targetNode.transform.position)).FirstOrDefault().targetNode;
+        if (enemy.targetList.Count == 0) return;
 
+        var targetNode = enemy.targetList.OrderBy(x => DataUtility.GetDistance(currentNode.transform.position, x.targetNode.transform.position)).FirstOrDefault().targetNode;
         var range = rangePool.Find(x => !x.gameObject.activeSelf);
         range.SetRange(enemy, targetNode);
         range.transform.LookAt(targetNode.transform);
         enemy.SetWatch();
+        enemy.state = CharacterState.Watch;
     }
 
     public void EnemyAI_Shoot(CharacterController enemy)

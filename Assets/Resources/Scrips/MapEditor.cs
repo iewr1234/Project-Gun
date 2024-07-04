@@ -1034,6 +1034,11 @@ public class MapEditor : MonoBehaviour
     {
         findType = FindNodeType.DeleteMarker;
     }
+
+    public void Button_Close()
+    {
+        gameObject.SetActive(false);
+    }
     #endregion
 
     #region Side
