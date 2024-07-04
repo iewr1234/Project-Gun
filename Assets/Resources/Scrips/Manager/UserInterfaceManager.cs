@@ -40,7 +40,6 @@ public class UserInterfaceManager : MonoBehaviour
     public Button onButton;
 
     private readonly string aimUIGaugePath = "Sprites/SightGauge/Gauge_SightAp";
-    private readonly int aimUIGaugeMax = 4;
 
     public void SetComponents(GameManager _gameMgr)
     {

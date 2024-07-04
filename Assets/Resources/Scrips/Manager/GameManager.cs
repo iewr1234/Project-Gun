@@ -1279,8 +1279,10 @@ public class GameManager : MonoBehaviour
                         }
                     }
 
-                    var dist = DataUtility.GetDistance(node.transform.position, targetInfo.target.currentNode.transform.position);
-                    if (dist > enemy.currentWeapon.weaponData.range)
+                    var shooterPos = targetInfo.shooterNode.transform.position;
+                    var targetPos = targetInfo.targetNode.transform.position;
+                    var dist = DataUtility.GetDistance(shooterPos, targetPos);
+                    if (dist > enemy.currentWeapon.weaponData.range || !enemy.CheckTheCoverAlongPath(shooterPos, targetPos))
                     {
                         shootScore = 0;
                         continue;

@@ -1509,8 +1509,8 @@ public class CharacterController : MonoBehaviour
         var shooterCover = FindCoverNode(currentNode, targetNode);
         if (shooterCover != null && shooterCover.coverType == CoverType.Full)
         {
-            var RN = CheckTheCanMoveNode(currentNode.transform.position, shooterCover, TargetDirection.Right);
-            var LN = CheckTheCanMoveNode(currentNode.transform.position, shooterCover, TargetDirection.Left);
+            var RN = CheckTheCanMoveNode(currentNode, shooterCover, TargetDirection.Right);
+            var LN = CheckTheCanMoveNode(currentNode, shooterCover, TargetDirection.Left);
             if (RN == null && LN == null)
             {
                 watchNode = currentNode;
@@ -1690,15 +1690,15 @@ public class CharacterController : MonoBehaviour
                 if (shooterCover != null && shooterCover.coverType == CoverType.Full
                  && targetCover != null && targetCover.coverType == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
                         continue;
                     }
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1712,8 +1712,8 @@ public class CharacterController : MonoBehaviour
                 }
                 else if (shooterCover != null && shooterCover.coverType == CoverType.Full)
                 {
-                    RN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Right);
-                    LN = CheckTheCanMoveNode(pos, shooterCover, TargetDirection.Left);
+                    RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
+                    LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
                     if (RN == null && LN == null)
                     {
                         Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
@@ -1727,8 +1727,8 @@ public class CharacterController : MonoBehaviour
                 }
                 else if (targetCover != null && targetCover.coverType == CoverType.Full)
                 {
-                    targetRN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Right);
-                    targetLN = CheckTheCanMoveNode(targetPos, targetCover, TargetDirection.Left);
+                    targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+                    targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
                     if (targetRN == null && targetLN == null)
                     {
                         Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
@@ -1742,7 +1742,7 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    if (CheckTheCoverAlongPath(pos, targetPos))
+                    if (noRange || CheckTheCoverAlongPath(pos, targetPos))
                     {
                         var targetInfo = new TargetInfo
                         {
@@ -1847,7 +1847,7 @@ public class CharacterController : MonoBehaviour
                     {
                         pos = _shooterNode.transform.position;
                         targetPos = _targetNode.transform.position;
-                        if (CheckTheCoverAlongPath(pos, targetPos))
+                        if (noRange || CheckTheCoverAlongPath(pos, targetPos))
                         {
                             var dist = DataUtility.GetDistance(pos, targetPos);
                             if (dist < distance)
@@ -1867,28 +1867,6 @@ public class CharacterController : MonoBehaviour
             {
                 Debug.Log($"{transform.name}: 사거리가 닿지 않음(=> {target.name})");
             }
-        }
-
-        bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
-        {
-            if (noRange) return true;
-
-            bool canShoot;
-            var interval = new Vector3(0f, 1f, 0f);
-            pos += interval;
-            targetPos += interval;
-            var dir = Vector3.Normalize(targetPos - pos);
-            var dist = DataUtility.GetDistance(pos, targetPos);
-            if (Physics.Raycast(pos, dir, dist, gameMgr.coverLayer))
-            {
-                canShoot = false;
-            }
-            else
-            {
-                canShoot = true;
-            }
-
-            return canShoot;
         }
     }
 
@@ -1946,21 +1924,75 @@ public class CharacterController : MonoBehaviour
     /// <param name="coverNode"></param>
     /// <param name="targetDir"></param>
     /// <returns></returns>
-    private FieldNode CheckTheCanMoveNode(Vector3 pos, Cover cover, TargetDirection targetDir)
+    private FieldNode CheckTheCanMoveNode(FieldNode node, Cover cover, TargetDirection targetDir)
     {
-        FieldNode node = null;
-        var frontDir = Vector3.Normalize(cover.transform.position - pos);
+        FieldNode moveNode = null;
+        var frontDir = Vector3.Normalize(cover.transform.position - node.transform.position);
         var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
-        if (Physics.Raycast(pos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
+        if (Physics.Raycast(node.transform.position, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.nodeLayer))
         {
-            node = hit.collider.GetComponentInParent<FieldNode>();
-            if (!node.canMove)
+            moveNode = hit.collider.GetComponentInParent<FieldNode>();
+            if (!moveNode.canMove)
             {
-                node = null;
+                moveNode = null;
             }
         }
+        if (moveNode == null) return null;
 
-        return node;
+        switch (cover.formType)
+        {
+            case CoverForm.Node:
+                for (int i = 0; i < cover.coverNode.allAxisNodes.Count; i++)
+                {
+                    var axisNode = cover.coverNode.allAxisNodes[i];
+                    if (axisNode == null) continue;
+
+                    var checkNode = node.allAxisNodes.Find(x => x.allAxisNodes.Contains(axisNode));
+                    if (checkNode != null && checkNode.cover != null) return null;
+                }
+                break;
+            case CoverForm.Line:
+                var _node = cover.frontNode != node ? cover.frontNode : cover.backNode;
+                for (int i = 0; i < _node.allAxisNodes.Count; i++)
+                {
+                    var axisNode = _node.allAxisNodes[i];
+                    if (axisNode == null) continue;
+
+                    var checkNode = node.allAxisNodes.Find(x => x.allAxisNodes.Contains(axisNode));
+                    if (checkNode != null && checkNode.cover != null) return null;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return moveNode;
+    }
+
+    /// <summary>
+    /// 사격경로 상의 장애물을 체크
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="targetPos"></param>
+    /// <returns></returns>
+    public bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
+    {
+        bool canShoot;
+        var interval = new Vector3(0f, 1f, 0f);
+        pos += interval;
+        targetPos += interval;
+        var dir = Vector3.Normalize(targetPos - pos);
+        var dist = DataUtility.GetDistance(pos, targetPos);
+        if (Physics.Raycast(pos, dir, dist, gameMgr.coverLayer))
+        {
+            canShoot = false;
+        }
+        else
+        {
+            canShoot = true;
+        }
+
+        return canShoot;
     }
 
     /// <summary>
