@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,12 +13,26 @@ public enum GameState
     Inventory,
 }
 
+public enum ScheduleState
+{
+    None,
+    Aim,
+    Shoot,
+    End,
+}
+
 [System.Serializable]
 public struct MovePass
 {
     public string indexName;
     public List<FieldNode> passNodes;
     public int moveNum;
+}
+
+[System.Serializable]
+public class AttackSchedule
+{
+    public TargetInfo targetInfo;
 }
 
 public class GameManager : MonoBehaviour
@@ -66,6 +79,10 @@ public class GameManager : MonoBehaviour
     public List<CharacterController> playerList;
     public List<CharacterController> enemyList;
     public CharacterController selectChar;
+    [Space(5f)]
+
+    [SerializeField] private List<TargetInfo> attackSchedule;
+    [SerializeField] private ScheduleState scheduleState;
 
     [Header("[FieldNode]")]
     [SerializeField] private FieldNode targetNode;
@@ -314,6 +331,7 @@ public class GameManager : MonoBehaviour
         KeyboardInput();
         MouseInput();
         PointerUpEvent();
+        ScheduleProcess();
         CreatePlayer();
         CreateEnemy();
     }
@@ -1385,7 +1403,9 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                enemy.SetTargeting(targetInfo);
+                enemy.SetTargeting(targetInfo, CharacterOwner.Enemy);
+                attackSchedule.Add(targetInfo);
+
                 var totalCost = enemy.currentWeapon.weaponData.actionCost;
                 var remCost = enemy.action - totalCost;
                 if (remCost > 0)
@@ -1416,18 +1436,69 @@ public class GameManager : MonoBehaviour
                 var shootNum = DataUtility.GetShootNum(enemy.currentWeapon.weaponData.RPM, enemy.fiarRate);
                 enemy.animator.SetInteger("shootNum", shootNum);
                 enemy.SetAction(-totalCost);
-                if (targetInfo.shooterCover != null)
-                {
-                    enemy.AddCommand(CommandType.Aim);
-                    enemy.AddCommand(CommandType.Shoot);
-                    enemy.AddCommand(CommandType.BackCover);
-                }
-                else
-                {
-                    enemy.AddCommand(CommandType.Aim);
-                    enemy.AddCommand(CommandType.Shoot);
-                }
+                //if (targetInfo.shooterCover != null)
+                //{
+                //    enemy.AddCommand(CommandType.Aim);
+                //    enemy.AddCommand(CommandType.Shoot);
+                //    enemy.AddCommand(CommandType.BackCover);
+                //}
+                //else
+                //{
+                //    enemy.AddCommand(CommandType.Aim);
+                //    enemy.AddCommand(CommandType.Shoot);
+                //}
             }
+        }
+    }
+    #endregion
+
+    #region Attack Schedule
+    public void SetPositionOfAI(CharacterOwner ownerType)
+    {
+        if (ownerType == CharacterOwner.Player) return;
+
+        var endEnemys = enemyList.FindAll(x => x.commandList.Count == 0);
+        if (endEnemys.Count != enemyList.Count) return;
+
+        scheduleState = ScheduleState.Aim;
+    }
+
+    private void ScheduleProcess()
+    {
+        if (scheduleState == ScheduleState.None) return;
+        if (attackSchedule.Count == 0) return;
+
+        var schedule = attackSchedule[0];
+        switch (scheduleState)
+        {
+            case ScheduleState.Aim:
+                schedule.shooter.SetTargeting(schedule, CharacterOwner.All);
+                schedule.shooter.AddCommand(CommandType.Aim, schedule);
+                scheduleState = ScheduleState.Shoot;
+                break;
+            case ScheduleState.Shoot:
+                var canShot = schedule.target.commandList.Count == 0
+                           && schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Targeting");
+                if (!canShot) return;
+
+                schedule.shooter.AddCommand(CommandType.Shoot, schedule);
+                if (schedule.shooterCover != null)
+                {
+                    schedule.shooter.AddCommand(CommandType.BackCover);
+                }
+                scheduleState = ScheduleState.End;
+                break;
+            case ScheduleState.End:
+                var endAction = schedule.shooter.commandList.Count == 0
+                             && (schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Idle")
+                             || schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Cover"));
+                if (!endAction) return;
+
+                attackSchedule.RemoveAt(0);
+                scheduleState = attackSchedule.Count > 0 ? ScheduleState.Aim : ScheduleState.None;
+                break;
+            default:
+                break;
         }
     }
     #endregion

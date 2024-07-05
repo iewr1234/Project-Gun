@@ -11,6 +11,7 @@ public enum CharacterOwner
     None,
     Player,
     Enemy,
+    All,
 }
 
 public enum CharacterState
@@ -193,7 +194,7 @@ public class CharacterController : MonoBehaviour
     private bool headAim;
     private bool chestAim;
     private readonly float aimSpeed = 2f;
-    private readonly float aimTime = 0.4f;
+    private readonly float aimTime = 0.25f;
 
     private bool targetingMove;
     private Vector3 targetingPos;
@@ -776,6 +777,7 @@ public class CharacterController : MonoBehaviour
                     case CoverType.Half:
                         animator.SetBool("fullCover", false);
                         commandList.Remove(command);
+                        gameMgr.SetPositionOfAI(ownerType);
                         break;
                     case CoverType.Full:
                         animator.SetBool("fullCover", true);
@@ -818,6 +820,7 @@ public class CharacterController : MonoBehaviour
                         animator.SetBool("isCover", true);
                         animator.SetBool("fullCover", false);
                         commandList.Remove(command);
+                        gameMgr.SetPositionOfAI(ownerType);
                         break;
                     case CoverType.Full:
                         FindDirectionForCover(cover);
@@ -829,6 +832,7 @@ public class CharacterController : MonoBehaviour
             else
             {
                 commandList.Remove(command);
+                gameMgr.SetPositionOfAI(ownerType);
             }
         }
         else
@@ -1021,6 +1025,7 @@ public class CharacterController : MonoBehaviour
                 transform.LookAt(command.lookAt);
             }
             commandList.Remove(command);
+            gameMgr.SetPositionOfAI(ownerType);
         }
     }
 
@@ -2004,11 +2009,9 @@ public class CharacterController : MonoBehaviour
             targetIndex = 0;
             fiarRate = 0;
             sightRate = 0;
-            //ChangeTargetShader();
-
             var targetInfo = targetList[targetIndex];
             targetInfo.target.SetActiveOutline(true);
-            SetTargeting(targetInfo);
+            SetTargeting(targetInfo, CharacterOwner.All);
             CameraState camState;
             if (targetInfo.shooterCover == null)
             {
@@ -2053,7 +2056,7 @@ public class CharacterController : MonoBehaviour
 
         var targetInfo = targetList[targetIndex];
         targetInfo.target.SetActiveOutline(true);
-        SetTargeting(targetInfo);
+        SetTargeting(targetInfo, CharacterOwner.All);
         CameraState camState;
         if (cover == null)
         {
@@ -2079,59 +2082,66 @@ public class CharacterController : MonoBehaviour
     /// 조준상태로 설정
     /// </summary>
     /// <param name="value"></param>
-    public void SetTargeting(TargetInfo targetInfo)
+    public void SetTargeting(TargetInfo targetInfo, CharacterOwner ownerType)
     {
         var shooter = targetInfo.shooter;
         var target = targetInfo.target;
-        if (target.cover != null)
+
+        if (ownerType == CharacterOwner.All || target.ownerType == ownerType)
         {
-            if (targetInfo.targetCover == null)
+            if (target.cover != null)
             {
-                target.AddCommand(CommandType.LeaveCover);
+                if (targetInfo.targetCover == null)
+                {
+                    target.AddCommand(CommandType.LeaveCover);
+                }
+                else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
+                {
+                    target.AddCommand(CommandType.LeaveCover);
+                    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
+                }
+                else
+                {
+                    target.animator.SetBool("isRight", targetInfo.targetRight);
+                }
             }
-            else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
+            else if (targetInfo.targetCover != null)
             {
-                target.AddCommand(CommandType.LeaveCover);
                 target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
             }
             else
             {
-                target.animator.SetBool("isRight", targetInfo.targetRight);
+                target.transform.LookAt(shooter.transform);
             }
+            target.AddCommand(CommandType.Targeting, true, shooter.transform);
         }
-        else if (targetInfo.targetCover != null)
-        {
-            target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
-        }
-        else
-        {
-            target.transform.LookAt(shooter.transform);
-        }
-        target.AddCommand(CommandType.Targeting, true, shooter.transform);
 
-        if (shooter.cover != null)
+        if (ownerType == CharacterOwner.All || shooter.ownerType == ownerType)
         {
-            if (targetInfo.shooterCover == null)
+            if (shooter.cover != null)
             {
-                shooter.AddCommand(CommandType.LeaveCover);
+                if (targetInfo.shooterCover == null)
+                {
+                    shooter.AddCommand(CommandType.LeaveCover);
+                }
+                else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
+                {
+                    shooter.AddCommand(CommandType.LeaveCover);
+                    shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
+                }
+                else
+                {
+                    shooter.animator.SetBool("isRight", targetInfo.isRight);
+                }
             }
-            else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
+            else if (targetInfo.shooterCover != null)
             {
-                shooter.AddCommand(CommandType.LeaveCover);
                 shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
             }
             else
             {
-                shooter.animator.SetBool("isRight", targetInfo.isRight);
+                shooter.transform.LookAt(target.transform);
             }
-        }
-        else if (targetInfo.shooterCover != null)
-        {
-            shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
-        }
-        else
-        {
-            shooter.transform.LookAt(target.transform);
         }
     }
 
@@ -2264,8 +2274,6 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Targeting:
-                if (ownerType == CharacterOwner.Player) return;
-
                 var targetingCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2355,6 +2363,33 @@ public class CharacterController : MonoBehaviour
                     type = type,
                 };
                 commandList.Add(command);
+                break;
+        }
+    }
+
+    public void AddCommand(CommandType type, TargetInfo targetInfo)
+    {
+        switch (type)
+        {
+            case CommandType.Aim:
+                var coverAimCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Aim,
+                    targetInfo = targetInfo,
+                };
+                commandList.Add(coverAimCommand);
+                break;
+            case CommandType.Shoot:
+                var shootCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Shoot,
+                    targetInfo = targetInfo,
+                };
+                commandList.Add(shootCommand);
+                break;
+            default:
                 break;
         }
     }
