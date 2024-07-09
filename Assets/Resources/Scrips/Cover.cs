@@ -18,6 +18,14 @@ public enum CoverType
     Full,
 }
 
+public enum CoverState
+{
+    None,
+    Half,
+    FullLeft,
+    FullRight,
+}
+
 public class Cover : MonoBehaviour
 {
     [Header("---Access Component---")]

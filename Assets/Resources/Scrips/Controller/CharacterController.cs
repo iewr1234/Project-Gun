@@ -196,6 +196,7 @@ public class CharacterController : MonoBehaviour
     private readonly float aimSpeed = 2f;
     private readonly float aimTime = 0.25f;
 
+    private bool canTargeting;
     private bool targetingMove;
     private Vector3 targetingPos;
     private readonly float targetingMoveSpeed_Pistol = 1.5f;
@@ -709,14 +710,15 @@ public class CharacterController : MonoBehaviour
                                 AddCommand(CommandType.TakeCover);
                                 break;
                             case CharacterOwner.Enemy:
-                                if (state == CharacterState.Watch)
-                                {
-                                    gameMgr.EnemyAI_Watch(this, currentNode);
-                                }
-                                else
-                                {
-                                    gameMgr.EnemyAI_Shoot(this);
-                                }
+                                gameMgr.EnemyAI_Shoot(this);
+                                //if (state == CharacterState.Watch)
+                                //{
+                                //    gameMgr.EnemyAI_Watch(this, currentNode);
+                                //}
+                                //else
+                                //{
+                                //    gameMgr.EnemyAI_Shoot(this);
+                                //}
                                 break;
                             default:
                                 break;
@@ -1057,6 +1059,26 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void TargetingProcess(CharacterCommand command)
     {
+        if (!canTargeting)
+        {
+            switch (command.targeting)
+            {
+                case true:
+                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Cover"))
+                    {
+                        canTargeting = true;
+                    }
+                    break;
+                case false:
+                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
+                    {
+                        canTargeting = true;
+                    }
+                    break;
+            }
+            return;
+        }
+
         if (animator.GetBool("isCover") && !animator.GetBool("fullCover"))
         {
             switch (command.targeting)
@@ -1065,15 +1087,15 @@ public class CharacterController : MonoBehaviour
                     aimTf = command.lookAt;
                     headAim = true;
                     animator.SetTrigger("targeting");
-                    commandList.Remove(command);
                     break;
                 case false:
                     aimTf = null;
                     headAim = false;
                     animator.SetTrigger("unTargeting");
-                    commandList.Remove(command);
                     break;
             }
+            canTargeting = false;
+            commandList.Remove(command);
         }
         else if (animator.GetBool("isCover"))
         {
@@ -1107,6 +1129,7 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
+                    canTargeting = false;
                     targetingMove = false;
                     commandList.Remove(command);
                 }
@@ -1118,6 +1141,7 @@ public class CharacterController : MonoBehaviour
             {
                 transform.LookAt(command.lookAt);
             }
+            canTargeting = false;
             commandList.Remove(command);
         }
 
@@ -1218,6 +1242,7 @@ public class CharacterController : MonoBehaviour
                     coverPos = currentNode.transform.position + (transform.forward * coverInterval);
                     commandList.Remove(command);
                     covering = false;
+                    gameMgr.SetPositionOfAI(ownerType);
                 }
             }
         }
@@ -1244,6 +1269,7 @@ public class CharacterController : MonoBehaviour
             chestAim = true;
             chestRig.weight = 1f;
             commandList.Remove(command);
+            gameMgr.SetPositionOfAI(ownerType);
         }
     }
 
@@ -1260,10 +1286,10 @@ public class CharacterController : MonoBehaviour
             var errorInterval = 1f;
             aimInterval = dir * errorInterval;
             aimInterval.y += DataUtility.aimPointY;
-            if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
-            {
-                targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
-            }
+            //if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
+            //{
+            //    targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
+            //}
         }
         else
         {
@@ -1307,7 +1333,7 @@ public class CharacterController : MonoBehaviour
         if (!reloading && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("None"))
         {
             animator.SetTrigger("reload");
-            currentWeapon.Reload();
+            //currentWeapon.Reload();
             reloading = true;
         }
     }
@@ -2102,7 +2128,8 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    target.animator.SetBool("isRight", targetInfo.targetRight);
+                    //target.animator.SetBool("isRight", targetInfo.targetRight);
+                    target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
                 }
             }
             else if (targetInfo.targetCover != null)
@@ -2131,7 +2158,8 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    shooter.animator.SetBool("isRight", targetInfo.isRight);
+                    //shooter.animator.SetBool("isRight", targetInfo.isRight);
+                    shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
                 }
             }
             else if (targetInfo.shooterCover != null)
@@ -2536,7 +2564,7 @@ public class CharacterController : MonoBehaviour
         switch (state)
         {
             case CharacterState.None:
-                if (target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
+                if (target.ownerType != CharacterOwner.Player && target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
                 {
                     target.AddCommand(CommandType.Targeting, false, transform);
                 }
