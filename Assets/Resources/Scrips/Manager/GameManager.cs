@@ -84,9 +84,8 @@ public class GameManager : MonoBehaviour
     [Space(5f)]
 
     [SerializeField] private List<AttackSchedule> scheduleList;
-    private CoverState targetState;
-    [SerializeField] private List<TargetInfo> attackSchedule;
     [SerializeField] private ScheduleState scheduleState;
+    private CoverState targetState;
     private float timer;
 
     private readonly float scheduleWaitTime = 0.5f;
@@ -668,6 +667,8 @@ public class GameManager : MonoBehaviour
                         }
                         else if (node == targetNode && node.canMove && selectChar != null)
                         {
+                            if (selectChar.commandList.Count > 0) return;
+
                             CharacterMove(selectChar, node);
                             DeselectCharacter();
                         }
@@ -931,8 +932,6 @@ public class GameManager : MonoBehaviour
     /// <param name="targetNode"></param>
     private void CharacterMove(CharacterController charCtr, FieldNode targetNode)
     {
-        if (charCtr.commandList.Count > 0) return;
-
         //for (int i = 0; i < movableNodes.Count; i++)
         //{
         //    var movableNode = movableNodes[i];
@@ -1419,7 +1418,6 @@ public class GameManager : MonoBehaviour
             {
                 enemy.SetTargeting(targetInfo, CharacterOwner.Enemy);
                 enemy.AddCommand(CommandType.Aim, targetInfo);
-                attackSchedule.Add(targetInfo);
 
                 var schedule = new AttackSchedule
                 {

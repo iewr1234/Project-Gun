@@ -465,7 +465,7 @@ public class PopUp_Inventory : MonoBehaviour
                             invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
                         }
 
-                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.ID);
+                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.prefabName);
                         for (int j = 0; j < smaples.Count; j++)
                         {
                             var smaple = smaples[j];
@@ -498,7 +498,7 @@ public class PopUp_Inventory : MonoBehaviour
                         //    invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
                         //}
 
-                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.ID);
+                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
                         for (int j = 0; j < smaples.Count; j++)
                         {
                             var smaple = smaples[j];

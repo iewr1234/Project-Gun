@@ -220,7 +220,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (weaponData.isMag)
         {
-            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.ID);
+            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.prefabName);
             if (smaple)
             {
                 smaple.SetActive(true);
@@ -230,7 +230,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            var smaples = partsSamples.FindAll(x => x.name == partsData.ID);
+            var smaples = partsSamples.FindAll(x => x.name == partsData.prefabName);
             for (int j = 0; j < smaples.Count; j++)
             {
                 var smaple = smaples[j];
@@ -252,7 +252,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (weaponData.isMag)
         {
-            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.ID);
+            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.prefabName);
             if (smaple)
             {
                 smaple.SetActive(true);
@@ -262,7 +262,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            var smaples = partsSamples.FindAll(x => x.name == partsData.ID);
+            var smaples = partsSamples.FindAll(x => x.name == partsData.prefabName);
             for (int j = 0; j < smaples.Count; j++)
             {
                 var smaple = smaples[j];

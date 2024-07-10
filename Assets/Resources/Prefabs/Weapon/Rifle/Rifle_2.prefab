@@ -175,6 +175,7 @@ MonoBehaviour:
     weaponName: 
     model: 0
     caliber: 0
+    weight: 0
     type: 0
     RPM: 0
     range: 0
@@ -188,6 +189,8 @@ MonoBehaviour:
     useSight: 
     useUnderRail: 
     useRail: 
+    equipMagID: 
+    equipPartsIDs: []
     equipMag:
       indexName: 
       ID: 
@@ -195,13 +198,27 @@ MonoBehaviour:
       magName: 
       compatModel: 
       compatCaliber: 0
+      weight: 0
       magSize: 0
       loadedBullets: []
     isMag: 0
     equipPartsList: []
-  weight: 0
   fireMode: 1
   autoFireNum: 6
+  magMax: 0
+  loadedNum: 0
+  useBullet:
+    indexName: 
+    ID: 
+    bulletName: 
+    level: 0
+    caliber: 0
+    weight: 0
+    propellant: 0
+    damage: 0
+    penetrate: 0
+    armorBreak: 0
+    critical: 0
   hitList: 
 --- !u!33 &3906847497888561846
 MeshFilter:
@@ -500,7 +517,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4257123812893278662, guid: 8404f25c675163e48acc01ee882238d1, type: 3}
       propertyPath: m_Name
-      value: P0002
+      value: Sight_2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8404f25c675163e48acc01ee882238d1, type: 3}
@@ -518,7 +535,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8751787256974751010, guid: 255a8b1ba847ec04ca6575691146005b, type: 3}
       propertyPath: m_Name
-      value: M0002
+      value: Magazine_2
       objectReference: {fileID: 0}
     - target: {fileID: 8754866370050634544, guid: 255a8b1ba847ec04ca6575691146005b, type: 3}
       propertyPath: m_RootOrder

@@ -73,12 +73,12 @@ public class Weapon : MonoBehaviour
 
         if (weaponData.isMag)
         {
-            SetParts(weaponData.equipMag.ID, true);
+            SetParts(weaponData.equipMag.magName, true);
         }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            SetParts(partsData.ID, true);
+            SetParts(partsData.partsName, true);
         }
 
         void AddWeaponPartsObjects()
@@ -219,9 +219,9 @@ public class Weapon : MonoBehaviour
         //}
     }
 
-    public void SetParts(string partsID, bool value)
+    public void SetParts(string partsName, bool value)
     {
-        var partsList = partsObjects.FindAll(x => x.name == partsID);
+        var partsList = partsObjects.FindAll(x => x.name == partsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];

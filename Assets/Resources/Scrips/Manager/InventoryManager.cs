@@ -122,8 +122,8 @@ public class InventoryManager : MonoBehaviour
         SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots);
         SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots);
 
-        SetItemInStorage("Scope_1", 1, otherStorage.itemSlots);
-        SetItemInStorage("Scope_2", 1, otherStorage.itemSlots);
+        SetItemInStorage("Sight_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Sight_2", 1, otherStorage.itemSlots);
 
         SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
         SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
@@ -134,6 +134,8 @@ public class InventoryManager : MonoBehaviour
         SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots);
         SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots);
         SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots);
+
+        SetItemInStorage("Sight_20", 1, otherStorage.itemSlots);
     }
 
     private void CreateItems()
@@ -671,7 +673,7 @@ public class InventoryManager : MonoBehaviour
             putItem.transform.localPosition = Vector3.zero;
             putItem.targetImage.raycastTarget = true;
             putItem.SetItemScale(true);
-     
+
             switch (putItem.itemData.type)
             {
                 case ItemType.MainWeapon:
@@ -710,7 +712,7 @@ public class InventoryManager : MonoBehaviour
                         var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                         if (weapon != null)
                         {
-                            weapon.SetParts(putItem.magData.ID, true);
+                            weapon.SetParts(putItem.magData.magName, true);
                         }
                     }
                     break;
@@ -728,7 +730,7 @@ public class InventoryManager : MonoBehaviour
                             var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                             if (weapon != null)
                             {
-                                weapon.SetParts(putItem.partsData.ID, true);
+                                weapon.SetParts(putItem.partsData.partsName, true);
                             }
                         }
                     }
@@ -862,7 +864,7 @@ public class InventoryManager : MonoBehaviour
                     var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
                     if (weapon != null)
                     {
-                        weapon.SetParts(item.magData.ID, false);
+                        weapon.SetParts(item.magData.magName, false);
                     }
                 }
                 break;
@@ -877,7 +879,7 @@ public class InventoryManager : MonoBehaviour
                         var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
                         if (weapon != null)
                         {
-                            weapon.SetParts(item.partsData.ID, true);
+                            weapon.SetParts(item.partsData.partsName, true);
                         }
                     }
                 }
