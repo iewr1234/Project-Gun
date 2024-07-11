@@ -87,22 +87,27 @@ public class Weapon : MonoBehaviour
             var partsTf = transform.Find("PartsTransform");
 
             var magTf = partsTf.Find("Magazine");
-            for (int i = 0; i < magTf.childCount; i++)
-            {
-                var sample = magTf.GetChild(i).gameObject;
-                sample.SetActive(false);
-                parts.Add(sample);
-            }
+            AddParts(magTf);
 
             var sightTf = partsTf.Find("Sight");
-            for (int i = 0; i < sightTf.childCount; i++)
-            {
-                var sample = sightTf.GetChild(i).gameObject;
-                sample.SetActive(false);
-                parts.Add(sample);
-            }
+            AddParts(sightTf);
+
+            var underRailTf = partsTf.Find("UnderRail");
+            AddParts(underRailTf);
 
             partsObjects = parts;
+
+            void AddParts(Transform partsTf)
+            {
+                if (partsTf == null) return;
+
+                for (int i = 0; i < partsTf.childCount; i++)
+                {
+                    var sample = partsTf.GetChild(i).gameObject;
+                    sample.SetActive(false);
+                    parts.Add(sample);
+                }
+            }
         }
 
         void SetWeaponPositionAndRotation()
