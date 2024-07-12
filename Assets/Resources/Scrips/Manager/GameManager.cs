@@ -1323,7 +1323,7 @@ public class GameManager : MonoBehaviour
                     var shooterPos = targetInfo.shooterNode.transform.position;
                     var targetPos = targetInfo.targetNode.transform.position;
                     var dist = DataUtility.GetDistance(shooterPos, targetPos);
-                    if (!enemy.CheckTheCoverAlongPath(enemy.currentWeapon.weaponData.range, shooterPos, targetPos))
+                    if (!enemy.CheckTheCoverAlongPath(enemy.currentWeapon.weaponData.range, shooterPos, targetPos, false))
                     {
                         shootScore = 0;
                         continue;
@@ -1331,7 +1331,7 @@ public class GameManager : MonoBehaviour
 
                     if (targetInfo.targetCover == null)
                     {
-                        shootScore = enemy.aiData.score_fullShoot;
+                        shootScore = enemy.aiData.score_noneShoot;
                     }
                     else if (shootScore != enemy.aiData.score_noneShoot)
                     {

@@ -1771,7 +1771,7 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                if (noRange || CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos))
+                if (CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos, noRange))
                 {
                     var targetInfo = new TargetInfo
                     {
@@ -1876,7 +1876,7 @@ public class CharacterController : MonoBehaviour
                 {
                     pos = _shooterNode.transform.position;
                     targetPos = _targetNode.transform.position;
-                    if (noRange || CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos))
+                    if (CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos, noRange))
                     {
                         var dist = DataUtility.GetDistance(pos, targetPos);
                         if (dist < distance)
@@ -1998,10 +1998,11 @@ public class CharacterController : MonoBehaviour
     /// <param name="pos"></param>
     /// <param name="targetPos"></param>
     /// <returns></returns>
-    public bool CheckTheCoverAlongPath(float range, Vector3 pos, Vector3 targetPos)
+    public bool CheckTheCoverAlongPath(float range, Vector3 pos, Vector3 targetPos, bool noRange)
     {
         var dist = DataUtility.GetDistance(pos, targetPos);
-        if (dist > range) return false;
+        var isRange = noRange || dist <= range;
+        if (!isRange) return false;
 
         bool canShoot;
         var interval = new Vector3(0f, 1f, 0f);
