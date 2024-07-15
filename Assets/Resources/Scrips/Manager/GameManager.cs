@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
     private Transform bulletsPoolTf;
     private Transform warningPoolTf;
     private Transform passPointPoolTf;
+    private Transform floatTextPoolTf;
 
     [Header("--- Assignment Variable---")]
     public GameState gameState;
@@ -100,6 +101,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<Bullet> bulletPool = new List<Bullet>();
     [HideInInspector] public List<FireWarning> warningPool = new List<FireWarning>();
     [HideInInspector] public List<MeshRenderer> passPointPool = new List<MeshRenderer>();
+    [HideInInspector] public List<FloatText> floatTextPool = new List<FloatText>();
 
     [HideInInspector] public LayerMask nodeLayer;
     [HideInInspector] public LayerMask coverLayer;
@@ -109,6 +111,7 @@ public class GameManager : MonoBehaviour
     private readonly int bulletPoolMax = 30;
     private readonly int warningPoolMax = 30;
     private readonly int passPointPoolMax = 30;
+    private readonly int floatTextPoolMax = 30;
 
     public void Start()
     {
@@ -127,12 +130,15 @@ public class GameManager : MonoBehaviour
         targetCheck.gameObject.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+
         var objectPool = GameObject.FindGameObjectWithTag("ObjectPool").transform;
         linePoolTf = objectPool.transform.Find("LinePool");
         rangePoolTf = objectPool.transform.Find("RangePool");
         bulletsPoolTf = objectPool.transform.Find("BulletPool");
         warningPoolTf = objectPool.transform.Find("WarningPool");
         passPointPoolTf = objectPool.transform.Find("PassPointPool");
+        floatTextPoolTf = objectPool.transform.Find("FloatTextPool");
+
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
         watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
@@ -141,6 +147,7 @@ public class GameManager : MonoBehaviour
         CreateBullets();
         CreateWarnings();
         CreatePassPoint();
+        CreateFloatText();
 
         invenMgr = FindAnyObjectByType<InventoryManager>();
         invenMgr.SetComponents(this);
@@ -328,6 +335,17 @@ public class GameManager : MonoBehaviour
             passPoint.transform.SetParent(passPointPoolTf, false);
             passPoint.gameObject.SetActive(false);
             passPointPool.Add(passPoint);
+        }
+    }
+
+    private void CreateFloatText()
+    {
+        for (int i = 0; i < floatTextPoolMax; i++)
+        {
+            var floatText = Instantiate(Resources.Load<FloatText>("Prefabs/FloatText"));
+            floatText.transform.SetParent(floatTextPoolTf, false);
+            floatText.SetComponents(this);
+            floatTextPool.Add(floatText);
         }
     }
 
@@ -1181,6 +1199,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetFloatText(Vector3 pos, string text, Color color)
+    {
+        var floatText = floatTextPool.Find(x => !x.gameObject.activeSelf);
+        floatText.transform.SetAsFirstSibling();
+        floatText.ShowFloatText(pos, text, color);
+    }
+
     public void SetFireWarning(FieldNode node)
     {
         var fireWarning = warningPool.Find(x => !x.gameObject.activeSelf);
@@ -1359,6 +1384,32 @@ public class GameManager : MonoBehaviour
         }
 
         var maxScoreNode = movableNodes.OrderByDescending(n => n.aiScore).FirstOrDefault();
+        if (playerList.Count > 0 && maxScoreNode.aiScore < 20)
+        {
+            CharacterController closeTarget;
+            if (playerList.Count > 1)
+            {
+                var pos = enemy.currentNode.transform.position;
+                closeTarget = playerList.OrderBy(x => DataUtility.GetDistance(x.currentNode.transform.position, pos)).FirstOrDefault();
+            }
+            else
+            {
+                closeTarget = playerList[0];
+            }
+            maxScoreNode = movableNodes.OrderBy(x => DataUtility.GetDistance(x.transform.position, closeTarget.currentNode.transform.position)).FirstOrDefault();
+        }
+
+        if (maxScoreNode != enemy.currentNode)
+        {
+            ResultNodePass(enemy, maxScoreNode);
+            CharacterMove(enemy, maxScoreNode);
+        }
+        else
+        {
+            EnemyAI_Shoot(enemy);
+        }
+        enemy.targetList.Clear();
+
         //if (maxScoreNode.aiScore <= 40)
         //{
         //    var canWatchNode = movableNodes.FindAll(x => x.canShoot).OrderByDescending(n => n.aiScore).FirstOrDefault();
@@ -1373,18 +1424,6 @@ public class GameManager : MonoBehaviour
         //        EnemyAI_Watch(enemy, enemy.currentNode);
         //    }
         //}
-
-        maxScoreNode.PosText.color = Color.red;
-        if (maxScoreNode != enemy.currentNode)
-        {
-            ResultNodePass(enemy, maxScoreNode);
-            CharacterMove(enemy, maxScoreNode);
-        }
-        else
-        {
-            EnemyAI_Shoot(enemy);
-        }
-        enemy.targetList.Clear();
     }
 
     public void EnemyAI_Watch(CharacterController enemy, FieldNode currentNode)

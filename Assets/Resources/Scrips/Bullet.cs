@@ -21,6 +21,7 @@ public class Bullet : MonoBehaviour
 
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private bool isHit;
+    [SerializeField] private bool isMiss;
     private bool isCheck;
     private float timer;
 
@@ -68,10 +69,12 @@ public class Bullet : MonoBehaviour
         if (isHit)
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
+            isMiss = false;
         }
         else
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
+            isMiss = true;
         }
         isCheck = false;
     }
@@ -92,6 +95,16 @@ public class Bullet : MonoBehaviour
                 Debug.Log($"{charCtr.name}: Hit");
             }
             HitBullet();
+        }
+
+        if (!isHit && isMiss)
+        {
+            var dist = DataUtility.GetDistance(target.transform.position, transform.position);
+            if (dist < 1.5f)
+            {
+                target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
+                isMiss = false;
+            }
         }
     }
 
@@ -121,5 +134,10 @@ public class Bullet : MonoBehaviour
         bulletRb.isKinematic = true;
         bulletCd.enabled = false;
         isCheck = true;
+
+        if (!isHit)
+        {
+            target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
+        }
     }
 }

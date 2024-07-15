@@ -2497,6 +2497,7 @@ public class CharacterController : MonoBehaviour
         if (isPenetrate)
         {
             SetHealth(-damage);
+            gameMgr.SetFloatText(charUI.transform.position, $"{damage}", Color.white);
         }
         else
         {
