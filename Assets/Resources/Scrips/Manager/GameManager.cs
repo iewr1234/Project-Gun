@@ -86,6 +86,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<AttackSchedule> scheduleList;
     [SerializeField] private ScheduleState scheduleState;
     private CoverState targetState;
+    private bool firstSchedule;
     private float timer;
 
     private readonly float scheduleWaitTime = 0.5f;
@@ -1491,6 +1492,7 @@ public class GameManager : MonoBehaviour
         scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
         targetState = CoverState.None;
         scheduleState = ScheduleState.Check;
+        firstSchedule = true;
     }
 
     private void ScheduleProcess()
@@ -1519,7 +1521,7 @@ public class GameManager : MonoBehaviour
             var targetInfo = schedule.targetInfo;
             if (targetInfo.shooter.commandList.Count > 0) return;
 
-            if (targetState != schedule.type)
+            if (firstSchedule || targetState != schedule.type)
             {
                 if (targetState != CoverState.None)
                 {
@@ -1527,6 +1529,7 @@ public class GameManager : MonoBehaviour
                 }
                 targetInfo.shooter.SetTargeting(targetInfo, CharacterOwner.Player);
                 targetState = schedule.type;
+                firstSchedule = false;
             }
             scheduleState = ScheduleState.Shoot;
         }

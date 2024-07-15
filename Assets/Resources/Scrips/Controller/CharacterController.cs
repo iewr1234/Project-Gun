@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using UnityEditor.Experimental.GraphView;
 
 public enum CharacterOwner
 {
@@ -1701,6 +1702,10 @@ public class CharacterController : MonoBehaviour
     {
         targetList.Clear();
         if (currentWeapon == null) return;
+        if (node.nodePos == new Vector2Int(12, 4))
+        {
+
+        }
 
         var currentNode = node;
         var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
@@ -1932,10 +1937,44 @@ public class CharacterController : MonoBehaviour
                 var _cover = hit.collider.GetComponentInParent<Cover>();
                 if (_cover == null) return;
 
-                if (shooterNode.onAxisNodes.Contains(_cover.coverNode) || shooterNode.outlines.Find(x => x.lineCover == _cover))
+                switch (_cover.formType)
                 {
-                    cover = _cover;
+                    case CoverForm.Node:
+                        if (!shooterNode.onAxisNodes.Contains(_cover.coverNode)) return;
+
+                        for (int i = 0; i < _cover.coverNode.allAxisNodes.Count; i++)
+                        {
+                            var axisNode = _cover.coverNode.allAxisNodes[i];
+                            if (axisNode == null) continue;
+                            if (axisNode == shooterNode) continue;
+
+                            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
+                             && axisNode.cover != null) return;
+                        }
+                        break;
+                    case CoverForm.Line:
+                        if (!shooterNode.outlines.Find(x => x.lineCover == _cover)) return;
+
+                        var _coverNode = _cover.frontNode != shooterNode ? _cover.frontNode : _cover.backNode;
+                        for (int i = 0; i < _coverNode.allAxisNodes.Count; i++)
+                        {
+                            var axisNode = _coverNode.allAxisNodes[i];
+                            if (axisNode == null) continue;
+                            if (axisNode == shooterNode) continue;
+
+                            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
+                             && axisNode.cover != null) return;
+                        }
+                        break;
+                    default:
+                        break;
                 }
+                cover = _cover;
+
+                //if (shooterNode.onAxisNodes.Contains(_cover.coverNode) || shooterNode.outlines.Find(x => x.lineCover == _cover))
+                //{
+                //    cover = _cover;
+                //}
             }
         }
     }
@@ -1960,34 +1999,34 @@ public class CharacterController : MonoBehaviour
                 moveNode = null;
             }
         }
-        if (moveNode == null) return null;
+        //if (moveNode == null) return null;
 
-        switch (cover.formType)
-        {
-            case CoverForm.Node:
-                for (int i = 0; i < node.offAxisNodes.Count; i++)
-                {
-                    var axisNode = node.offAxisNodes[i];
-                    if (axisNode == null) continue;
+        //switch (cover.formType)
+        //{
+        //    case CoverForm.Node:
+        //        for (int i = 0; i < moveNode.offAxisNodes.Count; i++)
+        //        {
+        //            var axisNode = moveNode.offAxisNodes[i];
+        //            if (axisNode == null) continue;
 
-                    var checkNode = cover.coverNode.allAxisNodes.Find(x => x.allAxisNodes.Contains(axisNode));
-                    if (checkNode != null && checkNode.cover != null) return null;
-                }
-                break;
-            case CoverForm.Line:
-                var _node = cover.frontNode != node ? cover.frontNode : cover.backNode;
-                for (int i = 0; i < _node.allAxisNodes.Count; i++)
-                {
-                    var axisNode = node.offAxisNodes[i];
-                    if (axisNode == null) continue;
+        //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != node && x.allAxisNodes.Contains(moveNode));
+        //            if (checkNode != null && checkNode.cover != null) return null;
+        //        }
+        //        break;
+        //    case CoverForm.Line:
+        //        var _node = cover.frontNode != node ? cover.frontNode : cover.backNode;
+        //        for (int i = 0; i < _node.allAxisNodes.Count; i++)
+        //        {
+        //            var axisNode = _node.offAxisNodes[i];
+        //            if (axisNode == null) continue;
 
-                    var checkNode = cover.coverNode.allAxisNodes.Find(x => x.allAxisNodes.Contains(axisNode));
-                    if (checkNode != null && checkNode.cover != null) return null;
-                }
-                break;
-            default:
-                break;
-        }
+        //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != _node && x.allAxisNodes.Contains(axisNode));
+        //            if (checkNode != null && checkNode.cover != null) return null;
+        //        }
+        //        break;
+        //    default:
+        //        break;
+        //}
 
         return moveNode;
     }
