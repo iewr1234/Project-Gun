@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.ComponentModel;
+using UnityEditor.Experimental.GraphView;
 
 public enum MapEditorType
 {
@@ -48,6 +50,8 @@ public class MapEditor : MonoBehaviour
     private GameManager gameMgr;
 
     [Header("---Access Component---")]
+    private Transform components;
+
     private Transform fieldNodeTf;
     private Transform nodeOutlineTf;
     private Transform characterTf;
@@ -70,12 +74,12 @@ public class MapEditor : MonoBehaviour
     private bool lineForm;
 
     [Header("[Player]")]
-    private GameObject playerUI;
-    private List<FieldNode> pMarkerNodes = new List<FieldNode>();
+    [SerializeField] private GameObject playerUI;
+    [SerializeField] private List<FieldNode> pMarkerNodes = new List<FieldNode>();
 
     [Header("[Enemy]")]
-    private GameObject enemyUI;
-    private List<FieldNode> eMarkerNodes = new List<FieldNode>();
+    [SerializeField] private GameObject enemyUI;
+    [SerializeField] private List<FieldNode> eMarkerNodes = new List<FieldNode>();
     #endregion
 
     #region Side
@@ -134,32 +138,33 @@ public class MapEditor : MonoBehaviour
         nodeOutlineTf = GameObject.FindGameObjectWithTag("NodeOutlines").transform;
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
 
-        dataUI = transform.Find("Top/UI/Data").gameObject;
-        saveInput = transform.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
-        loadDropdown = transform.Find("Top/UI/Data/Dropdown_Load").GetComponent<TMP_Dropdown>();
+        components = transform.Find("Components");
+        dataUI = components.Find("Top/UI/Data").gameObject;
+        saveInput = components.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
+        loadDropdown = components.Find("Top/UI/Data/Dropdown_Load").GetComponent<TMP_Dropdown>();
         gameMgr.dataMgr.ReadMapLoadIndex(loadDropdown);
         dataUI.SetActive(false);
 
-        createNodeUI = transform.Find("Top/UI/CreateNode").gameObject;
+        createNodeUI = components.Find("Top/UI/CreateNode").gameObject;
         xSizeInput = createNodeUI.transform.Find("InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
         ySizeInput = createNodeUI.transform.Find("InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
         createNodeUI.SetActive(false);
 
-        setAreaUI = transform.Find("Top/UI/SetArea").gameObject;
+        setAreaUI = components.Find("Top/UI/SetArea").gameObject;
         coverFormText = setAreaUI.transform.Find("CoverForm/Text").GetComponent<TextMeshProUGUI>();
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetUnableMove/Outline").GetComponent<Image>());
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetHalfCover/Outline").GetComponent<Image>());
         setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetFullCover/Outline").GetComponent<Image>());
         setAreaUI.SetActive(false);
 
-        playerUI = transform.Find("Top/UI/Player").gameObject;
+        playerUI = components.Find("Top/UI/Player").gameObject;
         playerUI.SetActive(false);
 
-        enemyUI = transform.Find("Top/UI/Enemy").gameObject;
+        enemyUI = components.Find("Top/UI/Enemy").gameObject;
         enemyUI.SetActive(false);
 
-        sideButtons = transform.Find("Side/Buttons").gameObject;
-        sideUI = transform.Find("Side/UI").gameObject;
+        sideButtons = components.Find("Side/Buttons").gameObject;
+        sideUI = components.Find("Side/UI").gameObject;
         setDirText = sideUI.transform.Find("SetDirection/Text").GetComponent<TextMeshProUGUI>();
         allFloorText = sideUI.transform.Find("SubButtons/AllFloor/Text").GetComponent<TextMeshProUGUI>();
         floorRandomText = sideUI.transform.Find("SubButtons/FloorRandom/Text").GetComponent<TextMeshProUGUI>();
@@ -171,12 +176,12 @@ public class MapEditor : MonoBehaviour
         sideButtons.transform.localPosition = sidePos_Off;
         sideUI.transform.localPosition = sidePos_Off;
 
-        floorUI = transform.Find("Side/UI/Floor").gameObject;
-        floorObjectUI = transform.Find("Side/UI/FloorObject").gameObject;
-        hurdleUI = transform.Find("Side/UI/Hurdle").gameObject;
-        halfCoverUI = transform.Find("Side/UI/HalfCover").gameObject;
-        fullCoverUI = transform.Find("Side/UI/FullCover").gameObject;
-        sideObjectUI = transform.Find("Side/UI/SideObject").gameObject;
+        floorUI = components.Find("Side/UI/Floor").gameObject;
+        floorObjectUI = components.Find("Side/UI/FloorObject").gameObject;
+        hurdleUI = components.Find("Side/UI/Hurdle").gameObject;
+        halfCoverUI = components.Find("Side/UI/HalfCover").gameObject;
+        fullCoverUI = components.Find("Side/UI/FullCover").gameObject;
+        sideObjectUI = components.Find("Side/UI/SideObject").gameObject;
         SetActiveAllSideUI(true);
         mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
         for (int i = 0; i < mapItems.Count; i++)
@@ -185,6 +190,7 @@ public class MapEditor : MonoBehaviour
             mapItem.SetComponents(this);
         }
         SetActiveAllSideUI(false);
+        components.gameObject.SetActive(false);
 
         void SetActiveAllSideUI(bool value)
         {
@@ -199,6 +205,11 @@ public class MapEditor : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            components.gameObject.SetActive(!components.gameObject.activeSelf);
+        }
+
         if (findType == FindNodeType.None) return;
 
         switch (editType)
@@ -382,11 +393,11 @@ public class MapEditor : MonoBehaviour
                     {
                         if (lineForm)
                         {
-                            selectNode.SetOnArea(setDirection, findType);
+                            selectNode.SetOnArea(setDirection, findType, true);
                         }
                         else
                         {
-                            selectNode.SetOnArea(findType);
+                            selectNode.SetOnArea(findType, true);
                         }
                         selectNodes.Add(selectNode);
                     }
@@ -787,7 +798,7 @@ public class MapEditor : MonoBehaviour
         Debug.Log("¿Ï·á");
     }
 
-    private IEnumerator Coroutine_MapLoad(MapData mapData)
+    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad)
     {
         if (gameMgr.fieldNodes.Count > 0)
         {
@@ -810,6 +821,8 @@ public class MapEditor : MonoBehaviour
                     yield return null;
                 }
             }
+            pMarkerNodes.Clear();
+            eMarkerNodes.Clear();
             gameMgr.fieldNodes.Clear();
         }
 
@@ -869,7 +882,7 @@ public class MapEditor : MonoBehaviour
             // NodeCover Data
             if (nodeData.isNodeCover)
             {
-                node.SetOnArea(nodeData.nCoverType);
+                node.SetOnArea(nodeData.nCoverType, allLoad);
             }
 
             // LineCover Data
@@ -881,7 +894,7 @@ public class MapEditor : MonoBehaviour
                     var coverType = nodeData.lCoverTypes[j];
                     if (setDirection != TargetDirection.None && coverType != FindNodeType.None)
                     {
-                        node.SetOnArea(setDirection, coverType);
+                        node.SetOnArea(setDirection, coverType, allLoad);
                     }
                 }
             }
@@ -891,7 +904,10 @@ public class MapEditor : MonoBehaviour
             {
                 var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
                 markerNodes.Add(node);
-                node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
+                if (allLoad)
+                {
+                    node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
+                }
             }
 
             // ObjectData
@@ -906,7 +922,23 @@ public class MapEditor : MonoBehaviour
                 }
             }
         }
+
+        if (!allLoad)
+        {
+            var playerNode = pMarkerNodes[0];
+            gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
+            yield return null;
+
+            for (int i = 0; i < eMarkerNodes.Count; i++)
+            {
+                var markerNode = eMarkerNodes[i];
+                gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, "E0001");
+                yield return null;
+            }
+        }
+
         Debug.Log("Map load complete");
+        gameMgr.sceneHlr.EndLoadScene();
 
         GameObject GetObjectUI(MapEditorType type)
         {
@@ -960,7 +992,7 @@ public class MapEditor : MonoBehaviour
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
-            StartCoroutine(Coroutine_MapLoad(mapData));
+            StartCoroutine(Coroutine_MapLoad(mapData, true));
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -41,8 +42,9 @@ public class GameManager : MonoBehaviour
 {
     [Header("---Access Script---")]
     public DataManager dataMgr;
+    public SceneHandler sceneHlr;
     public CameraManager camMgr;
-    public UserInterfaceManager uiMgr;
+    public GameUIManager uiMgr;
     public MapEditor mapEdt;
     public InventoryManager invenMgr;
 
@@ -51,6 +53,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Collider targetCheck;
 
     private Transform characterTf;
+
     private Transform linePoolTf;
     private Transform rangePoolTf;
     private Transform bulletsPoolTf;
@@ -111,14 +114,15 @@ public class GameManager : MonoBehaviour
     private readonly int bulletPoolMax = 30;
     private readonly int warningPoolMax = 30;
     private readonly int passPointPoolMax = 30;
-    private readonly int floatTextPoolMax = 30;
+    private readonly int floatTextPoolMax = 150;
 
     public void Start()
     {
         dataMgr = FindAnyObjectByType<DataManager>();
+        sceneHlr = FindAnyObjectByType<SceneHandler>();
         camMgr = FindAnyObjectByType<CameraManager>();
         camMgr.SetComponents(this);
-        uiMgr = FindAnyObjectByType<UserInterfaceManager>();
+        uiMgr = FindAnyObjectByType<GameUIManager>();
         uiMgr.SetComponents(this);
         mapEdt = FindAnyObjectByType<MapEditor>();
         mapEdt.SetComponents(this);
@@ -151,12 +155,27 @@ public class GameManager : MonoBehaviour
 
         invenMgr = FindAnyObjectByType<InventoryManager>();
         invenMgr.SetComponents(this);
+
+        MapLoad();
+
+        void MapLoad()
+        {
+            if (!dataMgr.gameData.mapLoad) return;
+
+            var loadName = dataMgr.gameData.mapName;
+            var mapData = dataMgr.LoadMapData(loadName);
+            if (mapData != null)
+            {
+                StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false));
+                dataMgr.gameData.mapLoad = false;
+            }
+        }
     }
 
     /// <summary>
     /// 캐릭터 생성
     /// </summary>
-    private void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charID)
+    public void CreateCharacter(CharacterOwner ownerType, Vector2 nodePos, string charID)
     {
         CharacterController charCtr = null;
         switch (ownerType)
@@ -536,11 +555,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        if (Input.GetKeyDown(KeyCode.F12))
-        {
-            mapEdt.gameObject.SetActive(!mapEdt.gameObject.activeSelf);
-        }
-        else if (Input.GetKeyDown(KeyCode.End))
+        if (Input.GetKeyDown(KeyCode.End))
         {
             TurnEnd();
         }

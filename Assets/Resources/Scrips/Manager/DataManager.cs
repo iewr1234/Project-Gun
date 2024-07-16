@@ -6,8 +6,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
-using System;
-using UnityEngine.Tilemaps;
 
 [System.Serializable]
 public struct ObjectData
@@ -71,6 +69,8 @@ public class DataManager : MonoBehaviour
 
     private void SetComponents()
     {
+        if (gameData == null) gameData = Resources.Load<GameData>("ScriptableObjects/GameData");
+
         if (playerData == null) playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
 
         if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
@@ -83,6 +83,11 @@ public class DataManager : MonoBehaviour
 
         if (itemData == null) itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
     }
+
+    #region GameData
+    public GameData gameData;
+
+    #endregion
 
     #region MapEditor
     public void SaveMapData(string saveName, Vector2 _mapSize, List<FieldNode> _fieldNodes)

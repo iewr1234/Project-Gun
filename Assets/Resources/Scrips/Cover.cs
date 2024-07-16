@@ -55,7 +55,7 @@ public class Cover : MonoBehaviour
     private readonly Vector3 lineFullCover_Pos = new Vector3(0f, 1f, 0f);
     private readonly Vector3 lineFullCover_Scale = new Vector3(0.05f, 2f, 1.3f);
 
-    public void SetComponents(FieldNode _node, CoverType _type)
+    public void SetComponents(FieldNode _node, CoverType _type, bool allLoad)
     {
         coverNode = _node;
         coverNode.cover = this;
@@ -97,9 +97,14 @@ public class Cover : MonoBehaviour
             default:
                 break;
         }
+
+        if (!allLoad)
+        {
+            coverMesh.enabled = false;
+        }
     }
 
-    public void SetComponents(NodeOutline _nodeOutline, FieldNode _node, TargetDirection setDirection, CoverType _type)
+    public void SetComponents(NodeOutline _nodeOutline, FieldNode _node, TargetDirection setDirection, CoverType _type, bool allLoad)
     {
         outline = _nodeOutline;
         outline.lineCover = this;
@@ -141,6 +146,11 @@ public class Cover : MonoBehaviour
                 break;
             default:
                 break;
+        }
+
+        if (!allLoad)
+        {
+            coverMesh.enabled = false;
         }
     }
 

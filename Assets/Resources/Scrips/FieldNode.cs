@@ -368,7 +368,7 @@ public class FieldNode : MonoBehaviour
         }
     }
 
-    public void SetOnArea(FindNodeType findType)
+    public void SetOnArea(FindNodeType findType, bool allLoad)
     {
         if (unableMove.enabled || cover != null) return;
 
@@ -383,11 +383,11 @@ public class FieldNode : MonoBehaviour
             var coverType = findType == FindNodeType.SetFullCover ? CoverType.Full : CoverType.Half;
             var nodeCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/NodeCover"));
             nodeCover.transform.SetParent(transform, false);
-            nodeCover.SetComponents(this, coverType);
+            nodeCover.SetComponents(this, coverType, allLoad);
         }
     }
 
-    public void SetOnArea(TargetDirection setDirection, FindNodeType findType)
+    public void SetOnArea(TargetDirection setDirection, FindNodeType findType, bool allLoad)
     {
         var outline = outlines[(int)setDirection];
         if (unableMove.enabled || outline.lineCover != null) return;
@@ -407,7 +407,7 @@ public class FieldNode : MonoBehaviour
             {
                 var lineCover = Instantiate(Resources.Load<Cover>($"Prefabs/Cover/LineCover"));
                 lineCover.transform.SetParent(outline.transform, false);
-                lineCover.SetComponents(outline, this, setDirection, coverType);
+                lineCover.SetComponents(outline, this, setDirection, coverType, allLoad);
                 switch (setDirection)
                 {
                     case TargetDirection.Front:
@@ -455,13 +455,13 @@ public class FieldNode : MonoBehaviour
         markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
         markerText.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
         markerText.text = type == CharacterOwner.Player ? $"P{index}" : $"E{index}";
-        canMove = false;
+        //canMove = false;
     }
 
     public void SetOffMarker()
     {
         marker.SetActive(false);
-        canMove = true;
+        //canMove = true;
     }
 
     public void SetOnFloor(MapItem item, bool random)
