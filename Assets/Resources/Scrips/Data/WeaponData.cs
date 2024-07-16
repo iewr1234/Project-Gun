@@ -23,6 +23,7 @@ public class WeaponDataInfo
     [Tooltip("모델")] public int model;
     [Tooltip("구경")] public float caliber;
     [Tooltip("무게")] public float weight;
+    [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType type;
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;

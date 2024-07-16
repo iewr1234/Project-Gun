@@ -520,7 +520,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:U";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:V";
     private enum WeaponVariable
     {
         ID,
@@ -529,6 +529,7 @@ public class DataManager : MonoBehaviour
         Model,
         Caliber,
         Weight,
+        IsMain,
         WeaponType,
         RPM,
         Range,
@@ -572,6 +573,7 @@ public class DataManager : MonoBehaviour
                     model = int.Parse(data[(int)WeaponVariable.Model]),
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
                     weight = float.Parse(data[(int)WeaponVariable.Weight]),
+                    isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
