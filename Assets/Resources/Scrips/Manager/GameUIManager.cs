@@ -264,6 +264,8 @@ public class GameUIManager : MonoBehaviour
 
     public void Button_TurnEnd()
     {
+        if (gameMgr.currentTurn != CharacterOwner.Player) return;
+
         gameMgr.TurnEnd();
     }
 }

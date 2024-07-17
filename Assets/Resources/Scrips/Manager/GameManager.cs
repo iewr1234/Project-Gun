@@ -62,6 +62,7 @@ public class GameManager : MonoBehaviour
     private Transform floatTextPoolTf;
 
     [Header("--- Assignment Variable---")]
+    public CharacterOwner currentTurn;
     public GameState gameState;
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
 
@@ -155,6 +156,7 @@ public class GameManager : MonoBehaviour
 
         invenMgr = FindAnyObjectByType<InventoryManager>();
         invenMgr.SetComponents(this);
+        currentTurn = CharacterOwner.Player;
 
         MapLoad();
 
@@ -372,10 +374,19 @@ public class GameManager : MonoBehaviour
     {
         if (gameState == GameState.Inventory) return;
 
-        KeyboardInput();
-        MouseInput();
-        PointerUpEvent();
-        ScheduleProcess();
+        switch (currentTurn)
+        {
+            case CharacterOwner.Player:
+                KeyboardInput();
+                MouseInput();
+                PointerUpEvent();
+                break;
+            case CharacterOwner.Enemy:
+                ScheduleProcess();
+                break;
+            default:
+                break;
+        }
         CreatePlayer();
         CreateEnemy();
     }
@@ -555,7 +566,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        if (Input.GetKeyDown(KeyCode.End))
+        if (Input.GetKeyDown(KeyCode.End) && currentTurn == CharacterOwner.Player)
         {
             TurnEnd();
         }
@@ -1277,20 +1288,34 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void TurnEnd()
     {
-        for (int i = 0; i < playerList.Count; i++)
+        currentTurn = currentTurn != CharacterOwner.Player ? CharacterOwner.Player : CharacterOwner.Enemy;
+        switch (currentTurn)
         {
-            var player = playerList[i];
-            Reset(player);
-        }
-        for (int i = 0; i < enemyList.Count; i++)
-        {
-            var enemy = enemyList[i];
-            Reset(enemy);
-            if (enemy.currentWeapon.loadedNum == 0)
-            {
-                EnemyAI_Reload(enemy);
-            }
-            EnemyAI_Move(enemy);
+            case CharacterOwner.Player:
+                for (int i = 0; i < playerList.Count; i++)
+                {
+                    var player = playerList[i];
+                    Reset(player);
+                }
+                for (int i = 0; i < enemyList.Count; i++)
+                {
+                    var enemy = enemyList[i];
+                    Reset(enemy);
+                }
+                break;
+            case CharacterOwner.Enemy:
+                for (int i = 0; i < enemyList.Count; i++)
+                {
+                    var enemy = enemyList[i];
+                    if (enemy.currentWeapon.loadedNum == 0)
+                    {
+                        EnemyAI_Reload(enemy);
+                    }
+                    EnemyAI_Move(enemy);
+                }
+                break;
+            default:
+                break;
         }
 
         void Reset(CharacterController charCtr)
@@ -1317,10 +1342,6 @@ public class GameManager : MonoBehaviour
     }
 
     #region AI
-    /// <summary>
-    /// AI행동 처리
-    /// </summary>
-    /// <param name="enemy"></param>
     public void EnemyAI_Move(CharacterController enemy)
     {
         ShowMovableNodes(enemy);
@@ -1621,6 +1642,7 @@ public class GameManager : MonoBehaviour
                 {
                     target.AddCommand(CommandType.Targeting, false, target.transform);
                     scheduleState = ScheduleState.None;
+                    TurnEnd();
                 }
                 timer = 0f;
             }

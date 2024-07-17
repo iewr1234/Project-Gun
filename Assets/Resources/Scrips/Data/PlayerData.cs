@@ -23,6 +23,7 @@ public class PlayerDataInfo
 
     public int maxAction;
     public int maxHealth;
+    public int health;
     public int maxStamina;
     public float sight;
     public int aiming;

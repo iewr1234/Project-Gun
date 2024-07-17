@@ -77,11 +77,13 @@ public class DataManager : MonoBehaviour
 
         if (aiData == null) aiData = Resources.Load<AIData>("ScriptableObjects/AIData");
 
+        if (itemData == null) itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
+
         if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
 
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
-        if (itemData == null) itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
+        if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
     }
 
     #region GameData
@@ -462,13 +464,14 @@ public class DataManager : MonoBehaviour
 
     #region Item Data
     [HideInInspector] public ItemData itemData;
-    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:I";
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:J";
     private enum ItemVariable
     {
         ID,
         DataID,
         ItemName,
         Type,
+        Level,
         Rarity,
         MaxNesting,
         Price,
@@ -506,6 +509,7 @@ public class DataManager : MonoBehaviour
                     dataID = data[(int)ItemVariable.DataID],
                     itemName = data[(int)ItemVariable.ItemName],
                     type = (ItemType)int.Parse(data[(int)ItemVariable.Type]),
+                    level = int.Parse(data[(int)ItemVariable.Level]),
                     rarity = (ItemRarity)int.Parse(data[(int)ItemVariable.Rarity]),
                     maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
                     price = int.Parse(data[(int)ItemVariable.Price]),
@@ -848,6 +852,93 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region OptionSheet Data
+    [HideInInspector] public OptionSheetData optionSheetData;
+    private readonly string optionSheetDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1423114483&range=A4:R";
+    private enum OptionSheetVariable
+    {
+        MinLevel,
+        MaxLevel,
+        rank1_option1,
+        rank1_option2,
+        rank1_option3,
+        rank1_option4,
+        rank2_option1,
+        rank2_option2,
+        rank2_option3,
+        rank2_option4,
+        rank3_option1,
+        rank3_option2,
+        rank3_option3,
+        rank3_option4,
+        rank4_option1,
+        rank4_option2,
+        rank4_option3,
+        rank4_option4,
+    }
+
+    public void UpdateOptionSheetData()
+    {
+        if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
+        if (optionSheetData.optionSheetInfos.Count > 0) optionSheetData.optionSheetInfos.Clear();
+
+        StartCoroutine(ReadOptionSheetData());
+
+        IEnumerator ReadOptionSheetData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(optionSheetDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            var rankMax = 4;
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var optionSheetInfo = new OptionSheetDataInfo
+                {
+                    indexName = $"{data[(int)OptionSheetVariable.MinLevel]} ~ {data[(int)OptionSheetVariable.MaxLevel]}",
+                    levelInfo = ReadLevelInfo(data[(int)OptionSheetVariable.MinLevel], data[(int)OptionSheetVariable.MaxLevel]),
+                };
+                for (int j = 0; j < rankMax; j++)
+                {
+                    optionSheetInfo.rankOptions.Add(ReadRankOptionInfo(j, data[(j * rankMax) + (int)OptionSheetVariable.rank1_option1],
+                                                                          data[(j * rankMax) + (int)OptionSheetVariable.rank1_option2],
+                                                                          data[(j * rankMax) + (int)OptionSheetVariable.rank1_option3],
+                                                                          data[(j * rankMax) + (int)OptionSheetVariable.rank1_option4]));
+                }
+                optionSheetData.optionSheetInfos.Add(optionSheetInfo);
+            }
+            Debug.Log("Update OptionSheet Data");
+        }
+
+        ItemLevelInfo ReadLevelInfo(string minLevel, string maxLevel)
+        {
+            var levelInfo = new ItemLevelInfo
+            {
+                minLevel = int.Parse(minLevel),
+                maxLevel = int.Parse(maxLevel),
+            };
+
+            return levelInfo;
+        }
+
+        ItemRankOptionInfo ReadRankOptionInfo(int rank, string option1_rank, string option2_rank, string option3_rank, string option4_rank)
+        {
+            var rankOptionInfo = new ItemRankOptionInfo
+            {
+                indexName = $"Rank{rank + 1}",
+                option1_rank = int.Parse(option1_rank),
+                option2_rank = int.Parse(option2_rank),
+                option3_rank = int.Parse(option3_rank),
+                option4_rank = int.Parse(option4_rank),
+            };
+
+            return rankOptionInfo;
+        }
+    }
+    #endregion
+
     private List<int> ReadCompatModelInfo(string modelData)
     {
         var compatModels = new List<int>();
@@ -922,6 +1013,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
             }
+            if (GUILayout.Button("Update the OptionSheet Database"))
+            {
+                dataMgr.UpdateOptionSheetData();
+                EditorUtility.SetDirty(dataMgr.optionSheetData);
+            }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))
             {
@@ -943,6 +1039,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.bulletData);
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+                dataMgr.UpdateOptionSheetData();
+                EditorUtility.SetDirty(dataMgr.optionSheetData);
             }
         }
     }

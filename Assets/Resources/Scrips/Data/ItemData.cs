@@ -38,6 +38,7 @@ public class ItemDataInfo
     public string dataID;
     public string itemName;
     public ItemType type;
+    public int level;
     public ItemRarity rarity;
     public int maxNesting;
     public int price;
