@@ -83,6 +83,8 @@ public class DataManager : MonoBehaviour
 
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
+        if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
+
         if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
     }
 
@@ -852,6 +854,54 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region ItemOption Data
+    [HideInInspector] public ItemOptionData itemOptionData;
+    private readonly string itemOptionDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1636963263&range=A3:G";
+    private enum ItemOptionDataVariable
+    {
+        ID,
+        Rank,
+        MainType,
+        SubType,
+        OptionType,
+        MinValue,
+        MaxValue,
+    }
+
+    public void UpdateItemOptionData()
+    {
+        if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
+        if (itemOptionData.itemOptionInfos.Count > 0) itemOptionData.itemOptionInfos.Clear();
+
+        StartCoroutine(ReadItemOptionData());
+
+        IEnumerator ReadItemOptionData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(itemOptionDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var itemOptionInfo = new ItemOptionDataInfo
+                {
+                    indexName = $"{data[(int)ItemOptionDataVariable.ID]}: Rank{int.Parse(data[(int)ItemOptionDataVariable.Rank])}",
+                    rank = int.Parse(data[(int)ItemOptionDataVariable.Rank]),
+                    mainType = int.Parse(data[(int)ItemOptionDataVariable.MainType]),
+                    subType = int.Parse(data[(int)ItemOptionDataVariable.SubType]),
+                    optionType = (ItemOptionType)int.Parse(data[(int)ItemOptionDataVariable.OptionType]),
+                    minValue = int.Parse(data[(int)ItemOptionDataVariable.MinValue]),
+                    maxValue = int.Parse(data[(int)ItemOptionDataVariable.MaxValue]),
+                };
+                itemOptionData.itemOptionInfos.Add(itemOptionInfo);
+            }
+            Debug.Log("Update ItemOption Data");
+        }
+    }
+    #endregion
+
     #region OptionSheet Data
     [HideInInspector] public OptionSheetData optionSheetData;
     private readonly string optionSheetDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1423114483&range=A4:R";
@@ -1013,6 +1063,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
             }
+            if (GUILayout.Button("Update the ItemOption Database"))
+            {
+                dataMgr.UpdateItemOptionData();
+                EditorUtility.SetDirty(dataMgr.itemOptionData);
+            }
             if (GUILayout.Button("Update the OptionSheet Database"))
             {
                 dataMgr.UpdateOptionSheetData();
@@ -1039,6 +1094,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.bulletData);
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+                dataMgr.UpdateItemOptionData();
+                EditorUtility.SetDirty(dataMgr.itemOptionData);
                 dataMgr.UpdateOptionSheetData();
                 EditorUtility.SetDirty(dataMgr.optionSheetData);
             }
