@@ -92,7 +92,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetItemInfo(ItemDataInfo _itemData, int count)
+    public void SetItemInfo(ItemDataInfo _itemData, int count, bool insertOption)
     {
         itemData = _itemData.CopyData();
         size = _itemData.size;
@@ -123,6 +123,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             default:
                 break;
         }
+        InsertItemOption();
 
         SetItemRotation(false);
         if (itemData.type == ItemType.Magazine)
@@ -147,6 +148,38 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (!invenMgr.activeItem.Contains(this))
         {
             invenMgr.activeItem.Add(this);
+        }
+
+        void InsertItemOption()
+        {
+            if (!insertOption) return;
+
+            var optionSheet = invenMgr.dataMgr.optionSheetData.optionSheetInfos.Find(x => x.levelInfo.minLevel < itemData.level && x.levelInfo.maxLevel >= itemData.level);
+            var rankOption = optionSheet.rankOptions[(int)itemData.rarity - 1];
+            AddOption(rankOption.option1_rank);
+            AddOption(rankOption.option2_rank);
+            AddOption(rankOption.option3_rank);
+            AddOption(rankOption.option4_rank);
+        }
+
+        void AddOption(int optionRank)
+        {
+            if (optionRank == 0) return;
+
+            var options = invenMgr.dataMgr.itemOptionData.itemOptionInfos.FindAll(x => x.rank == optionRank && (x.mainType == 0 || x.mainType == optionRank));
+            if (options.Count == 0) return;
+
+            var option = options[Random.Range(0, options.Count)];
+            var type = option.optionType;
+            var value = Random.Range(option.minValue, option.maxValue + 1);
+            var itemOption = new ItemOption()
+            {
+                indexName = $"{type}: {value}",
+                type = type,
+                value = value,
+                scriptText = DataUtility.GetScriptText(option.scriptText, value),
+            };
+            itemData.itemOptions.Add(itemOption);
         }
     }
 

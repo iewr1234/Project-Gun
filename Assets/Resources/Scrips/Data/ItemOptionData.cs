@@ -8,6 +8,7 @@ public enum ItemOptionType
     Health,
     Defense,
     Damage,
+    Critical,
 }
 
 [System.Serializable]
@@ -20,6 +21,7 @@ public class ItemOptionDataInfo
     public ItemOptionType optionType;
     public int minValue;
     public int maxValue;
+    public string scriptText;
 }
 
 [CreateAssetMenu(fileName = "ItemOptionData", menuName = "Scriptable Object/ItemOptionData")]

@@ -106,7 +106,7 @@ public class ContextMenu : MonoBehaviour
             }
             else
             {
-                invenMgr.SetItemInStorage(loadedBullet.bulletName, 1, invenMgr.otherStorage.itemSlots);
+                invenMgr.SetItemInStorage(loadedBullet.bulletName, 1, invenMgr.otherStorage.itemSlots, false);
             }
         }
         invenMgr.selectItem.magData.loadedBullets.Clear();

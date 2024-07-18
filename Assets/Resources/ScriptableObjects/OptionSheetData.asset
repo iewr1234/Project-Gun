@@ -12,3 +12,79 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b497e2af24511ea41b91e287ec3cea7e, type: 3}
   m_Name: OptionSheetData
   m_EditorClassIdentifier: 
+  optionSheetInfos:
+  - indexName: 0 ~ 10
+    levelInfo:
+      minLevel: 0
+      maxLevel: 10
+    rankOptions:
+    - indexName: Rank1
+      option1_rank: 1
+      option2_rank: 0
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank2
+      option1_rank: 1
+      option2_rank: 1
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank3
+      option1_rank: 2
+      option2_rank: 1
+      option3_rank: 1
+      option4_rank: 0
+    - indexName: Rank4
+      option1_rank: 2
+      option2_rank: 2
+      option3_rank: 1
+      option4_rank: 1
+  - indexName: 10 ~ 20
+    levelInfo:
+      minLevel: 10
+      maxLevel: 20
+    rankOptions:
+    - indexName: Rank1
+      option1_rank: 1
+      option2_rank: 0
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank2
+      option1_rank: 1
+      option2_rank: 1
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank3
+      option1_rank: 2
+      option2_rank: 1
+      option3_rank: 1
+      option4_rank: 0
+    - indexName: Rank4
+      option1_rank: 2
+      option2_rank: 2
+      option3_rank: 1
+      option4_rank: 1
+  - indexName: 20 ~ 30
+    levelInfo:
+      minLevel: 20
+      maxLevel: 30
+    rankOptions:
+    - indexName: Rank1
+      option1_rank: 1
+      option2_rank: 0
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank2
+      option1_rank: 1
+      option2_rank: 1
+      option3_rank: 0
+      option4_rank: 0
+    - indexName: Rank3
+      option1_rank: 2
+      option2_rank: 1
+      option3_rank: 1
+      option4_rank: 0
+    - indexName: Rank4
+      option1_rank: 2
+      option2_rank: 2
+      option3_rank: 1
+      option4_rank: 1

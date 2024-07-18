@@ -29,6 +29,15 @@ public enum ItemRarity
 }
 
 [System.Serializable]
+public struct ItemOption
+{
+    public string indexName;
+    public ItemOptionType type;
+    public int value;
+    public string scriptText;
+}
+
+[System.Serializable]
 public class ItemDataInfo
 {
     public string indexName;
@@ -43,6 +52,7 @@ public class ItemDataInfo
     public int maxNesting;
     public int price;
     public Vector2Int size;
+    public List<ItemOption> itemOptions = new List<ItemOption>();
 
     public ItemDataInfo CopyData()
     {
@@ -53,10 +63,12 @@ public class ItemDataInfo
             dataID = dataID,
             itemName = itemName,
             type = type,
+            level = level,
             rarity = rarity,
             maxNesting = maxNesting,
             price = price,
             size = size,
+            itemOptions = new List<ItemOption>(itemOptions),
         };
 
         return itemData;

@@ -856,7 +856,7 @@ public class DataManager : MonoBehaviour
 
     #region ItemOption Data
     [HideInInspector] public ItemOptionData itemOptionData;
-    private readonly string itemOptionDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1636963263&range=A3:G";
+    private readonly string itemOptionDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1636963263&range=A3:H";
     private enum ItemOptionDataVariable
     {
         ID,
@@ -866,6 +866,7 @@ public class DataManager : MonoBehaviour
         OptionType,
         MinValue,
         MaxValue,
+        ScriptText,
     }
 
     public void UpdateItemOptionData()
@@ -894,6 +895,7 @@ public class DataManager : MonoBehaviour
                     optionType = (ItemOptionType)int.Parse(data[(int)ItemOptionDataVariable.OptionType]),
                     minValue = int.Parse(data[(int)ItemOptionDataVariable.MinValue]),
                     maxValue = int.Parse(data[(int)ItemOptionDataVariable.MaxValue]),
+                    scriptText = data[(int)ItemOptionDataVariable.ScriptText],
                 };
                 itemOptionData.itemOptionInfos.Add(itemOptionInfo);
             }
@@ -932,6 +934,7 @@ public class DataManager : MonoBehaviour
         if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
         if (optionSheetData.optionSheetInfos.Count > 0) optionSheetData.optionSheetInfos.Clear();
 
+        var rankMax = 4;
         StartCoroutine(ReadOptionSheetData());
 
         IEnumerator ReadOptionSheetData()
@@ -941,7 +944,6 @@ public class DataManager : MonoBehaviour
 
             var text = www.downloadHandler.text;
             var datas = text.Split('\n');
-            var rankMax = 4;
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i].Split('\t');

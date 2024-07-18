@@ -49,8 +49,9 @@ public class PopUp_Inventory : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public PopUpState state;
     public ItemHandler item;
-    public List<ItemSlot> itemSlots;
 
+    [HideInInspector] public List<TextMeshProUGUI> optionTexts = new List<TextMeshProUGUI>();
+    [HideInInspector] public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public int index;
 
     public void SetComponents(InventoryManager _invenMgr)
@@ -76,6 +77,8 @@ public class PopUp_Inventory : MonoBehaviour
             equipSlots = FindAllEquipSlots(),
         };
         FindAllSamples();
+
+        optionTexts = transform.Find("ItemInformation/Options").GetComponentsInChildren<TextMeshProUGUI>().ToList();
 
         gameObject.SetActive(false);
 
@@ -258,6 +261,7 @@ public class PopUp_Inventory : MonoBehaviour
             default:
                 break;
         }
+        OptionInfo();
 
         void WeaponInfo()
         {
@@ -419,6 +423,29 @@ public class PopUp_Inventory : MonoBehaviour
                 valueText.gameObject.SetActive(true);
             }
         }
+
+        void OptionInfo()
+        {
+            var optionMax = 4;
+            var index = 0;
+            for (int i = 0; i < item.itemData.itemOptions.Count; i++)
+            {
+                var itemOption = item.itemData.itemOptions[i];
+                var optionText = optionTexts[i];
+                var sign = itemOption.value < 0 ? "-" : "+";
+                //optionText.text = $"可记{i + 1} : {itemOption.type} {sign}{itemOption.value}";
+                optionText.text = $"可记{i + 1} : {itemOption.scriptText}";
+                index++;
+            }
+
+            if (index == optionMax) return;
+
+            for (int i = index; i < optionTexts.Count; i++)
+            {
+                var optionText = optionTexts[i];
+                optionText.text = $"可记{i + 1} : ---";
+            }
+        }
     }
 
     public void SetPartsSample()
@@ -544,9 +571,9 @@ public class PopUp_Inventory : MonoBehaviour
         {
             pos.y = -260f;
         }
-        else if (itemInfo.uiObject.activeSelf && pos.y < -20f)
+        else if (itemInfo.uiObject.activeSelf && pos.y < 40f)
         {
-            pos.y = -20f;
+            pos.y = 40f;
         }
         else if (pos.y > 440f)
         {

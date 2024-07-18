@@ -243,4 +243,24 @@ public static class DataUtility
 
         return Mathf.Floor(value * decimalPoint) / decimalPoint;
     }
+
+    public static string GetScriptText(string textInfo, int value)
+    {
+        var textData = textInfo.Split('{', '}');
+        string scriptText = null;
+        for (int i = 0; i < textData.Length; i++)
+        {
+            var text = textData[i];
+            if (text == "value")
+            {
+                scriptText += $"{value}";
+            }
+            else
+            {
+                scriptText += text;
+            }
+        }
+
+        return scriptText;
+    }
 }

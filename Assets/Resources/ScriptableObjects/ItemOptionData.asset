@@ -12,4 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f788a7b9b7def4d98f632379f7fc42, type: 3}
   m_Name: ItemOptionData
   m_EditorClassIdentifier: 
-  itemOptionInfos: []
+  itemOptionInfos:
+  - indexName: 'O0001: Rank1'
+    rank: 1
+    mainType: 0
+    subType: 0
+    optionType: 1
+    minValue: 10
+    maxValue: 100
+    scriptText: "\uCCB4\uB825 +{value}\r"
+  - indexName: 'O0002: Rank1'
+    rank: 1
+    mainType: 0
+    subType: 0
+    optionType: 2
+    minValue: 5
+    maxValue: 30
+    scriptText: "\uBC29\uC5B4\uB825 +{value}\r"
+  - indexName: 'O0003: Rank1'
+    rank: 1
+    mainType: 0
+    subType: 0
+    optionType: 3
+    minValue: 1
+    maxValue: 5
+    scriptText: "\uD53C\uD574\uB7C9 +{value}\r"
+  - indexName: 'O0004: Rank1'
+    rank: 1
+    mainType: 0
+    subType: 0
+    optionType: 4
+    minValue: 5
+    maxValue: 15
+    scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +{value}%\r"
+  - indexName: 'O0005: Rank2'
+    rank: 2
+    mainType: 0
+    subType: 0
+    optionType: 1
+    minValue: 50
+    maxValue: 150
+    scriptText: "\uCCB4\uB825 +{value}"

@@ -118,24 +118,24 @@ public class InventoryManager : MonoBehaviour
         CreateItems();
         invenUI.gameObject.SetActive(false);
 
-        SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots);
-        SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots);
-        SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots);
+        SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Sight_1", 1, otherStorage.itemSlots);
-        SetItemInStorage("Sight_2", 1, otherStorage.itemSlots);
+        SetItemInStorage("Sight_1", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Sight_2", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
-        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots);
-        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
-        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots);
-        SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots);
+        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
+        SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots);
-        SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots);
-        SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots);
+        SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots, true);
+        SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots, true);
+        SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Sight_20", 1, otherStorage.itemSlots);
+        SetItemInStorage("Sight_20", 1, otherStorage.itemSlots, true);
     }
 
     private void CreateItems()
@@ -325,7 +325,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetItemInStorage(string itemName, int count, List<ItemSlot> itemSlots)
+    public void SetItemInStorage(string itemName, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.itemName == itemName);
         if (itemData == null)
@@ -335,7 +335,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, insertOption);
 
         var emptySlots = FindEmptySlots(item, itemSlots);
         if (emptySlots == null)
@@ -382,7 +382,7 @@ public class InventoryManager : MonoBehaviour
     public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, false);
         PutTheItem(item, itemSlots);
     }
 
@@ -420,7 +420,7 @@ public class InventoryManager : MonoBehaviour
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == bulletData.ID);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, false);
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
@@ -438,7 +438,7 @@ public class InventoryManager : MonoBehaviour
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, false);
         item.magData.loadedBullets = magData.loadedBullets;
 
         equipSlot.item = item;
@@ -457,7 +457,7 @@ public class InventoryManager : MonoBehaviour
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, false);
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
