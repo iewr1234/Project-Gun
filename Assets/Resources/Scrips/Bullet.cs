@@ -102,7 +102,7 @@ public class Bullet : MonoBehaviour
             var dist = DataUtility.GetDistance(target.transform.position, transform.position);
             if (dist < 1.5f)
             {
-                target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
+                target.GameMgr.SetFloatText(target.transform.position + new Vector3(0f, 2f, 0f), "Miss", Color.red);
                 isMiss = false;
             }
         }

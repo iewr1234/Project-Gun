@@ -77,6 +77,8 @@ public class DataManager : MonoBehaviour
 
         if (aiData == null) aiData = Resources.Load<AIData>("ScriptableObjects/AIData");
 
+        if (stageData == null) stageData = Resources.Load<StageData>("ScriptableObjects/StageData");
+
         if (itemData == null) itemData = Resources.Load<ItemData>("ScriptableObjects/ItemData");
 
         if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
@@ -464,9 +466,67 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Stage Data
+    [HideInInspector] public StageData stageData;
+    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A2:E";
+    private enum StageVariable
+    {
+        ID,
+        StageName,
+        MapList,
+        WaveNum,
+        BossID,
+    }
+
+    public void UpdateStageData()
+    {
+        if (stageData == null) stageData = Resources.Load<StageData>("ScriptableObjects/StageData");
+        if (stageData.stageInfos.Count > 0) stageData.stageInfos.Clear();
+
+        StartCoroutine(ReadStageData());
+
+        IEnumerator ReadStageData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(stageDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var stageInfo = new StageDataInfo
+                {
+                    indexName = $"{data[(int)StageVariable.ID]}",
+                    ID = data[(int)StageVariable.ID],
+                    stageName = data[(int)StageVariable.StageName],
+                    mapList = ReadMapList(data[(int)StageVariable.MapList]),
+                    waveNum = int.Parse(data[(int)StageVariable.WaveNum]),
+                    bossID = data[(int)StageVariable.BossID],
+                };
+                stageData.stageInfos.Add(stageInfo);
+            }
+            Debug.Log("Update Stage Data");
+        }
+
+        List<string> ReadMapList(string mapData)
+        {
+            var mapList = new List<string>();
+            var mapInfos = mapData.Split(' ');
+            for (int i = 0; i < mapInfos.Length; i++)
+            {
+                var mapInfo = mapInfos[i];
+                mapList.Add(mapInfo);
+            }
+
+            return mapList;
+        }
+    }
+    #endregion
+
     #region Item Data
     [HideInInspector] public ItemData itemData;
-    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:J";
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:K";
     private enum ItemVariable
     {
         ID,
@@ -479,6 +539,7 @@ public class DataManager : MonoBehaviour
         Price,
         X_Size,
         Y_Size,
+        AddOption,
     }
 
     public void UpdateItemData()
@@ -516,6 +577,7 @@ public class DataManager : MonoBehaviour
                     maxNesting = int.Parse(data[(int)ItemVariable.MaxNesting]),
                     price = int.Parse(data[(int)ItemVariable.Price]),
                     size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
+                    addOption = System.Convert.ToBoolean(int.Parse(data[(int)ItemVariable.AddOption])),
                 };
                 itemData.itemInfos.Add(itemInfo);
             }
@@ -1035,6 +1097,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateAIData();
                 EditorUtility.SetDirty(dataMgr.aiData);
             }
+            if (GUILayout.Button("Update the Stage Database"))
+            {
+                dataMgr.UpdateStageData();
+                EditorUtility.SetDirty(dataMgr.stageData);
+            }
             if (GUILayout.Button("Update the Item Database"))
             {
                 dataMgr.UpdateItemData();
@@ -1084,6 +1151,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.enemyData);
                 dataMgr.UpdateAIData();
                 EditorUtility.SetDirty(dataMgr.aiData);
+                dataMgr.UpdateStageData();
+                EditorUtility.SetDirty(dataMgr.stageData);
                 dataMgr.UpdateItemData();
                 EditorUtility.SetDirty(dataMgr.itemData);
                 dataMgr.UpdateWeaponData();

@@ -166,7 +166,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             if (optionRank == 0) return;
 
-            var options = invenMgr.dataMgr.itemOptionData.itemOptionInfos.FindAll(x => x.rank == optionRank && (x.mainType == 0 || x.mainType == optionRank));
+            var options = invenMgr.dataMgr.itemOptionData.itemOptionInfos.FindAll(x => x.rank == optionRank && (x.mainType == 0 || x.mainType == (int)itemData.type));
             if (options.Count == 0) return;
 
             var option = options[Random.Range(0, options.Count)];

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -158,19 +159,22 @@ public class GameManager : MonoBehaviour
         invenMgr.SetComponents(this);
         currentTurn = CharacterOwner.Player;
 
-        MapLoad();
-
-        void MapLoad()
+        if (dataMgr.gameData.mapLoad)
         {
-            if (!dataMgr.gameData.mapLoad) return;
-
+            // MapLoad
             var loadName = dataMgr.gameData.mapName;
             var mapData = dataMgr.LoadMapData(loadName);
             if (mapData != null)
             {
                 StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false));
                 dataMgr.gameData.mapLoad = false;
+                mapEdt.SetActive(false);
             }
+        }
+        else
+        {
+            mapEdt.SetActive(true);
+            sceneHlr.EndLoadScene();
         }
     }
 
@@ -1307,6 +1311,8 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < enemyList.Count; i++)
                 {
                     var enemy = enemyList[i];
+                    if (enemy.state == CharacterState.Dead) continue;
+
                     if (enemy.currentWeapon.loadedNum == 0)
                     {
                         EnemyAI_Reload(enemy);
@@ -1338,6 +1344,21 @@ public class GameManager : MonoBehaviour
                 default:
                     break;
             }
+        }
+    }
+
+    public IEnumerator Coroutine_GameEnd()
+    {
+        yield return new WaitForSeconds(1f);
+
+        dataMgr.gameData.RandomMapSelection();
+        if (dataMgr.gameData.stageData.waveNum >= 0)
+        {
+            sceneHlr.StartLoadScene("SampleScene");
+        }
+        else
+        {
+            sceneHlr.StartLoadScene("StageScene");
         }
     }
 
@@ -1561,13 +1582,21 @@ public class GameManager : MonoBehaviour
     {
         if (ownerType == CharacterOwner.Player) return;
 
-        var endEnemys = enemyList.FindAll(x => x.commandList.Count == 0 || x.commandList.Find(x => x.type == CommandType.Reload) != null);
-        if (endEnemys.Count != enemyList.Count) return;
+        var survieEnemys = enemyList.FindAll(x => x.state != CharacterState.Dead);
+        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0 || x.commandList.Find(x => x.type == CommandType.Reload) != null);
+        if (endEnemys.Count != survieEnemys.Count) return;
 
-        scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
-        targetState = CoverState.None;
-        scheduleState = ScheduleState.Check;
-        firstSchedule = true;
+        if (scheduleList.Count == 0)
+        {
+            TurnEnd();
+        }
+        else
+        {
+            scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
+            targetState = CoverState.None;
+            scheduleState = ScheduleState.Check;
+            firstSchedule = true;
+        }
     }
 
     private void ScheduleProcess()

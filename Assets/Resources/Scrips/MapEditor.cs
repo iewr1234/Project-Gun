@@ -1,12 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.ComponentModel;
-using UnityEditor.Experimental.GraphView;
 
 public enum MapEditorType
 {
@@ -190,7 +187,6 @@ public class MapEditor : MonoBehaviour
             mapItem.SetComponents(this);
         }
         SetActiveAllSideUI(false);
-        components.gameObject.SetActive(false);
 
         void SetActiveAllSideUI(bool value)
         {
@@ -751,8 +747,10 @@ public class MapEditor : MonoBehaviour
                     yield return null;
                 }
             }
-            gameMgr.fieldNodes.Clear();
         }
+        pMarkerNodes.Clear();
+        eMarkerNodes.Clear();
+        gameMgr.fieldNodes.Clear();
 
         mapSize = new Vector2(xSize, ySize);
         var size = DataUtility.nodeSize;
@@ -821,10 +819,10 @@ public class MapEditor : MonoBehaviour
                     yield return null;
                 }
             }
-            pMarkerNodes.Clear();
-            eMarkerNodes.Clear();
-            gameMgr.fieldNodes.Clear();
         }
+        pMarkerNodes.Clear();
+        eMarkerNodes.Clear();
+        gameMgr.fieldNodes.Clear();
 
         mapSize = new Vector2(mapData.mapSize.x, mapData.mapSize.y);
         var size = DataUtility.nodeSize;
@@ -956,6 +954,11 @@ public class MapEditor : MonoBehaviour
                     return null;
             }
         }
+    }
+
+    public void SetActive(bool value)
+    {
+        components.gameObject.SetActive(value);
     }
 
     #region Button Event

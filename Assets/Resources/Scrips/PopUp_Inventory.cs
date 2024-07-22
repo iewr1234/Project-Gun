@@ -426,6 +426,16 @@ public class PopUp_Inventory : MonoBehaviour
 
         void OptionInfo()
         {
+            if (!item.itemData.addOption)
+            {
+                for (int i = 0; i < optionTexts.Count; i++)
+                {
+                    var optionText = optionTexts[i];
+                    optionText.text = $"¿É¼Ç{i + 1} : ---";
+                }
+                return;
+            }
+
             var optionMax = 4;
             var index = 0;
             for (int i = 0; i < item.itemData.itemOptions.Count; i++)

@@ -52,6 +52,9 @@ public class ItemDataInfo
     public int maxNesting;
     public int price;
     public Vector2Int size;
+    [Space(5f)]
+
+    public bool addOption;
     public List<ItemOption> itemOptions = new List<ItemOption>();
 
     public ItemDataInfo CopyData()
@@ -68,6 +71,7 @@ public class ItemDataInfo
             maxNesting = maxNesting,
             price = price,
             size = size,
+            addOption = addOption,
             itemOptions = new List<ItemOption>(itemOptions),
         };
 

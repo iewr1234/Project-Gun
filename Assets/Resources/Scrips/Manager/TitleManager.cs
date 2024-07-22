@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,9 +18,12 @@ public class TitleManager : MonoBehaviour
 
     public void Button_Start()
     {
-        dataMgr.gameData.mapName = "M0001";
         dataMgr.gameData.playerID = "P0001";
-        dataMgr.gameData.mapLoad = true;
+        sceneHlr.StartLoadScene("StageScene");
+    }
+
+    public void Button_MapEditor()
+    {
         sceneHlr.StartLoadScene("SampleScene");
     }
 }

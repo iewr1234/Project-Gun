@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
-using UnityEditor.Experimental.GraphView;
 
 public enum CharacterOwner
 {
@@ -1702,13 +1701,10 @@ public class CharacterController : MonoBehaviour
     {
         targetList.Clear();
         if (currentWeapon == null) return;
-        if (node.nodePos == new Vector2Int(12, 4))
-        {
-
-        }
 
         var currentNode = node;
-        var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+        var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList.FindAll(x => x.state != CharacterState.Dead)
+                                                             : gameMgr.enemyList.FindAll(x => x.state != CharacterState.Dead);
         for (int i = 0; i < _targetList.Count; i++)
         {
             var target = _targetList[i];
@@ -1805,26 +1801,11 @@ public class CharacterController : MonoBehaviour
                 Vector3 targetPos;
                 var distance = 999999f;
 
-                if (shooterCover == null)
-                {
-                    if (targetRN != null)
-                    {
-                        CheckNodes(currentNode, targetRN, false, true);
-                    }
-                    if (targetLN != null)
-                    {
-                        CheckNodes(currentNode, targetLN, false, false);
-                    }
-                }
-                else
+                if (shooterCover != null && shooterCover.coverType == CoverType.Full)
                 {
                     if (RN != null)
                     {
-                        if (targetCover == null)
-                        {
-                            CheckNodes(RN, target.currentNode, true, false);
-                        }
-                        else
+                        if (targetCover != null && targetCover.coverType == CoverType.Full)
                         {
                             if (targetRN != null)
                             {
@@ -1835,14 +1816,14 @@ public class CharacterController : MonoBehaviour
                                 CheckNodes(RN, targetLN, true, false);
                             }
                         }
+                        else
+                        {
+                            CheckNodes(RN, target.currentNode, true, false);
+                        }
                     }
                     if (LN != null)
                     {
-                        if (targetCover == null)
-                        {
-                            CheckNodes(LN, target.currentNode, false, false);
-                        }
-                        else
+                        if (targetCover != null && targetCover.coverType == CoverType.Full)
                         {
                             if (targetRN != null)
                             {
@@ -1853,8 +1834,31 @@ public class CharacterController : MonoBehaviour
                                 CheckNodes(LN, targetLN, false, false);
                             }
                         }
+                        else
+                        {
+                            CheckNodes(LN, target.currentNode, false, false);
+                        }
                     }
                 }
+                else
+                {
+                    if (targetCover != null && targetCover.coverType == CoverType.Full)
+                    {
+                        if (targetRN != null)
+                        {
+                            CheckNodes(currentNode, targetRN, false, true);
+                        }
+                        if (targetLN != null)
+                        {
+                            CheckNodes(currentNode, targetLN, false, false);
+                        }
+                    }
+                    else
+                    {
+                        CheckNodes(currentNode, target.currentNode, true, false);
+                    }
+                }
+
 
                 if (shooterNode != null && targetNode != null)
                 {
@@ -1936,6 +1940,11 @@ public class CharacterController : MonoBehaviour
             {
                 var _cover = hit.collider.GetComponentInParent<Cover>();
                 if (_cover == null) return;
+                //if (_cover.coverType != CoverType.Full)
+                //{
+                //    cover = _cover;
+                //    return;
+                //}
 
                 switch (_cover.formType)
                 {
@@ -2527,7 +2536,7 @@ public class CharacterController : MonoBehaviour
             currentNode.charCtr = null;
             currentNode.canMove = true;
             var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            charList.Remove(this);
+            //charList.Remove(this);
 
             var force = 500f;
             for (int i = 0; i < ragdollCds.Count; i++)
@@ -2542,7 +2551,13 @@ public class CharacterController : MonoBehaviour
                 rb.AddForce(dir * force, ForceMode.Force);
             }
             state = CharacterState.Dead;
-            Destroy(charUI.gameObject);
+            charUI.gameObject.SetActive(false);
+            //Destroy(charUI.gameObject);
+
+            if (charList.Find(x => x.state != CharacterState.Dead) == null)
+            {
+                StartCoroutine(gameMgr.Coroutine_GameEnd());
+            }
         }
     }
 

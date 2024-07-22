@@ -158,6 +158,9 @@ public class InventoryManager : MonoBehaviour
         StorageScrollView();
     }
 
+    /// <summary>
+    /// 키보드 입력
+    /// </summary>
     private void KeyboardInput()
     {
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
@@ -189,6 +192,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 인벤토리 열기
+    /// </summary>
     public void ShowInventory()
     {
         if (gameMgr.gameState == GameState.Shoot || gameMgr.gameState == GameState.Watch) return;
@@ -216,6 +222,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 아이템 회전
+    /// </summary>
     private void RotateItem()
     {
         if (holdingItem.itemData.size.x == 1 && holdingItem.itemData.size.y == 1) return;
@@ -249,6 +258,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 마우스 입력
+    /// </summary>
     private void MouseInput()
     {
         if (!invenUI.gameObject.activeSelf) return;
