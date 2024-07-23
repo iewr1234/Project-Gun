@@ -1940,11 +1940,11 @@ public class CharacterController : MonoBehaviour
             {
                 var _cover = hit.collider.GetComponentInParent<Cover>();
                 if (_cover == null) return;
-                //if (_cover.coverType != CoverType.Full)
-                //{
-                //    cover = _cover;
-                //    return;
-                //}
+                if (_cover.coverType == CoverType.Half)
+                {
+                    cover = _cover;
+                    return;
+                }
 
                 switch (_cover.formType)
                 {
