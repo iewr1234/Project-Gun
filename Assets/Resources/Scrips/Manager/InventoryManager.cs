@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [Header("---Access Script---")]
-    [SerializeField] private GameManager gameMgr;
+    [HideInInspector] public GameManager gameMgr;
     [HideInInspector] public DataManager dataMgr;
 
     [Space(5f)]

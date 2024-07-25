@@ -16,9 +16,19 @@ MonoBehaviour:
   - indexName: S0001
     ID: S0001
     stageName: Stage 1
+    level: 1
+    waveNum: 2
     mapList:
     - M0001
     - M0002
     - M0003
-    waveNum: 2
-    bossID: E0001
+    bossMap: M0001
+    crossRangeEnemys:
+    - ID: E0001
+      level: 1
+    middleRangeEnemys: []
+    longRangeEnemys: []
+    eliteEnemys: []
+    bossEnemy:
+      ID: E0001
+      level: 1

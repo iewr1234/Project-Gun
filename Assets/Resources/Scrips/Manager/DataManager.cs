@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
+using System.Linq;
 
 [System.Serializable]
 public struct ObjectData
@@ -55,11 +56,13 @@ public class DataManager : MonoBehaviour
 {
     private void Awake()
     {
-        var find = FindObjectsOfType<DataManager>();
-        if (find.Length == 1)
+        if (gameData == null) gameData = Resources.Load<GameData>("ScriptableObjects/GameData");
+
+        if (gameData.dataMgr == null)
         {
             DontDestroyOnLoad(gameObject);
             SetComponents();
+            gameData.dataMgr = this;
         }
         else
         {
@@ -69,7 +72,7 @@ public class DataManager : MonoBehaviour
 
     private void SetComponents()
     {
-        if (gameData == null) gameData = Resources.Load<GameData>("ScriptableObjects/GameData");
+        //if (gameData == null) gameData = Resources.Load<GameData>("ScriptableObjects/GameData");
 
         if (playerData == null) playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
 
@@ -468,14 +471,20 @@ public class DataManager : MonoBehaviour
 
     #region Stage Data
     [HideInInspector] public StageData stageData;
-    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A2:E";
+    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A3:K";
     private enum StageVariable
     {
         ID,
         StageName,
-        MapList,
+        Level,
         WaveNum,
-        BossID,
+        MapList,
+        BossMap,
+        CrossRangeEnemys,
+        MiddleRangeEnemys,
+        LongRangeEnemys,
+        EliteEnemys,
+        BossEnemy,
     }
 
     public void UpdateStageData()
@@ -500,9 +509,15 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)StageVariable.ID]}",
                     ID = data[(int)StageVariable.ID],
                     stageName = data[(int)StageVariable.StageName],
-                    mapList = ReadMapList(data[(int)StageVariable.MapList]),
+                    level = (StageLevel)int.Parse(data[(int)StageVariable.Level]),
                     waveNum = int.Parse(data[(int)StageVariable.WaveNum]),
-                    bossID = data[(int)StageVariable.BossID],
+                    mapList = ReadMapList(data[(int)StageVariable.MapList]),
+                    bossMap = data[(int)StageVariable.BossMap],
+                    crossRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.CrossRangeEnemys]),
+                    middleRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.MiddleRangeEnemys]),
+                    longRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.LongRangeEnemys]),
+                    eliteEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.EliteEnemys]),
+                    bossEnemy = ReadSpawnEnemyInfo(data[(int)StageVariable.BossEnemy]),
                 };
                 stageData.stageInfos.Add(stageInfo);
             }
@@ -520,6 +535,32 @@ public class DataManager : MonoBehaviour
             }
 
             return mapList;
+        }
+
+        List<SpawnEnemyInfo> ReadSpawnEnemyInfos(string enemyDatas)
+        {
+            var enemyList = new List<SpawnEnemyInfo>();
+            var enemyInfos = enemyDatas.Split(' ');
+            if (enemyInfos[0] == "None") return null;
+
+            for (int i = 0; i < enemyInfos.Length; i++)
+            {
+                enemyList.Add(ReadSpawnEnemyInfo(enemyInfos[i]));
+            }
+
+            return enemyList;
+        }
+
+        SpawnEnemyInfo ReadSpawnEnemyInfo(string enemyDatas)
+        {
+            var enemyData = enemyDatas.Split('(', ')');
+            var enemyInfo = new SpawnEnemyInfo()
+            {
+                ID = enemyData[0],
+                level = int.Parse(enemyData[1]),
+            };
+
+            return enemyInfo;
         }
     }
     #endregion

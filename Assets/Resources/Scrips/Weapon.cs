@@ -284,7 +284,7 @@ public class Weapon : MonoBehaviour
         for (int i = 0; i < shootNum; i++)
         {
             charCtr.SetStamina(-DataUtility.GetAimStaminaCost(charCtr));
-            var hitAccuracy = DataUtility.GetHitAccuracy(charCtr, targetInfo);
+            var hitAccuracy = DataUtility.GetHitAccuracy(targetInfo);
             if (i > 0)
             {
                 hitAccuracy -= DataUtility.GetHitAccuracyReduction(charCtr, dist);

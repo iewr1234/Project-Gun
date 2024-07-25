@@ -121,13 +121,29 @@ public class GameUIManager : MonoBehaviour
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
-        var shootNum = (int)(((float)weapon.weaponData.RPM / 200) * (charCtr.fiarRate + 1));
+        var shootNum = DataUtility.GetShootNum(weapon.weaponData.RPM, charCtr.fiarRate);
 
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
         //if (weapon.weaponData.isChamber) loadedAmmo++;
 
         shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";
+        SetHitAccuracy(charCtr);
+    }
+
+    public void SetHitAccuracy(CharacterController charCtr)
+    {
+        var targetInfo = charCtr.targetList[charCtr.targetIndex];
+        var hitAccuracy = DataUtility.GetHitAccuracy(targetInfo);
+        if (hitAccuracy > 100)
+        {
+            hitAccuracy = 100;
+        }
+        else if (hitAccuracy < 0)
+        {
+            hitAccuracy = 0;
+        }
+        hitAccuracyText.text = $"{hitAccuracy}%";
     }
 
     public void SetActiveMagazineIcon(bool value)
@@ -245,12 +261,13 @@ public class GameUIManager : MonoBehaviour
         sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightRate + 1}");
         var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
+        SetHitAccuracy(charCtr);
         SetActionPoint_Aim(charCtr);
     }
 
     public void SetTargetInfo(TargetInfo targetInfo)
     {
-        hitAccuracyText.text = $"{DataUtility.GetHitAccuracy(targetInfo.target, targetInfo)}%";
+        SetHitAccuracy(targetInfo.shooter);
         if (targetInfo.target.armor != null)
         {
             armorGauge.maxValue = targetInfo.target.armor.maxDurability;

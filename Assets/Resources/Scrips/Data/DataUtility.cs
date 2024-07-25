@@ -145,28 +145,33 @@ public static class DataUtility
     /// <param name="charCtr"></param>
     /// <param name="targetInfo"></param>
     /// <returns></returns>
-    public static float GetHitAccuracy(CharacterController charCtr, TargetInfo targetInfo)
+    public static float GetHitAccuracy(TargetInfo targetInfo)
     {
+        var shooter = targetInfo.shooter;
         var pos = targetInfo.shooterNode.transform.position;
         var targetPos = targetInfo.targetNode.transform.position;
         var dist = GetDistance(pos, targetPos);
-        var weapon = charCtr.currentWeapon;
+        var weapon = shooter.currentWeapon;
         var reboundCheck = 0;
-        if (charCtr.stamina == 0)
+        if (shooter.stamina == 0)
         {
             reboundCheck++;
         }
         //var value = Random.Range(0, 100);
-        var shooterHit = charCtr.aiming - (weapon.weaponData.MOA * dist) + (15 / (dist / 3)) - (weapon.weaponData.rebound * reboundCheck);
-        if (shooterHit < 0f)
-        {
-            shooterHit = 0f;
-        }
+        var shootNum = GetShootNum(weapon.weaponData.RPM, shooter.fiarRate);
+        var extraAccuracy = shooter.aiming * ((0.1f * shooter.sightRate) / shootNum);
+        var shooterHit = (shooter.aiming + extraAccuracy) - (weapon.weaponData.MOA * dist) + (15 / (dist / 3)) - (weapon.weaponData.rebound * reboundCheck);
+        //if (shooterHit < 0f)
+        //{
+        //    shooterHit = 0f;
+        //}
         var coverBonus = GetCoverBonus();
         var reactionBonus = GetReactionBonus();
         var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
 
-        return Mathf.Floor((shooterHit - targetEvasion) * 100f) / 100f;
+        var hitAccuracy = Mathf.Floor(shooterHit - targetEvasion);
+
+        return Mathf.Floor(hitAccuracy * 100f) / 100f;
 
         int GetCoverBonus()
         {

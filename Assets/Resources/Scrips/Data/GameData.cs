@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameData", menuName = "Scriptable Object/GameData")]
 public class GameData : ScriptableObject
 {
+    [HideInInspector] public DataManager dataMgr;
+    [HideInInspector] public InventoryManager invenMgr;
+
     [Header("[Stage]")]
     public StageDataInfo stageData;
     public string mapName;

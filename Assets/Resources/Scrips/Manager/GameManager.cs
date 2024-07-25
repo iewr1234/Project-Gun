@@ -155,8 +155,17 @@ public class GameManager : MonoBehaviour
         CreatePassPoint();
         CreateFloatText();
 
-        invenMgr = FindAnyObjectByType<InventoryManager>();
-        invenMgr.SetComponents(this);
+        if (dataMgr.gameData.invenMgr == null)
+        {
+            invenMgr = FindAnyObjectByType<InventoryManager>();
+            invenMgr.SetComponents(this);
+            dataMgr.gameData.invenMgr = invenMgr;
+        }
+        else
+        {
+            invenMgr = dataMgr.gameData.invenMgr;
+            invenMgr.gameMgr = this;
+        }
         currentTurn = CharacterOwner.Player;
 
         if (dataMgr.gameData.mapLoad)
