@@ -38,7 +38,7 @@ public class NodeData
     [Header("[Marker]")]
     public bool isMarker;
     public CharacterOwner markerType;
-    public int markerIndex;
+    public EnemyMarkerType enemyType;
 
     [Header("[Object]")]
     public bool isObject;
@@ -179,15 +179,19 @@ public class DataManager : MonoBehaviour
             if (nodeData.isMarker)
             {
                 nodeData.markerType = node.MarkerOutline.color == DataUtility.color_Player ? CharacterOwner.Player : CharacterOwner.Enemy;
-                var indexText = node.MarkerText.text;
-                var match = Regex.Match(indexText, @"\d+");
-                if (match.Success)
+                if (nodeData.markerType == CharacterOwner.Enemy)
                 {
-                    if (int.TryParse(match.Value, out int index))
-                    {
-                        nodeData.markerIndex = index;
-                    }
+                    nodeData.enemyType = node.enemyType;
                 }
+                //var indexText = node.MarkerText.text;
+                //var match = Regex.Match(indexText, @"\d+");
+                //if (match.Success)
+                //{
+                //    if (int.TryParse(match.Value, out int index))
+                //    {
+                //        nodeData.markerIndex = index;
+                //    }
+                //}
             }
 
             // Object Data
@@ -480,7 +484,7 @@ public class DataManager : MonoBehaviour
         WaveNum,
         MapList,
         BossMap,
-        CrossRangeEnemys,
+        ShortRangeEnemys,
         MiddleRangeEnemys,
         LongRangeEnemys,
         EliteEnemys,
@@ -513,7 +517,7 @@ public class DataManager : MonoBehaviour
                     waveNum = int.Parse(data[(int)StageVariable.WaveNum]),
                     mapList = ReadMapList(data[(int)StageVariable.MapList]),
                     bossMap = data[(int)StageVariable.BossMap],
-                    crossRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.CrossRangeEnemys]),
+                    shortRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.ShortRangeEnemys]),
                     middleRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.MiddleRangeEnemys]),
                     longRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.LongRangeEnemys]),
                     eliteEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.EliteEnemys]),

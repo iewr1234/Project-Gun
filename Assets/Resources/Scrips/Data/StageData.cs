@@ -31,7 +31,7 @@ public class StageDataInfo
     public string bossMap;
 
     [Header("[Enemy List]")]
-    public List<SpawnEnemyInfo> crossRangeEnemys = new List<SpawnEnemyInfo>();
+    public List<SpawnEnemyInfo> shortRangeEnemys = new List<SpawnEnemyInfo>();
     public List<SpawnEnemyInfo> middleRangeEnemys = new List<SpawnEnemyInfo>();
     public List<SpawnEnemyInfo> longRangeEnemys = new List<SpawnEnemyInfo>();
     public List<SpawnEnemyInfo> eliteEnemys = new List<SpawnEnemyInfo>();
@@ -48,7 +48,7 @@ public class StageDataInfo
             waveNum = waveNum,
             mapList = new List<string>(mapList),
             bossMap = bossMap,
-            crossRangeEnemys = new List<SpawnEnemyInfo>(crossRangeEnemys),
+            shortRangeEnemys = new List<SpawnEnemyInfo>(shortRangeEnemys),
             middleRangeEnemys = new List<SpawnEnemyInfo>(middleRangeEnemys),
             longRangeEnemys = new List<SpawnEnemyInfo>(longRangeEnemys),
             eliteEnemys = new List<SpawnEnemyInfo>(eliteEnemys),

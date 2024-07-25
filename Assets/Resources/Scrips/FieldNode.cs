@@ -30,7 +30,7 @@ public class FieldNode : MonoBehaviour
 
     private GameObject marker;
     private Image markerOutline;
-    private TextMeshProUGUI markerText;
+    private Image markerImage;
 
     private TextMeshProUGUI posText;
 
@@ -44,6 +44,7 @@ public class FieldNode : MonoBehaviour
     public int moveCost;
     [Space(5f)]
 
+    [HideInInspector] public EnemyMarkerType enemyType;
     [HideInInspector] public bool hitNode;
     [HideInInspector] public CharacterController watcher;
     [Space(5f)]
@@ -81,7 +82,7 @@ public class FieldNode : MonoBehaviour
 
         marker = transform.Find("Canvas/Marker").gameObject;
         markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
-        markerText = marker.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        markerImage = marker.transform.Find("Image").GetComponent<Image>();
         marker.SetActive(false);
 
         posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
@@ -449,13 +450,39 @@ public class FieldNode : MonoBehaviour
         canMove = true;
     }
 
-    public void SetOnMarker(CharacterOwner type, int index)
+    public void SetOnMarker()
     {
         marker.SetActive(true);
-        markerOutline.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
-        markerText.color = type == CharacterOwner.Player ? DataUtility.color_Player : DataUtility.color_Enemy;
-        markerText.text = type == CharacterOwner.Player ? $"P{index}" : $"E{index}";
-        //canMove = false;
+        markerOutline.color = DataUtility.color_PlayerMarker;
+        markerImage.color = DataUtility.color_PlayerMarker;
+        markerImage.sprite = Resources.Load<Sprite>("Sprites/player_marker");
+    }
+
+    public void SetOnMarker(EnemyMarkerType enemyType)
+    {
+        marker.SetActive(true);
+        markerOutline.color = DataUtility.color_EnemyMarker;
+        markerImage.color = DataUtility.color_EnemyMarker;
+        switch (enemyType)
+        {
+            case EnemyMarkerType.ShortRange:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_S");
+                break;
+            case EnemyMarkerType.MiddleRange:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_M");
+                break;
+            case EnemyMarkerType.LongRange:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_L");
+                break;
+            case EnemyMarkerType.Elite:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_Elite");
+                break;
+            case EnemyMarkerType.Boss:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_Boss");
+                break;
+            default:
+                break;
+        }
     }
 
     public void SetOffMarker()
@@ -633,12 +660,6 @@ public class FieldNode : MonoBehaviour
     {
         private set { markerOutline = value; }
         get { return markerOutline; }
-    }
-
-    public TextMeshProUGUI MarkerText
-    {
-        private set { markerText = value; }
-        get { return markerText; }
     }
 
     public TextMeshProUGUI PosText

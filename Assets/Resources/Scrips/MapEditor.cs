@@ -34,6 +34,15 @@ public enum FindNodeType
     SetObject,
 }
 
+public enum EnemyMarkerType
+{
+    ShortRange,
+    MiddleRange,
+    LongRange,
+    Elite,
+    Boss,
+}
+
 public class MapEditor : MonoBehaviour
 {
     private enum InterfaceType
@@ -77,6 +86,8 @@ public class MapEditor : MonoBehaviour
     [Header("[Enemy]")]
     [SerializeField] private GameObject enemyUI;
     [SerializeField] private List<FieldNode> eMarkerNodes = new List<FieldNode>();
+    [SerializeField] private TMP_Dropdown markerDropdown;
+    public EnemyMarkerType enemyType;
     #endregion
 
     #region Side
@@ -158,6 +169,7 @@ public class MapEditor : MonoBehaviour
         playerUI.SetActive(false);
 
         enemyUI = components.Find("Top/UI/Enemy").gameObject;
+        markerDropdown = enemyUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         enemyUI.SetActive(false);
 
         sideButtons = components.Find("Side/Buttons").gameObject;
@@ -412,17 +424,24 @@ public class MapEditor : MonoBehaviour
             switch (findType)
             {
                 case FindNodeType.CreateMarker:
-                    selectNode.SetOnMarker(charType, markerNodes.Count);
+                    if (charType == CharacterOwner.Enemy)
+                    {
+                        selectNode.SetOnMarker(enemyType);
+                    }
+                    else
+                    {
+                        selectNode.SetOnMarker();
+                    }
                     markerNodes.Add(selectNode);
                     break;
                 case FindNodeType.DeleteMarker:
                     selectNode.SetOffMarker();
                     markerNodes.Remove(selectNode);
-                    for (int i = 0; i < markerNodes.Count; i++)
-                    {
-                        var markerNode = markerNodes[i];
-                        markerNode.SetOnMarker(charType, i);
-                    }
+                    //for (int i = 0; i < markerNodes.Count; i++)
+                    //{
+                    //    var markerNode = markerNodes[i];
+                    //    markerNode.SetOnMarker(charType);
+                    //}
                     break;
                 default:
                     break;
@@ -904,7 +923,14 @@ public class MapEditor : MonoBehaviour
                 markerNodes.Add(node);
                 if (allLoad)
                 {
-                    node.SetOnMarker(nodeData.markerType, nodeData.markerIndex);
+                    if (nodeData.markerType == CharacterOwner.Enemy)
+                    {
+                        selectNode.SetOnMarker(nodeData.enemyType);
+                    }
+                    else
+                    {
+                        selectNode.SetOnMarker();
+                    }
                 }
             }
 
@@ -1073,6 +1099,11 @@ public class MapEditor : MonoBehaviour
     public void Button_Close()
     {
         gameObject.SetActive(false);
+    }
+
+    public void ValueChanged_EnemyMarkerType()
+    {
+        enemyType = (EnemyMarkerType)markerDropdown.value;
     }
     #endregion
 

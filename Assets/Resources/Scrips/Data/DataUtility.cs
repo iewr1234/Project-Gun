@@ -28,6 +28,8 @@ public static class DataUtility
 
     public static readonly Color color_Player = new Color(90 / 255f, 130 / 255f, 192 / 255f);
     public static readonly Color color_Enemy = new Color(192 / 255f, 94 / 255f, 90 / 255f);
+    public static readonly Color color_PlayerMarker = new Color(90 / 255f, 130 / 255f, 192 / 255f);
+    public static readonly Color color_EnemyMarker = new Color(150 / 255f, 35 / 255f, 35 / 255f);
 
     public static readonly float aimPointY = 0.9f;
     public static readonly float aimPointZ = 5f;
