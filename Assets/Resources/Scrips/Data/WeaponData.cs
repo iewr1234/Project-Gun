@@ -89,6 +89,14 @@ public class WeaponDataInfo
         {
             var magData = dataMgr.magData.magInfos.Find(x => x.ID == weaponData.equipMagID);
             weaponData.equipMag = magData.CopyData();
+            var loadedBullet = dataMgr.bulletData.bulletInfos.Find(x => x.ID == weaponData.equipMag.loadedBulletID);
+            if (loadedBullet != null)
+            {
+                for (int i = 0; i < weaponData.equipMag.magSize; i++)
+                {
+                    weaponData.equipMag.loadedBullets.Add(loadedBullet);
+                }
+            }
             weaponData.isMag = true;
         }
         for (int i = 0; i < weaponData.equipPartsIDs.Count; i++)

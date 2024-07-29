@@ -13,6 +13,7 @@ public enum GameState
     Reload,
     Watch,
     Inventory,
+    End,
 }
 
 public enum ScheduleState
@@ -158,7 +159,9 @@ public class GameManager : MonoBehaviour
         if (dataMgr.gameData.invenMgr == null)
         {
             invenMgr = FindAnyObjectByType<InventoryManager>();
-            invenMgr.SetComponents(this);
+            //invenMgr.SetComponents(this);
+            invenMgr.gameMgr = this;
+            invenMgr.dataMgr = dataMgr;
             dataMgr.gameData.invenMgr = invenMgr;
         }
         else
@@ -1367,6 +1370,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            dataMgr.gameData.stageData = null;
             sceneHlr.StartLoadScene("StageScene");
         }
     }
@@ -1592,7 +1596,7 @@ public class GameManager : MonoBehaviour
         if (ownerType == CharacterOwner.Player) return;
 
         var survieEnemys = enemyList.FindAll(x => x.state != CharacterState.Dead);
-        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0 || x.commandList.Find(x => x.type == CommandType.Reload) != null);
+        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0 || x.commandList.Find(x => x.type == CommandType.Reload) == null);
         if (endEnemys.Count != survieEnemys.Count) return;
 
         if (scheduleList.Count == 0)

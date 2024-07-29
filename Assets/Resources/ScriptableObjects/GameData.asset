@@ -12,5 +12,70 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0bc42faf548e0a4283601d09fb64790, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
+  dataMgr: {fileID: 0}
+  invenMgr: {fileID: 0}
+  stageData:
+    indexName: 
+    ID: 
+    stageName: 
+    level: 0
+    waveNum: 0
+    mapList: []
+    bossMap: 
+    shortRangeEnemys: []
+    middleRangeEnemys: []
+    longRangeEnemys: []
+    eliteEnemys: []
+    bossEnemy:
+      ID: 
+      level: 0
+    dropInfo_equipment:
+      itemMinLevel: 0
+      itemMaxLevel: 0
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+      dropPercentage_special: 0
+    dropInfo_expendable:
+      itemMinLevel: 0
+      itemMaxLevel: 0
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+      dropPercentage_special: 0
+    dropInfo_ingredient:
+      itemMinLevel: 0
+      itemMaxLevel: 0
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+      dropPercentage_special: 0
+  mapName: 
+  mapLoad: 0
   playerID: 
-  stageID: 
+  health: 0
+  initialItemIDList:
+  - ID: W0001
+    num: 1
+    createPos: 1
+  - ID: M0001
+    num: 1
+    createPos: 1
+  - ID: M0001
+    num: 2
+    createPos: 2

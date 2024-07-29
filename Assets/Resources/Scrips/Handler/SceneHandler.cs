@@ -50,14 +50,14 @@ public class SceneHandler : MonoBehaviour
         var asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         while (!asyncLoad.isDone)
         {
-            Debug.Log(asyncLoad.progress);
+            Debug.Log($"Scene load: {asyncLoad.progress * 100}%");
             //if (asyncLoad.progress >= 0.9f && Time.time - startTime >= minimumLoadingTime)
             //{
             //    asyncLoad.allowSceneActivation = true; // 최소 로딩 시간이 지나면 씬 활성화
             //}
             yield return null;
         }
-
+        Debug.Log("Scene load complete");
         //fade.raycastTarget = false;
         //yield return StartCoroutine(Fade(0f));
     }

@@ -44,7 +44,7 @@ public class FieldNode : MonoBehaviour
     public int moveCost;
     [Space(5f)]
 
-    [HideInInspector] public EnemyMarkerType enemyType;
+    public EnemyMarkerType enemyType;
     [HideInInspector] public bool hitNode;
     [HideInInspector] public CharacterController watcher;
     [Space(5f)]
@@ -450,19 +450,19 @@ public class FieldNode : MonoBehaviour
         canMove = true;
     }
 
-    public void SetOnMarker()
+    public void SetOnMarker(bool isActive)
     {
-        marker.SetActive(true);
         markerOutline.color = DataUtility.color_PlayerMarker;
         markerImage.color = DataUtility.color_PlayerMarker;
         markerImage.sprite = Resources.Load<Sprite>("Sprites/player_marker");
+        marker.SetActive(isActive);
     }
 
-    public void SetOnMarker(EnemyMarkerType enemyType)
+    public void SetOnMarker(bool isActive, EnemyMarkerType _enemyType)
     {
-        marker.SetActive(true);
         markerOutline.color = DataUtility.color_EnemyMarker;
         markerImage.color = DataUtility.color_EnemyMarker;
+        enemyType = _enemyType;
         switch (enemyType)
         {
             case EnemyMarkerType.ShortRange:
@@ -483,12 +483,12 @@ public class FieldNode : MonoBehaviour
             default:
                 break;
         }
+        marker.SetActive(isActive);
     }
 
     public void SetOffMarker()
     {
         marker.SetActive(false);
-        //canMove = true;
     }
 
     public void SetOnFloor(MapItem item, bool random)

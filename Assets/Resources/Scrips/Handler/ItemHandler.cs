@@ -115,6 +115,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.Magazine:
                 var _magData = invenMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
                 magData = _magData.CopyData();
+                var loadedBullet = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
+                if (loadedBullet != null)
+                {
+                    for (int i = 0; i < magData.magSize; i++)
+                    {
+                        magData.loadedBullets.Add(loadedBullet);
+                    }
+                }
                 break;
             case ItemType.Sight:
                 var _partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
@@ -183,11 +191,19 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetItemInfo(MagazineDataInfo magData)
+    public void SetItemInfo(MagazineDataInfo _magData)
     {
-        itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == magData.ID);
+        itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _magData.ID);
         size = itemData.size;
-        this.magData = magData.CopyData();
+        magData = _magData.CopyData();
+        var loadedBullet = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
+        if (loadedBullet != null)
+        {
+            for (int i = 0; i < magData.magSize; i++)
+            {
+                magData.loadedBullets.Add(loadedBullet);
+            }
+        }
         countText.enabled = true;
         SetTotalCount(magData.loadedBullets.Count);
 

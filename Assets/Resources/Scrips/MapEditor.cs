@@ -426,11 +426,11 @@ public class MapEditor : MonoBehaviour
                 case FindNodeType.CreateMarker:
                     if (charType == CharacterOwner.Enemy)
                     {
-                        selectNode.SetOnMarker(enemyType);
+                        selectNode.SetOnMarker(true, enemyType);
                     }
                     else
                     {
-                        selectNode.SetOnMarker();
+                        selectNode.SetOnMarker(true);
                     }
                     markerNodes.Add(selectNode);
                     break;
@@ -921,16 +921,13 @@ public class MapEditor : MonoBehaviour
             {
                 var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
                 markerNodes.Add(node);
-                if (allLoad)
+                if (nodeData.markerType == CharacterOwner.Enemy)
                 {
-                    if (nodeData.markerType == CharacterOwner.Enemy)
-                    {
-                        selectNode.SetOnMarker(nodeData.enemyType);
-                    }
-                    else
-                    {
-                        selectNode.SetOnMarker();
-                    }
+                    node.SetOnMarker(allLoad, nodeData.enemyType);
+                }
+                else
+                {
+                    node.SetOnMarker(allLoad);
                 }
             }
 
@@ -953,10 +950,40 @@ public class MapEditor : MonoBehaviour
             gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
             yield return null;
 
+            var stageData = gameMgr.dataMgr.gameData.stageData;
             for (int i = 0; i < eMarkerNodes.Count; i++)
             {
                 var markerNode = eMarkerNodes[i];
-                gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, "E0001");
+                SpawnEnemyInfo enemyInfo;
+                switch (markerNode.enemyType)
+                {
+                    case EnemyMarkerType.ShortRange:
+                        if (stageData.shortRangeEnemys.Count == 0) continue;
+
+                        enemyInfo = stageData.shortRangeEnemys[Random.Range(0, stageData.shortRangeEnemys.Count)];
+                        break;
+                    case EnemyMarkerType.MiddleRange:
+                        if (stageData.middleRangeEnemys.Count == 0) continue;
+
+                        enemyInfo = stageData.middleRangeEnemys[Random.Range(0, stageData.middleRangeEnemys.Count)];
+                        break;
+                    case EnemyMarkerType.LongRange:
+                        if (stageData.longRangeEnemys.Count == 0) continue;
+
+                        enemyInfo = stageData.longRangeEnemys[Random.Range(0, stageData.longRangeEnemys.Count)];
+                        break;
+                    case EnemyMarkerType.Elite:
+                        if (stageData.eliteEnemys.Count == 0) continue;
+
+                        enemyInfo = stageData.eliteEnemys[Random.Range(0, stageData.eliteEnemys.Count)];
+                        break;
+                    case EnemyMarkerType.Boss:
+                        enemyInfo = stageData.bossEnemy;
+                        break;
+                    default:
+                        continue;
+                }
+                gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, enemyInfo.ID);
                 yield return null;
             }
         }

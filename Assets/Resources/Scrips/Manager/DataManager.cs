@@ -86,6 +86,10 @@ public class DataManager : MonoBehaviour
 
         if (weaponData == null) weaponData = Resources.Load<WeaponData>("ScriptableObjects/WeaponData");
 
+        if (partsData == null) partsData = Resources.Load<WeaponPartsData>("ScriptableObjects/WeaponPartsData");
+
+        if (magData == null) magData = Resources.Load<MagazineData>("ScriptableObjects/MagazineData");
+
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
         if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
@@ -94,7 +98,7 @@ public class DataManager : MonoBehaviour
     }
 
     #region GameData
-    public GameData gameData;
+    [HideInInspector] public GameData gameData;
 
     #endregion
 
@@ -409,8 +413,9 @@ public class DataManager : MonoBehaviour
                     mainWeapon2_ID = data[(int)EnemyVariable.MainWeapon2_ID],
                     mainBullet2_ID = data[(int)EnemyVariable.MainBullet2_ID],
                     subWeapon_ID = data[(int)EnemyVariable.SubWeapon_ID],
-                    subBullet_ID = data[(int)EnemyVariable.SubBullet_ID],
+                    subBullet_ID = data[(int)EnemyVariable.SubBullet_ID].Split('\r')[0],
                 };
+                Debug.Log(enemyInfo.subBullet_ID);
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
@@ -475,7 +480,7 @@ public class DataManager : MonoBehaviour
 
     #region Stage Data
     [HideInInspector] public StageData stageData;
-    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A3:K";
+    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A5:AR";
     private enum StageVariable
     {
         ID,
@@ -489,6 +494,39 @@ public class DataManager : MonoBehaviour
         LongRangeEnemys,
         EliteEnemys,
         BossEnemy,
+        Equipment_itemMaxLevel,
+        Equipment_itemMinLevel,
+        Equipment_itemMinNum,
+        Equipment_itemMaxNum,
+        Equipment_dropPercentage_lowGrade,
+        Equipment_dropPercentage_nomal,
+        Equipment_dropPercentage_middleGrade,
+        Equipment_dropPercentage_highGrade,
+        Equipment_dropPercentage_advanced,
+        Equipment_dropPercentage_set,
+        Equipment_dropPercentage_special,
+        Expendable_itemMaxLevel,
+        Expendable_itemMinLevel,
+        Expendable_itemMinNum,
+        Expendable_itemMaxNum,
+        Expendable_dropPercentage_lowGrade,
+        Expendable_dropPercentage_nomal,
+        Expendable_dropPercentage_middleGrade,
+        Expendable_dropPercentage_highGrade,
+        Expendable_dropPercentage_advanced,
+        Expendable_dropPercentage_set,
+        Expendable_dropPercentage_special,
+        Ingredient_itemMaxLevel,
+        Ingredient_itemMinLevel,
+        Ingredient_itemMinNum,
+        Ingredient_itemMaxNum,
+        Ingredient_dropPercentage_lowGrade,
+        Ingredient_dropPercentage_nomal,
+        Ingredient_dropPercentage_middleGrade,
+        Ingredient_dropPercentage_highGrade,
+        Ingredient_dropPercentage_advanced,
+        Ingredient_dropPercentage_set,
+        Ingredient_dropPercentage_special,
     }
 
     public void UpdateStageData()
@@ -522,6 +560,39 @@ public class DataManager : MonoBehaviour
                     longRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.LongRangeEnemys]),
                     eliteEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.EliteEnemys]),
                     bossEnemy = ReadSpawnEnemyInfo(data[(int)StageVariable.BossEnemy]),
+                    dropInfo_equipment = ReadDropItemInfo(data[(int)StageVariable.Equipment_itemMinLevel],
+                                                          data[(int)StageVariable.Equipment_itemMaxLevel],
+                                                          data[(int)StageVariable.Equipment_itemMinNum],
+                                                          data[(int)StageVariable.Equipment_itemMaxNum],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_lowGrade],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_nomal],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_middleGrade],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_highGrade],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_advanced],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_set],
+                                                          data[(int)StageVariable.Equipment_dropPercentage_special]),
+                    dropInfo_expendable = ReadDropItemInfo(data[(int)StageVariable.Expendable_itemMinLevel],
+                                                           data[(int)StageVariable.Expendable_itemMaxLevel],
+                                                           data[(int)StageVariable.Expendable_itemMinNum],
+                                                           data[(int)StageVariable.Expendable_itemMaxNum],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_lowGrade],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_nomal],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_middleGrade],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_highGrade],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_advanced],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_set],
+                                                           data[(int)StageVariable.Expendable_dropPercentage_special]),
+                    dropInfo_ingredient = ReadDropItemInfo(data[(int)StageVariable.Ingredient_itemMinLevel],
+                                                           data[(int)StageVariable.Ingredient_itemMaxLevel],
+                                                           data[(int)StageVariable.Ingredient_itemMinNum],
+                                                           data[(int)StageVariable.Ingredient_itemMaxNum],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_lowGrade],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_nomal],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_middleGrade],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_highGrade],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_advanced],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_set],
+                                                           data[(int)StageVariable.Ingredient_dropPercentage_special]),
                 };
                 stageData.stageInfos.Add(stageInfo);
             }
@@ -565,6 +636,26 @@ public class DataManager : MonoBehaviour
             };
 
             return enemyInfo;
+        }
+
+        DropItemInfo ReadDropItemInfo(string itemMinLevel, string itemMaxLevel, string itemMinNum, string itemMaxNum, string dropPercentage_lowGrade, string dropPercentage_nomal, string dropPercentage_middleGrade, string dropPercentage_highGrade, string dropPercentage_advanced, string dropPercentage_set, string dropPercentage_special)
+        {
+            var dropItemInfo = new DropItemInfo()
+            {
+                itemMinLevel = int.Parse(itemMinLevel),
+                itemMaxLevel = int.Parse(itemMaxLevel),
+                itemMinNum = int.Parse(itemMinNum),
+                itemMaxNum = int.Parse(itemMaxNum),
+                dropPercentage_lowGrade = int.Parse(dropPercentage_lowGrade),
+                dropPercentage_nomal = int.Parse(dropPercentage_nomal),
+                dropPercentage_middleGrade = int.Parse(dropPercentage_middleGrade),
+                dropPercentage_highGrade = int.Parse(dropPercentage_highGrade),
+                dropPercentage_advanced = int.Parse(dropPercentage_advanced),
+                dropPercentage_set = int.Parse(dropPercentage_set),
+                dropPercentage_special = int.Parse(dropPercentage_special),
+            };
+
+            return dropItemInfo;
         }
     }
     #endregion
@@ -810,10 +901,11 @@ public class DataManager : MonoBehaviour
 
     #region Magazine Data
     [HideInInspector] public MagazineData magData;
-    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:G";
+    private readonly string magDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=660227428&range=A2:H";
     private enum MagazineVariable
     {
         ID,
+        LoadedBulletID,
         PrefabName,
         MagazineName,
         CompatModel,
@@ -843,6 +935,7 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)MagazineVariable.ID]}: {data[(int)MagazineVariable.MagazineName]}",
                     ID = data[(int)MagazineVariable.ID],
+                    loadedBulletID = data[(int)MagazineVariable.LoadedBulletID] == "None" ? null : data[(int)MagazineVariable.LoadedBulletID],
                     prefabName = data[(int)MagazineVariable.PrefabName],
                     magName = data[(int)MagazineVariable.MagazineName],
                     compatModel = ReadCompatModelInfo(data[(int)MagazineVariable.CompatModel]),

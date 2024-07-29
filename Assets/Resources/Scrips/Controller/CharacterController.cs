@@ -2710,6 +2710,7 @@ public class CharacterController : MonoBehaviour
 
         commandList.RemoveAt(0);
         reloading = false;
+        gameMgr.SetPositionOfAI(ownerType);
     }
 
     public void Event_WeaponChange()

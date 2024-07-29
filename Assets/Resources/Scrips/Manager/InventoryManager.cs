@@ -60,6 +60,7 @@ public class InventoryManager : MonoBehaviour
         if (find.Length == 1)
         {
             DontDestroyOnLoad(gameObject);
+            SetComponents();
         }
         else
         {
@@ -68,10 +69,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetComponents(GameManager _gmaeMgr)
+    public void SetComponents()
     {
-        gameMgr = _gmaeMgr;
-        dataMgr = _gmaeMgr.dataMgr;
+        //gameMgr = _gmaeMgr;
+        //dataMgr = _gmaeMgr.dataMgr;
+
         //popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
         //popUp.SetComponents(this);
         popUpList = transform.Find("InventoryUI/PopUpList").GetComponentsInChildren<PopUp_Inventory>().ToList();
@@ -118,24 +120,24 @@ public class InventoryManager : MonoBehaviour
         CreateItems();
         invenUI.gameObject.SetActive(false);
 
-        SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Sight_1", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Sight_2", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Sight_1", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Sight_2", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
-        SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots, true);
-        SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots, true);
-        SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots, true);
+        //SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots, true);
+        //SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots, true);
+        //SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots, true);
 
-        SetItemInStorage("Sight_20", 1, otherStorage.itemSlots, true);
+        //SetItemInStorage("Sight_20", 1, otherStorage.itemSlots, true);
     }
 
     private void CreateItems()
@@ -166,6 +168,7 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
             itemSplit = false;
+            gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.None : GameState.Inventory;
             gameMgr.uiMgr.bottomUI.SetActive(false);
             ShowInventory();
         }
@@ -197,6 +200,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     public void ShowInventory()
     {
+        if (gameMgr == null) return;
         if (gameMgr.gameState == GameState.Shoot || gameMgr.gameState == GameState.Watch) return;
 
         var value = !invenCam.enabled;
@@ -204,9 +208,8 @@ public class InventoryManager : MonoBehaviour
         subCam.enabled = value;
         invenUI.gameObject.SetActive(value);
 
-        gameMgr.uiMgr.bottomUI.SetActive(!value);
         gameMgr.DeselectCharacter();
-        gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
+        //gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         if (!value && activePopUp.Count > 0)
         {
             for (int i = activePopUp.Count - 1; i >= 0; i--)
@@ -216,6 +219,10 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
+        if (gameMgr.uiMgr != null)
+        {
+            gameMgr.uiMgr.gameObject.SetActive(!value);
+        }
         if (gameMgr.mapEdt != null)
         {
             gameMgr.mapEdt.gameObject.SetActive(!value);
@@ -420,7 +427,7 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        if (emptySlots == null)
+        if (emptySlots.Count < item.size.x * item.size.y)
         {
             var itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
             emptySlots = FindEmptySlots(item, itemSlots);

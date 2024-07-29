@@ -9,6 +9,7 @@ public class MagazineDataInfo
     [Space(5f)]
 
     public string ID;
+    public string loadedBulletID;
     public string prefabName;
     public string magName;
     [Space(5f)]
@@ -27,6 +28,7 @@ public class MagazineDataInfo
         {
             indexName = indexName,
             ID = ID,
+            loadedBulletID = loadedBulletID,
             prefabName = prefabName,
             magName = magName,
             compatModel = new List<int>(compatModel),

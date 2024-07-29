@@ -880,12 +880,26 @@ MonoBehaviour:
   sight: 5
   aiming: 0
   reaction: 0
+  baseIndex: 0
+  upperIndex: 0
   currentWeapon: {fileID: 0}
-  fireRateNum: 0
-  sightNum: 0
+  fiarRate: 0
+  sightRate: 0
   currentNode: {fileID: 0}
   cover: {fileID: 0}
   isCopy: 0
+  aiData:
+    indexName: 
+    ID: 
+    typeName: 
+    actionType: 0
+    score_move: 0
+    score_noneCover: 0
+    score_halfCover: 0
+    score_fullCover: 0
+    score_noneShoot: 0
+    score_halfShoot: 0
+    score_fullShoot: 0
   targetList: []
   targetIndex: 0
   watchInfo:
