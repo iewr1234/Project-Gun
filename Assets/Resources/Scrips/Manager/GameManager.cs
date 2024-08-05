@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private List<AttackSchedule> scheduleList;
     [SerializeField] private ScheduleState scheduleState;
-    private CoverState targetState;
+    [SerializeField] private CoverState targetState;
     private bool firstSchedule;
     private float timer;
 
@@ -1596,7 +1596,8 @@ public class GameManager : MonoBehaviour
         if (ownerType == CharacterOwner.Player) return;
 
         var survieEnemys = enemyList.FindAll(x => x.state != CharacterState.Dead);
-        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0 || x.commandList.Find(x => x.type == CommandType.Reload) == null);
+        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0
+                                          || (x.commandList.Count > 0 && x.commandList.Find(x => x.type == CommandType.Reload) == null));
         if (endEnemys.Count != survieEnemys.Count) return;
 
         if (scheduleList.Count == 0)
@@ -1638,16 +1639,16 @@ public class GameManager : MonoBehaviour
             var targetInfo = schedule.targetInfo;
             if (targetInfo.shooter.commandList.Count > 0) return;
 
-            if (firstSchedule || targetState != schedule.type)
+            Debug.Log($"{targetInfo.shooter.name}: {targetState} / {schedule.type}");
+            if (targetState != schedule.type)
             {
                 if (targetState != CoverState.None)
                 {
                     targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
                 }
                 targetInfo.shooter.SetTargeting(targetInfo, CharacterOwner.Player);
-                targetState = schedule.type;
-                firstSchedule = false;
             }
+            targetState = schedule.type;
             scheduleState = ScheduleState.Shoot;
         }
 

@@ -6,20 +6,18 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [Header("---Access Script---")]
-    [HideInInspector] public GameManager gameMgr;
-    [HideInInspector] public DataManager dataMgr;
-
-    [Space(5f)]
-    //[HideInInspector] public PopUp_Inventory popUp;
-    public List<PopUp_Inventory> activePopUp;
-    private List<PopUp_Inventory> popUpList;
-
-    [HideInInspector] public ContextMenu contextMenu;
-
-    [Space(5f)]
     public List<EquipSlot> allEquips = new List<EquipSlot>();
     public List<MyStorage> myStorages = new List<MyStorage>();
     public OtherStorage otherStorage;
+
+    [HideInInspector] public DataManager dataMgr;
+    [HideInInspector] public GameManager gameMgr;
+
+    //[HideInInspector] public PopUp_Inventory popUp;
+    [HideInInspector] public List<PopUp_Inventory> activePopUp;
+    private List<PopUp_Inventory> popUpList;
+
+    [HideInInspector] public ContextMenu contextMenu;
 
     [Header("---Access Component---")]
     public ItemHandler sampleItem;
@@ -60,7 +58,6 @@ public class InventoryManager : MonoBehaviour
         if (find.Length == 1)
         {
             DontDestroyOnLoad(gameObject);
-            SetComponents();
         }
         else
         {
@@ -69,10 +66,15 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void Start()
+    {
+        SetComponents();
+    }
+
     public void SetComponents()
     {
         //gameMgr = _gmaeMgr;
-        //dataMgr = _gmaeMgr.dataMgr;
+        dataMgr = FindAnyObjectByType<DataManager>();
 
         //popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
         //popUp.SetComponents(this);
@@ -119,6 +121,25 @@ public class InventoryManager : MonoBehaviour
 
         CreateItems();
         invenUI.gameObject.SetActive(false);
+
+        if (dataMgr == null) return;
+
+        for (int i = 0; i < dataMgr.gameData.initialItemIDList.Count; i++)
+        {
+            var initialItem = dataMgr.gameData.initialItemIDList[i];
+            switch (initialItem.createPos)
+            {
+                case CreatePos.Equip:
+                    SetItemInEquipSlot(initialItem);
+                    break;
+                case CreatePos.Rig:
+                    break;
+                case CreatePos.Backpack:
+                    break;
+                default:
+                    break;
+            }
+        }
 
         //SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots, true);
         //SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots, true);
@@ -433,6 +454,25 @@ public class InventoryManager : MonoBehaviour
             emptySlots = FindEmptySlots(item, itemSlots);
         }
         PutTheItem(item, emptySlots);
+    }
+
+    public void SetItemInEquipSlot(InitialItem initialItem)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == initialItem.ID);
+        item.SetItemInfo(itemData, initialItem.num, false);
+
+        var equipSlot = allEquips.Find(x => x.CheckEquip(item) == true);
+        equipSlot.item = item;
+        equipSlot.slotText.enabled = false;
+        equipSlot.countText.enabled = false;
+
+        item.countText.enabled = false;
+        item.equipSlot = equipSlot;
+        item.SetItemScale(true);
+        item.ChangeRectPivot(true);
+        item.transform.SetParent(equipSlot.transform, false);
+        item.transform.localPosition = Vector3.zero;
     }
 
     public void SetItemInEquipSlot(BulletDataInfo bulletData, int count, EquipSlot equipSlot)

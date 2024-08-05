@@ -1027,7 +1027,7 @@ public class CharacterController : MonoBehaviour
                 transform.LookAt(command.lookAt);
             }
             commandList.Remove(command);
-            gameMgr.SetPositionOfAI(ownerType);
+            //gameMgr.SetPositionOfAI(ownerType);
         }
     }
 

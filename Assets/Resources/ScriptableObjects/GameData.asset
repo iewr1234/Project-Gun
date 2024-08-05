@@ -15,25 +15,34 @@ MonoBehaviour:
   dataMgr: {fileID: 0}
   invenMgr: {fileID: 0}
   stageData:
-    indexName: 
-    ID: 
-    stageName: 
-    level: 0
-    waveNum: 0
-    mapList: []
-    bossMap: 
-    shortRangeEnemys: []
-    middleRangeEnemys: []
+    indexName: S0001
+    ID: S0001
+    stageName: Stage 1
+    level: 1
+    waveNum: 1
+    mapList:
+    - M0002
+    bossMap: M0003
+    shortRangeEnemys:
+    - ID: E0002
+      level: 1
+    - ID: E0003
+      level: 1
+    - ID: E0004
+      level: 1
+    middleRangeEnemys:
+    - ID: E0001
+      level: 1
     longRangeEnemys: []
     eliteEnemys: []
     bossEnemy:
-      ID: 
-      level: 0
+      ID: E0010
+      level: 1
     dropInfo_equipment:
       itemMinLevel: 0
       itemMaxLevel: 0
-      itemMinNum: 0
-      itemMaxNum: 0
+      itemMinNum: 1
+      itemMaxNum: 2
       dropPercentage_lowGrade: 0
       dropPercentage_nomal: 0
       dropPercentage_middleGrade: 0
@@ -65,17 +74,11 @@ MonoBehaviour:
       dropPercentage_advanced: 0
       dropPercentage_set: 0
       dropPercentage_special: 0
-  mapName: 
+  mapName: M0001
   mapLoad: 0
-  playerID: 
+  playerID: P0001
   health: 0
   initialItemIDList:
   - ID: W0001
     num: 1
     createPos: 1
-  - ID: M0001
-    num: 1
-    createPos: 1
-  - ID: M0001
-    num: 2
-    createPos: 2
