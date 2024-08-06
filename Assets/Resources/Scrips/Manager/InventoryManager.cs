@@ -188,9 +188,11 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
+            if (gameMgr.gameState == GameState.Result) return;
+
             itemSplit = false;
             gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.None : GameState.Inventory;
-            gameMgr.uiMgr.bottomUI.SetActive(false);
+            //gameMgr.uiMgr.bottomUI.SetActive(false);
             ShowInventory();
         }
 
@@ -242,7 +244,7 @@ public class InventoryManager : MonoBehaviour
 
         if (gameMgr.uiMgr != null)
         {
-            gameMgr.uiMgr.gameObject.SetActive(!value);
+            gameMgr.uiMgr.playUI.SetActive(!value);
         }
         if (gameMgr.mapEdt != null)
         {

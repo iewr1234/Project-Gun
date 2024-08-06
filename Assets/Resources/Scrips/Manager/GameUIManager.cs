@@ -12,6 +12,8 @@ public class GameUIManager : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private Canvas canvas;
+    [HideInInspector] public GameObject playUI;
+    [HideInInspector] public GameObject resultUI;
 
     [Header("[BottomUI]")]
     public GameObject bottomUI;
@@ -36,6 +38,10 @@ public class GameUIManager : MonoBehaviour
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
 
+    [Header("[ResultUI]")]
+    public Button nextButton;
+    public Button returnButton;
+
     [Header("--- Assignment Variable---")]
     public Button onButton;
 
@@ -45,8 +51,10 @@ public class GameUIManager : MonoBehaviour
     {
         gameMgr = _gameMgr;
         canvas = GetComponent<Canvas>();
+        playUI = transform.Find("Play").gameObject;
+        resultUI = transform.Find("Result").gameObject;
 
-        bottomUI = transform.Find("BottomUI").gameObject;
+        bottomUI = playUI.transform.Find("BottomUI").gameObject;
         magNumText = bottomUI.transform.Find("MagNum").GetComponent<TextMeshProUGUI>();
         magNumText.enabled = false;
         actionBlocks = bottomUI.transform.Find("ActionPoint").GetComponentsInChildren<ActionBlock>().ToList();
@@ -64,15 +72,15 @@ public class GameUIManager : MonoBehaviour
         }
         magIcons.gameObject.SetActive(false);
 
-        aimUI = transform.Find("AimUI").gameObject;
-        shootNumText = transform.Find("AimUI/ShootNum").GetComponent<TextMeshProUGUI>();
-        hitAccuracyText = transform.Find("AimUI/HitAccuracy").GetComponent<TextMeshProUGUI>();
-        actionPointText = transform.Find("AimUI/ActionPoint/Text").GetComponent<TextMeshProUGUI>();
-        fireRateGauge = transform.Find("AimUI/FireRateGauge").GetComponent<Image>();
-        sightGauge = transform.Find("AimUI/SightGauge").GetComponent<Image>();
-        armorGauge = transform.Find("AimUI/TargetInfo/ArmorGauge").GetComponent<Slider>();
-        healthGauge = transform.Find("AimUI/TargetInfo/HealthGauge").GetComponent<Slider>();
-        staminaGauge = transform.Find("AimUI/TargetInfo/StaminaGauge").GetComponent<Slider>();
+        aimUI = playUI.transform.Find("AimUI").gameObject;
+        shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
+        hitAccuracyText = aimUI.transform.Find("HitAccuracy").GetComponent<TextMeshProUGUI>();
+        actionPointText = aimUI.transform.Find("ActionPoint/Text").GetComponent<TextMeshProUGUI>();
+        fireRateGauge = aimUI.transform.Find("FireRateGauge").GetComponent<Image>();
+        sightGauge = aimUI.transform.Find("SightGauge").GetComponent<Image>();
+        armorGauge = aimUI.transform.Find("TargetInfo/ArmorGauge").GetComponent<Slider>();
+        healthGauge = aimUI.transform.Find("TargetInfo/HealthGauge").GetComponent<Slider>();
+        staminaGauge = aimUI.transform.Find("TargetInfo/StaminaGauge").GetComponent<Slider>();
         aimUI.SetActive(false);
 
         var actionButtons = bottomUI.transform.Find("ActionButtons").GetComponentsInChildren<ActionButton>().ToList();
@@ -95,6 +103,13 @@ public class GameUIManager : MonoBehaviour
                     break;
             }
         }
+
+        nextButton = resultUI.transform.Find("Next").GetComponent<Button>();
+        nextButton.gameObject.SetActive(false);
+        returnButton = resultUI.transform.Find("Retrun").GetComponent<Button>();
+        returnButton.gameObject.SetActive(false);
+
+        resultUI.SetActive(false);
     }
 
     public void SetMagNum(CharacterController charCtr)
@@ -279,10 +294,46 @@ public class GameUIManager : MonoBehaviour
         staminaGauge.value = targetInfo.target.stamina;
     }
 
+    public void SetResultUI(bool value)
+    {
+        switch (value)
+        {
+            case true:
+                gameMgr.invenMgr.ShowInventory();
+                resultUI.SetActive(true);
+                if (gameMgr.dataMgr.gameData.stageData.waveNum >= 0)
+                {
+                    nextButton.gameObject.SetActive(true);
+                }
+                else
+                {
+                    returnButton.gameObject.SetActive(true);
+                }
+                break;
+            case false:
+                nextButton.gameObject.SetActive(false);
+                returnButton.gameObject.SetActive(false);
+                resultUI.SetActive(false);
+                break;
+        }
+    }
+
     public void Button_TurnEnd()
     {
         if (gameMgr.currentTurn != CharacterOwner.Player) return;
 
         gameMgr.TurnEnd();
+    }
+
+    public void Button_Next()
+    {
+        nextButton.enabled = false;
+        gameMgr.NextMap();
+    }
+
+    public void Button_Return()
+    {
+        returnButton.enabled = false;
+        gameMgr.ReturnTitle();
     }
 }

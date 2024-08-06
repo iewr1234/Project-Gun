@@ -58,6 +58,11 @@ public class SceneHandler : MonoBehaviour
             yield return null;
         }
         Debug.Log("Scene load complete");
+
+        if (sceneName == "TitleScene")
+        {
+            StartCoroutine(Fade(0f));
+        }
         //fade.raycastTarget = false;
         //yield return StartCoroutine(Fade(0f));
     }

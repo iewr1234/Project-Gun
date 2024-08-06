@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +12,7 @@ public enum GameState
     Reload,
     Watch,
     Inventory,
-    End,
+    Result,
 }
 
 public enum ScheduleState
@@ -170,6 +169,10 @@ public class GameManager : MonoBehaviour
         {
             invenMgr = dataMgr.gameData.invenMgr;
             invenMgr.gameMgr = this;
+        }
+        if (invenMgr.invenCam.enabled)
+        {
+            invenMgr.ShowInventory();
         }
         currentTurn = CharacterOwner.Player;
 
@@ -681,11 +684,15 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < playerList.Count; i++)
         {
             var player = playerList[i];
+            if (player.state == CharacterState.Dead) continue;
+
             player.charUI.gameObject.SetActive(value);
         }
         for (int i = 0; i < enemyList.Count; i++)
         {
             var enemy = enemyList[i];
+            if (enemy.state == CharacterState.Dead) continue;
+
             enemy.charUI.gameObject.SetActive(value);
         }
     }
@@ -1358,19 +1365,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void NextMap()
+    {
+        sceneHlr.StartLoadScene("SampleScene");
+    }
+
+    public void ReturnTitle()
+    {
+        dataMgr.gameData.stageData = null;
+        sceneHlr.StartLoadScene("TitleScene");
+    }
+
     public IEnumerator Coroutine_GameEnd()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
 
-        dataMgr.gameData.RandomMapSelection();
-        if (dataMgr.gameData.stageData.waveNum >= 0)
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = 0.02f;
+        if (playerList.Count == playerList.FindAll(x => x.state == CharacterState.Dead).Count)
         {
-            sceneHlr.StartLoadScene("SampleScene");
+            ReturnTitle();
         }
         else
         {
-            dataMgr.gameData.stageData = null;
-            sceneHlr.StartLoadScene("StageScene");
+            dataMgr.gameData.RandomMapSelection();
+            uiMgr.SetResultUI(true);
         }
     }
 

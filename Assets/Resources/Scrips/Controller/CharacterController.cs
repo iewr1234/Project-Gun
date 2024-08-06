@@ -1285,7 +1285,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
-        aimTf = targetInfo.targetNode.transform;
+        aimTf = targetInfo.target.transform;
         if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
@@ -2588,6 +2588,9 @@ public class CharacterController : MonoBehaviour
 
             if (charList.Find(x => x.state != CharacterState.Dead) == null)
             {
+                Time.timeScale = 0.2f;
+                Time.fixedDeltaTime = Time.timeScale * 0.02f;
+                gameMgr.gameState = GameState.Result;
                 StartCoroutine(gameMgr.Coroutine_GameEnd());
             }
         }

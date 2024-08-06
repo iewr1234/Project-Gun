@@ -415,7 +415,6 @@ public class DataManager : MonoBehaviour
                     subWeapon_ID = data[(int)EnemyVariable.SubWeapon_ID],
                     subBullet_ID = data[(int)EnemyVariable.SubBullet_ID].Split('\r')[0],
                 };
-                Debug.Log(enemyInfo.subBullet_ID);
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
