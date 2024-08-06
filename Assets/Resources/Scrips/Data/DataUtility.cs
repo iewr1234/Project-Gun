@@ -225,7 +225,8 @@ public static class DataUtility
     /// <returns></returns>
     public static int GetShootNum(int RPM, int fireRate)
     {
-        return (int)(((float)RPM / 200) * (fireRate + 1));
+        var result = (int)(((float)RPM / 200) * (fireRate + 1));
+        return result == 0 ? 1 : result;
     }
 
     public static Vector3 GetAimPosition(Transform charTf, bool isRight)

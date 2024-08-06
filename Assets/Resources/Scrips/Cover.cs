@@ -21,6 +21,7 @@ public enum CoverType
 public enum CoverState
 {
     None,
+    NoCover,
     Half,
     FullLeft,
     FullRight,

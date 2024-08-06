@@ -19,6 +19,7 @@ public enum GameState
 public enum ScheduleState
 {
     None,
+    Wait,
     Check,
     Shoot,
     End,
@@ -55,6 +56,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Collider targetCheck;
 
     private Transform characterTf;
+    private Transform characterUI_Tf;
 
     private Transform linePoolTf;
     private Transform rangePoolTf;
@@ -93,7 +95,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<AttackSchedule> scheduleList;
     [SerializeField] private ScheduleState scheduleState;
     [SerializeField] private CoverState targetState;
-    private bool firstSchedule;
     private float timer;
 
     private readonly float scheduleWaitTime = 0.5f;
@@ -137,6 +138,7 @@ public class GameManager : MonoBehaviour
         targetCheck.gameObject.SetActive(false);
 
         characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+        characterUI_Tf = GameObject.FindGameObjectWithTag("CharacterUIs").transform;
 
         var objectPool = GameObject.FindGameObjectWithTag("ObjectPool").transform;
         linePoolTf = objectPool.transform.Find("LinePool");
@@ -233,7 +235,7 @@ public class GameManager : MonoBehaviour
 
         // Set CharacterUI
         var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
-        charUI.transform.SetParent(characterTf, false);
+        charUI.transform.SetParent(characterUI_Tf, false);
         charUI.SetComponents(charCtr);
         CreateRange();
         uiMgr.SetMagNum(charCtr);
@@ -1338,10 +1340,7 @@ public class GameManager : MonoBehaviour
 
         void Reset(CharacterController charCtr)
         {
-            var newStamina = 30 + (charCtr.action * 10);
-            charCtr.SetAction(charCtr.maxAction);
-            charCtr.SetStamina(newStamina);
-
+            charCtr.SetTurnEnd(false);
             switch (charCtr.state)
             {
                 case CharacterState.Watch:
@@ -1515,6 +1514,7 @@ public class GameManager : MonoBehaviour
         if (enemy.aiData.actionType == UseActionType.Rest || enemy.targetList.Count == 0)
         {
             enemy.AddCommand(CommandType.TakeCover);
+            enemy.SetTurnEnd(true);
         }
         else
         {
@@ -1523,6 +1523,7 @@ public class GameManager : MonoBehaviour
             if (enemy.action < enemy.currentWeapon.weaponData.actionCost)
             {
                 enemy.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
+                enemy.SetTurnEnd(true);
             }
             else
             {
@@ -1595,10 +1596,8 @@ public class GameManager : MonoBehaviour
     {
         if (ownerType == CharacterOwner.Player) return;
 
-        var survieEnemys = enemyList.FindAll(x => x.state != CharacterState.Dead);
-        var endEnemys = survieEnemys.FindAll(x => x.commandList.Count == 0
-                                          || (x.commandList.Count > 0 && x.commandList.Find(x => x.type == CommandType.Reload) == null));
-        if (endEnemys.Count != survieEnemys.Count) return;
+        var endEnemys = enemyList.FindAll(x => x.TurnEnd == true || x.state == CharacterState.Dead);
+        if (endEnemys.Count != enemyList.Count) return;
 
         if (scheduleList.Count == 0)
         {
@@ -1607,9 +1606,8 @@ public class GameManager : MonoBehaviour
         else
         {
             scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
-            targetState = CoverState.None;
             scheduleState = ScheduleState.Check;
-            firstSchedule = true;
+            targetState = CoverState.None;
         }
     }
 
@@ -1622,6 +1620,9 @@ public class GameManager : MonoBehaviour
         {
             case ScheduleState.Check:
                 Check();
+                break;
+            case ScheduleState.Wait:
+                Wait();
                 break;
             case ScheduleState.Shoot:
                 Shoot();
@@ -1636,31 +1637,35 @@ public class GameManager : MonoBehaviour
         void Check()
         {
             var schedule = scheduleList[0];
-            var targetInfo = schedule.targetInfo;
-            if (targetInfo.shooter.commandList.Count > 0) return;
-
-            Debug.Log($"{targetInfo.shooter.name}: {targetState} / {schedule.type}");
             if (targetState != schedule.type)
             {
-                if (targetState != CoverState.None)
+                var targetInfo = schedule.targetInfo;
+                if (targetState != CoverState.None && targetState != CoverState.NoCover)
                 {
                     targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
                 }
                 targetInfo.shooter.SetTargeting(targetInfo, CharacterOwner.Player);
+                scheduleState = ScheduleState.Wait;
+                targetState = schedule.type;
             }
-            targetState = schedule.type;
-            scheduleState = ScheduleState.Shoot;
+            else
+            {
+                scheduleState = ScheduleState.Shoot;
+            }
+        }
+
+        void Wait()
+        {
+            var targetInfo = scheduleList[0].targetInfo;
+            if (targetInfo.target.commandList.Count == 0)
+            {
+                scheduleState = ScheduleState.Shoot;
+            }
         }
 
         void Shoot()
         {
             var targetInfo = scheduleList[0].targetInfo;
-            var canShoot = targetInfo.shooter.commandList.Count == 0 && targetInfo.target.commandList.Count == 0
-                        && targetInfo.shooter.animator.GetCurrentAnimatorStateInfo(targetInfo.shooter.upperIndex).IsTag("Aim")
-                        && (targetInfo.target.animator.GetCurrentAnimatorStateInfo(targetInfo.target.baseIndex).IsTag("Idle")
-                        || targetInfo.target.animator.GetCurrentAnimatorStateInfo(targetInfo.target.baseIndex).IsTag("Targeting"));
-            if (!canShoot) return;
-
             targetInfo.shooter.AddCommand(CommandType.Shoot, targetInfo);
             if (targetInfo.shooterCover != null)
             {
@@ -1690,56 +1695,6 @@ public class GameManager : MonoBehaviour
                 timer = 0f;
             }
         }
-
-        //if (scheduleState == ScheduleState.None) return;
-        //if (attackSchedule.Count == 0) return;
-
-        //var schedule = attackSchedule[0];
-        //switch (scheduleState)
-        //{
-        //    case ScheduleState.Aim:
-        //        Aim();
-        //        break;
-        //    case ScheduleState.Shoot:
-        //        Shoot();
-        //        break;
-        //    case ScheduleState.End:
-        //        End();
-        //        break;
-        //    default:
-        //        break;
-        //}
-
-        //void Aim()
-        //{
-        //    schedule.shooter.SetTargeting(schedule, CharacterOwner.All);
-        //    scheduleState = ScheduleState.Shoot;
-        //}
-
-        //void Shoot()
-        //{
-        //    var canShot = schedule.target.commandList.Count == 0
-        //               && schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Targeting");
-        //    if (!canShot) return;
-
-        //    schedule.shooter.AddCommand(CommandType.Shoot, schedule);
-        //    if (schedule.shooterCover != null)
-        //    {
-        //        schedule.shooter.AddCommand(CommandType.BackCover);
-        //    }
-        //    scheduleState = ScheduleState.End;
-        //}
-
-        //void End()
-        //{
-        //    var endAction = schedule.shooter.commandList.Count == 0
-        //               && (schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Idle")
-        //               || schedule.target.animator.GetCurrentAnimatorStateInfo(schedule.target.baseIndex).IsTag("Cover"));
-        //    if (!endAction) return;
-
-        //    attackSchedule.RemoveAt(0);
-        //    scheduleState = attackSchedule.Count > 0 ? ScheduleState.Aim : ScheduleState.None;
-        //}
     }
 
     private CoverState GetScheduleType(TargetInfo targetInfo)
@@ -1753,12 +1708,12 @@ public class GameManager : MonoBehaviour
                 case CoverType.Full:
                     return targetInfo.targetRight ? CoverState.FullRight : CoverState.FullLeft;
                 default:
-                    return CoverState.None;
+                    return CoverState.NoCover;
             }
         }
         else
         {
-            return CoverState.None;
+            return CoverState.NoCover;
         }
     }
     #endregion

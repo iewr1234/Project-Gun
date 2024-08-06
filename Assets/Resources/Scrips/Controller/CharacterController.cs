@@ -125,6 +125,7 @@ public class CharacterController : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
     [Tooltip("캐릭터 상태")] public CharacterState state;
+    [SerializeField] private bool turnEnd;
 
     [Header("[Status]")]
     [Tooltip("힘")] public int strength;
@@ -779,7 +780,6 @@ public class CharacterController : MonoBehaviour
                     case CoverType.Half:
                         animator.SetBool("fullCover", false);
                         commandList.Remove(command);
-                        gameMgr.SetPositionOfAI(ownerType);
                         break;
                     case CoverType.Full:
                         animator.SetBool("fullCover", true);
@@ -822,7 +822,6 @@ public class CharacterController : MonoBehaviour
                         animator.SetBool("isCover", true);
                         animator.SetBool("fullCover", false);
                         commandList.Remove(command);
-                        gameMgr.SetPositionOfAI(ownerType);
                         break;
                     case CoverType.Full:
                         FindDirectionForCover(cover);
@@ -834,7 +833,6 @@ public class CharacterController : MonoBehaviour
             else
             {
                 commandList.Remove(command);
-                gameMgr.SetPositionOfAI(ownerType);
             }
         }
         else
@@ -1222,7 +1220,7 @@ public class CharacterController : MonoBehaviour
                         coverPos = watchInfo.watchNode.transform.position;
                         aimTf = watchInfo.targetNode.transform;
                         aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-                        aimPoint.transform.position = aimTf.position + aimInterval;
+                        aimPoint.position = aimTf.position + aimInterval;
                         break;
                     default:
                         break;
@@ -1242,7 +1240,11 @@ public class CharacterController : MonoBehaviour
                     coverPos = currentNode.transform.position + (transform.forward * coverInterval);
                     commandList.Remove(command);
                     covering = false;
-                    gameMgr.SetPositionOfAI(ownerType);
+
+                    if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy)
+                    {
+                        SetTurnEnd(true);
+                    }
                 }
             }
         }
@@ -1269,7 +1271,11 @@ public class CharacterController : MonoBehaviour
             chestAim = true;
             chestRig.weight = 1f;
             commandList.Remove(command);
-            gameMgr.SetPositionOfAI(ownerType);
+
+            if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy)
+            {
+                SetTurnEnd(true);
+            }
         }
     }
 
@@ -1279,7 +1285,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
-        aimTf = targetInfo.target.transform;
+        aimTf = targetInfo.targetNode.transform;
         if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
@@ -1527,6 +1533,25 @@ public class CharacterController : MonoBehaviour
     {
         SetAction(-useAction);
         SetStamina(-useAction * 5);
+    }
+
+    public void SetTurnEnd(bool turnEnd)
+    {
+        this.turnEnd = turnEnd;
+        switch (turnEnd)
+        {
+            case true:
+                if (ownerType == CharacterOwner.Enemy)
+                {
+                    gameMgr.SetPositionOfAI(ownerType);
+                }
+                break;
+            case false:
+                var newStamina = 30 + (action * 10);
+                SetAction(maxAction);
+                SetStamina(newStamina);
+                break;
+        }
     }
 
     /// <summary>
@@ -2710,7 +2735,6 @@ public class CharacterController : MonoBehaviour
 
         commandList.RemoveAt(0);
         reloading = false;
-        gameMgr.SetPositionOfAI(ownerType);
     }
 
     public void Event_WeaponChange()
@@ -2752,5 +2776,11 @@ public class CharacterController : MonoBehaviour
     {
         private set { gameMgr = value; }
         get { return gameMgr; }
+    }
+
+    public bool TurnEnd
+    {
+        private set { turnEnd = value; }
+        get { return turnEnd; }
     }
 }
