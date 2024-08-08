@@ -19,6 +19,7 @@ public enum CharacterState
     None,
     Watch,
     Dead,
+    Base,
 }
 
 public enum CommandType
@@ -2638,6 +2639,12 @@ public class CharacterController : MonoBehaviour
     public Weapon GetWeapon(string weaponName)
     {
         return weaponPool.Find(x => x.name == weaponName);
+    }
+
+    public void EnterTheBase()
+    {
+        charUI.gameObject.SetActive(false);
+        state = CharacterState.Base;
     }
 
     #region Coroutine

@@ -658,6 +658,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
+  baseMgr: {fileID: 0}
   outlines: []
   unableMove: {fileID: 0}
   charCtr: {fileID: 0}
@@ -665,6 +666,8 @@ MonoBehaviour:
   canMove: 0
   canShoot: 1
   moveCost: 0
+  enemyType: -1
+  baseType: -1
   hitNode: 0
   watcher: {fileID: 0}
   nodePos: {x: 0, y: 0}

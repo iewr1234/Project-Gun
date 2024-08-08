@@ -12,6 +12,7 @@ public class InventoryManager : MonoBehaviour
 
     [HideInInspector] public DataManager dataMgr;
     [HideInInspector] public GameManager gameMgr;
+    [HideInInspector] public BaseManager baseMgr;
 
     //[HideInInspector] public PopUp_Inventory popUp;
     [HideInInspector] public List<PopUp_Inventory> activePopUp;

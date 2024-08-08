@@ -65,6 +65,9 @@ public class MapItem : MonoBehaviour
             case "SideObject":
                 type = MapEditorType.SideObject;
                 break;
+            case "BaseObject":
+                type = MapEditorType.BaseObject;
+                break;
             default:
                 break;
         }

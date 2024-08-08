@@ -1,12 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
-using System.Linq;
 
 [System.Serializable]
 public struct ObjectData
@@ -37,8 +35,9 @@ public class NodeData
 
     [Header("[Marker]")]
     public bool isMarker;
-    public CharacterOwner markerType;
-    public EnemyMarkerType enemyType;
+    public MarkerType markerType;
+    public EnemyMarker enemyType;
+    public BaseCampMarker baseType;
 
     [Header("[Object]")]
     public bool isObject;
@@ -182,20 +181,18 @@ public class DataManager : MonoBehaviour
             nodeData.isMarker = node.Marker.activeSelf;
             if (nodeData.isMarker)
             {
-                nodeData.markerType = node.MarkerOutline.color == DataUtility.color_Player ? CharacterOwner.Player : CharacterOwner.Enemy;
-                if (nodeData.markerType == CharacterOwner.Enemy)
+                nodeData.markerType = node.markerType;
+                switch (nodeData.markerType)
                 {
-                    nodeData.enemyType = node.enemyType;
+                    case MarkerType.Enemy:
+                        nodeData.enemyType = node.enemyType;
+                        break;
+                    case MarkerType.Base:
+                        nodeData.baseType = node.baseType;
+                        break;
+                    default:
+                        break;
                 }
-                //var indexText = node.MarkerText.text;
-                //var match = Regex.Match(indexText, @"\d+");
-                //if (match.Success)
-                //{
-                //    if (int.TryParse(match.Value, out int index))
-                //    {
-                //        nodeData.markerIndex = index;
-                //    }
-                //}
             }
 
             // Object Data

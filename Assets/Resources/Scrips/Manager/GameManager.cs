@@ -13,6 +13,7 @@ public enum GameState
     Watch,
     Inventory,
     Result,
+    Base,
 }
 
 public enum ScheduleState
@@ -186,6 +187,10 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false));
                 dataMgr.gameData.mapLoad = false;
                 mapEdt.SetActive(false);
+                if (loadName == "BASECAMP")
+                {
+                    gameState = GameState.Base;
+                }
             }
         }
         else
@@ -408,8 +413,8 @@ public class GameManager : MonoBehaviour
             default:
                 break;
         }
-        CreatePlayer();
-        CreateEnemy();
+        //CreatePlayer();
+        //CreateEnemy();
     }
 
     /// <summary>
@@ -447,7 +452,7 @@ public class GameManager : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.Escape) && passList.Count > 0)
                 {
                     ClearPassPoint();
-                    ShowMovableNodes(selectChar);
+                    FindMovableNodes(selectChar, true);
                     ResultNodePass(selectChar, targetNode);
                     DrawMoveLine();
                 }
@@ -560,7 +565,7 @@ public class GameManager : MonoBehaviour
                 {
                     uiMgr.SetActiveMagazineIcon(false);
                     uiMgr.reloadButton.SetActiveButton(false);
-                    ShowMovableNodes(selectChar);
+                    FindMovableNodes(selectChar, true);
                     rigMags.Clear();
                     gameState = GameState.Move;
                 }
@@ -726,7 +731,7 @@ public class GameManager : MonoBehaviour
                                 selectChar.watchInfo.drawRang.gameObject.SetActive(false);
                                 selectChar.state = CharacterState.None;
                             }
-                            ShowMovableNodes(selectChar);
+                            FindMovableNodes(selectChar, true);
                             gameState = GameState.Move;
                         }
                         break;
@@ -755,11 +760,13 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if (Input.GetMouseButtonDown(1) && selectChar != null)
+        else if (Input.GetMouseButtonDown(1))
         {
             switch (gameState)
             {
                 case GameState.Move:
+                    if (selectChar == null) return;
+
                     if (addPass)
                     {
                         if (passList.Count > 0 && passList[0].passNodes[0] == targetNode) return;
@@ -780,9 +787,41 @@ public class GameManager : MonoBehaviour
                         ShowMovableNodes(selectChar, passList[0].passNodes[0]);
                     }
                     break;
-                case GameState.Shoot:
-                    break;
-                case GameState.Watch:
+                case GameState.Base:
+                    if (playerList.Count == 0) return;
+
+                    var player = playerList[0];
+                    if (player.commandList.Count > 0) return;
+
+                    var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+                    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+                    {
+                        var node = hit.collider.GetComponentInParent<FieldNode>();
+                        if (node.markerType == MarkerType.Base)
+                        {
+                            // BaseNode Process
+                            FieldNode enterNode = null;
+                            switch (node.baseType)
+                            {
+                                case BaseCampMarker.Mission_Node:
+                                    enterNode = node.onAxisNodes.Find(x => x.baseType == BaseCampMarker.Mission_Enter);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            FindMovableNodes(player);
+                            ResultNodePass(player, enterNode);
+                            CharacterMove(player, enterNode);
+                        }
+                        else
+                        {
+                            if (!node.canMove) return;
+
+                            FindMovableNodes(player);
+                            ResultNodePass(player, node);
+                            CharacterMove(player, node);
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -879,7 +918,7 @@ public class GameManager : MonoBehaviour
     /// 이동가능 노드 표시
     /// </summary>
     /// <param name="charCtr"></param>
-    private void ShowMovableNodes(CharacterController charCtr)
+    private void FindMovableNodes(CharacterController charCtr, bool showNode)
     {
         SwitchMovableNodes(false);
         Queue<FieldNode> queue = new Queue<FieldNode>();
@@ -928,9 +967,35 @@ public class GameManager : MonoBehaviour
             moveRange++;
         }
 
-        if (charCtr.ownerType == CharacterOwner.Player)
+        SwitchMovableNodes(showNode);
+    }
+
+    private void FindMovableNodes(CharacterController charCtr)
+    {
+        SwitchMovableNodes(false);
+        Queue<FieldNode> queue = new Queue<FieldNode>();
+        HashSet<FieldNode> visited = new HashSet<FieldNode>();
+
+        queue.Enqueue(charCtr.currentNode);
+        visited.Add(charCtr.currentNode);
+
+        while (queue.Count > 0)
         {
-            SwitchMovableNodes(true);
+            int nodesInCurrentRange = queue.Count;
+            for (int i = 0; i < nodesInCurrentRange; i++)
+            {
+                FieldNode node = queue.Dequeue();
+                movableNodes.Add(node); // 이동 가능 노드로 추가
+
+                foreach (FieldNode onAxisNode in node.onAxisNodes)
+                {
+                    if (onAxisNode != null && onAxisNode.canMove && !visited.Contains(onAxisNode))
+                    {
+                        queue.Enqueue(onAxisNode);
+                        visited.Add(onAxisNode);
+                    }
+                }
+            }
         }
     }
 
@@ -1396,7 +1461,7 @@ public class GameManager : MonoBehaviour
     #region AI
     public void EnemyAI_Move(CharacterController enemy)
     {
-        ShowMovableNodes(enemy);
+        FindMovableNodes(enemy, false);
         for (int i = 0; i < movableNodes.Count; i++)
         {
             var node = movableNodes[i];

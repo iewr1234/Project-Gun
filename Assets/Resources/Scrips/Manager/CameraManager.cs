@@ -17,6 +17,7 @@ public class CameraManager : MonoBehaviour
 {
     [Header("---Access Script---")]
     private GameManager gameMgr;
+    private BaseManager baseMgr;
 
     [Header("---Access Component---")]
     public Camera mainCam;
@@ -61,15 +62,36 @@ public class CameraManager : MonoBehaviour
         actionCam = false;
     }
 
+    public void SetComponents(BaseManager _baseMgr)
+    {
+        baseMgr = _baseMgr;
+
+        pivotPoint = transform.Find("PivotPoint");
+        mainCam = Camera.main;
+        subCam = mainCam.transform.Find("SubCamera").GetComponent<Camera>();
+        camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
+        mainCam.transform.localPosition = camDirection * camDistance;
+        mainCam.transform.LookAt(pivotPoint);
+
+        cambrain = mainCam.GetComponent<CinemachineBrain>();
+        virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
+
+        actionCam = false;
+    }
+
     private void Update()
     {
-        var canOperation = !actionCam && gameMgr.fieldNodes.Count > 0;
-        if (!canOperation) return;
+        if (gameMgr != null)
+        {
+            var canOperation = !actionCam && gameMgr.fieldNodes.Count > 0;
+            if (!canOperation) return;
 
-        var canMoveCam = gameMgr.gameState == GameState.None
-                      || gameMgr.gameState == GameState.Move
-                      || gameMgr.gameState == GameState.Watch;
-        if (!canMoveCam) return;
+            var canMoveCam = gameMgr.gameState == GameState.None
+                          || gameMgr.gameState == GameState.Move
+                          || gameMgr.gameState == GameState.Watch
+                          || gameMgr.gameState == GameState.Base;
+            if (!canMoveCam) return;
+        }
 
         CameraMove();
         CameraRotate();

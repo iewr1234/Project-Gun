@@ -20,6 +20,7 @@ public class FieldNode : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
+    [SerializeField] private BaseManager baseMgr;
 
     [Header("---Access Component---")]
     private MeshRenderer mesh;
@@ -29,8 +30,8 @@ public class FieldNode : MonoBehaviour
     [HideInInspector] public MeshRenderer unableMove;
 
     private GameObject marker;
-    private Image markerOutline;
     private Image markerImage;
+    private Image markerOutline;
 
     private TextMeshProUGUI posText;
 
@@ -44,7 +45,9 @@ public class FieldNode : MonoBehaviour
     public int moveCost;
     [Space(5f)]
 
-    public EnemyMarkerType enemyType;
+    public MarkerType markerType;
+    public EnemyMarker enemyType = EnemyMarker.None;
+    public BaseCampMarker baseType = BaseCampMarker.None;
     [HideInInspector] public bool hitNode;
     [HideInInspector] public CharacterController watcher;
     [Space(5f)]
@@ -68,6 +71,30 @@ public class FieldNode : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, Vector2Int _nodePos)
     {
         gameMgr = _gameMgr;
+        nodePos = _nodePos;
+
+        transform.name = $"X{nodePos.x}/Y{nodePos.y}";
+        mesh = transform.Find("Mesh").GetComponent<MeshRenderer>();
+        mesh.enabled = false;
+
+        canvas = GetComponentInChildren<Canvas>();
+        canvas.worldCamera = Camera.main;
+        frame = transform.Find("Frame").gameObject;
+        outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
+        unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
+
+        marker = transform.Find("Canvas/Marker").gameObject;
+        markerImage = marker.transform.Find("Image").GetComponent<Image>();
+        markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
+        marker.SetActive(false);
+
+        posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
+        posText.text = $"X{nodePos.x} / Y{nodePos.y}";
+    }
+
+    public void SetComponents(BaseManager _baseMgr, Vector2Int _nodePos)
+    {
+        baseMgr = _baseMgr;
         nodePos = _nodePos;
 
         transform.name = $"X{nodePos.x}/Y{nodePos.y}";
@@ -375,7 +402,7 @@ public class FieldNode : MonoBehaviour
 
         if (findType == FindNodeType.SetUnableMove)
         {
-            unableMove.enabled = true;
+            unableMove.enabled = allLoad;
             canMove = false;
             ReleaseAdjacentNodes();
         }
@@ -395,7 +422,7 @@ public class FieldNode : MonoBehaviour
 
         if (findType == FindNodeType.SetUnableMove)
         {
-            outline.unableMove.enabled = true;
+            outline.unableMove.enabled = allLoad;
             var nextNode = onAxisNodes[(int)setDirection];
             ReleaseAdjacentNodes(nextNode);
             allAxisNodes.Remove(nextNode);
@@ -452,42 +479,79 @@ public class FieldNode : MonoBehaviour
 
     public void SetOnMarker(bool isActive)
     {
-        markerOutline.color = DataUtility.color_PlayerMarker;
-        markerImage.color = DataUtility.color_PlayerMarker;
+        markerType = MarkerType.Player;
         markerImage.sprite = Resources.Load<Sprite>("Sprites/player_marker");
+        markerImage.color = DataUtility.color_PlayerMarker;
+        markerOutline.color = DataUtility.color_PlayerMarker;
         marker.SetActive(isActive);
     }
 
-    public void SetOnMarker(bool isActive, EnemyMarkerType _enemyType)
+    public void SetOnMarker(bool isActive, EnemyMarker _enemyType)
     {
-        markerOutline.color = DataUtility.color_EnemyMarker;
-        markerImage.color = DataUtility.color_EnemyMarker;
+        markerType = MarkerType.Enemy;
         enemyType = _enemyType;
         switch (enemyType)
         {
-            case EnemyMarkerType.ShortRange:
+            case EnemyMarker.ShortRange:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_S");
                 break;
-            case EnemyMarkerType.MiddleRange:
+            case EnemyMarker.MiddleRange:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_M");
                 break;
-            case EnemyMarkerType.LongRange:
+            case EnemyMarker.LongRange:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_L");
                 break;
-            case EnemyMarkerType.Elite:
+            case EnemyMarker.Elite:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_Elite");
                 break;
-            case EnemyMarkerType.Boss:
+            case EnemyMarker.Boss:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/enemy_Boss");
                 break;
             default:
                 break;
         }
+        markerImage.color = DataUtility.color_EnemyMarker;
+        markerOutline.color = DataUtility.color_EnemyMarker;
+        marker.SetActive(isActive);
+    }
+
+    public void SetOnMarker(bool isActive, BaseCampMarker _baseType)
+    {
+        markerType = MarkerType.Base;
+        baseType = _baseType;
+        switch (baseType)
+        {
+            case BaseCampMarker.Mission_Node:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/Icon_Event");
+                canMove = false;
+                ReleaseAdjacentNodes();
+                break;
+            case BaseCampMarker.Mission_Enter:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/Icon_Cross");
+                break;
+            default:
+                break;
+        }
+        markerImage.color = DataUtility.color_baseMarker;
+        markerOutline.color = DataUtility.color_baseMarker;
         marker.SetActive(isActive);
     }
 
     public void SetOffMarker()
     {
+        enemyType = EnemyMarker.None;
+        if (baseType == BaseCampMarker.Mission_Node)
+        {
+            canMove = true;
+            for (int i = 0; i < onAxisNodes.Count; i++)
+            {
+                var onAxisNode = onAxisNodes[i];
+                if (onAxisNode == null) continue;
+
+                onAxisNode.AddAdjacentNodes();
+            }
+        }
+        baseType = BaseCampMarker.None;
         marker.SetActive(false);
     }
 
@@ -568,11 +632,15 @@ public class FieldNode : MonoBehaviour
         {
             case MapEditorType.FloorObject:
                 return SetObject();
+            case MapEditorType.Hurdle:
+                return SetObject();
             case MapEditorType.HalfCover:
                 return SetObject();
             case MapEditorType.FullCover:
                 return SetObject();
             case MapEditorType.SideObject:
+                return SetObject();
+            case MapEditorType.BaseObject:
                 return SetObject();
             default:
                 return null;

@@ -13,6 +13,7 @@ public enum MapEditorType
     SetArea,
     Player,
     Enemy,
+    BaseCamp,
     Floor,
     FloorObject,
     Hurdle,
@@ -20,6 +21,7 @@ public enum MapEditorType
     HalfCover,
     FullCover,
     SideObject,
+    BaseObject,
 }
 
 public enum FindNodeType
@@ -32,15 +34,32 @@ public enum FindNodeType
     DeleteMarker,
     SetFloor,
     SetObject,
+    SetBaseObject,
 }
 
-public enum EnemyMarkerType
+public enum MarkerType
 {
+    None,
+    Player,
+    Enemy,
+    Base,
+}
+
+public enum EnemyMarker
+{
+    None = -1,
     ShortRange,
     MiddleRange,
     LongRange,
     Elite,
     Boss,
+}
+
+public enum BaseCampMarker
+{
+    None = -1,
+    Mission_Node,
+    Mission_Enter,
 }
 
 public class MapEditor : MonoBehaviour
@@ -54,6 +73,7 @@ public class MapEditor : MonoBehaviour
 
     [Header("---Access Script---")]
     private GameManager gameMgr;
+    private BaseManager baseMgr;
 
     [Header("---Access Component---")]
     private Transform components;
@@ -86,8 +106,14 @@ public class MapEditor : MonoBehaviour
     [Header("[Enemy]")]
     [SerializeField] private GameObject enemyUI;
     [SerializeField] private List<FieldNode> eMarkerNodes = new List<FieldNode>();
-    [SerializeField] private TMP_Dropdown markerDropdown;
-    public EnemyMarkerType enemyType;
+    [SerializeField] private TMP_Dropdown enemyDropdown;
+    public EnemyMarker enemyType = EnemyMarker.ShortRange;
+
+    [Header("[BaseCamp]")]
+    [SerializeField] private GameObject baseUI;
+    [SerializeField] private TMP_Dropdown baseDropdown;
+    [SerializeField] private List<FieldNode> eventMarkerNodes = new List<FieldNode>();
+    public BaseCampMarker baseType = BaseCampMarker.Mission_Node;
     #endregion
 
     #region Side
@@ -97,7 +123,7 @@ public class MapEditor : MonoBehaviour
     private TextMeshProUGUI allFloorText;
     private TextMeshProUGUI floorRandomText;
     private TextMeshProUGUI gridSwitchText;
-    public bool onSideButton;
+    [HideInInspector] public bool onSideButton;
 
     [Header("[Floor]")]
     private GameObject floorUI;
@@ -118,6 +144,9 @@ public class MapEditor : MonoBehaviour
 
     [Header("[SideObject]")]
     private GameObject sideObjectUI;
+
+    [Header("[BaseObject]")]
+    private GameObject baseObjectUI;
     #endregion
 
     [Header("--- Assignment Variable---")]
@@ -169,7 +198,85 @@ public class MapEditor : MonoBehaviour
         playerUI.SetActive(false);
 
         enemyUI = components.Find("Top/UI/Enemy").gameObject;
-        markerDropdown = enemyUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
+        enemyDropdown = enemyUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
+        enemyUI.SetActive(false);
+
+        baseUI = components.Find("Top/UI/BaseCamp").gameObject;
+        baseDropdown = baseUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
+        baseUI.SetActive(false);
+
+        sideButtons = components.Find("Side/Buttons").gameObject;
+        sideUI = components.Find("Side/UI").gameObject;
+        setDirText = sideUI.transform.Find("SetDirection/Text").GetComponent<TextMeshProUGUI>();
+        allFloorText = sideUI.transform.Find("SubButtons/AllFloor/Text").GetComponent<TextMeshProUGUI>();
+        floorRandomText = sideUI.transform.Find("SubButtons/FloorRandom/Text").GetComponent<TextMeshProUGUI>();
+        gridSwitchText = sideUI.transform.Find("SubButtons/GridSwitch/Text").GetComponent<TextMeshProUGUI>();
+
+        sidePos_On = sideUI.transform.localPosition;
+        var width = sideUI.GetComponent<RectTransform>().rect.width;
+        sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
+        sideButtons.transform.localPosition = sidePos_Off;
+        sideUI.transform.localPosition = sidePos_Off;
+
+        floorUI = components.Find("Side/UI/Floor").gameObject;
+        floorObjectUI = components.Find("Side/UI/FloorObject").gameObject;
+        hurdleUI = components.Find("Side/UI/Hurdle").gameObject;
+        halfCoverUI = components.Find("Side/UI/HalfCover").gameObject;
+        fullCoverUI = components.Find("Side/UI/FullCover").gameObject;
+        sideObjectUI = components.Find("Side/UI/SideObject").gameObject;
+        baseObjectUI = components.Find("Side/UI/BaseObject").gameObject;
+        SetActiveAllSideUI(true);
+        mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
+        for (int i = 0; i < mapItems.Count; i++)
+        {
+            var mapItem = mapItems[i];
+            mapItem.SetComponents(this);
+        }
+        SetActiveAllSideUI(false);
+
+        void SetActiveAllSideUI(bool value)
+        {
+            floorUI.SetActive(value);
+            floorObjectUI.SetActive(value);
+            hurdleUI.SetActive(value);
+            halfCoverUI.SetActive(value);
+            fullCoverUI.SetActive(value);
+            sideObjectUI.SetActive(value);
+            baseObjectUI.SetActive(value);
+        }
+    }
+
+    public void SetComponents(BaseManager _baseMgr)
+    {
+        baseMgr = _baseMgr;
+
+        fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
+        nodeOutlineTf = GameObject.FindGameObjectWithTag("NodeOutlines").transform;
+        characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
+
+        components = transform.Find("Components");
+        dataUI = components.Find("Top/UI/Data").gameObject;
+        saveInput = components.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
+        loadDropdown = components.Find("Top/UI/Data/Dropdown_Load").GetComponent<TMP_Dropdown>();
+        dataUI.SetActive(false);
+
+        createNodeUI = components.Find("Top/UI/CreateNode").gameObject;
+        xSizeInput = createNodeUI.transform.Find("InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
+        ySizeInput = createNodeUI.transform.Find("InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
+        createNodeUI.SetActive(false);
+
+        setAreaUI = components.Find("Top/UI/SetArea").gameObject;
+        coverFormText = setAreaUI.transform.Find("CoverForm/Text").GetComponent<TextMeshProUGUI>();
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetUnableMove/Outline").GetComponent<Image>());
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetHalfCover/Outline").GetComponent<Image>());
+        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetFullCover/Outline").GetComponent<Image>());
+        setAreaUI.SetActive(false);
+
+        playerUI = components.Find("Top/UI/Player").gameObject;
+        playerUI.SetActive(false);
+
+        enemyUI = components.Find("Top/UI/Enemy").gameObject;
+        enemyDropdown = enemyUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         enemyUI.SetActive(false);
 
         sideButtons = components.Find("Side/Buttons").gameObject;
@@ -191,6 +298,7 @@ public class MapEditor : MonoBehaviour
         halfCoverUI = components.Find("Side/UI/HalfCover").gameObject;
         fullCoverUI = components.Find("Side/UI/FullCover").gameObject;
         sideObjectUI = components.Find("Side/UI/SideObject").gameObject;
+        baseObjectUI = components.Find("Side/UI/BaseObject").gameObject;
         SetActiveAllSideUI(true);
         mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
         for (int i = 0; i < mapItems.Count; i++)
@@ -208,6 +316,7 @@ public class MapEditor : MonoBehaviour
             halfCoverUI.SetActive(value);
             fullCoverUI.SetActive(value);
             sideObjectUI.SetActive(value);
+            baseObjectUI.SetActive(value);
         }
     }
 
@@ -291,6 +400,9 @@ public class MapEditor : MonoBehaviour
                 case MapEditorType.Enemy:
                     SetMarker();
                     break;
+                case MapEditorType.BaseCamp:
+                    SetMarker();
+                    break;
                 case MapEditorType.FloorObject:
                     SetObject(true);
                     break;
@@ -304,6 +416,9 @@ public class MapEditor : MonoBehaviour
                     SetObject(true);
                     break;
                 case MapEditorType.SideObject:
+                    SetObject(true);
+                    break;
+                case MapEditorType.BaseObject:
                     SetObject(true);
                     break;
                 default:
@@ -347,6 +462,9 @@ public class MapEditor : MonoBehaviour
                     SetObject(false);
                     break;
                 case MapEditorType.SideObject:
+                    SetObject(false);
+                    break;
+                case MapEditorType.BaseObject:
                     SetObject(false);
                     break;
                 default:
@@ -419,29 +537,43 @@ public class MapEditor : MonoBehaviour
         void SetMarker()
         {
             selectNode.SetNodeOutline(false);
-            var charType = editType == MapEditorType.Player ? CharacterOwner.Player : CharacterOwner.Enemy;
-            var markerNodes = editType == MapEditorType.Player ? pMarkerNodes : eMarkerNodes;
             switch (findType)
             {
                 case FindNodeType.CreateMarker:
-                    if (charType == CharacterOwner.Enemy)
+                    switch (editType)
                     {
-                        selectNode.SetOnMarker(true, enemyType);
+                        case MapEditorType.Player:
+                            selectNode.SetOnMarker(true);
+                            pMarkerNodes.Add(selectNode);
+                            break;
+                        case MapEditorType.Enemy:
+                            selectNode.SetOnMarker(true, enemyType);
+                            eMarkerNodes.Add(selectNode);
+                            break;
+                        case MapEditorType.BaseCamp:
+                            selectNode.SetOnMarker(true, baseType);
+                            eventMarkerNodes.Add(selectNode);
+                            break;
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        selectNode.SetOnMarker(true);
-                    }
-                    markerNodes.Add(selectNode);
                     break;
                 case FindNodeType.DeleteMarker:
                     selectNode.SetOffMarker();
-                    markerNodes.Remove(selectNode);
-                    //for (int i = 0; i < markerNodes.Count; i++)
-                    //{
-                    //    var markerNode = markerNodes[i];
-                    //    markerNode.SetOnMarker(charType);
-                    //}
+                    switch (editType)
+                    {
+                        case MapEditorType.Player:
+                            pMarkerNodes.Remove(selectNode);
+                            break;
+                        case MapEditorType.Enemy:
+                            eMarkerNodes.Remove(selectNode);
+                            break;
+                        case MapEditorType.BaseCamp:
+                            eventMarkerNodes.Remove(selectNode);
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 default:
                     break;
@@ -542,6 +674,9 @@ public class MapEditor : MonoBehaviour
                 case FindNodeType.SetObject:
                     HighlightNode(node);
                     break;
+                case FindNodeType.SetBaseObject:
+                    HighlightNode(node);
+                    break;
                 default:
                     break;
             }
@@ -555,25 +690,21 @@ public class MapEditor : MonoBehaviour
 
         void CreateMarker(FieldNode node)
         {
-            if (node.canMove)
+            switch (editType)
             {
-                switch (editType)
-                {
-                    case MapEditorType.Player:
-                        node.SetNodeOutline(true);
-                        break;
-                    case MapEditorType.Enemy:
-                        node.SetNodeOutline(true);
-                        break;
-                    default:
-                        break;
-                }
-                selectNode = node;
+                case MapEditorType.Player:
+                    node.SetNodeOutline(true);
+                    break;
+                case MapEditorType.Enemy:
+                    node.SetNodeOutline(true);
+                    break;
+                case MapEditorType.BaseCamp:
+                    node.SetNodeOutline(true);
+                    break;
+                default:
+                    break;
             }
-            else
-            {
-                selectNode = null;
-            }
+            selectNode = node;
         }
 
         void DeleteMarker(FieldNode node)
@@ -634,6 +765,24 @@ public class MapEditor : MonoBehaviour
                     selectNode = node;
                     break;
                 case FindNodeType.SetObject:
+                    if (node.Mesh.enabled)
+                    {
+                        if (selectItem == null)
+                        {
+                            node.SetNodeOutline(setDirection);
+                        }
+                        else if (selectItem.size.x == 1 && selectItem.size.y == 1)
+                        {
+                            node.SetNodeOutline(setDirection);
+                        }
+                        else
+                        {
+                            HighlightNodes(node);
+                        }
+                        selectNode = node;
+                    }
+                    break;
+                case FindNodeType.SetBaseObject:
                     if (node.Mesh.enabled)
                     {
                         if (selectItem == null)
@@ -745,6 +894,29 @@ public class MapEditor : MonoBehaviour
     {
         Debug.Log("시작");
 
+        yield return ClearFieldNodes();
+
+        yield return CreateFieldNodes(xSize, ySize);
+
+        Debug.Log("완료");
+    }
+
+    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad)
+    {
+        Debug.Log("Map load start");
+
+        yield return ClearFieldNodes();
+
+        yield return CreateFieldNodes(mapData.mapSize.x, mapData.mapSize.y);
+
+        yield return ReadMapData(mapData, allLoad);
+
+        Debug.Log("Map load complete");
+        gameMgr.sceneHlr.EndLoadScene();
+    }
+
+    private IEnumerator ClearFieldNodes()
+    {
         if (gameMgr.fieldNodes.Count > 0)
         {
             for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
@@ -770,7 +942,10 @@ public class MapEditor : MonoBehaviour
         pMarkerNodes.Clear();
         eMarkerNodes.Clear();
         gameMgr.fieldNodes.Clear();
+    }
 
+    private IEnumerator CreateFieldNodes(float xSize, float ySize)
+    {
         mapSize = new Vector2(xSize, ySize);
         var size = DataUtility.nodeSize;
         var interval = DataUtility.nodeInterval;
@@ -811,79 +986,10 @@ public class MapEditor : MonoBehaviour
                 yield return null;
             }
         }
-
-        Debug.Log("완료");
     }
 
-    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad)
+    private IEnumerator ReadMapData(MapData mapData, bool allLoad)
     {
-        if (gameMgr.fieldNodes.Count > 0)
-        {
-            for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
-            {
-                var node = gameMgr.fieldNodes[i];
-                for (int j = 0; j < node.outlines.Count; j++)
-                {
-                    var outline = node.outlines[j];
-                    if (outline == null) continue;
-
-                    Destroy(outline.gameObject);
-                }
-                Destroy(node.gameObject);
-
-                if (i % 50 == 0)
-                {
-                    float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-                    Debug.Log($"기존 노드 제거 진행률: {progress}%");
-                    yield return null;
-                }
-            }
-        }
-        pMarkerNodes.Clear();
-        eMarkerNodes.Clear();
-        gameMgr.fieldNodes.Clear();
-
-        mapSize = new Vector2(mapData.mapSize.x, mapData.mapSize.y);
-        var size = DataUtility.nodeSize;
-        var interval = DataUtility.nodeInterval;
-        int totalNodes = (int)(mapSize.x * mapSize.y);
-        int createdNodes = 0;
-        for (int i = 0; i < mapSize.y; i++)
-        {
-            for (int j = 0; j < mapSize.x; j++)
-            {
-                var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
-                fieldNode.transform.SetParent(fieldNodeTf, false);
-                var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
-                fieldNode.transform.position = pos;
-                fieldNode.SetComponents(gameMgr, new Vector2Int(j, i));
-                //fieldNode.NodeColor = Color.gray;
-                gameMgr.fieldNodes.Add(fieldNode);
-                createdNodes++;
-
-                if ((i + j) % 50 == 0)
-                {
-                    float progress = (float)createdNodes / totalNodes * 100;
-                    Debug.Log($"노드 생성 진행률: {progress}%");
-                    yield return null;
-                }
-            }
-        }
-
-        for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
-        {
-            var node = gameMgr.fieldNodes[i];
-            node.AddAdjacentNodes();
-            node.AddNodeOutline(nodeOutlineTf);
-
-            if (i % 50 == 0)
-            {
-                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
-                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
-                yield return null;
-            }
-        }
-
         for (int i = 0; i < mapData.nodeDatas.Length; i++)
         {
             var nodeData = mapData.nodeDatas[i];
@@ -919,15 +1025,22 @@ public class MapEditor : MonoBehaviour
             // MarkerData
             if (nodeData.isMarker)
             {
-                var markerNodes = nodeData.markerType == CharacterOwner.Player ? pMarkerNodes : eMarkerNodes;
-                markerNodes.Add(node);
-                if (nodeData.markerType == CharacterOwner.Enemy)
+                switch (nodeData.markerType)
                 {
-                    node.SetOnMarker(allLoad, nodeData.enemyType);
-                }
-                else
-                {
-                    node.SetOnMarker(allLoad);
+                    case MarkerType.Player:
+                        pMarkerNodes.Add(node);
+                        node.SetOnMarker(allLoad);
+                        break;
+                    case MarkerType.Enemy:
+                        eMarkerNodes.Add(node);
+                        node.SetOnMarker(allLoad, nodeData.enemyType);
+                        break;
+                    case MarkerType.Base:
+                        eventMarkerNodes.Add(node);
+                        node.SetOnMarker(allLoad, nodeData.baseType);
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -948,6 +1061,7 @@ public class MapEditor : MonoBehaviour
         {
             var playerNode = pMarkerNodes[0];
             gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
+            gameMgr.playerList[0].EnterTheBase();
             yield return null;
 
             var stageData = gameMgr.dataMgr.gameData.stageData;
@@ -957,27 +1071,27 @@ public class MapEditor : MonoBehaviour
                 SpawnEnemyInfo enemyInfo;
                 switch (markerNode.enemyType)
                 {
-                    case EnemyMarkerType.ShortRange:
+                    case EnemyMarker.ShortRange:
                         if (stageData.shortRangeEnemys.Count == 0) continue;
 
                         enemyInfo = stageData.shortRangeEnemys[Random.Range(0, stageData.shortRangeEnemys.Count)];
                         break;
-                    case EnemyMarkerType.MiddleRange:
+                    case EnemyMarker.MiddleRange:
                         if (stageData.middleRangeEnemys.Count == 0) continue;
 
                         enemyInfo = stageData.middleRangeEnemys[Random.Range(0, stageData.middleRangeEnemys.Count)];
                         break;
-                    case EnemyMarkerType.LongRange:
+                    case EnemyMarker.LongRange:
                         if (stageData.longRangeEnemys.Count == 0) continue;
 
                         enemyInfo = stageData.longRangeEnemys[Random.Range(0, stageData.longRangeEnemys.Count)];
                         break;
-                    case EnemyMarkerType.Elite:
+                    case EnemyMarker.Elite:
                         if (stageData.eliteEnemys.Count == 0) continue;
 
                         enemyInfo = stageData.eliteEnemys[Random.Range(0, stageData.eliteEnemys.Count)];
                         break;
-                    case EnemyMarkerType.Boss:
+                    case EnemyMarker.Boss:
                         enemyInfo = stageData.bossEnemy;
                         break;
                     default:
@@ -987,9 +1101,6 @@ public class MapEditor : MonoBehaviour
                 yield return null;
             }
         }
-
-        Debug.Log("Map load complete");
-        gameMgr.sceneHlr.EndLoadScene();
 
         GameObject GetObjectUI(MapEditorType type)
         {
@@ -1113,6 +1224,11 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Top, MapEditorType.Enemy, enemyUI);
     }
 
+    public void Button_BaseCamp()
+    {
+        OnInterface(InterfaceType.Top, MapEditorType.BaseCamp, baseUI);
+    }
+
     public void Button_Character_CreateMarker()
     {
         findType = FindNodeType.CreateMarker;
@@ -1130,7 +1246,12 @@ public class MapEditor : MonoBehaviour
 
     public void ValueChanged_EnemyMarkerType()
     {
-        enemyType = (EnemyMarkerType)markerDropdown.value;
+        enemyType = (EnemyMarker)enemyDropdown.value;
+    }
+
+    public void ValueChanged_BaseCampMarkerType()
+    {
+        baseType = (BaseCampMarker)baseDropdown.value;
     }
     #endregion
 
@@ -1163,6 +1284,11 @@ public class MapEditor : MonoBehaviour
     public void Button_SideObject()
     {
         OnInterface(InterfaceType.Side, MapEditorType.SideObject, sideObjectUI);
+    }
+
+    public void Button_BaseObject()
+    {
+        OnInterface(InterfaceType.Side, MapEditorType.BaseObject, baseObjectUI);
     }
     #endregion
 
@@ -1265,6 +1391,9 @@ public class MapEditor : MonoBehaviour
                                 break;
                             case MapEditorType.SideObject:
                                 findType = FindNodeType.SetObject;
+                                break;
+                            case MapEditorType.BaseObject:
+                                findType = FindNodeType.SetBaseObject;
                                 break;
                             default:
                                 break;
