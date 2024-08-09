@@ -190,9 +190,19 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
             if (gameMgr.gameState == GameState.Result) return;
+            if (gameMgr.playerList.Count == 0) return;
 
             itemSplit = false;
-            gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.None : GameState.Inventory;
+            var player = gameMgr.playerList[0];
+            if (player.state == CharacterState.Base)
+            {
+                gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Base : GameState.Inventory;
+            }
+            else
+            {
+                gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.None : GameState.Inventory;
+            }
+            gameMgr.camMgr.lockCam = !invenUI.gameObject.activeSelf;
             //gameMgr.uiMgr.bottomUI.SetActive(false);
             ShowInventory();
         }

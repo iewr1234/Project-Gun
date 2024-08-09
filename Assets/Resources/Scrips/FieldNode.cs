@@ -529,6 +529,14 @@ public class FieldNode : MonoBehaviour
             case BaseCampMarker.Mission_Enter:
                 markerImage.sprite = Resources.Load<Sprite>("Sprites/Icon_Cross");
                 break;
+            case BaseCampMarker.Storage_Node:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/Icon_Event");
+                canMove = false;
+                ReleaseAdjacentNodes();
+                break;
+            case BaseCampMarker.Storage_Enter:
+                markerImage.sprite = Resources.Load<Sprite>("Sprites/Icon_Cross");
+                break;
             default:
                 break;
         }

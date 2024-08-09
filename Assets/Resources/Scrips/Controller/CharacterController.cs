@@ -648,6 +648,10 @@ public class CharacterController : MonoBehaviour
             if (command.movePass.Count == 0)
             {
                 commandList.RemoveAt(0);
+                if (currentNode.markerType == MarkerType.Base)
+                {
+                    gameMgr.BaseEvent(currentNode.baseType);
+                }
             }
         }
         else
@@ -709,7 +713,14 @@ public class CharacterController : MonoBehaviour
                         switch (ownerType)
                         {
                             case CharacterOwner.Player:
-                                AddCommand(CommandType.TakeCover);
+                                if (gameMgr.eventActive)
+                                {
+                                    gameMgr.BaseEvent(currentNode.baseType);
+                                }
+                                else
+                                {
+                                    AddCommand(CommandType.TakeCover);
+                                }
                                 break;
                             case CharacterOwner.Enemy:
                                 gameMgr.EnemyAI_Shoot(this);
@@ -1036,7 +1047,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
-        if (cover.coverType != CoverType.Full)
+        if (cover.coverType == CoverType.None)
         {
             commandList.Remove(command);
             return;

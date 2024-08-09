@@ -24,7 +24,7 @@ public class StageManager : MonoBehaviour
         {
             var stageIcon = stageIcons[i];
             var stageData = dataMgr.stageData.stageInfos.Find(x => x.ID == "S0001");
-            stageIcon.SetComponents(this, stageData);
+            //stageIcon.SetComponents(this, stageData);
         }
     }
 

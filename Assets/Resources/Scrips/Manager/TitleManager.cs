@@ -22,6 +22,7 @@ public class TitleManager : MonoBehaviour
         //sceneHlr.StartLoadScene("StageScene");
         dataMgr.gameData.mapName = "BASECAMP";
         dataMgr.gameData.mapLoad = true;
+        dataMgr.gameData.baseStorages.Clear();
         sceneHlr.StartLoadScene("SampleScene");
     }
 

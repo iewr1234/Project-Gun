@@ -18,6 +18,14 @@ public struct InitialItem
     public CreatePos createPos;
 }
 
+[System.Serializable]
+public class BaseStorage
+{
+    public string indexName;
+    public Vector2Int nodePos;
+    public List<ItemData> itemList = new List<ItemData>();
+}
+
 [CreateAssetMenu(fileName = "GameData", menuName = "Scriptable Object/GameData")]
 public class GameData : ScriptableObject
 {
@@ -58,4 +66,7 @@ public class GameData : ScriptableObject
             mapLoad = false;
         }
     }
+
+    [Header("[BaseCamp]")]
+    public List<BaseStorage> baseStorages = new List<BaseStorage>();
 }

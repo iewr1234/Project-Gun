@@ -60,6 +60,8 @@ public enum BaseCampMarker
     None = -1,
     Mission_Node,
     Mission_Enter,
+    Storage_Node,
+    Storage_Enter,
 }
 
 public class MapEditor : MonoBehaviour
@@ -901,7 +903,7 @@ public class MapEditor : MonoBehaviour
         Debug.Log("¿Ï·á");
     }
 
-    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad)
+    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad, bool isBase)
     {
         Debug.Log("Map load start");
 
@@ -909,9 +911,13 @@ public class MapEditor : MonoBehaviour
 
         yield return CreateFieldNodes(mapData.mapSize.x, mapData.mapSize.y);
 
-        yield return ReadMapData(mapData, allLoad);
+        yield return ReadMapData(mapData, allLoad, isBase);
 
         Debug.Log("Map load complete");
+        if (gameMgr.playerList.Count > 0)
+        {
+            gameMgr.camMgr.pivotPoint.position = gameMgr.playerList[0].currentNode.transform.position;
+        }
         gameMgr.sceneHlr.EndLoadScene();
     }
 
@@ -988,7 +994,7 @@ public class MapEditor : MonoBehaviour
         }
     }
 
-    private IEnumerator ReadMapData(MapData mapData, bool allLoad)
+    private IEnumerator ReadMapData(MapData mapData, bool allLoad, bool isBase)
     {
         for (int i = 0; i < mapData.nodeDatas.Length; i++)
         {
@@ -1038,6 +1044,20 @@ public class MapEditor : MonoBehaviour
                     case MarkerType.Base:
                         eventMarkerNodes.Add(node);
                         node.SetOnMarker(allLoad, nodeData.baseType);
+                        if (node.baseType == BaseCampMarker.Storage_Node)
+                        {
+                            var baseStorages = gameMgr.dataMgr.gameData.baseStorages;
+                            var find = baseStorages.Find(x => x.nodePos == node.nodePos);
+                            if (find == null)
+                            {
+                                var baseStorage = new BaseStorage()
+                                {
+                                    indexName = $"Storage_{baseStorages.Count}",
+                                    nodePos = node.nodePos,
+                                };
+                                baseStorages.Add(baseStorage);
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -1061,44 +1081,49 @@ public class MapEditor : MonoBehaviour
         {
             var playerNode = pMarkerNodes[0];
             gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
-            gameMgr.playerList[0].EnterTheBase();
-            yield return null;
-
-            var stageData = gameMgr.dataMgr.gameData.stageData;
-            for (int i = 0; i < eMarkerNodes.Count; i++)
+            if (isBase)
             {
-                var markerNode = eMarkerNodes[i];
-                SpawnEnemyInfo enemyInfo;
-                switch (markerNode.enemyType)
-                {
-                    case EnemyMarker.ShortRange:
-                        if (stageData.shortRangeEnemys.Count == 0) continue;
-
-                        enemyInfo = stageData.shortRangeEnemys[Random.Range(0, stageData.shortRangeEnemys.Count)];
-                        break;
-                    case EnemyMarker.MiddleRange:
-                        if (stageData.middleRangeEnemys.Count == 0) continue;
-
-                        enemyInfo = stageData.middleRangeEnemys[Random.Range(0, stageData.middleRangeEnemys.Count)];
-                        break;
-                    case EnemyMarker.LongRange:
-                        if (stageData.longRangeEnemys.Count == 0) continue;
-
-                        enemyInfo = stageData.longRangeEnemys[Random.Range(0, stageData.longRangeEnemys.Count)];
-                        break;
-                    case EnemyMarker.Elite:
-                        if (stageData.eliteEnemys.Count == 0) continue;
-
-                        enemyInfo = stageData.eliteEnemys[Random.Range(0, stageData.eliteEnemys.Count)];
-                        break;
-                    case EnemyMarker.Boss:
-                        enemyInfo = stageData.bossEnemy;
-                        break;
-                    default:
-                        continue;
-                }
-                gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, enemyInfo.ID);
+                gameMgr.playerList[0].EnterTheBase();
                 yield return null;
+            }
+            else
+            {
+                var stageData = gameMgr.dataMgr.gameData.stageData;
+                for (int i = 0; i < eMarkerNodes.Count; i++)
+                {
+                    var markerNode = eMarkerNodes[i];
+                    SpawnEnemyInfo enemyInfo;
+                    switch (markerNode.enemyType)
+                    {
+                        case EnemyMarker.ShortRange:
+                            if (stageData.shortRangeEnemys.Count == 0) continue;
+
+                            enemyInfo = stageData.shortRangeEnemys[Random.Range(0, stageData.shortRangeEnemys.Count)];
+                            break;
+                        case EnemyMarker.MiddleRange:
+                            if (stageData.middleRangeEnemys.Count == 0) continue;
+
+                            enemyInfo = stageData.middleRangeEnemys[Random.Range(0, stageData.middleRangeEnemys.Count)];
+                            break;
+                        case EnemyMarker.LongRange:
+                            if (stageData.longRangeEnemys.Count == 0) continue;
+
+                            enemyInfo = stageData.longRangeEnemys[Random.Range(0, stageData.longRangeEnemys.Count)];
+                            break;
+                        case EnemyMarker.Elite:
+                            if (stageData.eliteEnemys.Count == 0) continue;
+
+                            enemyInfo = stageData.eliteEnemys[Random.Range(0, stageData.eliteEnemys.Count)];
+                            break;
+                        case EnemyMarker.Boss:
+                            enemyInfo = stageData.bossEnemy;
+                            break;
+                        default:
+                            continue;
+                    }
+                    gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, enemyInfo.ID);
+                    yield return null;
+                }
             }
         }
 
@@ -1159,7 +1184,7 @@ public class MapEditor : MonoBehaviour
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
-            StartCoroutine(Coroutine_MapLoad(mapData, true));
+            StartCoroutine(Coroutine_MapLoad(mapData, true, false));
         }
     }
 

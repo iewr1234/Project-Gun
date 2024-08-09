@@ -12,8 +12,8 @@ public enum GameState
     Reload,
     Watch,
     Inventory,
-    Result,
     Base,
+    Result,
 }
 
 public enum ScheduleState
@@ -69,6 +69,7 @@ public class GameManager : MonoBehaviour
     public CharacterOwner currentTurn;
     public GameState gameState;
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
+    [HideInInspector] public bool eventActive;
 
     [Header("[Move]")]
     [SerializeField] private bool addPass;
@@ -184,13 +185,18 @@ public class GameManager : MonoBehaviour
             var mapData = dataMgr.LoadMapData(loadName);
             if (mapData != null)
             {
-                StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false));
-                dataMgr.gameData.mapLoad = false;
-                mapEdt.SetActive(false);
                 if (loadName == "BASECAMP")
                 {
+                    StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, true));
                     gameState = GameState.Base;
+
                 }
+                else
+                {
+                    StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, false));
+                }
+                dataMgr.gameData.mapLoad = false;
+                mapEdt.SetActive(false);
             }
         }
         else
@@ -413,8 +419,8 @@ public class GameManager : MonoBehaviour
             default:
                 break;
         }
-        //CreatePlayer();
-        //CreateEnemy();
+        CreatePlayer();
+        CreateEnemy();
     }
 
     /// <summary>
@@ -755,6 +761,46 @@ public class GameManager : MonoBehaviour
                         selectChar = null;
                         gameState = GameState.None;
                         break;
+                    case GameState.Base:
+                        if (node == null) return;
+                        if (playerList.Count == 0) return;
+
+                        var player = playerList[0];
+                        if (player.commandList.Count > 0) return;
+
+                        if (node.markerType == MarkerType.Base)
+                        {
+                            // BaseNode Process
+                            FieldNode enterNode = null;
+                            switch (node.baseType)
+                            {
+                                case BaseCampMarker.Mission_Node:
+                                    enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Mission_Enter);
+                                    eventActive = true;
+                                    break;
+                                case BaseCampMarker.Storage_Node:
+                                    enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Storage_Enter);
+                                    eventActive = true;
+                                    break;
+                                default:
+                                    enterNode = node;
+                                    break;
+                            }
+                            if (enterNode == null) return;
+
+                            FindMovableNodes(player);
+                            ResultNodePass(player, enterNode);
+                            CharacterMove(player, enterNode);
+                        }
+                        else
+                        {
+                            if (!node.canMove) return;
+
+                            FindMovableNodes(player);
+                            ResultNodePass(player, node);
+                            CharacterMove(player, node);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -785,42 +831,6 @@ public class GameManager : MonoBehaviour
                         closeNodes.Clear();
                         passList.Insert(0, movePass);
                         ShowMovableNodes(selectChar, passList[0].passNodes[0]);
-                    }
-                    break;
-                case GameState.Base:
-                    if (playerList.Count == 0) return;
-
-                    var player = playerList[0];
-                    if (player.commandList.Count > 0) return;
-
-                    var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-                    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
-                    {
-                        var node = hit.collider.GetComponentInParent<FieldNode>();
-                        if (node.markerType == MarkerType.Base)
-                        {
-                            // BaseNode Process
-                            FieldNode enterNode = null;
-                            switch (node.baseType)
-                            {
-                                case BaseCampMarker.Mission_Node:
-                                    enterNode = node.onAxisNodes.Find(x => x.baseType == BaseCampMarker.Mission_Enter);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            FindMovableNodes(player);
-                            ResultNodePass(player, enterNode);
-                            CharacterMove(player, enterNode);
-                        }
-                        else
-                        {
-                            if (!node.canMove) return;
-
-                            FindMovableNodes(player);
-                            ResultNodePass(player, node);
-                            CharacterMove(player, node);
-                        }
                     }
                     break;
                 default:
@@ -921,6 +931,7 @@ public class GameManager : MonoBehaviour
     private void FindMovableNodes(CharacterController charCtr, bool showNode)
     {
         SwitchMovableNodes(false);
+        movableNodes.Clear();
         Queue<FieldNode> queue = new Queue<FieldNode>();
         HashSet<FieldNode> visited = new HashSet<FieldNode>();
 
@@ -973,6 +984,7 @@ public class GameManager : MonoBehaviour
     private void FindMovableNodes(CharacterController charCtr)
     {
         SwitchMovableNodes(false);
+        movableNodes.Clear();
         Queue<FieldNode> queue = new Queue<FieldNode>();
         HashSet<FieldNode> visited = new HashSet<FieldNode>();
 
@@ -1002,6 +1014,7 @@ public class GameManager : MonoBehaviour
     private void ShowMovableNodes(CharacterController charCtr, FieldNode currentNode)
     {
         SwitchMovableNodes(false);
+        movableNodes.Clear();
         Queue<FieldNode> queue = new Queue<FieldNode>();
         HashSet<FieldNode> visited = new HashSet<FieldNode>();
 
@@ -1055,7 +1068,6 @@ public class GameManager : MonoBehaviour
                     var movableNode = movableNodes[i];
                     movableNode.SetNodeOutline(false);
                 }
-                movableNodes.Clear();
                 break;
         }
     }
@@ -1394,6 +1406,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case CharacterOwner.Enemy:
+                DeselectCharacter();
                 for (int i = 0; i < enemyList.Count; i++)
                 {
                     var enemy = enemyList[i];
@@ -1428,6 +1441,22 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
+    }
+
+    public void BaseEvent(BaseCampMarker baseType)
+    {
+        switch (baseType)
+        {
+            case BaseCampMarker.Mission_Enter:
+                uiMgr.SetStageUI(true);
+                break;
+            case BaseCampMarker.Storage_Enter:
+                
+                break;
+            default:
+                break;
+        }
+        eventActive = false;
     }
 
     public void NextMap()

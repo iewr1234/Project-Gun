@@ -22,16 +22,16 @@ public class CameraManager : MonoBehaviour
     [Header("---Access Component---")]
     public Camera mainCam;
     public Camera subCam;
-    private Transform pivotPoint;
+    public Transform pivotPoint;
     private CinemachineBrain cambrain;
 
     private List<CinemachineVirtualCamera> virCams;
 
     [Header("--- Assignment Variable---")]
     public CameraState state;
+    public bool lockCam;
 
     private CinemachineVirtualCamera currrentActionCam;
-    [SerializeField] private bool actionCam;
 
     private readonly float moveSpeed = 15f;
     private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
@@ -59,7 +59,7 @@ public class CameraManager : MonoBehaviour
         cambrain = mainCam.GetComponent<CinemachineBrain>();
         virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
 
-        actionCam = false;
+        lockCam = false;
     }
 
     public void SetComponents(BaseManager _baseMgr)
@@ -76,21 +76,21 @@ public class CameraManager : MonoBehaviour
         cambrain = mainCam.GetComponent<CinemachineBrain>();
         virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
 
-        actionCam = false;
+        lockCam = false;
     }
 
     private void Update()
     {
         if (gameMgr != null)
         {
-            var canOperation = !actionCam && gameMgr.fieldNodes.Count > 0;
+            var canOperation = !lockCam && gameMgr.fieldNodes.Count > 0;
             if (!canOperation) return;
 
-            var canMoveCam = gameMgr.gameState == GameState.None
-                          || gameMgr.gameState == GameState.Move
-                          || gameMgr.gameState == GameState.Watch
-                          || gameMgr.gameState == GameState.Base;
-            if (!canMoveCam) return;
+            //var canMoveCam = gameMgr.gameState == GameState.None
+            //              || gameMgr.gameState == GameState.Move
+            //              || gameMgr.gameState == GameState.Watch
+            //              || gameMgr.gameState == GameState.Base;
+            //if (!canMoveCam) return;
         }
 
         CameraMove();
@@ -178,7 +178,7 @@ public class CameraManager : MonoBehaviour
                 currrentActionCam = null;
                 mainCam.transform.localPosition = defaultPos;
                 mainCam.transform.LookAt(pivotPoint);
-                actionCam = false;
+                lockCam = false;
                 break;
             default:
                 break;
@@ -221,6 +221,6 @@ public class CameraManager : MonoBehaviour
         currrentActionCam.enabled = true;
         currrentActionCam.Follow = follow;
         currrentActionCam.LookAt = lookAt;
-        actionCam = true;
+        lockCam = true;
     }
 }
