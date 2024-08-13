@@ -20,7 +20,7 @@ public class FieldNode : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
-    [SerializeField] private BaseManager baseMgr;
+    [HideInInspector] public BaseStorage baseStorage;
 
     [Header("---Access Component---")]
     private MeshRenderer mesh;
@@ -92,29 +92,29 @@ public class FieldNode : MonoBehaviour
         posText.text = $"X{nodePos.x} / Y{nodePos.y}";
     }
 
-    public void SetComponents(BaseManager _baseMgr, Vector2Int _nodePos)
-    {
-        baseMgr = _baseMgr;
-        nodePos = _nodePos;
+    //public void SetComponents(BaseManager _baseMgr, Vector2Int _nodePos)
+    //{
+    //    baseMgr = _baseMgr;
+    //    nodePos = _nodePos;
 
-        transform.name = $"X{nodePos.x}/Y{nodePos.y}";
-        mesh = transform.Find("Mesh").GetComponent<MeshRenderer>();
-        mesh.enabled = false;
+    //    transform.name = $"X{nodePos.x}/Y{nodePos.y}";
+    //    mesh = transform.Find("Mesh").GetComponent<MeshRenderer>();
+    //    mesh.enabled = false;
 
-        canvas = GetComponentInChildren<Canvas>();
-        canvas.worldCamera = Camera.main;
-        frame = transform.Find("Frame").gameObject;
-        outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
-        unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
+    //    canvas = GetComponentInChildren<Canvas>();
+    //    canvas.worldCamera = Camera.main;
+    //    frame = transform.Find("Frame").gameObject;
+    //    outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
+    //    unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
 
-        marker = transform.Find("Canvas/Marker").gameObject;
-        markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
-        markerImage = marker.transform.Find("Image").GetComponent<Image>();
-        marker.SetActive(false);
+    //    marker = transform.Find("Canvas/Marker").gameObject;
+    //    markerOutline = marker.transform.Find("Outline").GetComponent<Image>();
+    //    markerImage = marker.transform.Find("Image").GetComponent<Image>();
+    //    marker.SetActive(false);
 
-        posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
-        posText.text = $"X{nodePos.x} / Y{nodePos.y}";
-    }
+    //    posText = transform.Find("Canvas/PositionText").GetComponent<TextMeshProUGUI>();
+    //    posText.text = $"X{nodePos.x} / Y{nodePos.y}";
+    //}
 
     public void AddAdjacentNodes()
     {
@@ -660,6 +660,14 @@ public class FieldNode : MonoBehaviour
             _object.name = item.name;
             _object.transform.SetParent(transform, false);
             _object.transform.localRotation = DataUtility.GetSetRotationOfObject(setDirection);
+            if (item.type == MapEditorType.BaseObject)
+            {
+                var _baseStorage = _object.GetComponent<BaseStorage>();
+                if (_baseStorage != null)
+                {
+                    baseStorage = _baseStorage;
+                }
+            }
 
             var setObject = new SetObject()
             {
@@ -681,6 +689,11 @@ public class FieldNode : MonoBehaviour
         var setObject = setObjects.Find(x => x.type == type);
         if (setObject != null)
         {
+            if (type == MapEditorType.BaseObject)
+            {
+                baseStorage = null;
+            }
+
             var setNode = setObject.setNode;
             //setNode.RemoveSetObject(type);
             setNode.setObjects.Remove(setObject);

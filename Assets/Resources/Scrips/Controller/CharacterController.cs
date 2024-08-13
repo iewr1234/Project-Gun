@@ -49,6 +49,7 @@ public class CharacterCommand
 
     [Header("[Move]")]
     public List<FieldNode> movePass;
+    public FieldNode targetNode;
 
     [Header("[Cover]")]
     public Cover cover;
@@ -647,10 +648,11 @@ public class CharacterController : MonoBehaviour
             command.movePass.Remove(targetNode);
             if (command.movePass.Count == 0)
             {
+                var _targetNode = commandList[0].targetNode;
                 commandList.RemoveAt(0);
                 if (currentNode.markerType == MarkerType.Base)
                 {
-                    gameMgr.BaseEvent(currentNode.baseType);
+                    gameMgr.BaseEvent(_targetNode);
                 }
             }
         }
@@ -707,6 +709,7 @@ public class CharacterController : MonoBehaviour
                 if (command.movePass.Count == 0)
                 {
                     animator.SetBool("isMove", false);
+                    var _targetNode = command.targetNode;
                     commandList.Remove(command);
                     if (commandList.Count == 0)
                     {
@@ -715,7 +718,7 @@ public class CharacterController : MonoBehaviour
                             case CharacterOwner.Player:
                                 if (gameMgr.eventActive)
                                 {
-                                    gameMgr.BaseEvent(currentNode.baseType);
+                                    gameMgr.BaseEvent(_targetNode);
                                 }
                                 else
                                 {
@@ -2335,14 +2338,13 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="movePass"></param>
-    public void AddCommand(CommandType type, List<FieldNode> movePass)
+    public void AddCommand(CommandType type, List<FieldNode> movePass, FieldNode targetNode)
     {
         switch (type)
         {
             case CommandType.Move:
                 currentNode.canMove = true;
                 currentNode.charCtr = null;
-                var targetNode = movePass[0];
                 targetNode.canMove = false;
                 targetNode.charCtr = this;
                 PayTheMoveCost(targetNode.moveCost);
@@ -2352,6 +2354,7 @@ public class CharacterController : MonoBehaviour
                     indexName = $"{type}",
                     type = CommandType.Move,
                     movePass = new List<FieldNode>(movePass),
+                    targetNode = targetNode,
                 };
                 commandList.Add(moveCommand);
                 break;

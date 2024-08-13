@@ -96,8 +96,8 @@ public class InventoryManager : MonoBehaviour
         myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
         myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
 
-        otherScrollRect = invenUI.transform.Find("OtherStorage/ScrollView").GetComponent<ScrollRect>();
-        otherScrollbar = invenUI.transform.Find("OtherStorage/ScrollView/Scrollbar Vertical").gameObject;
+        otherScrollRect = invenUI.transform.Find("OtherStorage/Components/ScrollView").GetComponent<ScrollRect>();
+        otherScrollbar = invenUI.transform.Find("OtherStorage/Components/ScrollView/Scrollbar Vertical").gameObject;
 
         itemPool = invenUI.transform.Find("ItemPool");
         sampleItem = itemPool.transform.Find("SampleItem").GetComponent<ItemHandler>();
@@ -119,6 +119,7 @@ public class InventoryManager : MonoBehaviour
         }
         otherStorage = invenUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
         otherStorage.SetComponents(this);
+        otherStorage.SetActive(false);
 
         CreateItems();
         invenUI.gameObject.SetActive(false);
@@ -260,6 +261,26 @@ public class InventoryManager : MonoBehaviour
         if (gameMgr.mapEdt != null)
         {
             gameMgr.mapEdt.gameObject.SetActive(!value);
+        }
+    }
+
+    public void SetItemStorage(bool value)
+    {
+        if (otherStorage.storageInfos.Count == 0) return;
+
+        otherStorage.SetActive(value);
+        switch (value)
+        {
+            case true:
+                otherStorage.tabIndex = 0;
+                otherStorage.ActiveTabButtons(otherStorage.storageInfos.Count);
+                otherStorage.GetStorageInfo();
+                gameMgr.gameState = GameState.Inventory;
+                break;
+            case false:
+                otherStorage.DeactiveTabButtons();
+                gameMgr.gameState = GameState.Base;
+                break;
         }
     }
 

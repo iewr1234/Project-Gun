@@ -19,10 +19,11 @@ public struct InitialItem
 }
 
 [System.Serializable]
-public class BaseStorage
+public class StorageInfo
 {
-    public string indexName;
+    public string storageName;
     public Vector2Int nodePos;
+    public Vector2Int slotSize;
     public List<ItemData> itemList = new List<ItemData>();
 }
 
@@ -43,6 +44,9 @@ public class GameData : ScriptableObject
     [Space(5f)]
 
     public List<InitialItem> initialItemIDList = new List<InitialItem>();
+
+    [Header("[BaseCamp]")]
+    public List<StorageInfo> baseStorages = new List<StorageInfo>();
 
     public void RandomMapSelection()
     {
@@ -66,7 +70,4 @@ public class GameData : ScriptableObject
             mapLoad = false;
         }
     }
-
-    [Header("[BaseCamp]")]
-    public List<BaseStorage> baseStorages = new List<BaseStorage>();
 }

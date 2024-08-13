@@ -1028,6 +1028,18 @@ public class MapEditor : MonoBehaviour
                 }
             }
 
+            // ObjectData
+            if (nodeData.isObject)
+            {
+                for (int j = 0; j < nodeData.objectDatas.Length; j++)
+                {
+                    var objectData = nodeData.objectDatas[j];
+                    var objectUI = GetObjectUI(objectData.objectType);
+                    var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
+                    node.SetOnObject(objectItem, objectData.setDir);
+                }
+            }
+
             // MarkerData
             if (nodeData.isMarker)
             {
@@ -1050,10 +1062,11 @@ public class MapEditor : MonoBehaviour
                             var find = baseStorages.Find(x => x.nodePos == node.nodePos);
                             if (find == null)
                             {
-                                var baseStorage = new BaseStorage()
+                                var baseStorage = new StorageInfo()
                                 {
-                                    indexName = $"Storage_{baseStorages.Count}",
+                                    storageName = $"{node.baseStorage.storageName}",
                                     nodePos = node.nodePos,
+                                    slotSize = node.baseStorage.slotSize,
                                 };
                                 baseStorages.Add(baseStorage);
                             }
@@ -1061,18 +1074,6 @@ public class MapEditor : MonoBehaviour
                         break;
                     default:
                         break;
-                }
-            }
-
-            // ObjectData
-            if (nodeData.isObject)
-            {
-                for (int j = 0; j < nodeData.objectDatas.Length; j++)
-                {
-                    var objectData = nodeData.objectDatas[j];
-                    var objectUI = GetObjectUI(objectData.objectType);
-                    var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
-                    node.SetOnObject(objectItem, objectData.setDir);
                 }
             }
         }

@@ -33,15 +33,15 @@ public class NodeData
     public TargetDirection[] lCoverDirs;
     public FindNodeType[] lCoverTypes;
 
+    [Header("[Object]")]
+    public bool isObject;
+    public ObjectData[] objectDatas;
+
     [Header("[Marker]")]
     public bool isMarker;
     public MarkerType markerType;
     public EnemyMarker enemyType;
     public BaseCampMarker baseType;
-
-    [Header("[Object]")]
-    public bool isObject;
-    public ObjectData[] objectDatas;
 }
 
 [System.Serializable]
@@ -177,24 +177,6 @@ public class DataManager : MonoBehaviour
                 }
             }
 
-            // Marker Data
-            nodeData.isMarker = node.Marker.activeSelf;
-            if (nodeData.isMarker)
-            {
-                nodeData.markerType = node.markerType;
-                switch (nodeData.markerType)
-                {
-                    case MarkerType.Enemy:
-                        nodeData.enemyType = node.enemyType;
-                        break;
-                    case MarkerType.Base:
-                        nodeData.baseType = node.baseType;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
             // Object Data
             nodeData.isObject = node.setObjects.Count > 0 && node.setObjects.Find(x => x.setNode == node) != null;
             if (nodeData.isObject)
@@ -214,6 +196,24 @@ public class DataManager : MonoBehaviour
                     objectDatas.Add(objectData);
                 }
                 nodeData.objectDatas = objectDatas.ToArray();
+            }
+
+            // Marker Data
+            nodeData.isMarker = node.Marker.activeSelf;
+            if (nodeData.isMarker)
+            {
+                nodeData.markerType = node.markerType;
+                switch (nodeData.markerType)
+                {
+                    case MarkerType.Enemy:
+                        nodeData.enemyType = node.enemyType;
+                        break;
+                    case MarkerType.Base:
+                        nodeData.baseType = node.baseType;
+                        break;
+                    default:
+                        break;
+                }
             }
             nodeDatas.Add(nodeData);
         }

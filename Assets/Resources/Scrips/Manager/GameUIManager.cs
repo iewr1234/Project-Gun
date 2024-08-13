@@ -319,15 +319,20 @@ public class GameUIManager : MonoBehaviour
 
     public void SetStageUI(bool value)
     {
-        switch (value)
-        {
-            case true:
-                break;
-            case false:
-                break;
-        }
+        //switch (value)
+        //{
+        //    case true:
+        //        break;
+        //    case false:
+        //        break;
+        //}
         playUI.SetActive(!value);
         stageUI.SetActive(value);
+        gameMgr.camMgr.lockCam = value;
+    }
+
+    public void SetStorageUI(bool value)
+    {
         gameMgr.camMgr.lockCam = value;
     }
 

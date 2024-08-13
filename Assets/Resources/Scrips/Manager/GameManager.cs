@@ -73,8 +73,6 @@ public class GameManager : MonoBehaviour
 
     [Header("[Move]")]
     [SerializeField] private bool addPass;
-    private int expectedAction;
-    private int expectedStamina;
 
     [SerializeField] private List<FieldNode> movableNodes = new List<FieldNode>();
     [SerializeField] private List<FieldNode> openNodes = new List<FieldNode>();
@@ -790,7 +788,7 @@ public class GameManager : MonoBehaviour
 
                             FindMovableNodes(player);
                             ResultNodePass(player, enterNode);
-                            CharacterMove(player, enterNode);
+                            CharacterMove(player, node);
                         }
                         else
                         {
@@ -1100,7 +1098,7 @@ public class GameManager : MonoBehaviour
         {
             charCtr.AddCommand(CommandType.LeaveCover);
         }
-        charCtr.AddCommand(CommandType.Move, movePass);
+        charCtr.AddCommand(CommandType.Move, movePass, targetNode);
         //charCtr.AddCommand(CommandType.TakeCover);
     }
 
@@ -1443,15 +1441,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void BaseEvent(BaseCampMarker baseType)
+    public void BaseEvent(FieldNode node)
     {
-        switch (baseType)
+        switch (node.baseType)
         {
-            case BaseCampMarker.Mission_Enter:
+            case BaseCampMarker.Mission_Node:
                 uiMgr.SetStageUI(true);
                 break;
-            case BaseCampMarker.Storage_Enter:
-                
+            case BaseCampMarker.Storage_Node:
+                var baseStorages = dataMgr.gameData.baseStorages;
+                var storageInfo = baseStorages.Find(x => x.nodePos == node.nodePos);
+                var storageInfos = new List<StorageInfo> { storageInfo };
+                invenMgr.otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= node.nodePos.x + 1 && x.nodePos.x >= node.nodePos.x - 1
+                                                                                               && x.nodePos.y <= node.nodePos.y + 1 && x.nodePos.y >= node.nodePos.y - 1)).ToList();
+                if (invenMgr.otherStorage.storageInfos.Count == 0) return;
+
+                invenMgr.ShowInventory();
+                invenMgr.SetItemStorage(true);
                 break;
             default:
                 break;
