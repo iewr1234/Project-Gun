@@ -13,8 +13,8 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
     [SerializeField] private Image slotImage;
 
     [Header("--- Assignment Variable---")]
+    public Vector2Int slotIndex;
     public ItemHandler item;
-    [HideInInspector] public Vector2Int slotIndex;
 
     public bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
     {
@@ -78,7 +78,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         void ProcessOfSlotSize(List<ItemSlot> itemSlots, ItemHandler item)
         {
             var startIndex = invenMgr.onSlot.slotIndex - item.pivotIndex;
-            invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item, startIndex);
+            invenMgr.onSlots = invenMgr.FindAllMultiSizeSlots(itemSlots, item.size, startIndex);
             var sizeCount = item.size.x * item.size.y;
             var findSlot = invenMgr.onSlots.Find(x => x.item != null && x.item != item);
 

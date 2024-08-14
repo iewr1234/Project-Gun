@@ -19,12 +19,22 @@ public struct InitialItem
 }
 
 [System.Serializable]
+public class StorageItemInfo
+{
+    public string indexName;
+    public Vector2Int slotIndex;
+    public Vector2Int itemSize;
+    public int totalCount;
+    public ItemDataInfo itemData;
+}
+
+[System.Serializable]
 public class StorageInfo
 {
     public string storageName;
     public Vector2Int nodePos;
     public Vector2Int slotSize;
-    public List<ItemData> itemList = new List<ItemData>();
+    public List<StorageItemInfo> itemList = new List<StorageItemInfo>();
 }
 
 [CreateAssetMenu(fileName = "GameData", menuName = "Scriptable Object/GameData")]

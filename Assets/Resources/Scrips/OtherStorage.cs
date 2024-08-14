@@ -85,24 +85,50 @@ public class OtherStorage : MonoBehaviour
 
     public void DeactiveTabButtons()
     {
+        ClearStorage();
         for (int i = 0; i < tabButtonImages.Count; i++)
         {
             tabButtonImages[i].gameObject.SetActive(false);
         }
+        tabIndex = 0;
     }
 
-    public void GetStorageInfo()
+    public void GetStorageInfo(int index)
     {
+        tabButtonImages[tabIndex].color = noneActiveColor_tab;
+        tabIndex = index;
+
         var storageInfo = storageInfos[tabIndex];
         nameText.text = storageInfo.storageName;
         tabButtonImages[tabIndex].color = activeColor_tab;
         ItemSlotsPlacement(storageInfo.slotSize);
+        for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
+        {
+            var storageItem = storageInfos[tabIndex].itemList[i];
+            var setSlot = invenMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
+            if (setSlot.Count == storageItem.itemSize.x * storageItem.itemSize.y)
+            {
+                invenMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, setSlot);
+            }
+        }
+    }
+
+    public void ClearStorage()
+    {
+        for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
+        {
+            var slotIndex = storageInfos[tabIndex].itemList[i].slotIndex;
+            var itemSlot = itemSlots.Find(x => x.slotIndex == slotIndex && x.item != null);
+            if (itemSlot != null)
+            {
+                invenMgr.InActiveItem(itemSlot.item);
+            }
+        }
     }
 
     public void Button_Tab(int index)
     {
-        tabButtonImages[tabIndex].color = noneActiveColor_tab;
-        tabIndex = index;
-        GetStorageInfo();
+        ClearStorage();
+        GetStorageInfo(index);
     }
 }

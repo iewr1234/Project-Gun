@@ -24,6 +24,7 @@ public class GameUIManager : MonoBehaviour
     public ActionButton watchButton;
     public ActionButton shootButton;
     public ActionButton reloadButton;
+    public Button turnEndButton;
 
     [HideInInspector] public GameObject magIcons;
     [HideInInspector] public List<MagazineIcon> magIconList;
@@ -38,10 +39,6 @@ public class GameUIManager : MonoBehaviour
     [HideInInspector] public Slider armorGauge;
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
-
-    [Header("[ResultUI]")]
-    public Button nextButton;
-    public Button returnButton;
 
     [Header("--- Assignment Variable---")]
     public Button onButton;
@@ -108,6 +105,7 @@ public class GameUIManager : MonoBehaviour
                     break;
             }
         }
+        turnEndButton = playUI.transform.Find("TurnEnd").GetComponent<Button>();
 
         stageIcons = stageUI.transform.Find("StageIcons").GetComponentsInChildren<StageIcon>().ToList();
         for (int i = 0; i < stageIcons.Count; i++)
@@ -118,10 +116,6 @@ public class GameUIManager : MonoBehaviour
         }
         stageUI.SetActive(false);
 
-        nextButton = resultUI.transform.Find("Next").GetComponent<Button>();
-        nextButton.gameObject.SetActive(false);
-        returnButton = resultUI.transform.Find("Retrun").GetComponent<Button>();
-        returnButton.gameObject.SetActive(false);
         resultUI.SetActive(false);
     }
 
@@ -236,7 +230,10 @@ public class GameUIManager : MonoBehaviour
 
     public void SetActiveAimUI(CharacterController charCtr, bool value)
     {
+        playUI.SetActive(value);
         aimUI.SetActive(value);
+        bottomUI.SetActive(!value);
+        turnEndButton.gameObject.SetActive(!value);
         if (value)
         {
             SetShootNum(charCtr);
@@ -336,29 +333,6 @@ public class GameUIManager : MonoBehaviour
         gameMgr.camMgr.lockCam = value;
     }
 
-    public void SetResultUI(bool value)
-    {
-        switch (value)
-        {
-            case true:
-                gameMgr.invenMgr.ShowInventory();
-                if (gameMgr.dataMgr.gameData.stageData.waveNum >= 0)
-                {
-                    nextButton.gameObject.SetActive(true);
-                }
-                else
-                {
-                    returnButton.gameObject.SetActive(true);
-                }
-                break;
-            case false:
-                nextButton.gameObject.SetActive(false);
-                returnButton.gameObject.SetActive(false);
-                break;
-        }
-        resultUI.SetActive(!value);
-    }
-
     public void Button_TurnEnd()
     {
         if (gameMgr.currentTurn != CharacterOwner.Player) return;
@@ -369,17 +343,5 @@ public class GameUIManager : MonoBehaviour
     public void Button_Stage_Return()
     {
         SetStageUI(false);
-    }
-
-    public void Button_Result_Next()
-    {
-        nextButton.enabled = false;
-        gameMgr.NextMap();
-    }
-
-    public void Button_Result_Return()
-    {
-        returnButton.enabled = false;
-        gameMgr.ReturnTitle();
     }
 }

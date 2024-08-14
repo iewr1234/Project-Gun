@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -760,6 +761,7 @@ public class GameManager : MonoBehaviour
                         gameState = GameState.None;
                         break;
                     case GameState.Base:
+                        if (invenMgr.showStorage) return;
                         if (node == null) return;
                         if (playerList.Count == 0) return;
 
@@ -1449,15 +1451,9 @@ public class GameManager : MonoBehaviour
                 uiMgr.SetStageUI(true);
                 break;
             case BaseCampMarker.Storage_Node:
-                var baseStorages = dataMgr.gameData.baseStorages;
-                var storageInfo = baseStorages.Find(x => x.nodePos == node.nodePos);
-                var storageInfos = new List<StorageInfo> { storageInfo };
-                invenMgr.otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= node.nodePos.x + 1 && x.nodePos.x >= node.nodePos.x - 1
-                                                                                               && x.nodePos.y <= node.nodePos.y + 1 && x.nodePos.y >= node.nodePos.y - 1)).ToList();
-                if (invenMgr.otherStorage.storageInfos.Count == 0) return;
-
+                invenMgr.SetOtherStorage(node);
+                invenMgr.SetStorageUI(true);
                 invenMgr.ShowInventory();
-                invenMgr.SetItemStorage(true);
                 break;
             default:
                 break;
@@ -1489,7 +1485,7 @@ public class GameManager : MonoBehaviour
         else
         {
             dataMgr.gameData.RandomMapSelection();
-            uiMgr.SetResultUI(true);
+            invenMgr.SetResultUI(true);
         }
     }
 

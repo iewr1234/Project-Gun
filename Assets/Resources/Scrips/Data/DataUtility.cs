@@ -50,6 +50,8 @@ public static class DataUtility
 
     public static readonly int shootRateMax = 4;
 
+    public static readonly Vector2Int floorSlotSize = new Vector2Int(7, 17);
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
