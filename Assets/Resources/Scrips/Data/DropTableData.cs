@@ -19,6 +19,27 @@ public struct DropTable
     [Tooltip("°í±Þ È®·ü")] public int dropPercentage_advanced;
     [Tooltip("¼¼Æ® È®·ü")] public int dropPercentage_set;
 
+    public readonly int LowGrade => dropPercentage_lowGrade;
+    public readonly int Nomal => dropPercentage_lowGrade 
+                               + dropPercentage_nomal;
+    public readonly int MiddleGrade => dropPercentage_lowGrade 
+                                     + dropPercentage_nomal 
+                                     + dropPercentage_middleGrade;
+    public readonly int HighGrade => dropPercentage_lowGrade 
+                                   + dropPercentage_nomal 
+                                   + dropPercentage_middleGrade
+                                   + dropPercentage_highGrade;
+    public readonly int Advanced => dropPercentage_lowGrade 
+                                  + dropPercentage_nomal
+                                  + dropPercentage_middleGrade
+                                  + dropPercentage_highGrade
+                                  + dropPercentage_advanced;
+    //public readonly int Set => dropPercentage_lowGrade
+    //                         + dropPercentage_nomal
+    //                         + dropPercentage_middleGrade
+    //                         + dropPercentage_highGrade
+    //                         + dropPercentage_advanced
+    //                         + dropPercentage_set;
     public readonly int TotalPercentage => dropPercentage_lowGrade
                                          + dropPercentage_nomal
                                          + dropPercentage_middleGrade

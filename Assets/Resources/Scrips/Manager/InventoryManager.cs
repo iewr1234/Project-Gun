@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
@@ -418,6 +419,29 @@ public class InventoryManager : MonoBehaviour
     public void SetItemInStorage(string itemName, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.itemName == itemName);
+        if (itemData == null)
+        {
+            Debug.Log("Not found item");
+            return;
+        }
+
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(itemData, count, insertOption);
+
+        var emptySlots = FindEmptySlots(item, itemSlots);
+        if (emptySlots == null)
+        {
+            Debug.Log("not found ItemSlot");
+            InActiveItem(item);
+        }
+        else
+        {
+            PutTheItem(item, emptySlots);
+        }
+    }
+
+    public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots, bool insertOption)
+    {
         if (itemData == null)
         {
             Debug.Log("Not found item");
@@ -1216,7 +1240,31 @@ public class InventoryManager : MonoBehaviour
         switch (value)
         {
             case true:
-                ShowInventory();
+                SetStorageUI(true);
+                for (int i = 0; i < gameMgr.enemyList.Count; i++)
+                {
+                    var dropTableData = gameMgr.enemyList[i].dropTableData;
+                    var itemLevel = Random.Range(dropTableData.minItemLevel, dropTableData.maxItemLevel);
+
+                    // Equipment
+                    if (dropTableData.dropInfo_equipment.itemMaxNum > 0 && dropTableData.dropInfo_equipment.TotalPercentage > 0)
+                    {
+                        SetLootItem("Equipment", dropTableData.dropInfo_equipment);
+                    }
+
+                    // Expendable
+                    if (dropTableData.dropInfo_expendable.itemMaxNum > 0 && dropTableData.dropInfo_expendable.TotalPercentage > 0)
+                    {
+                        //SetLootItem("Expendable", dropTableData.dropInfo_expendable);
+                    }
+
+                    // Ingredient
+                    if (dropTableData.dropInfo_ingredient.itemMaxNum > 0 && dropTableData.dropInfo_ingredient.TotalPercentage > 0)
+                    {
+                        //SetLootItem("Ingredient", dropTableData.dropInfo_ingredient);
+                    }
+                }
+
                 if (gameMgr.dataMgr.gameData.stageData.waveNum >= 0)
                 {
                     nextButton.gameObject.SetActive(true);
@@ -1230,6 +1278,78 @@ public class InventoryManager : MonoBehaviour
                 nextButton.gameObject.SetActive(false);
                 returnButton.gameObject.SetActive(false);
                 break;
+        }
+
+        void SetLootItem(string classType, DropTable dropTable)
+        {
+            var itemNum = Random.Range(dropTable.itemMinNum, dropTable.itemMaxNum);
+            for (int j = 0; j < itemNum; j++)
+            {
+                var rarity = GetRarity(dropTable);
+                var itemDatas = dataMgr.itemData.itemInfos.FindAll(x => x.setDropTable && x.rarity == rarity && ItemClassification(classType, x.type));
+                if (itemDatas.Count == 0) break;
+
+                var itemData = itemDatas[Random.Range(0, itemDatas.Count)];
+                SetItemInStorage(itemData, 1, otherStorage.itemSlots, true);
+            }
+        }
+
+        ItemRarity GetRarity(DropTable dropTable)
+        {
+            var percentage = Random.Range(0, dropTable.TotalPercentage);
+            if (percentage < dropTable.LowGrade)
+            {
+                return ItemRarity.LowGrade;
+            }
+            else if (percentage < dropTable.Nomal)
+            {
+                return ItemRarity.Nomal;
+            }
+            else if (percentage < dropTable.MiddleGrade)
+            {
+                return ItemRarity.MiddleGrade;
+            }
+            else if (percentage < dropTable.HighGrade)
+            {
+                return ItemRarity.HighGrade;
+            }
+            else if (percentage < dropTable.Advanced)
+            {
+                return ItemRarity.Advanced;
+            }
+            else
+            {
+                return ItemRarity.Set;
+            }
+        }
+
+        bool ItemClassification(string classType, ItemType type)
+        {
+            switch (classType)
+            {
+                case "Equipment":
+                    if (type == ItemType.Head) return true;
+                    if (type == ItemType.Body) return true;
+                    if (type == ItemType.Rig) return true;
+                    if (type == ItemType.Backpack) return true;
+                    if (type == ItemType.MainWeapon) return true;
+                    if (type == ItemType.SubWeapon) return true;
+                    if (type == ItemType.Magazine) return true;
+                    if (type == ItemType.Muzzle) return true;
+                    if (type == ItemType.Sight) return true;
+                    if (type == ItemType.FrontHandle) return true;
+                    if (type == ItemType.Attachment) return true;
+                    if (type == ItemType.UnderBarrel) return true;
+                    break;
+                case "Expendable":
+                    break;
+                case "Ingredient":
+                    break;
+                default:
+                    break;
+            }
+
+            return false;
         }
     }
 
@@ -1245,13 +1365,24 @@ public class InventoryManager : MonoBehaviour
         var currentNode = gameMgr.playerList[0].currentNode;
         otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= currentNode.nodePos.x + 1 && x.nodePos.x >= currentNode.nodePos.x - 1
                                                                               && x.nodePos.y <= currentNode.nodePos.y + 1 && x.nodePos.y >= currentNode.nodePos.y - 1)).ToList();
-        var floor = new StorageInfo()
+        var floorStorage = new StorageInfo()
         {
             storageName = "지면",
             nodePos = currentNode.nodePos,
             slotSize = DataUtility.floorSlotSize,
         };
-        otherStorage.storageInfos.Add(floor);
+        otherStorage.storageInfos.Add(floorStorage);
+    }
+
+    public void SetLootStorage()
+    {
+        var lootStorage = new StorageInfo()
+        {
+            storageName = "전리품",
+            nodePos = Vector2Int.zero,
+            slotSize = DataUtility.floorSlotSize,
+        };
+        otherStorage.storageInfos.Add(lootStorage);
     }
 
     public void SetStorageUI(bool value)
@@ -1274,12 +1405,14 @@ public class InventoryManager : MonoBehaviour
     public void Button_Result_Next()
     {
         nextButton.enabled = false;
+        SetStorageUI(false);
         gameMgr.NextMap();
     }
 
     public void Button_Result_Return()
     {
         returnButton.enabled = false;
+        SetStorageUI(false);
         gameMgr.ReturnTitle();
     }
 

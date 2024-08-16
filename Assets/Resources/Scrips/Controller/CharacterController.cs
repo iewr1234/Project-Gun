@@ -101,6 +101,10 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public CharacterUI charUI;
     public List<Weapon> weapons;
     public Armor armor;
+    [Space(5f)]
+
+    public DropTableDataInfo dropTableData;
+    public ItemDataInfo uniqueItemData;
 
     [Header("---Access Component---")]
     public Animator animator;
@@ -304,6 +308,11 @@ public class CharacterController : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, EnemyDataInfo enemyData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
+        if (enemyData.dropTableID != "None")
+            dropTableData = gameMgr.dataMgr.dropTableData.dropTableInfo.Find(x => x.ID == enemyData.dropTableID);
+        if (enemyData.uniqueItemID != "None")
+            uniqueItemData = gameMgr.dataMgr.itemData.itemInfos.Find(x => x.ID == enemyData.uniqueItemID);
+
         animator = GetComponent<Animator>();
         outlinable = this.AddComponent<Outlinable>();
         cd = GetComponent<Collider>();

@@ -23,8 +23,12 @@ public enum ItemType
 public enum ItemRarity
 {
     None,
+    LowGrade,
     Nomal,
-    Rare,
+    MiddleGrade,
+    HighGrade,
+    Advanced,
+    Set,
     Unique,
 }
 

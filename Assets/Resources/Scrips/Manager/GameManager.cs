@@ -1485,7 +1485,9 @@ public class GameManager : MonoBehaviour
         else
         {
             dataMgr.gameData.RandomMapSelection();
+            invenMgr.SetLootStorage();
             invenMgr.SetResultUI(true);
+            invenMgr.ShowInventory();
         }
     }
 
