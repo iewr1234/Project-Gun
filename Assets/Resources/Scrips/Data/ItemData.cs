@@ -55,6 +55,7 @@ public class ItemDataInfo
     [Space(5f)]
 
     public bool addOption;
+    public bool setDropTable;
     public List<ItemOption> itemOptions = new List<ItemOption>();
 
     public ItemDataInfo CopyData()

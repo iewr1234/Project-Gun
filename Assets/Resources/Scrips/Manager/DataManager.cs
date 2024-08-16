@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
+using Unity.VisualScripting;
 
 [System.Serializable]
 public struct ObjectData
@@ -94,6 +95,8 @@ public class DataManager : MonoBehaviour
         if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
 
         if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
+
+        if (dropTableData == null) dropTableData = Resources.Load<DropTableData>("ScriptableObjects/DropTableData");
     }
 
     #region GameData
@@ -338,13 +341,15 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:X";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:Z";
     private enum EnemyVariable
     {
         ID,
         PrefabName,
         EnemyName,
         AI_ID,
+        DropTableID,
+        UniqueItemID,
         Strength,
         Vitality,
         Intellect,
@@ -391,6 +396,8 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)EnemyVariable.PrefabName],
                     charName = data[(int)EnemyVariable.EnemyName],
                     aiID = data[(int)EnemyVariable.AI_ID],
+                    dropTableID = data[(int)EnemyVariable.DropTableID],
+                    uniqueItemID = data[(int)EnemyVariable.UniqueItemID],
                     strength = int.Parse(data[(int)EnemyVariable.Strength]),
                     vitality = int.Parse(data[(int)EnemyVariable.Vitality]),
                     intellect = int.Parse(data[(int)EnemyVariable.Intellect]),
@@ -476,7 +483,7 @@ public class DataManager : MonoBehaviour
 
     #region Stage Data
     [HideInInspector] public StageData stageData;
-    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A5:AR";
+    private readonly string stageDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1301337997&range=A3:K";
     private enum StageVariable
     {
         ID,
@@ -490,39 +497,6 @@ public class DataManager : MonoBehaviour
         LongRangeEnemys,
         EliteEnemys,
         BossEnemy,
-        Equipment_itemMaxLevel,
-        Equipment_itemMinLevel,
-        Equipment_itemMinNum,
-        Equipment_itemMaxNum,
-        Equipment_dropPercentage_lowGrade,
-        Equipment_dropPercentage_nomal,
-        Equipment_dropPercentage_middleGrade,
-        Equipment_dropPercentage_highGrade,
-        Equipment_dropPercentage_advanced,
-        Equipment_dropPercentage_set,
-        Equipment_dropPercentage_special,
-        Expendable_itemMaxLevel,
-        Expendable_itemMinLevel,
-        Expendable_itemMinNum,
-        Expendable_itemMaxNum,
-        Expendable_dropPercentage_lowGrade,
-        Expendable_dropPercentage_nomal,
-        Expendable_dropPercentage_middleGrade,
-        Expendable_dropPercentage_highGrade,
-        Expendable_dropPercentage_advanced,
-        Expendable_dropPercentage_set,
-        Expendable_dropPercentage_special,
-        Ingredient_itemMaxLevel,
-        Ingredient_itemMinLevel,
-        Ingredient_itemMinNum,
-        Ingredient_itemMaxNum,
-        Ingredient_dropPercentage_lowGrade,
-        Ingredient_dropPercentage_nomal,
-        Ingredient_dropPercentage_middleGrade,
-        Ingredient_dropPercentage_highGrade,
-        Ingredient_dropPercentage_advanced,
-        Ingredient_dropPercentage_set,
-        Ingredient_dropPercentage_special,
     }
 
     public void UpdateStageData()
@@ -556,39 +530,6 @@ public class DataManager : MonoBehaviour
                     longRangeEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.LongRangeEnemys]),
                     eliteEnemys = ReadSpawnEnemyInfos(data[(int)StageVariable.EliteEnemys]),
                     bossEnemy = ReadSpawnEnemyInfo(data[(int)StageVariable.BossEnemy]),
-                    dropInfo_equipment = ReadDropItemInfo(data[(int)StageVariable.Equipment_itemMinLevel],
-                                                          data[(int)StageVariable.Equipment_itemMaxLevel],
-                                                          data[(int)StageVariable.Equipment_itemMinNum],
-                                                          data[(int)StageVariable.Equipment_itemMaxNum],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_lowGrade],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_nomal],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_middleGrade],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_highGrade],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_advanced],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_set],
-                                                          data[(int)StageVariable.Equipment_dropPercentage_special]),
-                    dropInfo_expendable = ReadDropItemInfo(data[(int)StageVariable.Expendable_itemMinLevel],
-                                                           data[(int)StageVariable.Expendable_itemMaxLevel],
-                                                           data[(int)StageVariable.Expendable_itemMinNum],
-                                                           data[(int)StageVariable.Expendable_itemMaxNum],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_lowGrade],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_nomal],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_middleGrade],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_highGrade],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_advanced],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_set],
-                                                           data[(int)StageVariable.Expendable_dropPercentage_special]),
-                    dropInfo_ingredient = ReadDropItemInfo(data[(int)StageVariable.Ingredient_itemMinLevel],
-                                                           data[(int)StageVariable.Ingredient_itemMaxLevel],
-                                                           data[(int)StageVariable.Ingredient_itemMinNum],
-                                                           data[(int)StageVariable.Ingredient_itemMaxNum],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_lowGrade],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_nomal],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_middleGrade],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_highGrade],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_advanced],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_set],
-                                                           data[(int)StageVariable.Ingredient_dropPercentage_special]),
                 };
                 stageData.stageInfos.Add(stageInfo);
             }
@@ -633,32 +574,12 @@ public class DataManager : MonoBehaviour
 
             return enemyInfo;
         }
-
-        DropItemInfo ReadDropItemInfo(string itemMinLevel, string itemMaxLevel, string itemMinNum, string itemMaxNum, string dropPercentage_lowGrade, string dropPercentage_nomal, string dropPercentage_middleGrade, string dropPercentage_highGrade, string dropPercentage_advanced, string dropPercentage_set, string dropPercentage_special)
-        {
-            var dropItemInfo = new DropItemInfo()
-            {
-                itemMinLevel = int.Parse(itemMinLevel),
-                itemMaxLevel = int.Parse(itemMaxLevel),
-                itemMinNum = int.Parse(itemMinNum),
-                itemMaxNum = int.Parse(itemMaxNum),
-                dropPercentage_lowGrade = int.Parse(dropPercentage_lowGrade),
-                dropPercentage_nomal = int.Parse(dropPercentage_nomal),
-                dropPercentage_middleGrade = int.Parse(dropPercentage_middleGrade),
-                dropPercentage_highGrade = int.Parse(dropPercentage_highGrade),
-                dropPercentage_advanced = int.Parse(dropPercentage_advanced),
-                dropPercentage_set = int.Parse(dropPercentage_set),
-                dropPercentage_special = int.Parse(dropPercentage_special),
-            };
-
-            return dropItemInfo;
-        }
     }
     #endregion
 
     #region Item Data
     [HideInInspector] public ItemData itemData;
-    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:K";
+    private readonly string itemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=267991501&range=A3:L";
     private enum ItemVariable
     {
         ID,
@@ -672,6 +593,7 @@ public class DataManager : MonoBehaviour
         X_Size,
         Y_Size,
         AddOption,
+        SetDropTable,
     }
 
     public void UpdateItemData()
@@ -710,6 +632,7 @@ public class DataManager : MonoBehaviour
                     price = int.Parse(data[(int)ItemVariable.Price]),
                     size = new Vector2Int(int.Parse(data[(int)ItemVariable.X_Size]), int.Parse(data[(int)ItemVariable.Y_Size])),
                     addOption = System.Convert.ToBoolean(int.Parse(data[(int)ItemVariable.AddOption])),
+                    setDropTable = System.Convert.ToBoolean(int.Parse(data[(int)ItemVariable.SetDropTable])),
                 };
                 itemData.itemInfos.Add(itemInfo);
             }
@@ -1187,6 +1110,135 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region DropTable Data
+    [HideInInspector] public DropTableData dropTableData;
+    private readonly string dropTableDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1891763678&range=A4:AE";
+    private enum DropTableVariable
+    {
+        ID,
+        StageLevel,
+        MinItemLevel,
+        MaxItemLevel,
+        Equipment_itemMinNum,
+        Equipment_itemMaxNum,
+        Equipment_dropPercentage_lowGrade,
+        Equipment_dropPercentage_nomal,
+        Equipment_dropPercentage_middleGrade,
+        Equipment_dropPercentage_highGrade,
+        Equipment_dropPercentage_advanced,
+        Equipment_dropPercentage_set,
+        Expendable_itemMinNum,
+        Expendable_itemMaxNum,
+        Expendable_dropPercentage_lowGrade,
+        Expendable_dropPercentage_nomal,
+        Expendable_dropPercentage_middleGrade,
+        Expendable_dropPercentage_highGrade,
+        Expendable_dropPercentage_advanced,
+        Expendable_dropPercentage_set,
+        Ingredient_itemMinNum,
+        Ingredient_itemMaxNum,
+        Ingredient_dropPercentage_lowGrade,
+        Ingredient_dropPercentage_nomal,
+        Ingredient_dropPercentage_middleGrade,
+        Ingredient_dropPercentage_highGrade,
+        Ingredient_dropPercentage_advanced,
+        Ingredient_dropPercentage_set,
+        UniqueTable_itemMinNum,
+        UniqueTable_itemMaxNum,
+        UniqueTable_dropPercentage,
+    }
+
+    public void UpdateDropTableData()
+    {
+        if (dropTableData == null) dropTableData = Resources.Load<DropTableData>("ScriptableObjects/DropTableData");
+        if (dropTableData.dropTableInfo.Count > 0) dropTableData.dropTableInfo.Clear();
+
+        StartCoroutine(ReadDropTableData());
+
+        IEnumerator ReadDropTableData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(dropTableDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var dropTableInfo = new DropTableDataInfo()
+                {
+                    ID = data[(int)DropTableVariable.ID],
+                    stageLevel = (StageLevel)int.Parse(data[(int)DropTableVariable.StageLevel]),
+                    minItemLevel = int.Parse(data[(int)DropTableVariable.MinItemLevel]),
+                    maxItemLevel = int.Parse(data[(int)DropTableVariable.MaxItemLevel]),
+                    dropInfo_equipment = ReadDropTableInfo("Table_Equipment",
+                                                           data[(int)DropTableVariable.Equipment_itemMinNum],
+                                                           data[(int)DropTableVariable.Equipment_itemMaxNum],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_lowGrade],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_nomal],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_middleGrade],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_highGrade],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_advanced],
+                                                           data[(int)DropTableVariable.Equipment_dropPercentage_set]),
+                    dropInfo_expendable = ReadDropTableInfo("Table_Expendable",
+                                                            data[(int)DropTableVariable.Expendable_itemMinNum],
+                                                            data[(int)DropTableVariable.Expendable_itemMaxNum],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_lowGrade],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_nomal],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_middleGrade],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_highGrade],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_advanced],
+                                                            data[(int)DropTableVariable.Expendable_dropPercentage_set]),
+                    dropInfo_ingredient = ReadDropTableInfo("Table_Ingredient",
+                                                            data[(int)DropTableVariable.Ingredient_itemMinNum],
+                                                            data[(int)DropTableVariable.Ingredient_itemMaxNum],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_lowGrade],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_nomal],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_middleGrade],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_highGrade],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_advanced],
+                                                            data[(int)DropTableVariable.Ingredient_dropPercentage_set]),
+                    uniqueTable = ReadUniqueTableInfo(data[(int)DropTableVariable.UniqueTable_itemMinNum],
+                                                      data[(int)DropTableVariable.UniqueTable_itemMaxNum],
+                                                      data[(int)DropTableVariable.UniqueTable_dropPercentage])
+                };
+                dropTableData.dropTableInfo.Add(dropTableInfo);
+            }
+            Debug.Log("Update DropTable Data");
+        }
+
+        DropTable ReadDropTableInfo(string tableName, string itemMinNum, string itemMaxNum, string dropPercentage_lowGrade, string dropPercentage_nomal, string dropPercentage_middleGrade, string dropPercentage_highGrade, string dropPercentage_advanced, string dropPercentage_set)
+        {
+            var dropTableInfo = new DropTable()
+            {
+                indexName = $"{tableName}",
+                itemMinNum = int.Parse(itemMinNum),
+                itemMaxNum = int.Parse(itemMaxNum),
+                dropPercentage_lowGrade = int.Parse(dropPercentage_lowGrade),
+                dropPercentage_nomal = int.Parse(dropPercentage_nomal),
+                dropPercentage_middleGrade = int.Parse(dropPercentage_middleGrade),
+                dropPercentage_highGrade = int.Parse(dropPercentage_highGrade),
+                dropPercentage_advanced = int.Parse(dropPercentage_advanced),
+                dropPercentage_set = int.Parse(dropPercentage_set),
+            };
+
+            return dropTableInfo;
+        }
+
+        UniqueTable ReadUniqueTableInfo(string itemMinNum, string itemMaxNum, string dropPercentage)
+        {
+            var uniqueTable = new UniqueTable()
+            {
+                itemMinNum = int.Parse(itemMinNum),
+                itemMaxNum = int.Parse(itemMaxNum),
+                dropPercentage = int.Parse(dropPercentage),
+            };
+
+            return uniqueTable;
+        }
+    }
+    #endregion
+
     private List<int> ReadCompatModelInfo(string modelData)
     {
         var compatModels = new List<int>();
@@ -1276,6 +1328,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateOptionSheetData();
                 EditorUtility.SetDirty(dataMgr.optionSheetData);
             }
+            if (GUILayout.Button("Update the DropTable Database"))
+            {
+                dataMgr.UpdateDropTableData();
+                EditorUtility.SetDirty(dataMgr.dropTableData);
+            }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))
             {
@@ -1303,6 +1360,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.itemOptionData);
                 dataMgr.UpdateOptionSheetData();
                 EditorUtility.SetDirty(dataMgr.optionSheetData);
+                dataMgr.UpdateDropTableData();
+                EditorUtility.SetDirty(dataMgr.dropTableData);
             }
         }
     }

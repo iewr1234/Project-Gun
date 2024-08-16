@@ -12,6 +12,8 @@ public class EnemyDataInfo
     public string prefabName;
     public string charName;
     public string aiID;
+    public string dropTableID;
+    public string uniqueItemID;
     [Space(5f)]
 
     public int strength;
