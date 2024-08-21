@@ -4828,6 +4828,7 @@ Transform:
   - {fileID: 2079252459091370906}
   - {fileID: 6303128432421152357}
   - {fileID: 8121828533731697282}
+  - {fileID: 7338899582266708830}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4867,12 +4868,66 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charUI: {fileID: 0}
   weapons: []
+  grenadeHlr: {fileID: 0}
   armor:
     armorName: 
     maxBulletproof: 0
     bulletproof: 0
     maxDurability: 0
     durability: 0
+  dropTableData:
+    ID: 
+    stageLevel: 0
+    minItemLevel: 0
+    maxItemLevel: 0
+    dropInfo_equipment:
+      indexName: 
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+    dropInfo_expendable:
+      indexName: 
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+    dropInfo_ingredient:
+      indexName: 
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage_lowGrade: 0
+      dropPercentage_nomal: 0
+      dropPercentage_middleGrade: 0
+      dropPercentage_highGrade: 0
+      dropPercentage_advanced: 0
+      dropPercentage_set: 0
+    uniqueTable:
+      itemMinNum: 0
+      itemMaxNum: 0
+      dropPercentage: 0
+  uniqueItemData:
+    indexName: 
+    ID: 
+    dataID: 
+    itemName: 
+    type: 0
+    level: 0
+    rarity: 0
+    maxNesting: 0
+    price: 0
+    size: {x: 0, y: 0}
+    addOption: 0
+    setDropTable: 0
+    itemOptions: []
   animator: {fileID: 0}
   cd: {fileID: 0}
   aimPoint: {fileID: 0}
@@ -4884,6 +4939,7 @@ MonoBehaviour:
   sMeshs: []
   ownerType: 0
   state: 0
+  turnEnd: 0
   strength: 0
   vitality: 0
   intellect: 0
@@ -4905,11 +4961,23 @@ MonoBehaviour:
   baseIndex: 0
   upperIndex: 0
   currentWeapon: {fileID: 0}
-  fireRateNum: 0
-  sightNum: 0
+  fiarRate: 0
+  sightRate: 0
   currentNode: {fileID: 0}
   cover: {fileID: 0}
   isCopy: 0
+  aiData:
+    indexName: 
+    ID: 
+    typeName: 
+    actionType: 0
+    score_move: 0
+    score_noneCover: 0
+    score_halfCover: 0
+    score_fullCover: 0
+    score_noneShoot: 0
+    score_halfShoot: 0
+    score_fullShoot: 0
   targetList: []
   targetIndex: 0
   watchInfo:
@@ -4920,6 +4988,13 @@ MonoBehaviour:
     isRight: 0
     minAngle: 0
     maxAngle: 0
+  throwInfo:
+    grenade: {fileID: 0}
+    targetNode: {fileID: 0}
+    throwNode: {fileID: 0}
+    throwerCover: {fileID: 0}
+    isRight: 0
+    points: []
   commandList: []
   pause: 0
 --- !u!136 &6475746655025466428
@@ -9183,6 +9258,68 @@ MonoBehaviour:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4110740443896360912, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
   m_PrefabInstance: {fileID: 505439147841264542}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1484738481476188834
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2079099129505339146}
+    m_Modifications:
+    - target: {fileID: 1546465392543420994, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_Name
+      value: GrenadePool
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_RootOrder
+      value: 37
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 404be1a8757efec43beeda5867616052, type: 3}
+--- !u!4 &7338899582266708830 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8161608297895995900, guid: 404be1a8757efec43beeda5867616052, type: 3}
+  m_PrefabInstance: {fileID: 1484738481476188834}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2690154381136973835
 PrefabInstance:

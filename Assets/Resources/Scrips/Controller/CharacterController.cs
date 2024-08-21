@@ -33,9 +33,11 @@ public enum CommandType
     Targeting,
     Aim,
     Watch,
+    ThrowAim,
     Shoot,
     Reload,
     ChangeWeapon,
+    Throw,
 }
 
 [System.Serializable]
@@ -88,6 +90,17 @@ public struct WatchInfo
     public float maxAngle;
 }
 
+[System.Serializable]
+public struct ThrowInfo
+{
+    public GameObject grenade;
+    public FieldNode targetNode;
+    public FieldNode throwNode;
+    public Cover throwerCover;
+    public bool isRight;
+    public List<Vector3> points;
+}
+
 public struct LineInfo
 {
     public Vector3 startPos;
@@ -100,6 +113,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public CharacterUI charUI;
     public List<Weapon> weapons;
+    public GrenadeHandler grenadeHlr;
     public Armor armor;
     [Space(5f)]
 
@@ -179,6 +193,7 @@ public class CharacterController : MonoBehaviour
 
     [Space(5f)]
     public WatchInfo watchInfo;
+    public ThrowInfo throwInfo;
     [Space(5f)]
 
     public List<CharacterCommand> commandList = new List<CharacterCommand>();
@@ -213,6 +228,8 @@ public class CharacterController : MonoBehaviour
 
     private bool changing;
     private int changeIndex;
+
+    private bool throwing;
 
     /// <summary>
     /// 구성요소 설정
@@ -606,6 +623,9 @@ public class CharacterController : MonoBehaviour
             case CommandType.Watch:
                 AimAndWatchProcess(command);
                 break;
+            case CommandType.ThrowAim:
+                AimAndWatchProcess(command);
+                break;
             case CommandType.Shoot:
                 ShootProcess(command);
                 break;
@@ -614,6 +634,9 @@ public class CharacterController : MonoBehaviour
                 break;
             case CommandType.ChangeWeapon:
                 ChangeWeaponProcess(command);
+                break;
+            case CommandType.Throw:
+                ThrowProcess(command);
                 break;
             default:
                 break;
@@ -1222,6 +1245,16 @@ public class CharacterController : MonoBehaviour
                     NoneCoverAim();
                 }
                 break;
+            case CommandType.ThrowAim:
+                if (throwInfo.throwerCover != null)
+                {
+                    CoverAim();
+                }
+                else
+                {
+                    NoneCoverAim();
+                }
+                break;
             default:
                 break;
         }
@@ -1235,7 +1268,6 @@ public class CharacterController : MonoBehaviour
                 {
                     case CommandType.Aim:
                         animator.SetBool("isRight", command.targetInfo.isRight);
-                        //animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                         coverPos = command.targetInfo.shooterNode.transform.position;
                         SetAiming(command.targetInfo);
                         break;
@@ -1243,6 +1275,13 @@ public class CharacterController : MonoBehaviour
                         animator.SetBool("isRight", watchInfo.isRight);
                         coverPos = watchInfo.watchNode.transform.position;
                         aimTf = watchInfo.targetNode.transform;
+                        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+                        aimPoint.position = aimTf.position + aimInterval;
+                        break;
+                    case CommandType.ThrowAim:
+                        animator.SetBool("isRight", throwInfo.isRight);
+                        coverPos = throwInfo.throwNode.transform.position;
+                        aimTf = throwInfo.targetNode.transform;
                         aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
                         aimPoint.position = aimTf.position + aimInterval;
                         break;
@@ -1279,13 +1318,18 @@ public class CharacterController : MonoBehaviour
             switch (command.type)
             {
                 case CommandType.Aim:
-                    //animator.SetInteger("shootNum", currentWeapon.GetShootBulletNumber());
                     transform.LookAt(command.targetInfo.target.transform);
                     SetAiming(command.targetInfo);
                     break;
                 case CommandType.Watch:
-                    transform.LookAt(watchInfo.targetNode.transform);
-                    aimTf = watchInfo.targetNode.transform;
+                    var watchTarget = watchInfo.targetNode.transform;
+                    transform.LookAt(watchTarget);
+                    aimTf = watchTarget;
+                    break;
+                case CommandType.ThrowAim:
+                    var throwTarget = throwInfo.targetNode.transform;
+                    transform.LookAt(throwTarget);
+                    aimTf = throwTarget;
                     break;
                 default:
                     break;
@@ -1393,6 +1437,15 @@ public class CharacterController : MonoBehaviour
             }
             animator.SetTrigger("change");
             changing = true;
+        }
+    }
+
+    private void ThrowProcess(CharacterCommand command)
+    {
+        if (!throwing)
+        {
+            animator.SetTrigger("throw");
+            throwing = true;
         }
     }
 
@@ -1616,7 +1669,8 @@ public class CharacterController : MonoBehaviour
             }
 
             var dir = Vector3.Normalize(targetNode.transform.position - watchNode.transform.position);
-            if (Physics.Raycast(watchNode.transform.position, dir, DataUtility.nodeSize, gameMgr.coverLayer))
+            var interval = new Vector3(0f, 1f, 0f);
+            if (Physics.Raycast(watchNode.transform.position + interval, dir, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 watchNode = currentNode;
             }
@@ -1639,6 +1693,79 @@ public class CharacterController : MonoBehaviour
             isRight = isRight,
             minAngle = DataUtility.GetFloorValue((nodeAngle - halfAngle + 360f) % 360f, 2),
             maxAngle = DataUtility.GetFloorValue((nodeAngle + halfAngle) % 360f, 2),
+        };
+    }
+
+    public void SetGrenadeInfo(FieldNode targetNode)
+    {
+        FieldNode throwNode;
+        var isRight = false;
+        var interval = new Vector3(0f, 1f, 0f);
+        var throwerCover = FindCoverNode(currentNode, targetNode);
+        if (throwerCover != null && throwerCover.coverType == CoverType.Full)
+        {
+            var RN = CheckTheCanMoveNode(currentNode, throwerCover, TargetDirection.Right);
+            var LN = CheckTheCanMoveNode(currentNode, throwerCover, TargetDirection.Left);
+            if (RN == null && LN == null)
+            {
+                throwNode = currentNode;
+            }
+            else if (LN == null)
+            {
+                throwNode = RN;
+                isRight = true;
+            }
+            else if (RN == null)
+            {
+                throwNode = LN;
+            }
+            else if (DataUtility.GetDistance(RN.transform.position, targetNode.transform.position)
+                  <= DataUtility.GetDistance(LN.transform.position, targetNode.transform.position))
+            {
+                throwNode = RN;
+                isRight = true;
+            }
+            else
+            {
+                throwNode = LN;
+            }
+
+            var dir = Vector3.Normalize(targetNode.transform.position - throwNode.transform.position);
+            if (Physics.Raycast(throwNode.transform.position + interval, dir, DataUtility.nodeSize, gameMgr.coverLayer))
+            {
+                throwNode = currentNode;
+            }
+        }
+        else
+        {
+            throwNode = currentNode;
+        }
+
+        if (!CheckTheCoverAlongPath(throwNode.transform.position, targetNode.transform.position)) return;
+
+        // 포물선
+        grenadeHlr.lineRdr.enabled = true;
+        var startPos = throwNode.transform.position + interval;
+        var endPos = targetNode.transform.position;
+        var center = (startPos + endPos) * 0.5f;
+        center.y -= 3;
+        startPos -= center;
+        endPos -= center;
+        for (int i = 0; i < grenadeHlr.lineRdr.positionCount; i++)
+        {
+            var point = Vector3.Slerp(startPos, endPos, i / (float)(grenadeHlr.lineRdr.positionCount - 1));
+            point += center;
+            grenadeHlr.lineRdr.SetPosition(i, point);
+        }
+        grenadeHlr.rangeCdr.transform.position = grenadeHlr.lineRdr.GetPosition(grenadeHlr.lineRdr.positionCount - 1);
+        grenadeHlr.rangeCdr.gameObject.SetActive(true);
+
+        throwInfo = new ThrowInfo()
+        {
+            targetNode = targetNode,
+            throwNode = throwNode,
+            throwerCover = throwerCover,
+            isRight = isRight,
         };
     }
 
@@ -2097,7 +2224,7 @@ public class CharacterController : MonoBehaviour
     }
 
     /// <summary>
-    /// 사격경로 상의 장애물을 체크
+    /// 경로 상의 장애물을 체크
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="targetPos"></param>
@@ -2109,6 +2236,32 @@ public class CharacterController : MonoBehaviour
         if (!isRange) return false;
 
         bool canShoot;
+        var interval = new Vector3(0f, 1f, 0f);
+        pos += interval;
+        targetPos += interval;
+        var dir = Vector3.Normalize(targetPos - pos);
+        if (Physics.Raycast(pos, dir, dist, gameMgr.coverLayer))
+        {
+            canShoot = false;
+        }
+        else
+        {
+            canShoot = true;
+        }
+
+        return canShoot;
+    }
+
+    /// <summary>
+    /// 경로 상의 장애물을 체크
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="targetPos"></param>
+    /// <returns></returns>
+    public bool CheckTheCoverAlongPath(Vector3 pos, Vector3 targetPos)
+    {
+        bool canShoot;
+        var dist = DataUtility.GetDistance(pos, targetPos);
         var interval = new Vector3(0f, 1f, 0f);
         pos += interval;
         targetPos += interval;
@@ -2467,39 +2620,7 @@ public class CharacterController : MonoBehaviour
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
-    public void AddCommand(CommandType type)
-    {
-        switch (type)
-        {
-            case CommandType.Aim:
-                var coverAimCommand = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = CommandType.Aim,
-                    targetInfo = targetList[targetIndex],
-                };
-                commandList.Add(coverAimCommand);
-                break;
-            case CommandType.Shoot:
-                var shootCommand = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = CommandType.Shoot,
-                    targetInfo = targetList[targetIndex],
-                };
-                commandList.Add(shootCommand);
-                break;
-            default:
-                var command = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = type,
-                };
-                commandList.Add(command);
-                break;
-        }
-    }
-
+    /// <param name="targetInfo"></param>
     public void AddCommand(CommandType type, TargetInfo targetInfo)
     {
         switch (type)
@@ -2523,6 +2644,43 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(shootCommand);
                 break;
             default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    public void AddCommand(CommandType type)
+    {
+        switch (type)
+        {
+            case CommandType.Aim:
+                var aimCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Aim,
+                    targetInfo = targetList[targetIndex],
+                };
+                commandList.Add(aimCommand);
+                break;
+            case CommandType.Shoot:
+                var shootCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Shoot,
+                    targetInfo = targetList[targetIndex],
+                };
+                commandList.Add(shootCommand);
+                break;
+            default:
+                var command = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = type,
+                };
+                commandList.Add(command);
                 break;
         }
     }
@@ -2802,6 +2960,17 @@ public class CharacterController : MonoBehaviour
 
         commandList.RemoveAt(0);
         changing = false;
+    }
+
+    public void Event_SetGrenade()
+    {
+        var pos = new Vector3(-0.047f, -0.051f, 0f);
+        var rot = new Vector3(-15.6f, 90f, 90f);
+    }
+
+    public void Event_ThrowGrenade()
+    {
+
     }
     #endregion
 

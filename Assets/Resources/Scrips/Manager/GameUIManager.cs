@@ -323,7 +323,7 @@ public class GameUIManager : MonoBehaviour
         //    case false:
         //        break;
         //}
-        playUI.SetActive(!value);
+        //playUI.SetActive(!value);
         stageUI.SetActive(value);
         gameMgr.camMgr.lockCam = value;
     }

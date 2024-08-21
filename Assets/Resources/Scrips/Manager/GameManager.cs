@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public enum GameState
     Shoot,
     Reload,
     Watch,
+    Grenade,
     Inventory,
     Base,
     Result,
@@ -83,7 +85,7 @@ public class GameManager : MonoBehaviour
     private LineRenderer moveLine;
 
     [Header("[Reload]")]
-    private List<ItemHandler> rigMags = new List<ItemHandler>();
+    private List<ItemHandler> rigItems = new List<ItemHandler>();
     private int magIndex;
 
     [Header("[Character]")]
@@ -193,6 +195,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, false));
+                    uiMgr.playUI.SetActive(true);
                 }
                 dataMgr.gameData.mapLoad = false;
                 mapEdt.SetActive(false);
@@ -238,6 +241,8 @@ public class GameManager : MonoBehaviour
             }
         }
         charCtr.SetOutlinable();
+        charCtr.grenadeHlr = charCtr.transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        charCtr.grenadeHlr.SetComponents();
 
         //// Set Armor
         //if (charData.armorID != "None")
@@ -454,6 +459,10 @@ public class GameManager : MonoBehaviour
                     currentRange = rangePool.Find(x => !x.gameObject.activeSelf);
                     gameState = GameState.Watch;
                 }
+                else if (Input.GetKeyDown(KeyCode.G))
+                {
+                    ThrowAction_Move();
+                }
                 else if (Input.GetKeyDown(KeyCode.Escape) && passList.Count > 0)
                 {
                     ClearPassPoint();
@@ -541,7 +550,7 @@ public class GameManager : MonoBehaviour
             case GameState.Reload:
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
                 {
-                    if (rigMags.Count < 2) return;
+                    if (rigItems.Count < 2) return;
 
                     uiMgr.magIconList[magIndex].SetImageScale(false);
                     if (Input.GetKeyDown(KeyCode.A))
@@ -549,13 +558,13 @@ public class GameManager : MonoBehaviour
                         magIndex--;
                         if (magIndex < 0)
                         {
-                            magIndex = rigMags.Count - 1;
+                            magIndex = rigItems.Count - 1;
                         }
                     }
                     else
                     {
                         magIndex++;
-                        if (magIndex == rigMags.Count)
+                        if (magIndex == rigItems.Count)
                         {
                             magIndex = 0;
                         }
@@ -571,7 +580,7 @@ public class GameManager : MonoBehaviour
                     uiMgr.SetActiveMagazineIcon(false);
                     uiMgr.reloadButton.SetActiveButton(false);
                     FindMovableNodes(selectChar, true);
-                    rigMags.Clear();
+                    rigItems.Clear();
                     gameState = GameState.Move;
                 }
                 break;
@@ -593,6 +602,21 @@ public class GameManager : MonoBehaviour
                     gameState = GameState.None;
                 }
                 break;
+            case GameState.Grenade:
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    if (selectChar == null) return;
+
+                    ThrowAction_Grenade();
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    selectChar.grenadeHlr.lineRdr.enabled = false;
+                    selectChar.grenadeHlr.rangeCdr.gameObject.SetActive(false);
+                    selectChar = null;
+                    gameState = GameState.None;
+                }
+                break;
             default:
                 break;
         }
@@ -601,92 +625,6 @@ public class GameManager : MonoBehaviour
         {
             TurnEnd();
         }
-    }
-
-    public void ShootingAction_Move()
-    {
-        if (selectChar == null || selectChar.currentWeapon == null) return;
-
-        var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isMag /*&& !weapon.weaponData.isChamber*/)
-        {
-            Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
-            return;
-        }
-        if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
-        {
-            Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
-            return;
-        }
-
-        ClearLine();
-        selectChar.FindTargets(selectChar.currentNode, false);
-        if (selectChar.SetTargetOn())
-        {
-            RemoveTargetNode();
-            SwitchMovableNodes(false);
-            SwitchCharacterUI(false);
-            gameState = GameState.Shoot;
-        }
-    }
-
-    public void ReloadAction_Move()
-    {
-        if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
-
-        gameState = GameState.Reload;
-        uiMgr.reloadButton.SetActiveButton(true);
-        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
-        SwitchMovableNodes(false);
-        ClearLine();
-        RemoveTargetNode();
-        if (selectChar.currentWeapon == null) return;
-
-        rigMags = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                && x.itemSlots[0].myStorage.type == MyStorageType.Rig
-                                                && x.itemData.type == ItemType.Magazine
-                                                && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
-                                     .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
-
-        if (rigMags.Count == 0) return;
-
-        magIndex = 0;
-        uiMgr.SetActiveMagazineIcon(true);
-        for (int i = 0; i < rigMags.Count; i++)
-        {
-            var rigMag = rigMags[i];
-            var magIcon = uiMgr.magIconList[i];
-            magIcon.gameObject.SetActive(true);
-            magIcon.SetMagazineSlider(rigMag.magData.magSize, rigMag.magData.loadedBullets.Count);
-            magIcon.SetImageScale(i == 0);
-        }
-    }
-
-    public void ReloadAction_Reload()
-    {
-        if (rigMags.Count == 0) return;
-
-        var weapon = selectChar.currentWeapon;
-        if (weapon == null) return;
-
-        var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
-                                                    && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
-                                                    && x.weaponData.ID == weapon.weaponData.ID);
-        var rigMag = rigMags[magIndex];
-        if (weapon.weaponData.isMag)
-        {
-            var equipMag = weapon.weaponData.equipMag;
-            invenMgr.SetItemInStorage(equipMag);
-        }
-        invenMgr.QuickEquip(weaponItem, rigMag);
-
-        selectChar.AddCommand(CommandType.Reload);
-        selectChar = null;
-
-        uiMgr.SetActiveMagazineIcon(false);
-        uiMgr.reloadButton.SetActiveButton(false);
-        rigMags.Clear();
-        gameState = GameState.None;
     }
 
     private void SwitchCharacterUI(bool value)
@@ -759,6 +697,12 @@ public class GameManager : MonoBehaviour
                         selectChar.state = CharacterState.Watch;
                         selectChar = null;
                         gameState = GameState.None;
+                        break;
+                    case GameState.Grenade:
+                        if (selectChar == null) return;
+                        if (node != targetNode) return;
+
+                        ThrowAction_Grenade();
                         break;
                     case GameState.Base:
                         if (invenMgr.showStorage) return;
@@ -895,9 +839,130 @@ public class GameManager : MonoBehaviour
                         targetNode = node;
                     }
                     break;
+                case GameState.Grenade:
+                    if (targetNode != node)
+                    {
+                        if (node != null && node != selectChar.currentNode)
+                        {
+                            selectChar.SetGrenadeInfo(node);
+                        }
+                        targetNode = node;
+                    }
+                    break;
                 default:
                     break;
             }
+        }
+    }
+
+    public void ShootingAction_Move()
+    {
+        if (selectChar == null || selectChar.currentWeapon == null) return;
+
+        var weapon = selectChar.currentWeapon;
+        if (!weapon.weaponData.isMag /*&& !weapon.weaponData.isChamber*/)
+        {
+            Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
+            return;
+        }
+        if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
+        {
+            Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
+            return;
+        }
+
+        ClearLine();
+        selectChar.FindTargets(selectChar.currentNode, false);
+        if (selectChar.SetTargetOn())
+        {
+            RemoveTargetNode();
+            SwitchMovableNodes(false);
+            SwitchCharacterUI(false);
+            gameState = GameState.Shoot;
+        }
+    }
+
+    public void ReloadAction_Move()
+    {
+        if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
+
+        gameState = GameState.Reload;
+        uiMgr.reloadButton.SetActiveButton(true);
+        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
+        SwitchMovableNodes(false);
+        ClearLine();
+        RemoveTargetNode();
+        if (selectChar.currentWeapon == null) return;
+
+        rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                && x.itemData.type == ItemType.Magazine
+                                                && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
+                                     .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+
+        if (rigItems.Count == 0) return;
+
+        magIndex = 0;
+        uiMgr.SetActiveMagazineIcon(true);
+        for (int i = 0; i < rigItems.Count; i++)
+        {
+            var rigMag = rigItems[i];
+            var magIcon = uiMgr.magIconList[i];
+            magIcon.gameObject.SetActive(true);
+            magIcon.SetMagazineSlider(rigMag.magData.magSize, rigMag.magData.loadedBullets.Count);
+            magIcon.SetImageScale(i == 0);
+        }
+    }
+
+    public void ReloadAction_Reload()
+    {
+        if (rigItems.Count == 0) return;
+
+        var weapon = selectChar.currentWeapon;
+        if (weapon == null) return;
+
+        var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
+                                                    && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
+                                                    && x.weaponData.ID == weapon.weaponData.ID);
+        var rigMag = rigItems[magIndex];
+        if (weapon.weaponData.isMag)
+        {
+            var equipMag = weapon.weaponData.equipMag;
+            invenMgr.SetItemInStorage(equipMag);
+        }
+        invenMgr.QuickEquip(weaponItem, rigMag);
+
+        selectChar.AddCommand(CommandType.Reload);
+        selectChar = null;
+
+        uiMgr.SetActiveMagazineIcon(false);
+        uiMgr.reloadButton.SetActiveButton(false);
+        rigItems.Clear();
+        gameState = GameState.None;
+    }
+
+    public void ThrowAction_Move()
+    {
+        RemoveTargetNode();
+        ClearLine();
+        SwitchMovableNodes(false);
+        gameState = GameState.Grenade;
+    }
+
+    public void ThrowAction_Grenade()
+    {
+        selectChar.grenadeHlr.lineRdr.enabled = false;
+        selectChar.grenadeHlr.rangeCdr.gameObject.SetActive(false);
+        if (selectChar.animator.GetBool("isCover"))
+        {
+            selectChar.AddCommand(CommandType.ThrowAim);
+            selectChar.AddCommand(CommandType.Throw);
+            selectChar.AddCommand(CommandType.BackCover);
+        }
+        else
+        {
+            selectChar.AddCommand(CommandType.ThrowAim);
+            selectChar.AddCommand(CommandType.Throw);
         }
     }
 
@@ -1466,10 +1531,12 @@ public class GameManager : MonoBehaviour
         sceneHlr.StartLoadScene("SampleScene");
     }
 
-    public void ReturnTitle()
+    public void ReturnBase()
     {
         dataMgr.gameData.stageData = null;
-        sceneHlr.StartLoadScene("TitleScene");
+        dataMgr.gameData.mapName = "BASECAMP";
+        dataMgr.gameData.mapLoad = true;
+        sceneHlr.StartLoadScene("SampleScene");
     }
 
     public IEnumerator Coroutine_GameEnd()
@@ -1480,7 +1547,7 @@ public class GameManager : MonoBehaviour
         Time.fixedDeltaTime = 0.02f;
         if (playerList.Count == playerList.FindAll(x => x.state == CharacterState.Dead).Count)
         {
-            ReturnTitle();
+            ReturnBase();
         }
         else
         {

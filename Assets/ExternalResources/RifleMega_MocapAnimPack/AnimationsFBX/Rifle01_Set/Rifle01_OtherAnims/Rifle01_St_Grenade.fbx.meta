@@ -1,11 +1,11 @@
 fileFormatVersion: 2
 guid: 76dbecbd84fb93b4ebd9e9d4a034b842
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 21300
   internalIDToNameTable:
   - first:
       74: 1827226128182048838
-    second: Rifle01_St_Grenade
+    second: Grenade
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -59,7 +59,21 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.60655737
+        functionName: Event_ThrowGrenade
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.38114756
+        functionName: Event_SetGrenade
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask:
       - path: 
         weight: 1
@@ -1135,6 +1149,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

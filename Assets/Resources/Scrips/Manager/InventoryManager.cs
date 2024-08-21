@@ -1413,7 +1413,7 @@ public class InventoryManager : MonoBehaviour
     {
         returnButton.enabled = false;
         SetStorageUI(false);
-        gameMgr.ReturnTitle();
+        gameMgr.ReturnBase();
     }
 
     public void Button_Storage_Close()
