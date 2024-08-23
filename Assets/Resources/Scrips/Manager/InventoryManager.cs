@@ -156,25 +156,6 @@ public class InventoryManager : MonoBehaviour
                     break;
             }
         }
-
-        //SetItemInStorage("Rifle_1", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Rifle_2", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Pistol_1", 1, otherStorage.itemSlots, true);
-
-        //SetItemInStorage("Sight_1", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Sight_2", 1, otherStorage.itemSlots, true);
-
-        //SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Magazine_1", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Magazine_2", 1, otherStorage.itemSlots, true);
-        //SetItemInStorage("Magazine_3", 1, otherStorage.itemSlots, true);
-
-        //SetItemInStorage("Bullet_1", 100, otherStorage.itemSlots, true);
-        //SetItemInStorage("Bullet_2", 100, otherStorage.itemSlots, true);
-        //SetItemInStorage("Bullet_3", 50, otherStorage.itemSlots, true);
-
-        //SetItemInStorage("Sight_20", 1, otherStorage.itemSlots, true);
     }
 
     private void CreateItems()

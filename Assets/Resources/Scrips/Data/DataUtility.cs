@@ -58,6 +58,23 @@ public static class DataUtility
         return Mathf.Round(distance * 100) / 100;
     }
 
+    public static Vector3[] GetParabolaPoints(int length, Vector3 startPos, Vector3 endPos)
+    {
+        var points = new Vector3[length];
+        var center = (startPos + endPos) * 0.5f;
+        center.y -= 3;
+        startPos -= center;
+        endPos -= center;
+        for (int i = 0; i < points.Length; i++)
+        {
+            var point = Vector3.Slerp(startPos, endPos, i / (float)(points.Length - 1));
+            point += center;
+            points[i] = point;
+        }
+
+        return points;
+    }
+
     public static Vector3 GetPositionOfNodeOutline(TargetDirection setDirection)
     {
         switch (setDirection)

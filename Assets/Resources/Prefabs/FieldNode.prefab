@@ -375,7 +375,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8743686483124798450}
   - component: {fileID: 5430197613779608328}
-  m_Layer: 18
+  m_Layer: 19
   m_Name: TargetCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -658,7 +658,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
-  baseMgr: {fileID: 0}
+  baseStorage: {fileID: 0}
   outlines: []
   unableMove: {fileID: 0}
   charCtr: {fileID: 0}
@@ -666,6 +666,7 @@ MonoBehaviour:
   canMove: 0
   canShoot: 1
   moveCost: 0
+  markerType: 0
   enemyType: -1
   baseType: -1
   hitNode: 0

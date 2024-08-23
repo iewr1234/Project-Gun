@@ -55,7 +55,7 @@ namespace EPOOutline
     public class Outlinable : MonoBehaviour
     {
         private static List<TargetStateListener> tempListeners = new List<TargetStateListener>();
-        
+
         private static HashSet<Outlinable> outlinables = new HashSet<Outlinable>();
 
         [System.Serializable]
@@ -143,7 +143,7 @@ namespace EPOOutline
 
         [SerializeField]
         private ComplexMaskingMode complexMaskingMode;
-        
+
         [SerializeField]
         private OutlinableDrawingMode drawingMode = OutlinableDrawingMode.Normal;
 
@@ -167,7 +167,7 @@ namespace EPOOutline
         private OutlineProperties frontParameters = new OutlineProperties();
 
         private bool shouldValidateTargets = false;
-        
+
 #pragma warning restore CS0649
 
         public RenderStyle RenderStyle
@@ -253,7 +253,7 @@ namespace EPOOutline
                 return backParameters;
             }
         }
-        
+
         public bool NeedFillMask
         {
             get
@@ -300,11 +300,11 @@ namespace EPOOutline
                 var listener = target.renderer.GetComponent<TargetStateListener>();
                 if (listener == null)
                     return;
-                
+
                 listener.RemoveCallback(this, UpdateVisibility);
             }
         }
-        
+
         public OutlineTarget this[int index]
         {
             get
@@ -400,7 +400,7 @@ namespace EPOOutline
         {
             outlinables.Remove(this);
         }
-        
+
         public static void GetAllActiveOutlinables(Camera camera, List<Outlinable> outlinablesList)
         {
             outlinablesList.Clear();
@@ -424,6 +424,7 @@ namespace EPOOutline
             var renderers = GetComponentsInChildren<Renderer>(true);
             foreach (var renderer in renderers)
             {
+                if (renderer.CompareTag("Grenade")) continue;
                 if (!MatchingMode(renderer, renderersAddingMode))
                     continue;
 
@@ -444,7 +445,7 @@ namespace EPOOutline
 
         private bool MatchingMode(Renderer renderer, RenderersAddingMode mode)
         {
-            return 
+            return
                 (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer) && !(renderer is SpriteRenderer) && (mode & RenderersAddingMode.Others) != RenderersAddingMode.None) ||
                 (renderer is MeshRenderer && (mode & RenderersAddingMode.MeshRenderer) != RenderersAddingMode.None) ||
                 (renderer is SpriteRenderer && (mode & RenderersAddingMode.SpriteRenderer) != RenderersAddingMode.None) ||

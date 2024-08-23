@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -114,6 +112,7 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public LayerMask nodeLayer;
     [HideInInspector] public LayerMask coverLayer;
+    [HideInInspector] public LayerMask charLayer;
     [HideInInspector] public LayerMask watchLayer;
 
     private readonly int linePoolMax = 15;
@@ -152,7 +151,8 @@ public class GameManager : MonoBehaviour
 
         nodeLayer = LayerMask.GetMask("Node");
         coverLayer = LayerMask.GetMask("Cover");
-        watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("Character");
+        charLayer = LayerMask.GetMask("Character");
+        watchLayer = LayerMask.GetMask("Cover") | LayerMask.GetMask("TargetCheck");
 
         CreateLines();
         CreateBullets();
@@ -241,8 +241,8 @@ public class GameManager : MonoBehaviour
             }
         }
         charCtr.SetOutlinable();
-        charCtr.grenadeHlr = charCtr.transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
-        charCtr.grenadeHlr.SetComponents();
+        //charCtr.grenadeHlr = charCtr.transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        //charCtr.grenadeHlr.SetComponents();
 
         //// Set Armor
         //if (charData.armorID != "None")
@@ -408,6 +408,7 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
+        if (camMgr.lockCam) return;
         if (gameState == GameState.Inventory) return;
 
         switch (currentTurn)
@@ -611,8 +612,9 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    selectChar.SetOffThrowTargets();
                     selectChar.grenadeHlr.lineRdr.enabled = false;
-                    selectChar.grenadeHlr.rangeCdr.gameObject.SetActive(false);
+                    selectChar.grenadeHlr.rangeMr.gameObject.SetActive(false);
                     selectChar = null;
                     gameState = GameState.None;
                 }
@@ -840,8 +842,11 @@ public class GameManager : MonoBehaviour
                     }
                     break;
                 case GameState.Grenade:
-                    if (targetNode != node)
+                    if (node != null && targetNode != node)
                     {
+                        var dist = DataUtility.GetDistance(selectChar.currentNode.transform.position, node.transform.position);
+                        if (selectChar.grenadeHlr.throwRange < dist) return;
+
                         if (node != null && node != selectChar.currentNode)
                         {
                             selectChar.SetGrenadeInfo(node);
@@ -946,24 +951,21 @@ public class GameManager : MonoBehaviour
         RemoveTargetNode();
         ClearLine();
         SwitchMovableNodes(false);
+
+        var grenadeName = "Grenade_1";
+        var FX_name = "GrenadeExplosive_1";
+        var throwRange = 10f;
+        var blastRange = 60f;
+        var damage = 10;
+        selectChar.grenadeHlr.SetGrenadeInfo(grenadeName, FX_name, throwRange, blastRange, damage);
         gameState = GameState.Grenade;
     }
 
     public void ThrowAction_Grenade()
     {
-        selectChar.grenadeHlr.lineRdr.enabled = false;
-        selectChar.grenadeHlr.rangeCdr.gameObject.SetActive(false);
-        if (selectChar.animator.GetBool("isCover"))
-        {
-            selectChar.AddCommand(CommandType.ThrowAim);
-            selectChar.AddCommand(CommandType.Throw);
-            selectChar.AddCommand(CommandType.BackCover);
-        }
-        else
-        {
-            selectChar.AddCommand(CommandType.ThrowAim);
-            selectChar.AddCommand(CommandType.Throw);
-        }
+        selectChar.SetThrower();
+        selectChar = null;
+        gameState = GameState.None;
     }
 
     /// <summary>
@@ -1541,7 +1543,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator Coroutine_GameEnd()
     {
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSecondsRealtime(2.5f);
 
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;

@@ -98,7 +98,7 @@ public struct ThrowInfo
     public FieldNode throwNode;
     public Cover throwerCover;
     public bool isRight;
-    public List<Vector3> points;
+    public List<CharacterController> targetList;
 }
 
 public struct LineInfo
@@ -241,6 +241,9 @@ public class CharacterController : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, PlayerDataInfo playerData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
+        grenadeHlr = transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        grenadeHlr.SetComponents(this);
+
         animator = GetComponent<Animator>();
         outlinable = this.AddComponent<Outlinable>();
         cd = GetComponent<Collider>();
@@ -325,6 +328,8 @@ public class CharacterController : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, EnemyDataInfo enemyData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
+        grenadeHlr = transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        grenadeHlr.SetComponents(this);
         if (enemyData.dropTableID != "None")
             dropTableData = gameMgr.dataMgr.dropTableData.dropTableInfo.Find(x => x.ID == enemyData.dropTableID);
         if (enemyData.uniqueItemID != "None")
@@ -1082,7 +1087,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
-        if (cover.coverType == CoverType.None)
+        if (cover == null || cover.coverType == CoverType.None)
         {
             commandList.Remove(command);
             return;
@@ -1747,18 +1752,34 @@ public class CharacterController : MonoBehaviour
         grenadeHlr.lineRdr.enabled = true;
         var startPos = throwNode.transform.position + interval;
         var endPos = targetNode.transform.position;
-        var center = (startPos + endPos) * 0.5f;
-        center.y -= 3;
-        startPos -= center;
-        endPos -= center;
-        for (int i = 0; i < grenadeHlr.lineRdr.positionCount; i++)
+        grenadeHlr.lineRdr.SetPositions(DataUtility.GetParabolaPoints(grenadeHlr.lineRdr.positionCount, startPos, endPos));
+        grenadeHlr.rangeMr.transform.position = grenadeHlr.lineRdr.GetPosition(grenadeHlr.lineRdr.positionCount - 1);
+        grenadeHlr.rangeMr.gameObject.SetActive(true);
+
+
+        // 범위 검색
+        SetOffThrowTargets();
+        throwInfo.targetList.Clear();
+        var targetList = new List<CharacterController>();
+        var hits = Physics.SphereCastAll(endPos, grenadeHlr.blastRange * 0.5f, grenadeHlr.curGrenade.transform.forward, 0f, gameMgr.charLayer);
+        if (hits.Length > 0)
         {
-            var point = Vector3.Slerp(startPos, endPos, i / (float)(grenadeHlr.lineRdr.positionCount - 1));
-            point += center;
-            grenadeHlr.lineRdr.SetPosition(i, point);
+            var explosionPos = targetNode.transform.position + interval;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                var charCtr = hits[i].collider.GetComponent<CharacterController>();
+                if (charCtr == null) continue;
+
+                var targetPos = charCtr.currentNode.transform.position + interval;
+                var dist = DataUtility.GetDistance(targetPos, explosionPos);
+                var dir = Vector3.Normalize(targetPos - explosionPos);
+                if (!Physics.Raycast(explosionPos, dir, dist, gameMgr.coverLayer))
+                {
+                    charCtr.SetActiveOutline(true);
+                    targetList.Add(charCtr);
+                }
+            }
         }
-        grenadeHlr.rangeCdr.transform.position = grenadeHlr.lineRdr.GetPosition(grenadeHlr.lineRdr.positionCount - 1);
-        grenadeHlr.rangeCdr.gameObject.SetActive(true);
 
         throwInfo = new ThrowInfo()
         {
@@ -1766,7 +1787,19 @@ public class CharacterController : MonoBehaviour
             throwNode = throwNode,
             throwerCover = throwerCover,
             isRight = isRight,
+            targetList = targetList,
         };
+    }
+
+    public void SetOffThrowTargets()
+    {
+        if (throwInfo.targetList.Count == 0) return;
+
+        for (int i = 0; i < throwInfo.targetList.Count; i++)
+        {
+            var target = throwInfo.targetList[i];
+            target.SetActiveOutline(false);
+        }
     }
 
     /// <summary>
@@ -2472,6 +2505,35 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    public void SetThrower()
+    {
+        SetOffThrowTargets();
+        grenadeHlr.lineRdr.enabled = false;
+        grenadeHlr.rangeMr.gameObject.SetActive(false);
+        if (animator.GetBool("isCover"))
+        {
+            if (throwInfo.throwerCover == null)
+            {
+                AddCommand(CommandType.LeaveCover);
+            }
+            else if (throwInfo.throwerCover != null && throwInfo.throwerCover != cover)
+            {
+                AddCommand(CommandType.LeaveCover);
+                AddCommand(CommandType.TakeCover, throwInfo.throwerCover, throwInfo.isRight);
+            }
+        }
+        else
+        {
+            if (throwInfo.throwerCover != null)
+            {
+                AddCommand(CommandType.TakeCover, throwInfo.throwerCover, throwInfo.isRight);
+            }
+        }
+        AddCommand(CommandType.ThrowAim);
+        AddCommand(CommandType.Throw);
+        AddCommand(CommandType.BackCover);
+    }
+
     /// <summary>
     /// 커맨드 추가
     /// </summary>
@@ -2729,52 +2791,62 @@ public class CharacterController : MonoBehaviour
 
         if (health == 0)
         {
-            CharacterDead();
+            var force = 500f;
+            CharacterDead(dir, force);
         }
         else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
         {
             animator.SetTrigger("isHit");
         }
+    }
 
-        void CharacterDead()
+    public void OnHit(Vector3 dir, int damage)
+    {
+        SetHealth(-damage);
+        gameMgr.SetFloatText(charUI.transform.position, $"{damage}", Color.white);
+
+        if (health == 0)
         {
-            //DataUtility.SetMeshsMaterial(meshs, "Standard");
-            //DataUtility.SetMeshsMaterial(sMeshs, "Standard");
-            //DataUtility.SetMeshsMaterial(currentWeapon.meshs, "Standard");
-            animator.enabled = false;
-            cd.enabled = false;
-            headAim = false;
-            chestAim = false;
-            headRig.weight = 0f;
-            chestRig.weight = 0f;
-            currentNode.charCtr = null;
-            currentNode.canMove = true;
-            var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            //charList.Remove(this);
+            var force = 1000f;
+            CharacterDead(dir, force);
+        }
+        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
+        {
+            animator.SetTrigger("isHit");
+        }
+    }
 
-            var force = 500f;
-            for (int i = 0; i < ragdollCds.Count; i++)
-            {
-                var cd = ragdollCds[i];
-                cd.isTrigger = false;
-            }
-            for (int i = 0; i < ragdollRbs.Count; i++)
-            {
-                var rb = ragdollRbs[i];
-                rb.isKinematic = false;
-                rb.AddForce(dir * force, ForceMode.Force);
-            }
-            state = CharacterState.Dead;
-            charUI.gameObject.SetActive(false);
-            //Destroy(charUI.gameObject);
+    private void CharacterDead(Vector3 dir, float force)
+    {
+        animator.enabled = false;
+        cd.enabled = false;
+        headAim = false;
+        chestAim = false;
+        headRig.weight = 0f;
+        chestRig.weight = 0f;
+        currentNode.charCtr = null;
+        currentNode.canMove = true;
+        var charList = ownerType == CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
+        for (int i = 0; i < ragdollCds.Count; i++)
+        {
+            var cd = ragdollCds[i];
+            cd.isTrigger = false;
+        }
+        for (int i = 0; i < ragdollRbs.Count; i++)
+        {
+            var rb = ragdollRbs[i];
+            rb.isKinematic = false;
+            rb.AddForce(dir * force, ForceMode.Force);
+        }
+        state = CharacterState.Dead;
+        charUI.gameObject.SetActive(false);
 
-            if (charList.Find(x => x.state != CharacterState.Dead) == null)
-            {
-                Time.timeScale = 0.2f;
-                Time.fixedDeltaTime = Time.timeScale * 0.02f;
-                gameMgr.gameState = GameState.Result;
-                StartCoroutine(gameMgr.Coroutine_GameEnd());
-            }
+        if (charList.Find(x => x.state != CharacterState.Dead) == null)
+        {
+            Time.timeScale = 0.2f;
+            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+            gameMgr.gameState = GameState.Result;
+            StartCoroutine(gameMgr.Coroutine_GameEnd());
         }
     }
 
@@ -2964,14 +3036,37 @@ public class CharacterController : MonoBehaviour
 
     public void Event_SetGrenade()
     {
+        grenadeHlr.curGrenade.transform.SetParent(leftHandTf, false);
         var pos = new Vector3(-0.047f, -0.051f, 0f);
         var rot = new Vector3(-15.6f, 90f, 90f);
+        grenadeHlr.curGrenade.transform.SetLocalPositionAndRotation(pos, Quaternion.Euler(rot));
+        grenadeHlr.curGrenade.SetActive(true);
     }
 
     public void Event_ThrowGrenade()
     {
-
+        grenadeHlr.ThrowGrenade(throwInfo.targetNode.transform.position);
     }
+
+    public void Event_ThrowEnd()
+    {
+        Debug.Log("!");
+        if (commandList.Count == 0)
+        {
+            Debug.LogError("No Command in the CommanderList");
+            return;
+        }
+        else if (commandList[0].type != CommandType.Throw)
+        {
+            Debug.LogError("CommandType is not ChangeWeapon");
+            return;
+        }
+
+        AimOff();
+        commandList.RemoveAt(0);
+        throwing = false;
+    }
+
     #endregion
 
     public GameManager GameMgr
