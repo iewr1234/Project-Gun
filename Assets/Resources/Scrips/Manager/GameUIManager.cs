@@ -24,10 +24,13 @@ public class GameUIManager : MonoBehaviour
     public ActionButton watchButton;
     public ActionButton shootButton;
     public ActionButton reloadButton;
+    public ActionButton throwButton;
     public Button turnEndButton;
 
     [HideInInspector] public GameObject magIcons;
     [HideInInspector] public List<MagazineIcon> magIconList;
+    [HideInInspector] public GameObject grdIcons;
+    [HideInInspector] public List<GrenadeIcon> grdIconList;
 
     [Header("[AimUI]")]
     public GameObject aimUI;
@@ -65,6 +68,7 @@ public class GameUIManager : MonoBehaviour
             var actionBlock = actionBlocks[i];
             actionBlock.SetComponents();
         }
+
         magIcons = bottomUI.transform.Find("Magazines").gameObject;
         magIconList = magIcons.GetComponentsInChildren<MagazineIcon>().ToList();
         for (int i = 0; i < magIconList.Count; i++)
@@ -72,7 +76,15 @@ public class GameUIManager : MonoBehaviour
             var magIcon = magIconList[i];
             magIcon.SetComponents();
         }
-        magIcons.gameObject.SetActive(false);
+        magIcons.SetActive(false);
+        grdIcons = bottomUI.transform.Find("Grenades").gameObject;
+        grdIconList = grdIcons.GetComponentsInChildren<GrenadeIcon>().ToList();
+        for (int i = 0; i < grdIconList.Count; i++)
+        {
+            var grdIcon = grdIconList[i];
+            grdIcon.SetComponents();
+        }
+        magIcons.SetActive(false);
 
         aimUI = playUI.transform.Find("AimUI").gameObject;
         shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
@@ -100,6 +112,9 @@ public class GameUIManager : MonoBehaviour
                     break;
                 case GameState.Watch:
                     watchButton = actionButton;
+                    break;
+                case GameState.Throw:
+                    throwButton = actionButton;
                     break;
                 default:
                     break;
@@ -178,6 +193,28 @@ public class GameUIManager : MonoBehaviour
             case false:
                 magIcons.SetActive(false);
                 var activeIcons = magIconList.FindAll(x => x.gameObject.activeSelf);
+                if (activeIcons.Count > 0)
+                {
+                    for (int i = 0; i < activeIcons.Count; i++)
+                    {
+                        var activeIcon = activeIcons[i];
+                        activeIcon.gameObject.SetActive(false);
+                    }
+                }
+                break;
+        }
+    }
+
+    public void SetActiveGrenadeIcon(bool value)
+    {
+        switch (value)
+        {
+            case true:
+                grdIcons.SetActive(true);
+                break;
+            case false:
+                grdIcons.SetActive(false);
+                var activeIcons = grdIconList.FindAll(x => x.gameObject.activeSelf);
                 if (activeIcons.Count > 0)
                 {
                     for (int i = 0; i < activeIcons.Count; i++)

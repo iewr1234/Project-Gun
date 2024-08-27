@@ -18,6 +18,7 @@ public enum ItemType
     FrontHandle,
     Attachment,
     UnderBarrel,
+    Grenade = 30,
 }
 
 public enum ItemRarity

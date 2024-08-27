@@ -3050,7 +3050,6 @@ public class CharacterController : MonoBehaviour
 
     public void Event_ThrowEnd()
     {
-        Debug.Log("!");
         if (commandList.Count == 0)
         {
             Debug.LogError("No Command in the CommanderList");

@@ -89,13 +89,13 @@ public class GrenadeHandler : MonoBehaviour
         }
     }
 
-    public void SetGrenadeInfo(string grenadeName, string FX_name, float _throwRange, float _blastRange, int _damage)
+    public void SetGrenadeInfo(GrenadeDataInfo grenadeData)
     {
-        curGrenade = grenades.Find(x => x.name == grenadeName);
-        curFX = FX_List.Find(x => x.name == FX_name);
-        throwRange = _throwRange;
-        blastRange = _blastRange * 0.1f;
-        damage = _damage;
+        curGrenade = grenades.Find(x => x.name == grenadeData.grenadeName);
+        curFX = FX_List.Find(x => x.name == grenadeData.FX_name);
+        throwRange = grenadeData.throwRange;
+        blastRange = grenadeData.blastRange * 0.1f;
+        damage = grenadeData.damage;
 
         rangeMr.transform.localScale = new Vector3(blastRange, blastRange, blastRange);
     }

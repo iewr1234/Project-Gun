@@ -90,6 +90,8 @@ public class DataManager : MonoBehaviour
 
         if (magData == null) magData = Resources.Load<MagazineData>("ScriptableObjects/MagazineData");
 
+        if (grenadeData == null) grenadeData = Resources.Load<GrenadeData>("ScriptableObjects/GrenadeData");
+
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
         if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
@@ -930,6 +932,62 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Grenade Data
+    [HideInInspector] public GrenadeData grenadeData;
+    private readonly string grenadeDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1078537712&range=A3:G";
+    private enum GrenadeVariable
+    {
+        ID,
+        GrenadeName,
+        FX_Name,
+        ThrowRange,
+        BlastRange,
+        Weight,
+        Damage,
+    }
+
+    public void UpdateGrenadeData()
+    {
+        if (grenadeData == null)
+        {
+            grenadeData = Resources.Load<GrenadeData>("ScriptableObjects/GrenadeData");
+        }
+
+        if (grenadeData.grenadeInfos.Count > 0)
+        {
+            grenadeData.grenadeInfos.Clear();
+        }
+        StartCoroutine(ReadGrenadeData());
+
+        IEnumerator ReadGrenadeData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(grenadeDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var bulletInfo = new GrenadeDataInfo()
+                {
+                    indexName = $"{data[(int)GrenadeVariable.ID]}: {data[(int)GrenadeVariable.GrenadeName]}",
+                    ID = data[(int)GrenadeVariable.ID],
+                    grenadeName = data[(int)GrenadeVariable.GrenadeName],
+                    FX_name = data[(int)GrenadeVariable.FX_Name],
+                    throwRange = float.Parse(data[(int)GrenadeVariable.ThrowRange]),
+                    blastRange = float.Parse(data[(int)GrenadeVariable.BlastRange]),
+                    weight = float.Parse(data[(int)GrenadeVariable.Weight]),
+                    damage = int.Parse(data[(int)GrenadeVariable.Damage]),
+                };
+                grenadeData.grenadeInfos.Add(bulletInfo);
+            }
+            Debug.Log("Update Grenade Data");
+        }
+    }
+
+    #endregion
+
     #region Armor Data
     [HideInInspector] public ArmorData armorData;
     private readonly string armorDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1373614489&range=A2:D";
@@ -1313,6 +1371,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateBulletData();
                 EditorUtility.SetDirty(dataMgr.bulletData);
             }
+            if (GUILayout.Button("Update the Grenade Database"))
+            {
+                dataMgr.UpdateGrenadeData();
+                EditorUtility.SetDirty(dataMgr.grenadeData);
+            }
             if (GUILayout.Button("Update the Armor Database"))
             {
                 dataMgr.UpdateArmorData();
@@ -1354,6 +1417,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.magData);
                 dataMgr.UpdateBulletData();
                 EditorUtility.SetDirty(dataMgr.bulletData);
+                dataMgr.UpdateGrenadeData();
+                EditorUtility.SetDirty(dataMgr.grenadeData);
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
                 dataMgr.UpdateItemOptionData();

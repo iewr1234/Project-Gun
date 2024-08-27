@@ -16,6 +16,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public BulletDataInfo bulletData;
     public MagazineDataInfo magData;
     public WeaponPartsDataInfo partsData;
+    public GrenadeDataInfo grenadeData;
 
     [Header("---Access Component---")]
     public RectTransform rect;
@@ -127,6 +128,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.Sight:
                 var _partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
                 partsData = _partsData.CopyData();
+                break;
+            case ItemType.Grenade:
+                var _grenadeData = invenMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
+                grenadeData = _grenadeData.CopyData();
                 break;
             default:
                 break;

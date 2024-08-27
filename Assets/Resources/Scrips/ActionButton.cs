@@ -51,7 +51,7 @@ public class ActionButton : MonoBehaviour
                 gameMgr.ReloadAction_Move();
                 SetActiveButton(true);
                 break;
-            case GameState.Grenade:
+            case GameState.Throw:
                 gameMgr.ThrowAction_Move();
                 SetActiveButton(true);
                 break;

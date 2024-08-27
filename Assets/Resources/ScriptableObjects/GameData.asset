@@ -38,42 +38,6 @@ MonoBehaviour:
     bossEnemy:
       ID: E0010
       level: 1
-    dropInfo_equipment:
-      itemMinLevel: 0
-      itemMaxLevel: 0
-      itemMinNum: 1
-      itemMaxNum: 2
-      dropPercentage_lowGrade: 0
-      dropPercentage_nomal: 0
-      dropPercentage_middleGrade: 0
-      dropPercentage_highGrade: 0
-      dropPercentage_advanced: 0
-      dropPercentage_set: 0
-      dropPercentage_special: 0
-    dropInfo_expendable:
-      itemMinLevel: 0
-      itemMaxLevel: 0
-      itemMinNum: 0
-      itemMaxNum: 0
-      dropPercentage_lowGrade: 0
-      dropPercentage_nomal: 0
-      dropPercentage_middleGrade: 0
-      dropPercentage_highGrade: 0
-      dropPercentage_advanced: 0
-      dropPercentage_set: 0
-      dropPercentage_special: 0
-    dropInfo_ingredient:
-      itemMinLevel: 0
-      itemMaxLevel: 0
-      itemMinNum: 0
-      itemMaxNum: 0
-      dropPercentage_lowGrade: 0
-      dropPercentage_nomal: 0
-      dropPercentage_middleGrade: 0
-      dropPercentage_highGrade: 0
-      dropPercentage_advanced: 0
-      dropPercentage_set: 0
-      dropPercentage_special: 0
   mapName: BASECAMP
   mapLoad: 0
   playerID: P0001
@@ -82,6 +46,18 @@ MonoBehaviour:
   - ID: W0001
     num: 1
     createPos: 1
+  - ID: W0003
+    num: 1
+    createPos: 3
+  - ID: G0001
+    num: 1
+    createPos: 2
+  - ID: G0001
+    num: 1
+    createPos: 2
+  - ID: G0001
+    num: 1
+    createPos: 2
   baseStorages:
   - storageName: "\uCC3D\uACE01"
     nodePos: {x: 4, y: 0}
@@ -107,4 +83,5 @@ MonoBehaviour:
         price: 1000
         size: {x: 4, y: 2}
         addOption: 1
+        setDropTable: 0
         itemOptions: []

@@ -11,7 +11,7 @@ public enum GameState
     Shoot,
     Reload,
     Watch,
-    Grenade,
+    Throw,
     Inventory,
     Base,
     Result,
@@ -72,6 +72,9 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     [HideInInspector] public bool eventActive;
 
+    private List<ItemHandler> rigItems = new List<ItemHandler>();
+    private int iconIndex;
+
     [Header("[Move]")]
     [SerializeField] private bool addPass;
 
@@ -81,10 +84,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<MovePass> passList = new List<MovePass>();
     [SerializeField] private int moveNum;
     private LineRenderer moveLine;
-
-    [Header("[Reload]")]
-    private List<ItemHandler> rigItems = new List<ItemHandler>();
-    private int magIndex;
 
     [Header("[Character]")]
     public List<CharacterController> playerList;
@@ -408,7 +407,7 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        if (camMgr.lockCam) return;
+        //if (camMgr.lockCam) return;
         if (gameState == GameState.Inventory) return;
 
         switch (currentTurn)
@@ -549,28 +548,28 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameState.Reload:
-                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+                if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
                 {
                     if (rigItems.Count < 2) return;
 
-                    uiMgr.magIconList[magIndex].SetImageScale(false);
-                    if (Input.GetKeyDown(KeyCode.A))
+                    uiMgr.magIconList[iconIndex].SetImageScale(false);
+                    if (Input.GetKeyDown(KeyCode.Q))
                     {
-                        magIndex--;
-                        if (magIndex < 0)
+                        iconIndex--;
+                        if (iconIndex < 0)
                         {
-                            magIndex = rigItems.Count - 1;
+                            iconIndex = rigItems.Count - 1;
                         }
                     }
                     else
                     {
-                        magIndex++;
-                        if (magIndex == rigItems.Count)
+                        iconIndex++;
+                        if (iconIndex == rigItems.Count)
                         {
-                            magIndex = 0;
+                            iconIndex = 0;
                         }
                     }
-                    uiMgr.magIconList[magIndex].SetImageScale(true);
+                    uiMgr.magIconList[iconIndex].SetImageScale(true);
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
@@ -603,8 +602,32 @@ public class GameManager : MonoBehaviour
                     gameState = GameState.None;
                 }
                 break;
-            case GameState.Grenade:
-                if (Input.GetKeyDown(KeyCode.Space))
+            case GameState.Throw:
+                if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
+                {
+                    if (rigItems.Count < 2) return;
+
+                    uiMgr.grdIconList[iconIndex].SetImageScale(false);
+                    if (Input.GetKeyDown(KeyCode.Q))
+                    {
+                        iconIndex--;
+                        if (iconIndex < 0)
+                        {
+                            iconIndex = rigItems.Count - 1;
+                        }
+                    }
+                    else
+                    {
+                        iconIndex++;
+                        if (iconIndex == rigItems.Count)
+                        {
+                            iconIndex = 0;
+                        }
+                    }
+                    uiMgr.grdIconList[iconIndex].SetImageScale(true);
+                    selectChar.grenadeHlr.SetGrenadeInfo(rigItems[iconIndex].grenadeData);
+                }
+                else if (Input.GetKeyDown(KeyCode.Space))
                 {
                     if (selectChar == null) return;
 
@@ -612,10 +635,13 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    uiMgr.SetActiveGrenadeIcon(false);
+                    uiMgr.throwButton.SetActiveButton(false);
                     selectChar.SetOffThrowTargets();
                     selectChar.grenadeHlr.lineRdr.enabled = false;
                     selectChar.grenadeHlr.rangeMr.gameObject.SetActive(false);
-                    selectChar = null;
+                    FindMovableNodes(selectChar, true);
+                    rigItems.Clear();
                     gameState = GameState.None;
                 }
                 break;
@@ -700,7 +726,7 @@ public class GameManager : MonoBehaviour
                         selectChar = null;
                         gameState = GameState.None;
                         break;
-                    case GameState.Grenade:
+                    case GameState.Throw:
                         if (selectChar == null) return;
                         if (node != targetNode) return;
 
@@ -841,7 +867,7 @@ public class GameManager : MonoBehaviour
                         targetNode = node;
                     }
                     break;
-                case GameState.Grenade:
+                case GameState.Throw:
                     if (node != null && targetNode != node)
                     {
                         var dist = DataUtility.GetDistance(selectChar.currentNode.transform.position, node.transform.position);
@@ -900,14 +926,14 @@ public class GameManager : MonoBehaviour
         if (selectChar.currentWeapon == null) return;
 
         rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                && x.itemSlots[0].myStorage.type == MyStorageType.Rig
-                                                && x.itemData.type == ItemType.Magazine
-                                                && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
-                                     .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+                                                 && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                 && x.itemData.type == ItemType.Magazine
+                                                 && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
+                                      .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
 
         if (rigItems.Count == 0) return;
 
-        magIndex = 0;
+        iconIndex = 0;
         uiMgr.SetActiveMagazineIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
@@ -929,7 +955,7 @@ public class GameManager : MonoBehaviour
         var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
                                                     && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                     && x.weaponData.ID == weapon.weaponData.ID);
-        var rigMag = rigItems[magIndex];
+        var rigMag = rigItems[iconIndex];
         if (weapon.weaponData.isMag)
         {
             var equipMag = weapon.weaponData.equipMag;
@@ -948,21 +974,38 @@ public class GameManager : MonoBehaviour
 
     public void ThrowAction_Move()
     {
-        RemoveTargetNode();
-        ClearLine();
-        SwitchMovableNodes(false);
+        if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
 
-        var grenadeName = "Grenade_1";
-        var FX_name = "GrenadeExplosive_1";
-        var throwRange = 10f;
-        var blastRange = 60f;
-        var damage = 10;
-        selectChar.grenadeHlr.SetGrenadeInfo(grenadeName, FX_name, throwRange, blastRange, damage);
-        gameState = GameState.Grenade;
+        gameState = GameState.Throw;
+        uiMgr.throwButton.SetActiveButton(true);
+        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
+        SwitchMovableNodes(false);
+        ClearLine();
+        RemoveTargetNode();
+        rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                 && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                 && x.itemData.type == ItemType.Grenade);
+        if (rigItems.Count == 0) return;
+
+        iconIndex = 0;
+        uiMgr.SetActiveGrenadeIcon(true);
+        for (int i = 0; i < rigItems.Count; i++)
+        {
+            var rigMag = rigItems[i];
+            var grdIcon = uiMgr.grdIconList[i];
+            grdIcon.gameObject.SetActive(true);
+            grdIcon.SetImageScale(i == 0);
+        }
+        var grenadeData = rigItems[iconIndex].grenadeData;
+        selectChar.grenadeHlr.SetGrenadeInfo(grenadeData);
     }
 
     public void ThrowAction_Grenade()
     {
+        invenMgr.InActiveItem(rigItems[iconIndex]);
+        rigItems.Clear();
+        uiMgr.SetActiveGrenadeIcon(false);
+        uiMgr.throwButton.SetActiveButton(false);
         selectChar.SetThrower();
         selectChar = null;
         gameState = GameState.None;

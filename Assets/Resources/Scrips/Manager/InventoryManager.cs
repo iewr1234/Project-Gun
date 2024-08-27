@@ -149,8 +149,12 @@ public class InventoryManager : MonoBehaviour
                     SetItemInEquipSlot(initialItem);
                     break;
                 case CreatePos.Rig:
+                    var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
+                    SetItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
                     break;
                 case CreatePos.Backpack:
+                    var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
+                    SetItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
                     break;
                 default:
                     break;
@@ -397,9 +401,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetItemInStorage(string itemName, int count, List<ItemSlot> itemSlots, bool insertOption)
+    public void SetItemInStorage(string dataID, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
-        var itemData = dataMgr.itemData.itemInfos.Find(x => x.itemName == itemName);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == dataID);
         if (itemData == null)
         {
             Debug.Log("Not found item");
