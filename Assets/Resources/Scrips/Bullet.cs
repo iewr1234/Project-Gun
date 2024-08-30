@@ -6,7 +6,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [Header("---Access Script---")]
-    //[SerializeField] private Weapon weapon;
+    private CharacterController shooter;
     private CharacterController target;
 
     [Header("---Access Component---")]
@@ -16,8 +16,13 @@ public class Bullet : MonoBehaviour
     private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
 
     [Header("--- Assignment Variable---")]
-    [SerializeField] private BulletDataInfo bulletData;
+    //[SerializeField] private BulletDataInfo bulletData;
     [SerializeField] private float speed = 30f;
+    [Tooltip("장약")] public int propellant;
+    [Tooltip("피해량")] public int damage;
+    [Tooltip("관통")] public int penetrate;
+    [Tooltip("방어구 손상")] public int armorBreak;
+    [Tooltip("파편화")] public int critical;
 
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private bool isHit;
@@ -28,9 +33,9 @@ public class Bullet : MonoBehaviour
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime = 1f;
 
-    public void SetComponents(BulletDataInfo _bulletData, CharacterController _target, bool _isHit)
+    public void SetComponents(CharacterController _shooter, CharacterController _target, bool _isHit)
     {
-        bulletData = _bulletData.CopyData();
+        shooter = _shooter;
         target = _target;
 
         if (trail == null)
@@ -65,6 +70,12 @@ public class Bullet : MonoBehaviour
             meshRdr.enabled = true;
         }
 
+        propellant = shooter.propellant;
+        damage = shooter.damage;
+        penetrate = shooter.penetrate;
+        armorBreak = shooter.armorBreak;
+        critical = shooter.critical;
+
         isHit = _isHit;
         if (isHit)
         {
@@ -90,7 +101,7 @@ public class Bullet : MonoBehaviour
             var charCtr = hit.collider.GetComponentInParent<CharacterController>();
             if (charCtr != null && charCtr == target && isHit)
             {
-                charCtr.OnHit(transform.forward, bulletData);
+                charCtr.OnHit(transform.forward, this);
                 isHit = false;
                 Debug.Log($"{charCtr.name}: Hit");
             }

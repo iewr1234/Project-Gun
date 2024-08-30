@@ -270,7 +270,7 @@ public class DataManager : MonoBehaviour
 
     #region Player Data
     [HideInInspector] public PlayerData playerData;
-    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:S";
+    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:Z";
     private enum PlayerVariable
     {
         ID,
@@ -288,10 +288,17 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
-        MainWeapon1_ID,
-        MainWeapon2_ID,
-        SubWeapon_ID,
-        ArmorID,
+        RPM,
+        Range,
+        WatchAngle,
+        MOA,
+        Stability,
+        Rebound,
+        Propellant,
+        Damage,
+        Penetrate,
+        ArmorBreak,
+        Critical,
     }
 
     public void UpdatePlayerData()
@@ -329,10 +336,17 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)PlayerVariable.Sight]),
                     aiming = int.Parse(data[(int)PlayerVariable.Aiming]),
                     reaction = int.Parse(data[(int)PlayerVariable.Reaction]),
-                    mainWeapon1_ID = data[(int)PlayerVariable.MainWeapon1_ID],
-                    mainWeapon2_ID = data[(int)PlayerVariable.MainWeapon2_ID],
-                    subWeapon_ID = data[(int)PlayerVariable.SubWeapon_ID],
-                    armorID = data[(int)PlayerVariable.ArmorID].Replace("\r", ""),
+                    RPM = int.Parse(data[(int)PlayerVariable.RPM]),
+                    range = float.Parse(data[(int)PlayerVariable.Range]),
+                    watchAngle = int.Parse(data[(int)PlayerVariable.WatchAngle]),
+                    MOA = float.Parse(data[(int)PlayerVariable.MOA]),
+                    stability = int.Parse(data[(int)PlayerVariable.Stability]),
+                    rebound = int.Parse(data[(int)PlayerVariable.Rebound]),
+                    propellant = int.Parse(data[(int)PlayerVariable.Propellant]),
+                    damage = int.Parse(data[(int)PlayerVariable.Damage]),
+                    penetrate = int.Parse(data[(int)PlayerVariable.Penetrate]),
+                    armorBreak = int.Parse(data[(int)PlayerVariable.ArmorBreak]),
+                    critical = int.Parse(data[(int)PlayerVariable.Critical]),
                 };
                 playerData.playerInfos.Add(playerInfo);
             }
@@ -343,7 +357,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:Z";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AL";
     private enum EnemyVariable
     {
         ID,
@@ -364,14 +378,26 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
-        HeadID,
-        BodyID,
-        MainWeapon1_ID,
-        MainBullet1_ID,
-        MainWeapon2_ID,
-        MainBullet2_ID,
-        SubWeapon_ID,
-        SubBullet_ID,
+        RPM,
+        Range,
+        WatchAngle,
+        MOA,
+        Stability,
+        Rebound,
+        Propellant,
+        Damage,
+        Penetrate,
+        ArmorBreak,
+        Critical,
+        MainWeapon1_type,
+        MainWeapon1_prefabName,
+        MainWeapon1_magMax,
+        MainWeapon2_type,
+        MainWeapon2_prefabName,
+        MainWeapon2_magMax,
+        SubWeapon_type,
+        SubWeapon_prefabName,
+        SubWeapon_magMax,
     }
 
     public void UpdateEnemyData()
@@ -412,18 +438,36 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)EnemyVariable.Sight]),
                     aiming = int.Parse(data[(int)EnemyVariable.Aiming]),
                     reaction = int.Parse(data[(int)EnemyVariable.Reaction]),
-                    headID = data[(int)EnemyVariable.HeadID],
-                    bodyID = data[(int)EnemyVariable.BodyID],
-                    mainWeapon1_ID = data[(int)EnemyVariable.MainWeapon1_ID],
-                    mainBullet1_ID = data[(int)EnemyVariable.MainBullet1_ID],
-                    mainWeapon2_ID = data[(int)EnemyVariable.MainWeapon2_ID],
-                    mainBullet2_ID = data[(int)EnemyVariable.MainBullet2_ID],
-                    subWeapon_ID = data[(int)EnemyVariable.SubWeapon_ID],
-                    subBullet_ID = data[(int)EnemyVariable.SubBullet_ID].Split('\r')[0],
+                    RPM = int.Parse(data[(int)EnemyVariable.RPM]),
+                    range = float.Parse(data[(int)EnemyVariable.Range]),
+                    watchAngle = int.Parse(data[(int)EnemyVariable.WatchAngle]),
+                    MOA = float.Parse(data[(int)EnemyVariable.MOA]),
+                    stability = int.Parse(data[(int)EnemyVariable.Stability]),
+                    rebound = int.Parse(data[(int)EnemyVariable.Rebound]),
+                    propellant = int.Parse(data[(int)EnemyVariable.Propellant]),
+                    damage = int.Parse(data[(int)EnemyVariable.Damage]),
+                    penetrate = int.Parse(data[(int)EnemyVariable.Penetrate]),
+                    armorBreak = int.Parse(data[(int)EnemyVariable.ArmorBreak]),
+                    critical = int.Parse(data[(int)EnemyVariable.Critical]),
+                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_type], data[(int)EnemyVariable.MainWeapon1_prefabName], data[(int)EnemyVariable.MainWeapon1_magMax]),
+                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_type], data[(int)EnemyVariable.MainWeapon2_prefabName], data[(int)EnemyVariable.MainWeapon2_magMax]),
+                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_type], data[(int)EnemyVariable.SubWeapon_prefabName], data[(int)EnemyVariable.SubWeapon_magMax]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
+        }
+
+        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string magMaxData)
+        {
+            var enemyWeapon = new EnemyWeapon()
+            {
+                type = (WeaponType)int.Parse(typeData),
+                prefabName = prefabNameData,
+                magMax = int.Parse(magMaxData),
+            };
+
+            return enemyWeapon;
         }
     }
     #endregion
@@ -686,8 +730,10 @@ public class DataManager : MonoBehaviour
 
             var text = www.downloadHandler.text;
             var datas = text.Split('\n');
+            int intMagMax;
             for (int i = 0; i < datas.Length; i++)
             {
+                intMagMax = 0;
                 var data = datas[i].Split('\t');
                 var weaponInfo = new WeaponDataInfo
                 {
@@ -707,7 +753,7 @@ public class DataManager : MonoBehaviour
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
                     actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
-                    useMagazine = ReadUsePartsSize(data[(int)WeaponVariable.UseMagazine]),
+                    useMagazine = ReadUseMagazineSize(data[(int)WeaponVariable.UseMagazine]),
                     useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
                     useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
                     useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
@@ -715,9 +761,41 @@ public class DataManager : MonoBehaviour
                     equipMagID = data[(int)WeaponVariable.EquipMagID],
                     equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs])
                 };
+                SetInternalMagazine(ref weaponInfo);
                 weaponData.weaponInfos.Add(weaponInfo);
             }
             Debug.Log("Update Weapon Data");
+
+            List<WeaponPartsSize> ReadUseMagazineSize(string sizeData)
+            {
+                var partsSizeList = new List<WeaponPartsSize>();
+                var sizeInfos = sizeData.Split(',');
+                for (int i = 0; i < sizeInfos.Length; i++)
+                {
+                    var sizeInfo = sizeInfos[i];
+                    if (sizeInfo == "None") return null;
+
+                    WeaponPartsSize partsSize;
+                    switch (sizeInfo)
+                    {
+                        case "S":
+                            partsSize = WeaponPartsSize.Small;
+                            break;
+                        case "M":
+                            partsSize = WeaponPartsSize.Medium;
+                            break;
+                        case "L":
+                            partsSize = WeaponPartsSize.Large;
+                            break;
+                        default:
+                            intMagMax = int.Parse(sizeInfo);
+                            return null;
+                    }
+                    partsSizeList.Add(partsSize);
+                }
+
+                return partsSizeList;
+            }
 
             List<WeaponPartsSize> ReadUsePartsSize(string sizeData)
             {
@@ -748,6 +826,27 @@ public class DataManager : MonoBehaviour
                 }
 
                 return partsIDs;
+            }
+
+            void SetInternalMagazine(ref WeaponDataInfo weaponInfo)
+            {
+                if (intMagMax == 0) return;
+
+                var intMag = new MagazineDataInfo()
+                {
+                    indexName = "InternalMagazine",
+                    ID = "None",
+                    intMag = true,
+                    loadedBulletID = "None",
+                    prefabName = "None",
+                    magName = "InternalMagazine",
+                    compatModel = new List<int> { weaponInfo.model },
+                    compatCaliber = weaponInfo.caliber,
+                    weight = 0f,
+                    magSize = intMagMax,
+                };
+                weaponInfo.equipMag = intMag;
+                weaponInfo.isMag = true;
             }
         }
     }
@@ -856,6 +955,7 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)MagazineVariable.ID]}: {data[(int)MagazineVariable.MagazineName]}",
                     ID = data[(int)MagazineVariable.ID],
+                    intMag = false,
                     loadedBulletID = data[(int)MagazineVariable.LoadedBulletID] == "None" ? null : data[(int)MagazineVariable.LoadedBulletID],
                     prefabName = data[(int)MagazineVariable.PrefabName],
                     magName = data[(int)MagazineVariable.MagazineName],

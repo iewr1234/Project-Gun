@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public enum FireModeType
@@ -26,7 +25,6 @@ public class Weapon : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
-
     private Transform bulletTf;
 
     [Header("--- Assignment Variable---")]
@@ -39,7 +37,7 @@ public class Weapon : MonoBehaviour
 
     [Tooltip("ÅºÃ¢¿ë·®")] public int magMax;
     [Tooltip("ÀåÀüµÈ ÅºÈ¯ ¼ö")] public int loadedNum;
-    [Tooltip("»ç¿ëÅºÈ¯")] public BulletDataInfo useBullet;
+    //[Tooltip("»ç¿ëÅºÈ¯")] public BulletDataInfo useBullet;
 
     [SerializeField] private List<bool> hitList = new List<bool>();
 
@@ -57,18 +55,26 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
     private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
 
+    private readonly Vector3 weaponPos_Shotgun = new Vector3(0.048f, 0.052f, -0.035f);
+    private readonly Vector3 weaponRot_Shotgun = new Vector3(-5f, 95.5f, -95f);
+
     private readonly float shootDisparity = 0.15f;
 
     public void SetComponets(CharacterController _charCtr, WeaponDataInfo _weaponData)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
+        weaponData = _weaponData;
+        charCtr.SetWeaponAbility(true, weaponData);
+        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        {
+            var chamberBullet = weaponData.equipMag.loadedBullets[0];
+            charCtr.SetBulletAbility(true, chamberBullet);
+        }
         charCtr.weapons.Add(this);
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
-
-        weaponData = _weaponData;
         SetWeaponPositionAndRotation();
 
         if (weaponData.isMag)
@@ -80,88 +86,110 @@ public class Weapon : MonoBehaviour
             var partsData = weaponData.equipPartsList[i];
             SetParts(partsData.partsName, true);
         }
-
-        void AddWeaponPartsObjects()
-        {
-            var parts = new List<GameObject>();
-            var partsTf = transform.Find("PartsTransform");
-
-            var magTf = partsTf.Find("Magazine");
-            AddParts(magTf);
-
-            var sightTf = partsTf.Find("Sight");
-            AddParts(sightTf);
-
-            var underRailTf = partsTf.Find("UnderRail");
-            AddParts(underRailTf);
-
-            partsObjects = parts;
-
-            void AddParts(Transform partsTf)
-            {
-                if (partsTf == null) return;
-
-                for (int i = 0; i < partsTf.childCount; i++)
-                {
-                    var sample = partsTf.GetChild(i).gameObject;
-                    sample.SetActive(false);
-                    parts.Add(sample);
-                }
-            }
-        }
-
-        void SetWeaponPositionAndRotation()
-        {
-            switch (weaponData.type)
-            {
-                case WeaponType.Pistol:
-                    holsterPos = Vector3.zero;
-                    holsterRot = Vector3.zero;
-                    defaultPos = weaponPos_Pistol;
-                    defaultRot = weaponRot_Pistol;
-                    break;
-                case WeaponType.Rifle:
-                    if (charCtr.weapons.Count > 1)
-                    {
-                        holsterPos = weaponPos_Rifle_RightHolster;
-                        holsterRot = weaponRot_Rifle_Holster;
-                    }
-                    else
-                    {
-                        holsterPos = weaponPos_Rifle_LeftHolster;
-                        holsterRot = weaponRot_Rifle_Holster;
-                    }
-                    defaultPos = weaponPos_Rifle;
-                    defaultRot = weaponRot_Rifle;
-                    break;
-                default:
-                    break;
-            }
-        }
         gameObject.SetActive(true);
     }
 
-    public void SetComponets()
+    public void SetComponets(CharacterController _charCtr, WeaponType _type, int _magMax)
+    {
+        gameMgr = _charCtr.GameMgr;
+        charCtr = _charCtr;
+        charCtr.weapons.Add(this);
+
+        weaponData.type = _type;
+
+        bulletTf = transform.Find("BulletTransform");
+        AddWeaponPartsObjects();
+        SetWeaponPositionAndRotation();
+
+        magMax = _magMax;
+        loadedNum = magMax;
+        gameObject.SetActive(true);
+    }
+
+    private void AddWeaponPartsObjects()
     {
         var parts = new List<GameObject>();
         var partsTf = transform.Find("PartsTransform");
-        var scopeTf = partsTf.transform.Find("Scope");
-        for (int i = 0; i < scopeTf.childCount; i++)
-        {
-            var sample = scopeTf.GetChild(i).gameObject;
-            sample.SetActive(false);
-            parts.Add(sample);
-        }
+
+        var magTf = partsTf.Find("Magazine");
+        AddParts(magTf);
+
+        var sightTf = partsTf.Find("Sight");
+        AddParts(sightTf);
+
+        var underRailTf = partsTf.Find("UnderRail");
+        AddParts(underRailTf);
 
         partsObjects = parts;
+
+        void AddParts(Transform partsTf)
+        {
+            if (partsTf == null) return;
+
+            for (int i = 0; i < partsTf.childCount; i++)
+            {
+                var sample = partsTf.GetChild(i).gameObject;
+                sample.SetActive(false);
+                parts.Add(sample);
+            }
+        }
+    }
+
+    private void SetWeaponPositionAndRotation()
+    {
+        switch (weaponData.type)
+        {
+            case WeaponType.Pistol:
+                holsterPos = Vector3.zero;
+                holsterRot = Vector3.zero;
+                defaultPos = weaponPos_Pistol;
+                defaultRot = weaponRot_Pistol;
+                break;
+            case WeaponType.Rifle:
+                if (charCtr.weapons.Count > 1)
+                {
+                    holsterPos = weaponPos_Rifle_RightHolster;
+                    holsterRot = weaponRot_Rifle_Holster;
+                }
+                else
+                {
+                    holsterPos = weaponPos_Rifle_LeftHolster;
+                    holsterRot = weaponRot_Rifle_Holster;
+                }
+                defaultPos = weaponPos_Rifle;
+                defaultRot = weaponRot_Rifle;
+                break;
+            case WeaponType.Shotgun:
+                if (charCtr.weapons.Count > 1)
+                {
+                    holsterPos = weaponPos_Rifle_RightHolster;
+                    holsterRot = weaponRot_Rifle_Holster;
+                }
+                else
+                {
+                    holsterPos = weaponPos_Rifle_LeftHolster;
+                    holsterRot = weaponRot_Rifle_Holster;
+                }
+                defaultPos = weaponPos_Shotgun;
+                defaultRot = weaponRot_Shotgun;
+                break;
+            default:
+                break;
+        }
     }
 
     public void Initialize()
     {
+        charCtr.SetWeaponAbility(false, weaponData);
+        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        {
+            var chamberBullet = weaponData.equipMag.loadedBullets[0];
+            charCtr.SetBulletAbility(false, chamberBullet);
+        }
         charCtr.weapons.Remove(this);
         charCtr = null;
-
         weaponData = null;
+
         var activeParts = partsObjects.FindAll(x => x.gameObject.activeSelf);
         for (int i = 0; i < activeParts.Count; i++)
         {
@@ -322,18 +350,18 @@ public class Weapon : MonoBehaviour
         //    weaponData.equipMag.loadedBullets.RemoveAt(0);
         //}
 
-        BulletDataInfo loadedBullet = null;
-        switch (charCtr.ownerType)
-        {
-            case CharacterOwner.Player:
-                loadedBullet = weaponData.equipMag.loadedBullets[^1];
-                break;
-            case CharacterOwner.Enemy:
-                loadedBullet = useBullet;
-                break;
-            default:
-                break;
-        }
+        //BulletDataInfo loadedBullet = null;
+        //switch (charCtr.ownerType)
+        //{
+        //    case CharacterOwner.Player:
+        //        loadedBullet = weaponData.equipMag.loadedBullets[^1];
+        //        break;
+        //    case CharacterOwner.Enemy:
+        //        //loadedBullet = useBullet;
+        //        break;
+        //    default:
+        //        break;
+        //}
 
         var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
         if (bullet == null)
@@ -352,13 +380,19 @@ public class Weapon : MonoBehaviour
         bullet.transform.LookAt(aimPos);
 
         var isHit = hitList[0];
-        bullet.SetComponents(/*weaponData.chamberBullet*/ loadedBullet, target, isHit);
+        bullet.SetComponents(charCtr, target, isHit);
         hitList.RemoveAt(0);
 
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
+                var loadedBullet = weaponData.equipMag.loadedBullets[^1];
+                charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+                if (weaponData.equipMag.loadedBullets.Count == 0) return;
+
+                var chamberBullet = weaponData.equipMag.loadedBullets[^1];
+                charCtr.SetBulletAbility(true, chamberBullet);
                 break;
             case CharacterOwner.Enemy:
                 loadedNum--;

@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -804,7 +805,7 @@ public class InventoryManager : MonoBehaviour
                 };
                 storageInfo.itemList.Add(storageItemInfo);
             }
-            else if (itemSlots[0].otherStorage == null)
+            else if (itemSlots[0].otherStorage == null && item.itemSlots.Count > 0)
             {
                 var find = storageInfo.itemList.Find(x => x.slotIndex == item.itemSlots[0].slotIndex);
                 if (find != null)
@@ -840,8 +841,6 @@ public class InventoryManager : MonoBehaviour
             putItem.countText.enabled = false;
             putItem.equipSlot = equipSlot;
             putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
-            putItem.itemSlots.Clear();
-
             putItem.ChangeRectPivot(true);
             putItem.SetItemRotation(false);
             putItem.transform.SetParent(equipSlot.transform, false);
@@ -876,6 +875,30 @@ public class InventoryManager : MonoBehaviour
                 //    popUp.item.weaponData.chamberBullet = item.bulletData;
                 //    popUp.item.weaponData.isChamber = true;
                 //    break;
+                case ItemType.Bullet:
+                    if (equipSlot.intMagMax > 0)
+                    {
+                        var equipMag = equipSlot.popUp.item.weaponData.equipMag;
+                        var newTotal = equipMag.loadedBullets.Count + putItem.TotalCount;
+                        if (equipMag.magSize >= newTotal)
+                        {
+                            for (int i = 0; i < newTotal; i++)
+                            {
+                                equipMag.loadedBullets.Add(putItem.bulletData);
+                            }
+                        }
+                        else
+                        {
+                            var num = equipMag.magSize - equipMag.loadedBullets.Count;
+                            for (int i = 0; i < num; i++)
+                            {
+                                equipMag.loadedBullets.Add(putItem.bulletData);
+                            }
+                            SetItemInStorage(putItem.itemData, putItem.TotalCount - num, putItem.itemSlots, false);
+                        }
+                        equipSlot.popUp.item.SetTotalCount(equipMag.loadedBullets.Count);
+                    }
+                    break;
                 case ItemType.Magazine:
                     equipSlot.countText.enabled = true;
                     equipSlot.countText.text = $"{putItem.TotalCount}";
@@ -888,6 +911,11 @@ public class InventoryManager : MonoBehaviour
                         if (weapon != null)
                         {
                             weapon.SetParts(putItem.magData.magName, true);
+                            if (putItem.magData.loadedBullets.Count > 0)
+                            {
+                                var chamberBullet = putItem.magData.loadedBullets[0];
+                                playerCtr.SetBulletAbility(true, chamberBullet);
+                            }
                         }
                     }
                     break;
@@ -911,6 +939,7 @@ public class InventoryManager : MonoBehaviour
                     }
                     break;
             }
+            putItem.itemSlots.Clear();
 
             if (activePopUp.Contains(equipSlot.popUp))
             {
@@ -1025,10 +1054,10 @@ public class InventoryManager : MonoBehaviour
         //var popUp = item.equipSlot.popUp;
         switch (item.itemData.type)
         {
-            //case ItemType.Bullet:
-            //    popUp.item.weaponData.chamberBullet = null;
-            //    popUp.item.weaponData.isChamber = false;
-            //    break;
+            case ItemType.Bullet:
+                item.equipSlot.popUp.item.weaponData.equipMag.loadedBullets.Clear();
+                item.countText.enabled = true;
+                break;
             case ItemType.Magazine:
                 item.SetTotalCount(item.magData.loadedBullets.Count);
                 item.equipSlot.popUp.item.weaponData.equipMag = null;
@@ -1061,10 +1090,10 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
 
+        item.equipSlot.item = null;
         if (activePopUp.Contains(item.equipSlot.popUp))
         {
             item.equipSlot.popUp.item.SetPartsSample();
-            item.equipSlot.item = null;
             item.equipSlot.popUp.PopUp_ItemInformation();
         }
         item.equipSlot = null;

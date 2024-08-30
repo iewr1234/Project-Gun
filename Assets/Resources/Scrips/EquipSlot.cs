@@ -38,6 +38,7 @@ public class EquipSlot : MonoBehaviour
     public List<WeaponPartsSize> sizeList;
     public int model;
     public float caliber;
+    public int intMagMax;
     public ItemHandler item;
 
     public void SetComponents(InventoryManager _invenMgr, PopUp_Inventory _popUp)
@@ -78,13 +79,18 @@ public class EquipSlot : MonoBehaviour
             //    return item.itemData.type == ItemType.Bullet
             //        && item.bulletData != null;
             case EquipType.Magazine:
-                if (item.itemData.type == ItemType.Magazine)
+                switch (item.itemData.type)
                 {
-                    return this.item == null
-                        && item.magData != null
-                        && item.magData.compatModel.Contains(model);
+                    case ItemType.Bullet:
+                        if (intMagMax == 0) return false;
+                        if (this.item != null && this.item.TotalCount == intMagMax) return false;
+
+                        return item.bulletData != null && item.bulletData.caliber == caliber;
+                    case ItemType.Magazine:
+                        return this.item == null && item.magData != null && popUp != null && item.magData.compatModel.Contains(model);
+                    default:
+                        return false;
                 }
-                return false;
             case EquipType.Sight:
                 return item.itemData.type == ItemType.Sight
                     && item.partsData != null
@@ -104,6 +110,7 @@ public class EquipSlot : MonoBehaviour
     public bool CheckEquip(MagazineDataInfo magData)
     {
         return type == EquipType.Magazine
+                    && popUp != null && popUp.item != null
                     && magData != null
                     && magData.compatModel.Contains(model);
     }
@@ -114,6 +121,7 @@ public class EquipSlot : MonoBehaviour
         {
             case EquipType.Sight:
                 return partsData != null
+                    && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.Sight
                     && partsData.compatModel.Contains(model);
             default:

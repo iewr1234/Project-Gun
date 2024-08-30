@@ -14,7 +14,6 @@ public enum PopUpState
 
 public class PopUp_Inventory : MonoBehaviour
 {
-
     [System.Serializable]
     private struct Split
     {
@@ -314,6 +313,11 @@ public class PopUp_Inventory : MonoBehaviour
                 var equipSlot = itemInfo.equipSlots[i];
                 equipSlot.model = item.weaponData.model;
                 equipSlot.caliber = item.weaponData.caliber;
+                if (item.weaponData.isMag && item.weaponData.equipMag.intMag)
+                {
+                    equipSlot.intMagMax = item.weaponData.equipMag.magSize;
+                }
+
                 switch (type[i])
                 {
                     //case EquipType.Chamber:
@@ -321,14 +325,19 @@ public class PopUp_Inventory : MonoBehaviour
                     //    equipSlot.gameObject.SetActive(true);
                     //    break;
                     case EquipType.Magazine:
-                        if (item.weaponData.useMagazine.Count == 0)
+                        if (item.weaponData.isMag && item.weaponData.equipMag.intMag)
                         {
-                            equipSlot.gameObject.SetActive(false);
+                            equipSlot.slotText.text = "Åº¾à½Ç";
+                            equipSlot.gameObject.SetActive(true);
                         }
-                        else
+                        else if (item.weaponData.useMagazine.Count > 0)
                         {
                             equipSlot.slotText.text = "ÅºÃ¢";
                             equipSlot.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            equipSlot.gameObject.SetActive(false);
                         }
                         break;
                     case EquipType.Muzzle:
@@ -495,7 +504,17 @@ public class PopUp_Inventory : MonoBehaviour
                 //    break;
                 case EquipType.Magazine:
                     var magData = item.weaponData.equipMag;
-                    if (item.weaponData.isMag && equipSlot.CheckEquip(magData))
+                    if (item.weaponData.isMag && magData.intMag && magData.loadedBullets.Count > 0)
+                    {
+                        if (equipSlot.item == null)
+                        {
+                            invenMgr.SetItemInEquipSlot(magData.loadedBullets[0], magData.loadedBullets.Count, equipSlot);
+                        }
+
+                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
+                        equipSlot.countText.enabled = true;
+                    }
+                    else if (item.weaponData.isMag && !magData.intMag && equipSlot.CheckEquip(magData))
                     {
                         if (equipSlot.item == null)
                         {
@@ -509,6 +528,7 @@ public class PopUp_Inventory : MonoBehaviour
                             smaple.SetActive(true);
                         }
                         equipSlot.countText.text = $"{magData.loadedBullets.Count}";
+                        equipSlot.countText.enabled = true;
                     }
                     else
                     {

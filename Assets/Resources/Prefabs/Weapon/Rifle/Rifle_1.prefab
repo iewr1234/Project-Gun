@@ -472,6 +472,7 @@ MonoBehaviour:
     model: 0
     caliber: 0
     weight: 0
+    isMain: 0
     type: 0
     RPM: 0
     range: 0
@@ -487,9 +488,24 @@ MonoBehaviour:
     useRail: 
     equipMagID: 
     equipPartsIDs: []
+    isChamber: 0
+    chamberBullet:
+      indexName: 
+      ID: 
+      bulletName: 
+      level: 0
+      caliber: 0
+      weight: 0
+      propellant: 0
+      damage: 0
+      penetrate: 0
+      armorBreak: 0
+      critical: 0
+    isMag: 0
     equipMag:
       indexName: 
       ID: 
+      loadedBulletID: 
       prefabName: 
       magName: 
       compatModel: 
@@ -497,7 +513,7 @@ MonoBehaviour:
       weight: 0
       magSize: 0
       loadedBullets: []
-    isMag: 0
+    intMagMax: 0
     equipPartsList: []
   fireMode: 1
   autoFireNum: 6

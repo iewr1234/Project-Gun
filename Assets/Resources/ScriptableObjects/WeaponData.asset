@@ -39,6 +39,7 @@ MonoBehaviour:
     equipMag:
       indexName: 
       ID: 
+      intMag: 0
       loadedBulletID: 
       prefabName: 
       magName: 
@@ -75,6 +76,7 @@ MonoBehaviour:
     equipMag:
       indexName: 
       ID: 
+      intMag: 0
       loadedBulletID: 
       prefabName: 
       magName: 
@@ -111,6 +113,7 @@ MonoBehaviour:
     equipMag:
       indexName: 
       ID: 
+      intMag: 0
       loadedBulletID: 
       prefabName: 
       magName: 
@@ -120,4 +123,41 @@ MonoBehaviour:
       magSize: 0
       loadedBullets: []
     isMag: 0
+    equipPartsList: []
+  - indexName: 'W0004: Shotgun_1'
+    ID: W0004
+    prefabName: Shotgun_1
+    weaponName: Shotgun_1
+    model: 4
+    caliber: 12
+    weight: 3
+    isMain: 1
+    type: 3
+    RPM: 50
+    range: 10
+    watchAngle: 30
+    MOA: 3
+    stability: 5
+    rebound: 5
+    actionCost: 4
+    useMagazine: 
+    useMuzzle: 
+    useSight: 
+    useUnderRail: 
+    useRail: 
+    equipMagID: None
+    equipPartsIDs: []
+    equipMag:
+      indexName: InternalMagazine
+      ID: None
+      intMag: 1
+      loadedBulletID: None
+      prefabName: None
+      magName: InternalMagazine
+      compatModel: 04000000
+      compatCaliber: 12
+      weight: 0
+      magSize: 7
+      loadedBullets: []
+    isMag: 1
     equipPartsList: []

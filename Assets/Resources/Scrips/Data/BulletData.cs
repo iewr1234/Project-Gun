@@ -14,7 +14,7 @@ public class BulletDataInfo
 
     public int level;
     [Tooltip("구경")] public float caliber;
-    [Tooltip("구경")] public float weight;
+    [Tooltip("무게")] public float weight;
     [Tooltip("장약")] public int propellant;
     [Tooltip("피해량")] public int damage;
     [Tooltip("관통")] public int penetrate;

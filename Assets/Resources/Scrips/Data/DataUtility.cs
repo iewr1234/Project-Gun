@@ -151,9 +151,7 @@ public static class DataUtility
     public static int GetAimStaminaCost(CharacterController charCtr)
     {
         var weaponData = charCtr.currentWeapon.weaponData;
-        var rebound = charCtr.ownerType == CharacterOwner.Player
-                    ? weaponData.GetWeaponRebound(weaponData.equipMag.loadedBullets[^1])
-                    : weaponData.GetWeaponRebound(charCtr.currentWeapon.useBullet);
+        var rebound = charCtr.rebound;
         var weight = weaponData.GetWeaponWeight();
         var strength = charCtr.strength;
         var result = 3 + (rebound * weight * 0.01f) * (1 / (1 + strength * 0.01f));
@@ -182,7 +180,7 @@ public static class DataUtility
         //var value = Random.Range(0, 100);
         var shootNum = GetShootNum(weapon.weaponData.RPM, shooter.fiarRate);
         var extraAccuracy = shooter.aiming * ((0.1f * shooter.sightRate) / shootNum);
-        var shooterHit = (shooter.aiming + extraAccuracy) - (weapon.weaponData.MOA * dist) + (15 / (dist / 3)) - (weapon.weaponData.rebound * reboundCheck);
+        var shooterHit = (shooter.aiming + extraAccuracy) - (shooter.MOA * dist) + (15 / (dist / 3)) - (shooter.rebound * reboundCheck);
         //if (shooterHit < 0f)
         //{
         //    shooterHit = 0f;
@@ -229,9 +227,7 @@ public static class DataUtility
     public static float GetHitAccuracyReduction(CharacterController charCtr, float dist)
     {
         var weaponData = charCtr.currentWeapon.weaponData;
-        var rebound = charCtr.ownerType == CharacterOwner.Player
-                    ? weaponData.GetWeaponRebound(weaponData.equipMag.loadedBullets[^1])
-                    : weaponData.GetWeaponRebound(charCtr.currentWeapon.useBullet);
+        var rebound = weaponData.GetWeaponRebound(charCtr.propellant);
         var result = Mathf.Pow(2, dist / 5) * (rebound * 0.1f);
 
         return GetFloorValue(result, 2);

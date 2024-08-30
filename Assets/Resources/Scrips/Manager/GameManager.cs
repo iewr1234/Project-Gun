@@ -289,34 +289,14 @@ public class GameManager : MonoBehaviour
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             charCtr.SetComponents(this, ownerType, enemyData, node);
 
-            var weaponIDs = new string[3] { enemyData.mainWeapon1_ID, enemyData.mainWeapon2_ID, enemyData.subWeapon_ID };
-            var bulletsIDs = new string[3] { enemyData.mainBullet1_ID, enemyData.mainBullet2_ID, enemyData.subBullet_ID };
-            for (int i = 0; i < weaponIDs.Length; i++)
+            var weaponDatas = new EnemyWeapon[3] { enemyData.mainWeapon1, enemyData.mainWeapon2, enemyData.subWeapon };
+            for (int i = 0; i < weaponDatas.Length; i++)
             {
-                if (weaponIDs[i] == "None") continue;
+                var weaponData = weaponDatas[i];
+                if (weaponData.type == WeaponType.None) continue;
 
-                var weaponData = dataMgr.weaponData.weaponInfos.Find(x => x.ID == weaponIDs[i]).CopyData(dataMgr);
-                if (weaponData != null)
-                {
-                    Weapon weapon = null;
-                    switch (weaponData.type)
-                    {
-                        case WeaponType.Pistol:
-                            weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Pistol/{weaponData.prefabName}"));
-                            break;
-                        case WeaponType.Rifle:
-                            weapon = Instantiate(Resources.Load<Weapon>($"Prefabs/Weapon/Rifle/{weaponData.prefabName}"));
-                            break;
-                        default:
-                            break;
-                    }
-                    weapon.SetComponets(charCtr, weaponData);
-                    weapon.magMax = weapon.weaponData.equipMag.magSize;
-                    weapon.loadedNum = weapon.magMax;
-
-                    var bulletData = dataMgr.bulletData.bulletInfos.Find(x => x.ID == bulletsIDs[i]).CopyData();
-                    weapon.useBullet = bulletData;
-                }
+                var weapon = charCtr.GetWeapon(weaponData.prefabName);
+                weapon.SetComponets(charCtr, weaponData.type, weaponData.magMax);
             }
 
             return charCtr;
@@ -502,7 +482,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
                         return;
                     }
-                    var shootNum = DataUtility.GetShootNum(weapon.weaponData.RPM, selectChar.fiarRate);
+                    var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
                     var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
                     //if (weapon.weaponData.isChamber) loadedAmmo++;
 
@@ -1647,7 +1627,7 @@ public class GameManager : MonoBehaviour
                     var shooterPos = targetInfo.shooterNode.transform.position;
                     var targetPos = targetInfo.targetNode.transform.position;
                     var dist = DataUtility.GetDistance(shooterPos, targetPos);
-                    if (!enemy.CheckTheCoverAlongPath(enemy.currentWeapon.weaponData.range, shooterPos, targetPos, false))
+                    if (!enemy.CheckTheCoverAlongPath(enemy.range, shooterPos, targetPos, false))
                     {
                         shootScore = 0;
                         continue;
@@ -1794,7 +1774,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
 
-                var shootNum = DataUtility.GetShootNum(enemy.currentWeapon.weaponData.RPM, enemy.fiarRate);
+                var shootNum = DataUtility.GetShootNum(enemy.RPM, enemy.fiarRate);
                 enemy.animator.SetInteger("shootNum", shootNum);
                 enemy.SetAction(-totalCost);
                 //if (targetInfo.shooterCover != null)

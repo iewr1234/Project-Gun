@@ -7,6 +7,7 @@ public enum WeaponType
     None,
     Pistol,
     Rifle,
+    Shotgun,
 }
 
 [System.Serializable]
@@ -41,13 +42,14 @@ public class WeaponDataInfo
     [Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
     [Space(5f)]
 
-    [Tooltip("ÀåÂøÅºÃ¢ID")] public string equipMagID;
-    [Tooltip("ÀåÂøºÎÇ°IDs")] public List<string> equipPartsIDs;
-    [Space(5f)]
+    [HideInInspector][Tooltip("ÀåÂøÅºÃ¢ID")] public string equipMagID;
+    [HideInInspector][Tooltip("ÀåÂøºÎÇ°IDs")] public List<string> equipPartsIDs;
 
     //[Tooltip("¾à½Ç ÅºÈ¯")] public BulletDataInfo chamberBullet = null;
     //[HideInInspector] public bool isChamber;
-    [Tooltip("ÀåÂøÅºÃ¢")] public MagazineDataInfo equipMag = null;
+
+    [Space(5f)]
+    [Tooltip("ÀåÂøÅºÃ¢")] public MagazineDataInfo equipMag;
     [HideInInspector] public bool isMag;
     [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList = new List<WeaponPartsDataInfo>();
 
@@ -64,6 +66,7 @@ public class WeaponDataInfo
             model = model,
             caliber = caliber,
             weight = weight,
+            isMain = isMain,
             type = type,
             RPM = RPM,
             range = range,
@@ -85,7 +88,12 @@ public class WeaponDataInfo
             //isChamber = isChamber,
         };
 
-        if (weaponData.equipMagID != "None")
+        if (isMag)
+        {
+            weaponData.equipMag = equipMag.CopyData();
+            weaponData.isMag = true;
+        }
+        else if (weaponData.equipMagID != "None")
         {
             var magData = dataMgr.magData.magInfos.Find(x => x.ID == weaponData.equipMagID);
             weaponData.equipMag = magData.CopyData();
@@ -99,6 +107,7 @@ public class WeaponDataInfo
             }
             weaponData.isMag = true;
         }
+
         for (int i = 0; i < weaponData.equipPartsIDs.Count; i++)
         {
             var partsData = dataMgr.partsData.partsInfos.Find(x => x.ID == weaponData.equipPartsIDs[i]);
@@ -129,10 +138,10 @@ public class WeaponDataInfo
         return DataUtility.GetFloorValue(totalWegiht, 1);
     }
 
-    public int GetWeaponRebound(BulletDataInfo loadedBullet)
+    public int GetWeaponRebound(int propellant)
     {
         var totalRebound = rebound;
-        totalRebound += loadedBullet.propellant;
+        totalRebound += propellant;
         for (int i = 0; i < equipPartsList.Count; i++)
         {
             var parts = equipPartsList[i];

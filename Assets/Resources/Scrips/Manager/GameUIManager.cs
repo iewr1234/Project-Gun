@@ -158,7 +158,7 @@ public class GameUIManager : MonoBehaviour
     public void SetShootNum(CharacterController charCtr)
     {
         var weapon = charCtr.currentWeapon;
-        var shootNum = DataUtility.GetShootNum(weapon.weaponData.RPM, charCtr.fiarRate);
+        var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
 
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
         //if (weapon.weaponData.isChamber) loadedAmmo++;

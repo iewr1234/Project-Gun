@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using static UnityEditor.Progress;
 
 public enum CharacterOwner
 {
@@ -170,6 +171,19 @@ public class CharacterController : MonoBehaviour
     [Tooltip("조준")] public int aiming;
     [Tooltip("반응")] public int reaction;
 
+    [Header("[Ability]")]
+    [Tooltip("발사속도")] public int RPM;
+    [Tooltip("사거리")] public float range;
+    [Tooltip("경계각")] public int watchAngle;
+    [Tooltip("정확도")] public float MOA;
+    [Tooltip("안정성")] public int stability;
+    [Tooltip("반동")] public int rebound;
+    [Tooltip("장약")] public int propellant;
+    [Tooltip("피해량")] public int damage;
+    [Tooltip("관통")] public int penetrate;
+    [Tooltip("방어구 손상")] public int armorBreak;
+    [Tooltip("파편화")] public int critical;
+
     [HideInInspector] public int baseIndex;
     [HideInInspector] public int upperIndex;
 
@@ -306,6 +320,18 @@ public class CharacterController : MonoBehaviour
         aiming = playerData.aiming;
         reaction = playerData.reaction;
 
+        RPM = playerData.RPM;
+        range = playerData.range;
+        watchAngle = playerData.watchAngle;
+        MOA = playerData.MOA;
+        stability = playerData.stability;
+        rebound = playerData.rebound;
+        propellant = playerData.propellant;
+        damage = playerData.damage;
+        penetrate = playerData.penetrate;
+        armorBreak = playerData.armorBreak;
+        critical = playerData.critical;
+
         baseIndex = 1;
         upperIndex = 2;
 
@@ -396,6 +422,18 @@ public class CharacterController : MonoBehaviour
         sight = enemyData.sight;
         aiming = enemyData.aiming;
         reaction = enemyData.reaction;
+
+        RPM = enemyData.RPM;
+        range = enemyData.range;
+        watchAngle = enemyData.watchAngle;
+        MOA = enemyData.MOA;
+        stability = enemyData.stability;
+        rebound = enemyData.rebound;
+        propellant = enemyData.propellant;
+        damage = enemyData.damage;
+        penetrate = enemyData.penetrate;
+        armorBreak = enemyData.armorBreak;
+        critical = enemyData.critical;
 
         aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
 
@@ -537,11 +575,11 @@ public class CharacterController : MonoBehaviour
         var segments = 30f;
         var angleStep = 360f / segments;
         var angle = 0 * angleStep * Mathf.Deg2Rad;
-        var startPos = new Vector3(Mathf.Cos(angle) * currentWeapon.weaponData.range, height, Mathf.Sin(angle) * currentWeapon.weaponData.range);
+        var startPos = new Vector3(Mathf.Cos(angle) * range, height, Mathf.Sin(angle) * range);
         for (int i = 0; i <= segments; i++)
         {
             angle = i * angleStep * Mathf.Deg2Rad;
-            var endPos = new Vector3(Mathf.Cos(angle) * currentWeapon.weaponData.range, height, Mathf.Sin(angle) * currentWeapon.weaponData.range);
+            var endPos = new Vector3(Mathf.Cos(angle) * range, height, Mathf.Sin(angle) * range);
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
@@ -895,7 +933,7 @@ public class CharacterController : MonoBehaviour
         Cover FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.weaponData.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -1024,7 +1062,7 @@ public class CharacterController : MonoBehaviour
         TargetDirection FindCloseTargetDirection()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < currentWeapon.weaponData.range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -1540,6 +1578,60 @@ public class CharacterController : MonoBehaviour
     #endregion
 
     /// <summary>
+    /// 무기 능력치 설정
+    /// </summary>
+    /// <param name="apply"></param>
+    /// <param name="weaponData"></param>
+    public void SetWeaponAbility(bool apply, WeaponDataInfo weaponData)
+    {
+        switch (apply)
+        {
+            case true:
+                RPM += weaponData.RPM;
+                range += weaponData.range;
+                watchAngle += weaponData.watchAngle;
+                MOA += weaponData.MOA;
+                stability += weaponData.stability;
+                rebound += weaponData.rebound;
+                break;
+            case false:
+                RPM -= weaponData.RPM;
+                range -= weaponData.range;
+                watchAngle -= weaponData.watchAngle;
+                MOA -= weaponData.MOA;
+                stability -= weaponData.stability;
+                rebound -= weaponData.rebound;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 총알 능력치 설정
+    /// </summary>
+    /// <param name="apply"></param>
+    /// <param name="bulletData"></param>
+    public void SetBulletAbility(bool apply, BulletDataInfo bulletData)
+    {
+        switch (apply)
+        {
+            case true:
+                propellant += bulletData.propellant;
+                damage += bulletData.damage;
+                penetrate += bulletData.penetrate;
+                armorBreak += bulletData.armorBreak;
+                critical += bulletData.critical;
+                break;
+            case false:
+                propellant -= bulletData.propellant;
+                damage -= bulletData.damage;
+                penetrate -= bulletData.penetrate;
+                armorBreak -= bulletData.armorBreak;
+                critical -= bulletData.critical;
+                break;
+        }
+    }
+
+    /// <summary>
     /// 행동력 설정
     /// </summary>
     /// <param name="value"></param>
@@ -1688,7 +1780,7 @@ public class CharacterController : MonoBehaviour
         var pos = watchNode.transform.position;
         var nodeAngleRad = Mathf.Atan2(targetNode.transform.position.x - pos.x, targetNode.transform.position.z - pos.z);
         var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-        var halfAngle = currentWeapon.weaponData.watchAngle / 2f;
+        var halfAngle = watchAngle / 2f;
         watchInfo = new WatchInfo()
         {
             drawRang = drawRange,
@@ -1981,7 +2073,7 @@ public class CharacterController : MonoBehaviour
             }
             else
             {
-                if (CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos, noRange))
+                if (CheckTheCoverAlongPath(range, pos, targetPos, noRange))
                 {
                     var targetInfo = new TargetInfo
                     {
@@ -2094,7 +2186,7 @@ public class CharacterController : MonoBehaviour
                 {
                     pos = _shooterNode.transform.position;
                     targetPos = _targetNode.transform.position;
-                    if (CheckTheCoverAlongPath(currentWeapon.weaponData.range, pos, targetPos, noRange))
+                    if (CheckTheCoverAlongPath(range, pos, targetPos, noRange))
                     {
                         var dist = DataUtility.GetDistance(pos, targetPos);
                         if (dist < distance)
@@ -2750,7 +2842,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, BulletDataInfo _bulletData)
+    public void OnHit(Vector3 dir, Bullet bullet)
     {
         if (state == CharacterState.Dead) return;
 
@@ -2765,10 +2857,10 @@ public class CharacterController : MonoBehaviour
                 armor.bulletproof = 0f;
             }
 
-            var penetrateRate = _bulletData.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - _bulletData.penetrate)) * 100f) : 95;
+            var penetrateRate = bullet.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - bullet.penetrate)) * 100f) : 95;
             isPenetrate = value < penetrateRate;
 
-            var armorDamage = (int)Mathf.Floor(_bulletData.damage * (_bulletData.armorBreak / 100f));
+            var armorDamage = (int)Mathf.Floor(bullet.damage * (bullet.armorBreak / 100f));
             SetArmor(-armorDamage);
             bulletproof = armor.bulletproof;
         }
@@ -2778,7 +2870,7 @@ public class CharacterController : MonoBehaviour
             bulletproof = 0f;
         }
 
-        var damage = (int)Mathf.Floor(_bulletData.damage * (_bulletData.penetrate / (_bulletData.penetrate + bulletproof)));
+        var damage = (int)Mathf.Floor(bullet.damage * (bullet.penetrate / (bullet.penetrate + bulletproof)));
         if (isPenetrate)
         {
             SetHealth(-damage);
