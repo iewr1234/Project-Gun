@@ -43,6 +43,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [SerializeField] private Vector2 movePivot;
 
     public GameObject activeSample;
+    private int index;
 
     private readonly Vector3 defaultScale = new Vector3(400f, 400f, 400f);
 
@@ -91,11 +92,64 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             sample.SetActive(false);
             samples.Add(sample);
         }
+
+    }
+
+    public void SetComponents(InventoryManager _invenMgr, int _index)
+    {
+        index = _index;
+        transform.name = $"Item_{index}";
+
+        invenMgr = _invenMgr;
+        weaponData = null;
+        bulletData = null;
+        magData = null;
+        partsData = null;
+
+        rect = GetComponent<RectTransform>();
+        frameImage = transform.Find("Frame").GetComponent<Image>();
+        targetImage = transform.Find("BackGround").GetComponent<Image>();
+        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+
+        samplesTf = transform.Find("Sample");
+        for (int i = 0; i < samplesTf.childCount; i++)
+        {
+            var sample = samplesTf.GetChild(i).gameObject;
+            if (gameObject.layer == LayerMask.NameToLayer("Sample"))
+            {
+                var meshs = sample.transform.GetComponentsInChildren<MeshRenderer>().ToList();
+                for (int j = 0; j < meshs.Count; j++)
+                {
+                    var mesh = meshs[j];
+                    mesh.material = new Material(mesh.material);
+                    mesh.material.shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                    mesh.material.color = new Color(1f, 1f, 1f, 100 / 255f);
+                }
+            }
+
+            if (sample.name[0] == 'W')
+            {
+                var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
+                for (int j = 0; j < partsSamples.Length; j++)
+                {
+                    var partsSample = partsSamples[j];
+                    if (partsSample.CompareTag("WeaponParts"))
+                    {
+                        partsSample.gameObject.SetActive(false);
+                        this.partsSamples.Add(partsSample.gameObject);
+                    }
+                }
+            }
+            sample.SetActive(false);
+            samples.Add(sample);
+        }
+
     }
 
     public void SetItemInfo(ItemDataInfo _itemData, int count, bool insertOption)
     {
         itemData = _itemData.CopyData();
+        transform.name = $"Item_{index}_{itemData.itemName}";
         size = _itemData.size;
         switch (itemData.type)
         {

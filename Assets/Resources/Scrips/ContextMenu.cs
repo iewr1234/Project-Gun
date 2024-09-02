@@ -89,7 +89,7 @@ public class ContextMenu : MonoBehaviour
         if (invenMgr.activePopUp.Find(x => x.item == invenMgr.selectItem) == null)
         {
             var popUp = invenMgr.GetPopUp(PopUpState.ItemInformation);
-            popUp.PopUp_ItemInformation();
+            popUp.PopUp_ItemInformation(invenMgr.selectItem);
         }
         CloseTheContextMenu(false);
     }

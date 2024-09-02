@@ -528,28 +528,17 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameState.Reload:
-                if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.Tab))
                 {
                     if (rigItems.Count < 2) return;
 
-                    uiMgr.magIconList[iconIndex].SetImageScale(false);
-                    if (Input.GetKeyDown(KeyCode.Q))
+                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(false);
+                    iconIndex++;
+                    if (iconIndex == rigItems.Count)
                     {
-                        iconIndex--;
-                        if (iconIndex < 0)
-                        {
-                            iconIndex = rigItems.Count - 1;
-                        }
+                        iconIndex = 0;
                     }
-                    else
-                    {
-                        iconIndex++;
-                        if (iconIndex == rigItems.Count)
-                        {
-                            iconIndex = 0;
-                        }
-                    }
-                    uiMgr.magIconList[iconIndex].SetImageScale(true);
+                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(true);
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
@@ -557,11 +546,12 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    uiMgr.SetActiveMagazineIcon(false);
+                    uiMgr.SetActiveAmmoIcon(false);
                     uiMgr.reloadButton.SetActiveButton(false);
                     FindMovableNodes(selectChar, true);
                     rigItems.Clear();
                     gameState = GameState.Move;
+                    camMgr.lockCam = false;
                 }
                 break;
             case GameState.Watch:
@@ -583,28 +573,17 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameState.Throw:
-                if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.Tab))
                 {
                     if (rigItems.Count < 2) return;
 
-                    uiMgr.grdIconList[iconIndex].SetImageScale(false);
-                    if (Input.GetKeyDown(KeyCode.Q))
+                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(false);
+                    iconIndex++;
+                    if (iconIndex == rigItems.Count)
                     {
-                        iconIndex--;
-                        if (iconIndex < 0)
-                        {
-                            iconIndex = rigItems.Count - 1;
-                        }
+                        iconIndex = 0;
                     }
-                    else
-                    {
-                        iconIndex++;
-                        if (iconIndex == rigItems.Count)
-                        {
-                            iconIndex = 0;
-                        }
-                    }
-                    uiMgr.grdIconList[iconIndex].SetImageScale(true);
+                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(true);
                     selectChar.grenadeHlr.SetGrenadeInfo(rigItems[iconIndex].grenadeData);
                 }
                 else if (Input.GetKeyDown(KeyCode.Space))
@@ -615,7 +594,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    uiMgr.SetActiveGrenadeIcon(false);
+                    uiMgr.SetActiveAmmoIcon(false);
                     uiMgr.throwButton.SetActiveButton(false);
                     selectChar.SetOffThrowTargets();
                     selectChar.grenadeHlr.lineRdr.enabled = false;
@@ -914,15 +893,16 @@ public class GameManager : MonoBehaviour
         if (rigItems.Count == 0) return;
 
         iconIndex = 0;
-        uiMgr.SetActiveMagazineIcon(true);
+        uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
             var rigMag = rigItems[i];
-            var magIcon = uiMgr.magIconList[i];
-            magIcon.gameObject.SetActive(true);
-            magIcon.SetMagazineSlider(rigMag.magData.magSize, rigMag.magData.loadedBullets.Count);
-            magIcon.SetImageScale(i == 0);
+            var ammoIcon = uiMgr.ammoIconList[i];
+            ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
+
+            if (i == 0) ammoIcon.SetActiveIcon(true);
         }
+        camMgr.lockCam = true;
     }
 
     public void ReloadAction_Reload()
@@ -946,10 +926,11 @@ public class GameManager : MonoBehaviour
         selectChar.AddCommand(CommandType.Reload);
         selectChar = null;
 
-        uiMgr.SetActiveMagazineIcon(false);
+        uiMgr.SetActiveAmmoIcon(false);
         uiMgr.reloadButton.SetActiveButton(false);
         rigItems.Clear();
         gameState = GameState.None;
+        camMgr.lockCam = false;
     }
 
     public void ThrowAction_Move()
@@ -968,23 +949,26 @@ public class GameManager : MonoBehaviour
         if (rigItems.Count == 0) return;
 
         iconIndex = 0;
-        uiMgr.SetActiveGrenadeIcon(true);
+        uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
-            var rigMag = rigItems[i];
-            var grdIcon = uiMgr.grdIconList[i];
-            grdIcon.gameObject.SetActive(true);
-            grdIcon.SetImageScale(i == 0);
+            var rigGrd = rigItems[i];
+            var ammoIcon = uiMgr.ammoIconList[i];
+            ammoIcon.SetAmmoIcon(AmmoIconType.Grenade, rigGrd);
+
+            if (i == 0)
+            {
+                ammoIcon.SetActiveIcon(true);
+                selectChar.grenadeHlr.SetGrenadeInfo(rigGrd.grenadeData);
+            }
         }
-        var grenadeData = rigItems[iconIndex].grenadeData;
-        selectChar.grenadeHlr.SetGrenadeInfo(grenadeData);
     }
 
     public void ThrowAction_Grenade()
     {
         invenMgr.InActiveItem(rigItems[iconIndex]);
         rigItems.Clear();
-        uiMgr.SetActiveGrenadeIcon(false);
+        uiMgr.SetActiveAmmoIcon(false);
         uiMgr.throwButton.SetActiveButton(false);
         selectChar.SetThrower();
         selectChar = null;

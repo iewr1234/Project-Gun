@@ -196,7 +196,7 @@ public class PopUp_Inventory : MonoBehaviour
     #endregion
 
     #region ItemInformation
-    public void PopUp_ItemInformation()
+    public void PopUp_ItemInformation(ItemHandler _item)
     {
         if (gameObject.activeSelf)
         {
@@ -222,7 +222,8 @@ public class PopUp_Inventory : MonoBehaviour
         //{
         //    transform.localPosition = defaultPos_itemInfo;
         //}
-        topText.text = $"{invenMgr.selectItem.itemData.itemName}";
+        item = _item;
+        topText.text = $"{item.itemData.itemName}";
         state = PopUpState.ItemInformation;
 
         itemInfo.uiObject.SetActive(true);
@@ -232,7 +233,7 @@ public class PopUp_Inventory : MonoBehaviour
         {
             itemInfo.activeSample.SetActive(false);
         }
-        itemInfo.activeSample = itemInfo.samples.Find(x => x.name == invenMgr.selectItem.itemData.dataID);
+        itemInfo.activeSample = itemInfo.samples.Find(x => x.name == item.itemData.dataID);
         itemInfo.activeSample.SetActive(true);
         for (int i = 0; i < itemInfo.infoTexts.Count; i++)
         {
@@ -245,7 +246,6 @@ public class PopUp_Inventory : MonoBehaviour
             equipSlot.gameObject.SetActive(false);
         }
 
-        item = invenMgr.selectItem;
         switch (item.itemData.type)
         {
             case ItemType.MainWeapon:

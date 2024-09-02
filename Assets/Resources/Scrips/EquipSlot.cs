@@ -24,8 +24,8 @@ public enum EquipType
 public class EquipSlot : MonoBehaviour
 {
     [Header("---Access Script---")]
-    private InventoryManager invenMgr;
-    [HideInInspector] public PopUp_Inventory popUp;
+    [SerializeField] private InventoryManager invenMgr;
+    public PopUp_Inventory popUp;
 
     [Header("---Access Component---")]
     public Image outline;

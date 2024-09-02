@@ -27,10 +27,12 @@ public class GameUIManager : MonoBehaviour
     public ActionButton throwButton;
     public Button turnEndButton;
 
-    [HideInInspector] public GameObject magIcons;
-    [HideInInspector] public List<MagazineIcon> magIconList;
-    [HideInInspector] public GameObject grdIcons;
-    [HideInInspector] public List<GrenadeIcon> grdIconList;
+    //[HideInInspector] public GameObject magIcons;
+    //[HideInInspector] public List<MagazineIcon> magIconList;
+    //[HideInInspector] public GameObject grdIcons;
+    //[HideInInspector] public List<GrenadeIcon> grdIconList;
+    [HideInInspector] public GameObject ammoIcons;
+    [HideInInspector] public List<AmmoIcon> ammoIconList;
 
     [Header("[AimUI]")]
     public GameObject aimUI;
@@ -69,22 +71,32 @@ public class GameUIManager : MonoBehaviour
             actionBlock.SetComponents();
         }
 
-        magIcons = bottomUI.transform.Find("Magazines").gameObject;
-        magIconList = magIcons.GetComponentsInChildren<MagazineIcon>().ToList();
-        for (int i = 0; i < magIconList.Count; i++)
+        //magIcons = bottomUI.transform.Find("Magazines").gameObject;
+        //magIconList = magIcons.GetComponentsInChildren<MagazineIcon>().ToList();
+        //for (int i = 0; i < magIconList.Count; i++)
+        //{
+        //    var magIcon = magIconList[i];
+        //    magIcon.SetComponents();
+        //}
+        //magIcons.SetActive(false);
+        //grdIcons = bottomUI.transform.Find("Grenades").gameObject;
+        //grdIconList = grdIcons.GetComponentsInChildren<GrenadeIcon>().ToList();
+        //for (int i = 0; i < grdIconList.Count; i++)
+        //{
+        //    var grdIcon = grdIconList[i];
+        //    grdIcon.SetComponents();
+        //}
+        //grdIcons.SetActive(false);
+
+        ammoIcons = bottomUI.transform.Find("AmmoIcons").gameObject;
+        ammoIconList = ammoIcons.GetComponentsInChildren<AmmoIcon>().ToList();
+        for (int i = 0; i < ammoIconList.Count; i++)
         {
-            var magIcon = magIconList[i];
-            magIcon.SetComponents();
+            var ammoIcon = ammoIconList[i];
+            ammoIcon.SetComponents();
         }
-        magIcons.SetActive(false);
-        grdIcons = bottomUI.transform.Find("Grenades").gameObject;
-        grdIconList = grdIcons.GetComponentsInChildren<GrenadeIcon>().ToList();
-        for (int i = 0; i < grdIconList.Count; i++)
-        {
-            var grdIcon = grdIconList[i];
-            grdIcon.SetComponents();
-        }
-        magIcons.SetActive(false);
+        ammoIcons.SetActive(false);
+
 
         aimUI = playUI.transform.Find("AimUI").gameObject;
         shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
@@ -183,49 +195,68 @@ public class GameUIManager : MonoBehaviour
         hitAccuracyText.text = $"{hitAccuracy}%";
     }
 
-    public void SetActiveMagazineIcon(bool value)
+    public void SetActiveAmmoIcon(bool value)
     {
         switch (value)
         {
             case true:
-                magIcons.SetActive(true);
+                ammoIcons.SetActive(true);
                 break;
             case false:
-                magIcons.SetActive(false);
-                var activeIcons = magIconList.FindAll(x => x.gameObject.activeSelf);
-                if (activeIcons.Count > 0)
+                ammoIcons.SetActive(false);
+                var activeIcons = ammoIconList.FindAll(x => x.gameObject.activeSelf);
+                for (int i = 0; i < activeIcons.Count; i++)
                 {
-                    for (int i = 0; i < activeIcons.Count; i++)
-                    {
-                        var activeIcon = activeIcons[i];
-                        activeIcon.gameObject.SetActive(false);
-                    }
+                    var activeIcon = activeIcons[i];
+                    activeIcon.Initialize();
                 }
                 break;
         }
     }
 
-    public void SetActiveGrenadeIcon(bool value)
-    {
-        switch (value)
-        {
-            case true:
-                grdIcons.SetActive(true);
-                break;
-            case false:
-                grdIcons.SetActive(false);
-                var activeIcons = grdIconList.FindAll(x => x.gameObject.activeSelf);
-                if (activeIcons.Count > 0)
-                {
-                    for (int i = 0; i < activeIcons.Count; i++)
-                    {
-                        var activeIcon = activeIcons[i];
-                        activeIcon.gameObject.SetActive(false);
-                    }
-                }
-                break;
-        }
-    }
+    //public void SetActiveMagazineIcon(bool value)
+    //{
+    //    switch (value)
+    //    {
+    //        case true:
+    //            magIcons.SetActive(true);
+    //            break;
+    //        case false:
+    //            magIcons.SetActive(false);
+    //            var activeIcons = magIconList.FindAll(x => x.gameObject.activeSelf);
+    //            if (activeIcons.Count > 0)
+    //            {
+    //                for (int i = 0; i < activeIcons.Count; i++)
+    //                {
+    //                    var activeIcon = activeIcons[i];
+    //                    activeIcon.gameObject.SetActive(false);
+    //                }
+    //            }
+    //            break;
+    //    }
+    //}
+
+    //public void SetActiveGrenadeIcon(bool value)
+    //{
+    //    switch (value)
+    //    {
+    //        case true:
+    //            grdIcons.SetActive(true);
+    //            break;
+    //        case false:
+    //            grdIcons.SetActive(false);
+    //            var activeIcons = grdIconList.FindAll(x => x.gameObject.activeSelf);
+    //            if (activeIcons.Count > 0)
+    //            {
+    //                for (int i = 0; i < activeIcons.Count; i++)
+    //                {
+    //                    var activeIcon = activeIcons[i];
+    //                    activeIcon.gameObject.SetActive(false);
+    //                }
+    //            }
+    //            break;
+    //    }
+    //}
 
     public void SetActionPoint_Bottom(CharacterController charCtr)
     {

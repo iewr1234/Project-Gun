@@ -1,10 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -168,9 +165,8 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < itemPoolMax; i++)
         {
             var item = Instantiate(Resources.Load<ItemHandler>("Prefabs/Inventory/Item"));
-            item.transform.name = $"Item_{i}";
             item.transform.SetParent(itemPool, false);
-            item.SetComponents(this);
+            item.SetComponents(this, i);
             item.gameObject.SetActive(false);
             items.Add(item);
         }
@@ -344,7 +340,7 @@ public class InventoryManager : MonoBehaviour
 
                 selectItem = onEquip.item;
                 var popUp = GetPopUp(PopUpState.ItemInformation);
-                popUp.PopUp_ItemInformation();
+                popUp.PopUp_ItemInformation(selectItem);
             }
             else if (onSlot != null && onSlot.item != null)
             {
@@ -352,7 +348,7 @@ public class InventoryManager : MonoBehaviour
 
                 selectItem = onSlot.item;
                 var popUp = GetPopUp(PopUpState.ItemInformation);
-                popUp.PopUp_ItemInformation();
+                popUp.PopUp_ItemInformation(selectItem);
             }
         }
 
@@ -635,6 +631,7 @@ public class InventoryManager : MonoBehaviour
             {
                 var itemNesting = onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
                                && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
+                var itemMove = onSlots.Find(x => x.item != item) == null && onSlots.Count == item.size.x * item.size.y;
                 if (itemNesting)
                 {
                     ItemNesting();
@@ -643,7 +640,7 @@ public class InventoryManager : MonoBehaviour
                 {
                     QuickEquip(onSlot.item, item);
                 }
-                else if (onSlots.Count == item.size.x * item.size.y)
+                else if (itemMove)
                 {
                     CheckBaseStorage();
                     ItemMove(true);
@@ -944,7 +941,7 @@ public class InventoryManager : MonoBehaviour
             if (activePopUp.Contains(equipSlot.popUp))
             {
                 equipSlot.popUp.item.SetPartsSample();
-                equipSlot.popUp.PopUp_ItemInformation();
+                equipSlot.popUp.PopUp_ItemInformation(equipSlot.popUp.item);
             }
         }
         else if (putItem.equipSlot != null)
@@ -1043,7 +1040,7 @@ public class InventoryManager : MonoBehaviour
         var popUp = activePopUp.Find(x => x.state == PopUpState.ItemInformation && x.item == onItem);
         if (popUp != null)
         {
-            popUp.PopUp_ItemInformation();
+            popUp.PopUp_ItemInformation(popUp.item);
         }
     }
 
@@ -1094,7 +1091,7 @@ public class InventoryManager : MonoBehaviour
         if (activePopUp.Contains(item.equipSlot.popUp))
         {
             item.equipSlot.popUp.item.SetPartsSample();
-            item.equipSlot.popUp.PopUp_ItemInformation();
+            item.equipSlot.popUp.PopUp_ItemInformation(item.equipSlot.popUp.item);
         }
         item.equipSlot = null;
 
