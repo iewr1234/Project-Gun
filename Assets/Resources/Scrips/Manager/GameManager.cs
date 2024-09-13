@@ -73,7 +73,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public bool eventActive;
 
     private List<ItemHandler> rigItems = new List<ItemHandler>();
-    private int iconIndex;
 
     [Header("[Move]")]
     [SerializeField] private bool addPass;
@@ -296,7 +295,7 @@ public class GameManager : MonoBehaviour
                 if (weaponData.type == WeaponType.None) continue;
 
                 var weapon = charCtr.GetWeapon(weaponData.prefabName);
-                weapon.SetComponets(charCtr, weaponData.type, weaponData.magMax);
+                weapon.SetComponets(charCtr, weaponData.type, weaponData.meshType, weaponData.pelletNum, weaponData.magMax);
             }
 
             return charCtr;
@@ -346,7 +345,7 @@ public class GameManager : MonoBehaviour
         {
             var bullet = Instantiate(Resources.Load<Bullet>("Prefabs/Weapon/Bullet"));
             bullet.transform.SetParent(bulletsPoolTf, false);
-            bullet.gameObject.SetActive(false);
+            bullet.SetComponents();
             bulletPool.Add(bullet);
         }
     }
@@ -532,13 +531,22 @@ public class GameManager : MonoBehaviour
                 {
                     if (rigItems.Count < 2) return;
 
-                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(false);
-                    iconIndex++;
-                    if (iconIndex == rigItems.Count)
+                    uiMgr.GetAmmoIcon().SetActiveIcon(false);
+                    uiMgr.iconIndex++;
+                    if (uiMgr.iconIndex == rigItems.Count)
                     {
-                        iconIndex = 0;
+                        uiMgr.iconIndex = 0;
                     }
-                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(true);
+                    uiMgr.GetAmmoIcon().SetActiveIcon(true);
+                }
+                else if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S))
+                {
+                    var weaponData = selectChar.currentWeapon.weaponData;
+                    var intMag = weaponData.isMag && weaponData.equipMag.intMag;
+                    if (!intMag) return;
+
+                    var reloadMax = weaponData.equipMag.magSize - weaponData.equipMag.loadedBullets.Count;
+                    uiMgr.GetAmmoIcon().SetAmmoValue(reloadMax, Input.GetKeyDown(KeyCode.W));
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
@@ -577,14 +585,14 @@ public class GameManager : MonoBehaviour
                 {
                     if (rigItems.Count < 2) return;
 
-                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(false);
-                    iconIndex++;
-                    if (iconIndex == rigItems.Count)
+                    uiMgr.GetAmmoIcon().SetActiveIcon(false);
+                    uiMgr.iconIndex++;
+                    if (uiMgr.iconIndex == rigItems.Count)
                     {
-                        iconIndex = 0;
+                        uiMgr.iconIndex = 0;
                     }
-                    uiMgr.ammoIconList[iconIndex].SetActiveIcon(true);
-                    selectChar.grenadeHlr.SetGrenadeInfo(rigItems[iconIndex].grenadeData);
+                    uiMgr.GetAmmoIcon().SetActiveIcon(true);
+                    selectChar.grenadeHlr.SetGrenadeInfo(rigItems[uiMgr.iconIndex].grenadeData);
                 }
                 else if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -884,25 +892,44 @@ public class GameManager : MonoBehaviour
         RemoveTargetNode();
         if (selectChar.currentWeapon == null) return;
 
-        rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                 && x.itemSlots[0].myStorage.type == MyStorageType.Rig
-                                                 && x.itemData.type == ItemType.Magazine
-                                                 && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
-                                      .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+        camMgr.lockCam = true;
+        var weaponData = selectChar.currentWeapon.weaponData;
+        var intMag = weaponData.isMag && weaponData.equipMag.intMag;
+        if (intMag)
+        {
+            rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                     && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                     && x.itemData.type == ItemType.Bullet
+                                                     && x.bulletData.caliber == weaponData.caliber).ToList();
+        }
+        else
+        {
+            rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                     && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                     && x.itemData.type == ItemType.Magazine
+                                                     && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
+                                          .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+        }
 
         if (rigItems.Count == 0) return;
 
-        iconIndex = 0;
+        uiMgr.iconIndex = 0;
         uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
             var rigMag = rigItems[i];
             var ammoIcon = uiMgr.ammoIconList[i];
-            ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
+            if (intMag)
+            {
+                ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
+            }
+            else
+            {
+                ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
+            }
 
             if (i == 0) ammoIcon.SetActiveIcon(true);
         }
-        camMgr.lockCam = true;
     }
 
     public void ReloadAction_Reload()
@@ -915,17 +942,24 @@ public class GameManager : MonoBehaviour
         var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
                                                     && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                     && x.weaponData.ID == weapon.weaponData.ID);
-        var rigMag = rigItems[iconIndex];
+        var rigMag = rigItems[uiMgr.iconIndex];
         if (weapon.weaponData.isMag)
         {
             var equipMag = weapon.weaponData.equipMag;
-            invenMgr.SetItemInStorage(equipMag);
+            if (equipMag.intMag)
+            {
+                invenMgr.QuickEquip(weaponItem, rigMag);
+                var reloadNum = uiMgr.GetAmmoIcon().value;
+                selectChar.AddCommand(CommandType.Reload, reloadNum);
+            }
+            else
+            {
+                invenMgr.SetItemInStorage(equipMag);
+                invenMgr.QuickEquip(weaponItem, rigMag);
+                selectChar.AddCommand(CommandType.Reload);
+            }
         }
-        invenMgr.QuickEquip(weaponItem, rigMag);
-
-        selectChar.AddCommand(CommandType.Reload);
         selectChar = null;
-
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.reloadButton.SetActiveButton(false);
         rigItems.Clear();
@@ -948,7 +982,7 @@ public class GameManager : MonoBehaviour
                                                  && x.itemData.type == ItemType.Grenade);
         if (rigItems.Count == 0) return;
 
-        iconIndex = 0;
+        uiMgr.iconIndex = 0;
         uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
@@ -966,7 +1000,7 @@ public class GameManager : MonoBehaviour
 
     public void ThrowAction_Grenade()
     {
-        invenMgr.InActiveItem(rigItems[iconIndex]);
+        invenMgr.InActiveItem(rigItems[uiMgr.iconIndex]);
         rigItems.Clear();
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.throwButton.SetActiveButton(false);

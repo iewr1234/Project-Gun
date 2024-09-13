@@ -13,62 +13,64 @@ public class Bullet : MonoBehaviour
     private TrailRenderer trail;
     private Rigidbody bulletRb;
     private Collider bulletCd;
-    private List<MeshRenderer> meshRdrs = new List<MeshRenderer>();
+    [SerializeField] private List<GameObject> meshs = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
-    //[SerializeField] private BulletDataInfo bulletData;
-    [SerializeField] private float speed = 30f;
     [Tooltip("장약")] public int propellant;
     [Tooltip("피해량")] public int damage;
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
+    [Space(5f)]
 
     [SerializeField] private LayerMask targetLayer;
+    [SerializeField] private float speed = 30f;
     [SerializeField] private bool isHit;
     [SerializeField] private bool isMiss;
     private bool isCheck;
     private float timer;
+    private float destroyTime;
 
     private readonly float startWidth = 0.01f;
-    private readonly float destroyTime = 1f;
+    private readonly float destroyTime_bullet = 1f;
+    private readonly float destroyTime_pellet = 0.3f;
 
-    public void SetComponents(CharacterController _shooter, CharacterController _target, bool _isHit)
+    public void SetComponents()
+    {
+        trail = GetComponent<TrailRenderer>();
+        trail.startWidth = startWidth;
+        trail.endWidth = 0f;
+        trail.enabled = false;
+
+        bulletRb = GetComponent<Rigidbody>();
+        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
+        bulletRb.isKinematic = true;
+
+        bulletCd = GetComponent<Collider>();
+        bulletCd.enabled = false;
+
+        meshs.Add(transform.Find("Mesh1").gameObject);
+        meshs.Add(transform.Find("Mesh2").gameObject);
+        for (int i = 0; i < meshs.Count; i++)
+        {
+            var mesh = meshs[i];
+            mesh.SetActive(false);
+        }
+
+        gameObject.SetActive(false);
+    }
+
+    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit)
     {
         shooter = _shooter;
         target = _target;
 
-        if (trail == null)
-        {
-            trail = GetComponent<TrailRenderer>();
-        }
         trail.enabled = true;
-        trail.startWidth = startWidth;
-        trail.endWidth = 0f;
-
-        if (bulletRb == null)
-        {
-            bulletRb = GetComponent<Rigidbody>();
-        }
+        bulletCd.enabled = true;
         bulletRb.constraints = RigidbodyConstraints.None;
         bulletRb.isKinematic = false;
         bulletRb.velocity = transform.forward * speed;
-
-        if (bulletCd == null)
-        {
-            bulletCd = GetComponent<Collider>();
-        }
-        bulletCd.enabled = true;
-
-        if (meshRdrs.Count == 0)
-        {
-            meshRdrs = GetComponentsInChildren<MeshRenderer>().ToList();
-        }
-        for (int i = 0; i < meshRdrs.Count; i++)
-        {
-            var meshRdr = meshRdrs[i];
-            meshRdr.enabled = true;
-        }
+        meshs[_meshType].SetActive(true);
 
         propellant = shooter.propellant;
         damage = shooter.damage;
@@ -88,6 +90,16 @@ public class Bullet : MonoBehaviour
             isMiss = true;
         }
         isCheck = false;
+
+        if (_meshType == 0)
+        {
+            destroyTime = destroyTime_bullet;
+        }
+        else
+        {
+            destroyTime = destroyTime_pellet;
+        }
+        timer = 0f;
     }
 
     void FixedUpdate()
@@ -124,7 +136,6 @@ public class Bullet : MonoBehaviour
         timer += Time.deltaTime;
         if (timer > destroyTime)
         {
-            timer = 0f;
             trail.Clear();
             trail.enabled = false;
             gameObject.SetActive(false);
@@ -135,15 +146,15 @@ public class Bullet : MonoBehaviour
     {
         if (isCheck) return;
 
-        for (int j = 0; j < meshRdrs.Count; j++)
-        {
-            var meshRdr = meshRdrs[j];
-            meshRdr.enabled = false;
-        }
         bulletRb.velocity = Vector3.zero;
         bulletRb.constraints = RigidbodyConstraints.FreezeAll;
         bulletRb.isKinematic = true;
         bulletCd.enabled = false;
+        for (int i = 0; i < meshs.Count; i++)
+        {
+            var mesh = meshs[i];
+            mesh.SetActive(false);
+        }
         isCheck = true;
 
         if (!isHit)

@@ -357,7 +357,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AL";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AR";
     private enum EnemyVariable
     {
         ID,
@@ -391,12 +391,18 @@ public class DataManager : MonoBehaviour
         Critical,
         MainWeapon1_type,
         MainWeapon1_prefabName,
+        MainWeapon1_meshType,
+        MainWeapon1_pelletNum,
         MainWeapon1_magMax,
         MainWeapon2_type,
         MainWeapon2_prefabName,
+        MainWeapon2_meshType,
+        MainWeapon2_pelletNum,
         MainWeapon2_magMax,
         SubWeapon_type,
         SubWeapon_prefabName,
+        SubWeapon_meshType,
+        SubWeapon_pelletNum,
         SubWeapon_magMax,
     }
 
@@ -449,21 +455,35 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)EnemyVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)EnemyVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)EnemyVariable.Critical]),
-                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_type], data[(int)EnemyVariable.MainWeapon1_prefabName], data[(int)EnemyVariable.MainWeapon1_magMax]),
-                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_type], data[(int)EnemyVariable.MainWeapon2_prefabName], data[(int)EnemyVariable.MainWeapon2_magMax]),
-                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_type], data[(int)EnemyVariable.SubWeapon_prefabName], data[(int)EnemyVariable.SubWeapon_magMax]),
+                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_type],
+                                                  data[(int)EnemyVariable.MainWeapon1_prefabName],
+                                                  data[(int)EnemyVariable.MainWeapon1_meshType],
+                                                  data[(int)EnemyVariable.MainWeapon1_pelletNum],
+                                                  data[(int)EnemyVariable.MainWeapon1_magMax]),
+                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_type],
+                                                  data[(int)EnemyVariable.MainWeapon2_prefabName],
+                                                  data[(int)EnemyVariable.MainWeapon2_meshType],
+                                                  data[(int)EnemyVariable.MainWeapon2_pelletNum],
+                                                  data[(int)EnemyVariable.MainWeapon2_magMax]),
+                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_type],
+                                                data[(int)EnemyVariable.SubWeapon_prefabName],
+                                                data[(int)EnemyVariable.SubWeapon_meshType],
+                                                data[(int)EnemyVariable.SubWeapon_pelletNum],
+                                                data[(int)EnemyVariable.SubWeapon_magMax]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
         }
 
-        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string magMaxData)
+        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string meshType, string pelletNum, string magMaxData)
         {
             var enemyWeapon = new EnemyWeapon()
             {
                 type = (WeaponType)int.Parse(typeData),
                 prefabName = prefabNameData,
+                meshType = int.Parse(meshType),
+                pelletNum = int.Parse(pelletNum),
                 magMax = int.Parse(magMaxData),
             };
 
@@ -973,13 +993,15 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:J";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:M";
     private enum BulletVariable
     {
         ID,
         BulletName,
+        MeshType,
         Level,
         Caliber,
+        PelletNum,
         Weight,
         Propellant,
         Damage,
@@ -1016,8 +1038,10 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)BulletVariable.ID]}: {data[(int)BulletVariable.BulletName]}",
                     ID = data[(int)BulletVariable.ID],
                     bulletName = data[(int)BulletVariable.BulletName],
+                    meshType = int.Parse(data[(int)BulletVariable.MeshType]),
                     level = int.Parse(data[(int)BulletVariable.Level]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
+                    pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),
                     weight = float.Parse(data[(int)BulletVariable.Weight]),
                     propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     damage = int.Parse(data[(int)BulletVariable.Damage]),

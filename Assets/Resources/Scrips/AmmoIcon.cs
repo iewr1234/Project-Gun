@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public enum AmmoIconType
 {
@@ -16,7 +17,7 @@ public class AmmoIcon : MonoBehaviour
 {
     private class Magazine
     {
-        public GameObject component;
+        public RectTransform rect;
         public Slider slider;
         public Image frameImage;
         public Image backImage;
@@ -24,13 +25,17 @@ public class AmmoIcon : MonoBehaviour
 
     private class Grenade
     {
-        public GameObject component;
+        public RectTransform rect;
         public Image iconImage;
     }
 
     private class Bullet
     {
-        public GameObject component;
+        public RectTransform rect;
+        public Image iconImage;
+        public Image upArrowImage;
+        public Image downArrowImage;
+        public TextMeshProUGUI numText;
     }
 
     [Header("---Access Component---")]
@@ -43,6 +48,8 @@ public class AmmoIcon : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public AmmoIconType type;
+    public int maxValue;
+    public int value;
 
     private readonly Vector3 activeScale = new Vector3(1.3f, 1.3f, 1f);
 
@@ -53,25 +60,29 @@ public class AmmoIcon : MonoBehaviour
 
         mag = new Magazine()
         {
-            component = transform.Find("Magazine").gameObject,
+            rect = transform.Find("Magazine").GetComponent<RectTransform>(),
             slider = transform.Find("Magazine/Slider").GetComponent<Slider>(),
             frameImage = transform.Find("Magazine/Frame").GetComponent<Image>(),
             backImage = transform.Find("Magazine/Slider").GetComponent<Image>(),
         };
-        mag.component.SetActive(false);
+        mag.rect.gameObject.SetActive(false);
 
         grd = new Grenade()
         {
-            component = transform.Find("Grenade").gameObject,
+            rect = transform.Find("Grenade").GetComponent<RectTransform>(),
             iconImage = transform.Find("Grenade/Image").GetComponent<Image>(),
         };
-        grd.component.SetActive(false);
+        grd.rect.gameObject.SetActive(false);
 
         bullet = new Bullet()
         {
-            component = transform.Find("Grenade").gameObject,
+            rect = transform.Find("Bullet").GetComponent<RectTransform>(),
+            iconImage = transform.Find("Bullet/Image").GetComponent<Image>(),
+            upArrowImage = transform.Find("Bullet/UpArrow").GetComponent<Image>(),
+            downArrowImage = transform.Find("Bullet/DownArrow").GetComponent<Image>(),
+            numText = transform.Find("Bullet/NumText").GetComponent<TextMeshProUGUI>(),
         };
-        bullet.component.SetActive(false);
+        bullet.rect.gameObject.SetActive(false);
 
         gameObject.SetActive(false);
     }
@@ -83,15 +94,21 @@ public class AmmoIcon : MonoBehaviour
         switch (type)
         {
             case AmmoIconType.Magazine:
-                mag.component.SetActive(true);
+                mag.rect.gameObject.SetActive(true);
                 mag.slider.maxValue = _item.magData.magSize;
                 mag.slider.value = _item.magData.loadedBullets.Count;
                 break;
             case AmmoIconType.Grenade:
-                grd.component.SetActive(true);
+                grd.rect.gameObject.SetActive(true);
                 break;
             case AmmoIconType.Bullet:
-                bullet.component.SetActive(true);
+                bullet.rect.gameObject.SetActive(true);
+                bullet.upArrowImage.enabled = false;
+                bullet.downArrowImage.enabled = false;
+                maxValue = _item.TotalCount;
+                value = 0;
+                bullet.numText.enabled = false;
+                bullet.numText.text = $"{value}";
                 break;
             default:
                 break;
@@ -106,16 +123,16 @@ public class AmmoIcon : MonoBehaviour
         switch (type)
         {
             case AmmoIconType.Magazine:
-                mag.frameImage.transform.localScale = Vector3.one;
-                mag.backImage.transform.localScale = Vector3.one;
-                mag.component.SetActive(false);
+                mag.rect.transform.localScale = Vector3.one;
+                mag.rect.gameObject.SetActive(false);
                 break;
             case AmmoIconType.Grenade:
-                grd.iconImage.transform.localScale = Vector3.one;
-                grd.component.SetActive(false);
+                grd.rect.transform.localScale = Vector3.one;
+                grd.rect.gameObject.SetActive(false);
                 break;
             case AmmoIconType.Bullet:
-                bullet.component.SetActive(false);
+                bullet.rect.transform.localScale = Vector3.one;
+                bullet.rect.gameObject.SetActive(false);
                 break;
             default:
                 break;
@@ -129,15 +146,41 @@ public class AmmoIcon : MonoBehaviour
         switch (type)
         {
             case AmmoIconType.Magazine:
-                mag.frameImage.transform.localScale = zoom ? activeScale : Vector3.one;
-                mag.backImage.transform.localScale = zoom ? activeScale : Vector3.one;
+                mag.rect.transform.localScale = zoom ? activeScale : Vector3.one;
                 break;
             case AmmoIconType.Grenade:
-                grd.iconImage.transform.localScale = zoom ? activeScale : Vector3.one;
+                grd.rect.transform.localScale = zoom ? activeScale : Vector3.one;
+                break;
+            case AmmoIconType.Bullet:
+                bullet.rect.transform.localScale = zoom ? activeScale : Vector3.one;
+                bullet.upArrowImage.enabled = zoom;
+                bullet.downArrowImage.enabled = zoom;
+                bullet.numText.enabled = zoom;
                 break;
             default:
                 break;
         }
+    }
+
+    public void SetAmmoValue(int reloadMax, bool upValue)
+    {
+        int nextValue;
+        switch (upValue)
+        {
+            case true:
+                nextValue = value + 1;
+                if (nextValue > reloadMax || nextValue > maxValue) return;
+
+                value = nextValue;
+                break;
+            case false:
+                nextValue = value - 1;
+                if (nextValue < 0) return;
+
+                value = nextValue;
+                break;
+        }
+        bullet.numText.text = $"{value}";
     }
 
     public void Button_AmmoIcon()

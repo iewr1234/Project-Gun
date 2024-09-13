@@ -47,6 +47,7 @@ public class GameUIManager : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public Button onButton;
+    [HideInInspector] public int iconIndex;
 
     private List<StageIcon> stageIcons = new List<StageIcon>();
     private bool selcetStage;
@@ -411,5 +412,10 @@ public class GameUIManager : MonoBehaviour
     public void Button_Stage_Return()
     {
         SetStageUI(false);
+    }
+
+    public AmmoIcon GetAmmoIcon()
+    {
+        return ammoIconList[iconIndex];
     }
 }

@@ -15,7 +15,7 @@ public class InventoryManager : MonoBehaviour
     [HideInInspector] public BaseManager baseMgr;
 
     //[HideInInspector] public PopUp_Inventory popUp;
-    [HideInInspector] public List<PopUp_Inventory> activePopUp;
+    public List<PopUp_Inventory> activePopUp;
     private List<PopUp_Inventory> popUpList;
 
     [HideInInspector] public ContextMenu contextMenu;
@@ -218,7 +218,6 @@ public class InventoryManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Escape) && activePopUp.Count > 0)
         {
             activePopUp[^1].Button_PopUp_Close();
-            RemoveActivePopUp(activePopUp[^1]);
         }
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -992,31 +991,20 @@ public class InventoryManager : MonoBehaviour
                 //        InActiveItem(putItem);
                 //    }
                 //}
-                /*else*/
-                if (onItem.itemData.type == ItemType.Magazine)
+
+                switch (onItem.itemData.type)
                 {
-                    var newTotal = onItem.magData.loadedBullets.Count + putItem.TotalCount;
-                    if (onItem.magData.magSize >= newTotal)
-                    {
-                        for (int i = 0; i < newTotal; i++)
-                        {
-                            onItem.magData.loadedBullets.Add(putItem.bulletData);
-                        }
-                        //putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
-                        InActiveItem(putItem);
-                    }
-                    else
-                    {
-                        var num = onItem.magData.magSize - onItem.magData.loadedBullets.Count;
-                        for (int i = 0; i < num; i++)
-                        {
-                            onItem.magData.loadedBullets.Add(putItem.bulletData);
-                        }
-                        putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
-                        putItem.transform.localPosition = Vector3.zero;
-                        putItem.SetTotalCount(putItem.TotalCount - num);
-                    }
-                    onItem.SetTotalCount(onItem.magData.loadedBullets.Count);
+                    case ItemType.MainWeapon:
+                        InsertBullet_Weapon();
+                        break;
+                    case ItemType.SubWeapon:
+                        InsertBullet_Weapon();
+                        break;
+                    case ItemType.Magazine:
+                        InsertBullet_Magazine();
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case ItemType.Magazine:
@@ -1041,6 +1029,49 @@ public class InventoryManager : MonoBehaviour
         if (popUp != null)
         {
             popUp.PopUp_ItemInformation(popUp.item);
+        }
+
+        void InsertBullet_Weapon()
+        {
+            var reloadNum = gameMgr.uiMgr.GetAmmoIcon().value;
+            if (reloadNum < putItem.TotalCount)
+            {
+                for (int i = 0; i < reloadNum; i++)
+                {
+                    onItem.weaponData.equipMag.loadedBullets.Add(putItem.bulletData);
+                }
+                putItem.SetTotalCount(putItem.TotalCount - reloadNum);
+            }
+            else
+            {
+                InActiveItem(putItem);
+            }
+        }
+
+        void InsertBullet_Magazine()
+        {
+            var newTotal = onItem.magData.loadedBullets.Count + putItem.TotalCount;
+            if (onItem.magData.magSize >= newTotal)
+            {
+                for (int i = 0; i < newTotal; i++)
+                {
+                    onItem.magData.loadedBullets.Add(putItem.bulletData);
+                }
+                //putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+                InActiveItem(putItem);
+            }
+            else
+            {
+                var num = onItem.magData.magSize - onItem.magData.loadedBullets.Count;
+                for (int i = 0; i < num; i++)
+                {
+                    onItem.magData.loadedBullets.Add(putItem.bulletData);
+                }
+                putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
+                putItem.transform.localPosition = Vector3.zero;
+                putItem.SetTotalCount(putItem.TotalCount - num);
+            }
+            onItem.SetTotalCount(onItem.magData.loadedBullets.Count);
         }
     }
 

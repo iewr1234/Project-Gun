@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
-using static UnityEditor.Progress;
 
 public enum CharacterOwner
 {
@@ -2802,6 +2801,24 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    public void AddCommand(CommandType type, int reloadNum)
+    {
+        switch (type)
+        {
+            case CommandType.Reload:
+                var reloadCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Reload,
+                };
+                animator.SetInteger("reloadNum", reloadNum);
+                commandList.Add(reloadCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
     /// <summary>
     /// 커맨드 추가
     /// </summary>
@@ -3070,6 +3087,12 @@ public class CharacterController : MonoBehaviour
         if (!animator.GetBool("otherType")) return;
 
         currentWeapon.WeaponSwitching(switchPos);
+    }
+
+    public void Event_InsertBullet()
+    {
+        var reloadNum = animator.GetInteger("reloadNum");
+        animator.SetInteger("reloadNum", reloadNum - 1);
     }
 
     /// <summary>

@@ -17,6 +17,8 @@ public class Weapon : MonoBehaviour
         Pistol_A_Upper,
         Rifle_A_Base,
         Rifle_A_Upper,
+        Shotgun_A_Base,
+        Shotgun_A_Upper,
     }
 
     [Header("---Access Script---")]
@@ -35,6 +37,8 @@ public class Weapon : MonoBehaviour
     [Tooltip("자동사격 발사 수")] public int autoFireNum;
     [Space(5f)]
 
+    public int meshType;
+    public int pelletNum;
     [Tooltip("탄창용량")] public int magMax;
     [Tooltip("장전된 탄환 수")] public int loadedNum;
     //[Tooltip("사용탄환")] public BulletDataInfo useBullet;
@@ -58,7 +62,8 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponPos_Shotgun = new Vector3(0.048f, 0.052f, -0.035f);
     private readonly Vector3 weaponRot_Shotgun = new Vector3(-5f, 95.5f, -95f);
 
-    private readonly float shootDisparity = 0.15f;
+    private readonly float shootDisparity_bullet = 0.15f;
+    private readonly float shootDisparity_pellet = 0.15f;
 
     public void SetComponets(CharacterController _charCtr, WeaponDataInfo _weaponData)
     {
@@ -89,7 +94,7 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void SetComponets(CharacterController _charCtr, WeaponType _type, int _magMax)
+    public void SetComponets(CharacterController _charCtr, WeaponType _type, int _meshType, int _pelletNum, int _magMax)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
@@ -101,6 +106,8 @@ public class Weapon : MonoBehaviour
         AddWeaponPartsObjects();
         SetWeaponPositionAndRotation();
 
+        meshType = _meshType;
+        pelletNum = _pelletNum;
         magMax = _magMax;
         loadedNum = magMax;
         gameObject.SetActive(true);
@@ -215,12 +222,14 @@ public class Weapon : MonoBehaviour
             case WeaponType.Pistol:
                 charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
                 charCtr.upperIndex = (int)AnumationLayers_CharacterA.Pistol_A_Upper;
-                //charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Pistol/Pistol");
                 break;
             case WeaponType.Rifle:
                 charCtr.baseIndex = (int)AnumationLayers_CharacterA.Rifle_A_Base;
                 charCtr.upperIndex = (int)AnumationLayers_CharacterA.Rifle_A_Upper;
-                //charCtr.animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Character/Rifle/Rifle");
+                break;
+            case WeaponType.Shotgun:
+                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Base;
+                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Upper;
                 break;
             default:
                 break;
@@ -279,7 +288,7 @@ public class Weapon : MonoBehaviour
                 transform.localRotation = Quaternion.Euler(holsterRot);
                 break;
             case "Right":
-                transform.SetParent(charCtr.rightHandTf, false);
+                transform.SetParent(charCtr.rightHandTf);
                 transform.localPosition = defaultPos;
                 transform.localRotation = Quaternion.Euler(defaultRot);
                 break;
@@ -363,30 +372,26 @@ public class Weapon : MonoBehaviour
         //        break;
         //}
 
-        var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
-        if (bullet == null)
-        {
-            Debug.LogError("There are no bullet in the bulletPool");
-            return;
-        }
-
-        bullet.gameObject.SetActive(true);
-        bullet.transform.position = bulletTf.position;
-        var aimPos = charCtr.aimPoint.position;
-        var random = Random.Range(-shootDisparity, shootDisparity);
-        aimPos += charCtr.transform.right * random;
-        random = Random.Range(-shootDisparity, shootDisparity);
-        aimPos += charCtr.transform.up * random;
-        bullet.transform.LookAt(aimPos);
-
         var isHit = hitList[0];
-        bullet.SetComponents(charCtr, target, isHit);
-        hitList.RemoveAt(0);
-
+        int count;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
                 var loadedBullet = weaponData.equipMag.loadedBullets[^1];
+                count = loadedBullet.pelletNum == 0 ? 1 : loadedBullet.pelletNum;
+                for (int i = 0; i < count; i++)
+                {
+                    var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
+                    if (bullet == null)
+                    {
+                        Debug.LogError("There are no bullet in the bulletPool");
+                        return;
+                    }
+
+                    SetBulletDirection(bullet, i == 0 && isHit);
+                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && isHit);
+                }
+                hitList.RemoveAt(0);
                 charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
                 if (weaponData.equipMag.loadedBullets.Count == 0) return;
@@ -395,10 +400,37 @@ public class Weapon : MonoBehaviour
                 charCtr.SetBulletAbility(true, chamberBullet);
                 break;
             case CharacterOwner.Enemy:
+                count = pelletNum == 0 ? 1 : pelletNum;
+                for (int i = 0; i < count; i++)
+                {
+                    var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
+                    if (bullet == null)
+                    {
+                        Debug.LogError("There are no bullet in the bulletPool");
+                        return;
+                    }
+
+                    SetBulletDirection(bullet, i == 0 && isHit);
+                    bullet.SetBullet(charCtr, target, meshType, i == 0 && isHit);
+                }
+                hitList.RemoveAt(0);
                 loadedNum--;
                 break;
             default:
                 break;
+        }
+
+        void SetBulletDirection(Bullet bullet, bool noDisparity)
+        {
+            bullet.gameObject.SetActive(true);
+            bullet.transform.position = bulletTf.position;
+            var aimPos = charCtr.aimPoint.position;
+            if (!noDisparity)
+            {
+                var disparity = count == 1 ? shootDisparity_bullet : shootDisparity_pellet;
+                aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
+            }
+            bullet.transform.LookAt(aimPos);
         }
 
         //if (weaponData.equipMag.loadedBullets.Count > 0)

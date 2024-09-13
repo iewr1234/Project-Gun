@@ -10,10 +10,12 @@ public class BulletDataInfo
 
     public string ID;
     public string bulletName;
+    public int meshType;
     [Space(5f)]
 
     public int level;
     [Tooltip("구경")] public float caliber;
+    [Tooltip("펠릿 수")] public int pelletNum;
     [Tooltip("무게")] public float weight;
     [Tooltip("장약")] public int propellant;
     [Tooltip("피해량")] public int damage;
@@ -29,9 +31,11 @@ public class BulletDataInfo
 
             ID = ID,
             bulletName = bulletName,
+            meshType = meshType,
 
             level = level,
             caliber = caliber,
+            pelletNum = pelletNum,
             weight = weight,
             propellant = propellant,
             damage = damage,
