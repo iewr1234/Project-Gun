@@ -125,9 +125,9 @@ public class CharacterController : MonoBehaviour
     private Outlinable outlinable;
     [SerializeField] private Collider cd;
 
+    [SerializeField] private MultiAimConstraint headRig;
+    [SerializeField] private MultiAimConstraint chestRig;
     [HideInInspector] public Transform aimPoint;
-    private MultiAimConstraint headRig;
-    private MultiAimConstraint chestRig;
 
     [HideInInspector] public Transform mainHolsterTf;
     [HideInInspector] public Transform subHolsterTf;
@@ -457,6 +457,12 @@ public class CharacterController : MonoBehaviour
                 break;
             case WeaponType.Rifle:
                 chestRig.data.offset = new Vector3(-40f, 0f, 0f);
+                break;
+            case WeaponType.Shotgun:
+                chestRig.data.offset = new Vector3(-40f, 0f, 0f);
+                break;
+            case WeaponType.Revolver:
+                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
                 break;
             default:
                 break;
@@ -1424,7 +1430,8 @@ public class CharacterController : MonoBehaviour
         if (shootNum == 0) return;
 
         timer += Time.deltaTime;
-        if (timer > aimTime && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
+        if (timer > aimTime && chestRig.weight == 1f
+         && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
             if (!animator.GetBool("fireTrigger"))
             {
@@ -1446,7 +1453,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void ReloadPrecess(CharacterCommand command)
     {
-        if (!reloading && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("None"))
+        if (!reloading/* && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("None")*/)
         {
             animator.SetTrigger("reload");
             //currentWeapon.Reload();
@@ -2024,20 +2031,20 @@ public class CharacterController : MonoBehaviour
                 LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
                 if (RN == null && LN == null)
                 {
-                    Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
                     continue;
                 }
                 targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
                 targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
                 if (targetRN == null && targetLN == null)
                 {
-                    Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
                     continue;
                 }
 
                 if (!FindNodeOfShooterAndTarget())
                 {
-                    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
                 }
             }
             else if (shooterCover != null && shooterCover.coverType == CoverType.Full)
@@ -2046,13 +2053,13 @@ public class CharacterController : MonoBehaviour
                 LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
                 if (RN == null && LN == null)
                 {
-                    Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
                     continue;
                 }
 
                 if (!FindNodeOfShooterAndTarget())
                 {
-                    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
                 }
             }
             else if (targetCover != null && targetCover.coverType == CoverType.Full)
@@ -2067,7 +2074,7 @@ public class CharacterController : MonoBehaviour
 
                 if (!FindNodeOfShooterAndTarget())
                 {
-                    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
                 }
             }
             else
@@ -2085,10 +2092,10 @@ public class CharacterController : MonoBehaviour
                     };
                     targetList.Add(targetInfo);
                 }
-                else
-                {
-                    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
-                }
+                //else
+                //{
+                //    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+                //}
             }
 
             bool FindNodeOfShooterAndTarget()
@@ -2788,6 +2795,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(coverAimCommand);
                 break;
             case CommandType.Shoot:
+                SetRig(currentWeapon.weaponData.type);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2837,6 +2845,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(aimCommand);
                 break;
             case CommandType.Shoot:
+                SetRig(currentWeapon.weaponData.type);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2928,6 +2937,7 @@ public class CharacterController : MonoBehaviour
     private void CharacterDead(Vector3 dir, float force)
     {
         animator.enabled = false;
+        outlinable.enabled = false;
         cd.enabled = false;
         headAim = false;
         chestAim = false;
@@ -3117,15 +3127,20 @@ public class CharacterController : MonoBehaviour
 
     public void Event_WeaponChange()
     {
+        Debug.Log("Event_WeaponChange");
+        //SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon.WeaponSwitching("Holster");
         currentWeapon = weapons[changeIndex];
+        //currentWeapon.EquipWeapon();
         currentWeapon.WeaponSwitching("Right");
     }
 
     public void Event_WeaponChange_OrderType()
     {
+        Debug.Log("Event_WeaponChange_OrderType");
         if (!animator.GetBool("otherType")) return;
 
+        SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon = weapons[changeIndex];
         currentWeapon.EquipWeapon();
         animator.SetTrigger("change");

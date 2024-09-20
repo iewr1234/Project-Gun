@@ -8,6 +8,7 @@ public enum WeaponType
     Pistol,
     Rifle,
     Shotgun,
+    Revolver,
 }
 
 [System.Serializable]

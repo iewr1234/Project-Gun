@@ -92,7 +92,7 @@ MonoBehaviour:
     prefabName: Pistol_1
     weaponName: Pistol_1
     model: 3
-    caliber: 8
+    caliber: 9
     weight: 3
     isMain: 0
     type: 1
@@ -158,6 +158,43 @@ MonoBehaviour:
       compatCaliber: 12
       weight: 0
       magSize: 7
+      loadedBullets: []
+    isMag: 1
+    equipPartsList: []
+  - indexName: 'W0005: Revolver_1'
+    ID: W0005
+    prefabName: Revolver_1
+    weaponName: Revolver_1
+    model: 5
+    caliber: 9
+    weight: 3
+    isMain: 0
+    type: 4
+    RPM: 80
+    range: 15
+    watchAngle: 30
+    MOA: 3
+    stability: 5
+    rebound: 5
+    actionCost: 2
+    useMagazine: 
+    useMuzzle: 
+    useSight: 
+    useUnderRail: 
+    useRail: 
+    equipMagID: None
+    equipPartsIDs: []
+    equipMag:
+      indexName: InternalMagazine
+      ID: None
+      intMag: 1
+      loadedBulletID: None
+      prefabName: None
+      magName: InternalMagazine
+      compatModel: 05000000
+      compatCaliber: 9
+      weight: 0
+      magSize: 6
       loadedBullets: []
     isMag: 1
     equipPartsList: []

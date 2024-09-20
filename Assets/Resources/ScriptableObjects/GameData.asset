@@ -64,6 +64,12 @@ MonoBehaviour:
   - ID: B0004
     num: 50
     createPos: 2
+  - ID: W0005
+    num: 1
+    createPos: 1
+  - ID: B0003
+    num: 24
+    createPos: 2
   baseStorages:
   - storageName: "\uCC3D\uACE01"
     nodePos: {x: 4, y: 0}
@@ -72,22 +78,4 @@ MonoBehaviour:
   - storageName: "\uCC3D\uACE02"
     nodePos: {x: 5, y: 0}
     slotSize: {x: 7, y: 5}
-    itemList:
-    - indexName: Rifle_1_1/1
-      slotIndex: {x: 1, y: 1}
-      itemSize: {x: 4, y: 2}
-      totalCount: 1
-      itemData:
-        indexName: 'T0001: Rifle_1'
-        ID: T0001
-        dataID: W0001
-        itemName: Rifle_1
-        type: 10
-        level: 1
-        rarity: 1
-        maxNesting: 1
-        price: 1000
-        size: {x: 4, y: 2}
-        addOption: 1
-        setDropTable: 0
-        itemOptions: []
+    itemList: []

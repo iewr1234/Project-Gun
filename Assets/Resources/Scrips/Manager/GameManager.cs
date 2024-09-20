@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
     public GameState gameState;
     [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
     [HideInInspector] public bool eventActive;
+    [HideInInspector] public bool dontMove;
 
     private List<ItemHandler> rigItems = new List<ItemHandler>();
 
@@ -426,7 +427,7 @@ public class GameManager : MonoBehaviour
                 {
                     if (selectChar.commandList.Count > 0) return;
                     if (selectChar.weapons.Count < 2) return;
-                    if (!selectChar.animator.GetCurrentAnimatorStateInfo(selectChar.upperIndex).IsTag("None")) return;
+                    //if (!selectChar.animator.GetCurrentAnimatorStateInfo(selectChar.upperIndex).IsTag("None")) return;
 
                     selectChar.AddCommand(CommandType.ChangeWeapon);
                 }
@@ -700,6 +701,7 @@ public class GameManager : MonoBehaviour
                         ThrowAction_Grenade();
                         break;
                     case GameState.Base:
+                        if (dontMove) return;
                         if (invenMgr.showStorage) return;
                         if (node == null) return;
                         if (playerList.Count == 0) return;

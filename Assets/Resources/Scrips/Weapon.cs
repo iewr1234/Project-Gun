@@ -15,6 +15,7 @@ public class Weapon : MonoBehaviour
         Base,
         Pistol_A_Base,
         Pistol_A_Upper,
+        Revolver_A_Upper,
         Rifle_A_Base,
         Rifle_A_Upper,
         Shotgun_A_Base,
@@ -70,7 +71,7 @@ public class Weapon : MonoBehaviour
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         weaponData = _weaponData;
-        charCtr.SetWeaponAbility(true, weaponData);
+        //charCtr.SetWeaponAbility(true, weaponData);
         if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
         {
             var chamberBullet = weaponData.equipMag.loadedBullets[0];
@@ -180,6 +181,12 @@ public class Weapon : MonoBehaviour
                 defaultPos = weaponPos_Shotgun;
                 defaultRot = weaponRot_Shotgun;
                 break;
+            case WeaponType.Revolver:
+                holsterPos = Vector3.zero;
+                holsterRot = Vector3.zero;
+                defaultPos = weaponPos_Pistol;
+                defaultRot = weaponRot_Pistol;
+                break;
             default:
                 break;
         }
@@ -217,6 +224,7 @@ public class Weapon : MonoBehaviour
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
 
+        charCtr.SetWeaponAbility(true, weaponData);
         switch (weaponData.type)
         {
             case WeaponType.Pistol:
@@ -230,6 +238,10 @@ public class Weapon : MonoBehaviour
             case WeaponType.Shotgun:
                 charCtr.baseIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Base;
                 charCtr.upperIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Upper;
+                break;
+            case WeaponType.Revolver:
+                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
+                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Revolver_A_Upper;
                 break;
             default:
                 break;
