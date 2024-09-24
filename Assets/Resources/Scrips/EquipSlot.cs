@@ -25,6 +25,7 @@ public class EquipSlot : MonoBehaviour
 {
     [Header("---Access Script---")]
     [SerializeField] private InventoryManager invenMgr;
+    public MyStorage myStorage;
     public PopUp_Inventory popUp;
 
     [Header("---Access Component---")]
@@ -41,10 +42,39 @@ public class EquipSlot : MonoBehaviour
     public int intMagMax;
     public ItemHandler item;
 
+    public void SetComponents(InventoryManager _invenMgr)
+    {
+        invenMgr = _invenMgr;
+
+        outline = transform.Find("Outline").GetComponent<Image>();
+        outline.enabled = false;
+        backImage = transform.Find("BackGround").GetComponent<Image>();
+        slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText.enabled = false;
+
+        invenMgr.allEquips.Add(this);
+    }
+
     public void SetComponents(InventoryManager _invenMgr, PopUp_Inventory _popUp)
     {
         invenMgr = _invenMgr;
         popUp = _popUp;
+
+        outline = transform.Find("Outline").GetComponent<Image>();
+        outline.enabled = false;
+        backImage = transform.Find("BackGround").GetComponent<Image>();
+        slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText.enabled = false;
+
+        invenMgr.allEquips.Add(this);
+    }
+
+    public void SetComponents(InventoryManager _invenMgr, MyStorage _myStorage)
+    {
+        invenMgr = _invenMgr;
+        myStorage = _myStorage;
 
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;

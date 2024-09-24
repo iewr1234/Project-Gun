@@ -29,14 +29,15 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    public void SetComponents(MyStorage _myStorage, Vector2Int _slotIndex)
+    public void SetComponents(MyStorage _myStorage)
     {
         myStorage = _myStorage;
 
         slotImage = transform.Find("BackGround").GetComponent<Image>();
 
-        slotIndex = _slotIndex;
-        transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
+        //slotIndex = _slotIndex;
+        //transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
+        gameObject.SetActive(false); 
     }
 
     public void SetComponents(OtherStorage _otherStorage, Vector2Int _slotIndex)
@@ -45,6 +46,12 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 
         slotImage = transform.Find("BackGround").GetComponent<Image>();
 
+        slotIndex = _slotIndex;
+        transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
+    }
+
+    public void SetSlotIndex(Vector2Int _slotIndex)
+    {
         slotIndex = _slotIndex;
         transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
     }

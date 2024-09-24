@@ -12,6 +12,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public InventoryManager invenMgr;
     [Space(5f)]
 
+    public BackpackDataInfo backpackData;
     public WeaponDataInfo weaponData;
     public BulletDataInfo bulletData;
     public MagazineDataInfo magData;
@@ -153,6 +154,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         size = _itemData.size;
         switch (itemData.type)
         {
+            case ItemType.Backpack:
+                var _backpackData = invenMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
+                backpackData = _backpackData.CopyData();
+                break;
             case ItemType.MainWeapon:
                 var _mainWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                 weaponData = _mainWeaponData.CopyData(invenMgr.dataMgr);
@@ -425,7 +430,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemScale(bool value)
     {
         if (size == new Vector2Int(1, 1)) return;
-        if (itemData.type == ItemType.MainWeapon || itemData.type == ItemType.SubWeapon) return;
+        if (itemData.type == ItemType.Backpack) return;
+        if (itemData.type == ItemType.MainWeapon) return;
+        if (itemData.type == ItemType.SubWeapon) return;
 
         switch (value)
         {

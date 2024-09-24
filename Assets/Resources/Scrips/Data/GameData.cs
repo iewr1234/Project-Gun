@@ -6,6 +6,7 @@ public enum CreatePos
 {
     None,
     Equip,
+    Pocket,
     Rig,
     Backpack,
 }

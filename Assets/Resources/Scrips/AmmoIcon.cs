@@ -103,6 +103,14 @@ public class AmmoIcon : MonoBehaviour
                 break;
             case AmmoIconType.Bullet:
                 bullet.rect.gameObject.SetActive(true);
+                if (_item.bulletData.pelletNum == 0)
+                {
+                    bullet.iconImage.sprite = Resources.Load<Sprite>("Sprites/Icon_PistolBullet");
+                }
+                else
+                {
+                    bullet.iconImage.sprite = Resources.Load<Sprite>("Sprites/Icon_ShotgunCell");
+                }
                 bullet.upArrowImage.enabled = false;
                 bullet.downArrowImage.enabled = false;
                 maxValue = _item.TotalCount;

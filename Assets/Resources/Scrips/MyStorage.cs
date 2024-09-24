@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public enum MyStorageType
 {
     None,
+    Pocket,
     Rig,
     Backpack,
 }
@@ -30,7 +31,9 @@ public class MyStorage : MonoBehaviour
     public Vector2Int size;
     private int reSizeNum;
 
-    private readonly Vector2Int minRectSize_my = new Vector2Int(700, 150);
+    private readonly Vector2Int minRectSize_my = new Vector2Int(700, 170);
+    private readonly Vector2Int expandRectSize_my = new Vector2Int(700, 230);
+    private readonly int expandY = 70;
 
     public void SetComponents(InventoryManager _invenMgr)
     {
@@ -43,71 +46,130 @@ public class MyStorage : MonoBehaviour
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 
         equipSlot = GetComponentInChildren<EquipSlot>();
-        equipSlot.SetComponents(invenMgr, null);
+        if (equipSlot != null)
+        {
+            equipSlot.SetComponents(invenMgr, this);
+            switch (type)
+            {
+                case MyStorageType.Rig:
+                    equipSlot.type = EquipType.Rig;
+                    break;
+                case MyStorageType.Backpack:
+                    equipSlot.type = EquipType.Backpack;
+                    break;
+                default:
+                    break;
+            }
+        }
         itemSlots = itemsRect.GetComponentsInChildren<ItemSlot>().ToList();
 
-        SetStorageSize();
         itemSlots.Reverse();
         for (int i = 0; i < itemSlots.Count; i++)
         {
             var itemSlot = itemSlots[i];
-            var index = new Vector2Int(i % size.x, i / size.x);
-            itemSlot.SetComponents(this, index);
-            if (size.y == 0 || i >= size.x * size.y)
-            {
-                itemSlot.gameObject.SetActive(false);
-            }
+            //var index = size.x == 0 ? Vector2Int.zero : new Vector2Int(i % size.x, i / size.x);
+            //var index = new Vector2Int(i % 6, i / 6);
+            itemSlot.SetComponents(this);
+            //if (size.y == 0 || i >= size.x * size.y)
+            //{
+            //    itemSlot.gameObject.SetActive(false);
+            //}
         }
-    }
 
-    private void SetStorageSize()
-    {
-        int xCount;
-        int yCount;
         switch (type)
         {
+            case MyStorageType.Pocket:
+                SetStorageSize(new Vector2Int(4, 3));
+                break;
             case MyStorageType.Rig:
-                if (equipSlot.item == null)
-                {
-                    xCount = 3;
-                    yCount = 2;
-                    gridLayout.constraintCount = xCount;
-                    size = new Vector2Int(xCount, yCount);
-                    reSizeNum = xCount * yCount;
-                }
-                else
-                {
-                    gridLayout.constraintCount = 6;
-                }
+                SetStorageSize(Vector2Int.zero);
                 break;
             case MyStorageType.Backpack:
-                if (equipSlot.item == null)
-                {
-                    xCount = 6;
-                    yCount = 2;
-                    gridLayout.constraintCount = xCount;
-                    size = new Vector2Int(xCount, yCount);
-                    reSizeNum = xCount * yCount;
-                }
+                SetStorageSize(Vector2Int.zero);
                 break;
             default:
                 break;
         }
     }
 
-    private void Update()
+    public void SetStorageSize(Vector2Int newSize)
     {
-        ResizeStorage();
+        var activeSlots = itemSlots.FindAll(x => x.gameObject.activeSelf);
+        for (int i = 0; i < activeSlots.Count; i++)
+        {
+            var itemSlot = activeSlots[i];
+            itemSlot.gameObject.SetActive(false);
+        }
+
+        size = newSize;
+        gridLayout.constraintCount = size.x;
+        if (size.y > 2)
+        {
+            rect.sizeDelta = expandRectSize_my + new Vector2Int(0, expandY * (size.y - 3));
+        }
+        else
+        {
+            rect.sizeDelta = minRectSize_my;
+        }
+        //switch (type)
+        //{
+        //    case MyStorageType.Pocket:
+        //        gridLayout.constraintCount = size.x;
+        //        reSizeNum = size.x * size.y;
+        //        break;
+        //    case MyStorageType.Rig:
+        //        if (equipSlot != null && equipSlot.item == null)
+        //        {
+        //            gridLayout.constraintCount = size.x;
+        //            reSizeNum = size.x * size.y;
+        //        }
+        //        else
+        //        {
+        //            gridLayout.constraintCount = 6;
+        //        }
+        //        break;
+        //    case MyStorageType.Backpack:
+        //        if (equipSlot != null && equipSlot.item == null)
+        //        {
+        //            gridLayout.constraintCount = size.x;
+        //            reSizeNum = size.x * size.y;
+        //        }
+        //        else
+        //        {
+        //            gridLayout.constraintCount = 6;
+        //        }
+        //        break;
+        //    default:
+        //        break;
+        //}
+
+        if (size.x == 0 && size.y == 0) return;
+
+        for (int i = 0; i < itemSlots.Count; i++)
+        {
+            var itemSlot = itemSlots[i];
+            if (i < size.x * size.y)
+            {
+                var index = new Vector2Int(i % size.x, i / size.x);
+                itemSlot.SetSlotIndex(index);
+                itemSlot.gameObject.SetActive(true);
+            }
+        }
     }
 
+    //private void Update()
+    //{
+    //    ResizeStorage();
+    //}
 
-    private void ResizeStorage()
-    {
-        if (size.x * size.y <= reSizeNum) return;
 
-        var addSize = new Vector2(0, 8);
-        if (rect.sizeDelta == itemsRect.sizeDelta + addSize) return;
+    //private void ResizeStorage()
+    //{
+    //    if (size.x * size.y <= reSizeNum) return;
 
-        rect.sizeDelta = itemsRect.sizeDelta + addSize;
-    }
+    //    var addSize = new Vector2(0, 8);
+    //    if (rect.sizeDelta == itemsRect.sizeDelta + addSize) return;
+
+    //    rect.sizeDelta = itemsRect.sizeDelta + addSize;
+    //}
 }

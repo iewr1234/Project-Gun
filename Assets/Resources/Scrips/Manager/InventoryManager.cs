@@ -120,7 +120,7 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < charEquips.Count; i++)
         {
             var charEquip = charEquips[i];
-            charEquip.SetComponents(this, null);
+            charEquip.SetComponents(this);
         }
 
         myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
@@ -145,6 +145,10 @@ public class InventoryManager : MonoBehaviour
             {
                 case CreatePos.Equip:
                     SetItemInEquipSlot(initialItem);
+                    break;
+                case CreatePos.Pocket:
+                    var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
+                    SetItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
                     break;
                 case CreatePos.Rig:
                     var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
@@ -846,6 +850,12 @@ public class InventoryManager : MonoBehaviour
 
             switch (putItem.itemData.type)
             {
+                case ItemType.Backpack:
+                    if (equipSlot.myStorage != null && putItem.backpackData != null)
+                    {
+                        equipSlot.myStorage.SetStorageSize(putItem.backpackData.storageSize);
+                    }
+                    break;
                 case ItemType.MainWeapon:
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
@@ -1082,6 +1092,12 @@ public class InventoryManager : MonoBehaviour
         //var popUp = item.equipSlot.popUp;
         switch (item.itemData.type)
         {
+            case ItemType.Backpack:
+                if (item.equipSlot.myStorage != null)
+                {
+                    item.equipSlot.myStorage.SetStorageSize(Vector2Int.zero);
+                }
+                break;
             case ItemType.Bullet:
                 item.equipSlot.popUp.item.weaponData.equipMag.loadedBullets.Clear();
                 item.countText.enabled = true;

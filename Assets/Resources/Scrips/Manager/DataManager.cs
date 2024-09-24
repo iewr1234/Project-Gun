@@ -94,6 +94,8 @@ public class DataManager : MonoBehaviour
 
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
+        if (backpackData == null) backpackData = Resources.Load<BackpackData>("ScriptableObjects/BackpackData");
+
         if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
 
         if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
@@ -1155,6 +1157,48 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Backpack Data
+    [HideInInspector] public BackpackData backpackData;
+    private readonly string backpackDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=954121519&range=A3:D";
+    private enum BackpackVariable
+    {
+        ID,
+        BackpackName,
+        X_Size,
+        Y_Size,
+    }
+
+    public void UpdateBackpackData()
+    {
+        if (backpackData == null) backpackData = Resources.Load<BackpackData>("ScriptableObjects/BackpackData");
+        if (backpackData.backpackInfos.Count > 0) backpackData.backpackInfos.Clear();
+
+        StartCoroutine(ReadBackpackData());
+
+        IEnumerator ReadBackpackData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(backpackDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var backpackInfo = new BackpackDataInfo
+                {
+                    indexName = $"{data[(int)BackpackVariable.ID]}: {data[(int)BackpackVariable.BackpackName]}",
+                    ID = data[(int)BackpackVariable.ID],
+                    backpackName = data[(int)BackpackVariable.BackpackName],
+                    storageSize = new Vector2Int(int.Parse(data[(int)BackpackVariable.X_Size]), int.Parse(data[(int)BackpackVariable.Y_Size])),
+                };
+                backpackData.backpackInfos.Add(backpackInfo);
+            }
+            Debug.Log("Update Backpack Data");
+        }
+    }
+    #endregion
+
     #region ItemOption Data
     [HideInInspector] public ItemOptionData itemOptionData;
     private readonly string itemOptionDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1636963263&range=A3:H";
@@ -1504,6 +1548,11 @@ public class DataManager : MonoBehaviour
             {
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+            }
+            if (GUILayout.Button("Update the Backpack Database"))
+            {
+                dataMgr.UpdateBackpackData();
+                EditorUtility.SetDirty(dataMgr.backpackData);
             }
             if (GUILayout.Button("Update the ItemOption Database"))
             {
