@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -376,6 +377,10 @@ public class InventoryManager : MonoBehaviour
         otherScrollRect.vertical = otherScrollbar.activeSelf;
     }
 
+    /// <summary>
+    /// 아이템을 집음
+    /// </summary>
+    /// <param name="item"></param>
     public void TakeTheItem(ItemHandler item)
     {
         if (item.equipSlot == null)
@@ -401,6 +406,13 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 생성 아이템을 저장고에 넣음
+    /// </summary>
+    /// <param name="dataID"></param>
+    /// <param name="count"></param>
+    /// <param name="itemSlots"></param>
+    /// <param name="insertOption"></param>
     public void SetItemInStorage(string dataID, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == dataID);
@@ -425,6 +437,13 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 생성 아이템을 저장고에 넣음
+    /// </summary>
+    /// <param name="itemData"></param>
+    /// <param name="count"></param>
+    /// <param name="itemSlots"></param>
+    /// <param name="insertOption"></param>
     public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
         if (itemData == null)
@@ -448,6 +467,32 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 저장고에 아이템을 옮김
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="itemSlots"></param>
+    public void MoveItemInStorage(ItemHandler item, List<ItemSlot> itemSlots)
+    {
+        var emptySlots = FindEmptySlots(item, itemSlots);
+        if (emptySlots == null)
+        {
+            Debug.Log("not found ItemSlot");
+            InActiveItem(item);
+        }
+        else
+        {
+            onSlots = emptySlots;
+            PutTheItem(item, emptySlots);
+        }
+    }
+
+    /// <summary>
+    /// 빈 슬롯을 검색
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="itemSlots"></param>
+    /// <returns></returns>
     private List<ItemSlot> FindEmptySlots(ItemHandler item, List<ItemSlot> itemSlots)
     {
         int index = 0;
@@ -532,6 +577,23 @@ public class InventoryManager : MonoBehaviour
         item.ChangeRectPivot(true);
         item.transform.SetParent(equipSlot.transform, false);
         item.transform.localPosition = Vector3.zero;
+        switch (item.itemData.type)
+        {
+            case ItemType.Rig:
+                if (equipSlot.myStorage != null && item.rigData != null)
+                {
+                    equipSlot.myStorage.SetStorageSize(item.rigData.storageSize);
+                }
+                break;
+            case ItemType.Backpack:
+                if (equipSlot.myStorage != null && item.backpackData != null)
+                {
+                    equipSlot.myStorage.SetStorageSize(item.backpackData.storageSize);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     public void SetItemInEquipSlot(BulletDataInfo bulletData, int count, EquipSlot equipSlot)
@@ -634,7 +696,7 @@ public class InventoryManager : MonoBehaviour
             {
                 var itemNesting = onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
                                && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
-                var itemMove = onSlots.Find(x => x.item != item) == null && onSlots.Count == item.size.x * item.size.y;
+                var itemMove = onSlots.Find(x => x.item != null && x.item != item) == null && onSlots.Count == item.size.x * item.size.y;
                 if (itemNesting)
                 {
                     ItemNesting();
@@ -656,7 +718,10 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 var itemMove = itemSlots.Find(x => x.item != null && x.item != item) == null && itemSlots.Count == item.size.x * item.size.y;
-                if (itemMove)
+                var storageInTheStorage = itemSlots.Count > 0 && itemSlots[0].myStorage != null
+                                       && (itemSlots[0].myStorage.type == MyStorageType.Rig && item.itemData.type == ItemType.Rig
+                                       || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
+                if (itemMove && !storageInTheStorage)
                 {
                     CheckBaseStorage();
                     ItemMove(true);
@@ -694,19 +759,18 @@ public class InventoryManager : MonoBehaviour
                     ItemRegistration();
                     item.SetItemSlots(null, DataUtility.slot_noItemColor);
                     item.itemSlots = new List<ItemSlot>(itemSlots);
-                    UnequipItem(item);
 
-                    for (int i = 0; i < itemSlots.Count; i++)
+                    for (int i = 0; i < item.itemSlots.Count; i++)
                     {
-                        var itemSlot = itemSlots[i];
+                        var itemSlot = item.itemSlots[i];
                         itemSlot.item = item;
                         itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
                     }
+                    UnequipItem(item);
 
-                    item.itemSlots = new List<ItemSlot>(itemSlots);
                     item.SetItemScale(false);
                     item.ChangeRectPivot(false);
-                    item.transform.SetParent(itemSlots[0].transform, false);
+                    item.transform.SetParent(item.itemSlots[0].transform, false);
                     item.transform.localPosition = Vector3.zero;
                     if (item.itemData.type == ItemType.Magazine)
                     {
@@ -717,6 +781,7 @@ public class InventoryManager : MonoBehaviour
                     if (item.equipSlot != null)
                     {
                         item.equipSlot.slotText.enabled = false;
+                        item.SetItemRotation(false);
                         item.SetItemScale(true);
                         item.ChangeRectPivot(true);
                         item.transform.SetParent(item.equipSlot.transform, false);
@@ -816,6 +881,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 아이템 장착
+    /// </summary>
+    /// <param name="putItem"></param>
+    /// <param name="equipSlot"></param>
     public void EquipItem(ItemHandler putItem, EquipSlot equipSlot)
     {
         if (equipSlot.CheckEquip(putItem))
@@ -850,6 +920,12 @@ public class InventoryManager : MonoBehaviour
 
             switch (putItem.itemData.type)
             {
+                case ItemType.Rig:
+                    if (equipSlot.myStorage != null && putItem.rigData != null)
+                    {
+                        equipSlot.myStorage.SetStorageSize(putItem.rigData.storageSize);
+                    }
+                    break;
                 case ItemType.Backpack:
                     if (equipSlot.myStorage != null && putItem.backpackData != null)
                     {
@@ -974,6 +1050,11 @@ public class InventoryManager : MonoBehaviour
         InactiveSampleItem();
     }
 
+    /// <summary>
+    /// 빠른 장착
+    /// </summary>
+    /// <param name="onItem"></param>
+    /// <param name="putItem"></param>
     public void QuickEquip(ItemHandler onItem, ItemHandler putItem)
     {
         if (putItem.equipSlot != null)
@@ -1085,6 +1166,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 아이템 장착해제
+    /// </summary>
+    /// <param name="item"></param>
     public void UnequipItem(ItemHandler item)
     {
         if (item.equipSlot == null) return;
@@ -1092,10 +1177,34 @@ public class InventoryManager : MonoBehaviour
         //var popUp = item.equipSlot.popUp;
         switch (item.itemData.type)
         {
-            case ItemType.Backpack:
-                if (item.equipSlot.myStorage != null)
+            case ItemType.Rig:
+                var rigStorage = item.equipSlot.myStorage;
+                if (rigStorage != null)
                 {
-                    item.equipSlot.myStorage.SetStorageSize(Vector2Int.zero);
+                    var inItemSlots = rigStorage.itemSlots.FindAll(x => x.item != null);
+                    for (int i = 0; i < inItemSlots.Count; i++)
+                    {
+                        var itemSlot = inItemSlots[i];
+                        if (itemSlot.item == null) continue;
+
+                        MoveItemInStorage(itemSlot.item, otherStorage.itemSlots);
+                    }
+                    rigStorage.SetStorageSize(Vector2Int.zero);
+                }
+                break;
+            case ItemType.Backpack:
+                var backpackStorage = item.equipSlot.myStorage;
+                if (backpackStorage != null)
+                {
+                    var inItemSlots = backpackStorage.itemSlots.FindAll(x => x.item != null);
+                    for (int i = 0; i < inItemSlots.Count; i++)
+                    {
+                        var itemSlot = inItemSlots[i];
+                        if (itemSlot.item == null) continue;
+
+                        MoveItemInStorage(itemSlot.item, otherStorage.itemSlots);
+                    }
+                    backpackStorage.SetStorageSize(Vector2Int.zero);
                 }
                 break;
             case ItemType.Bullet:
@@ -1150,9 +1259,17 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 범위 내의 아이템슬롯 검색
+    /// </summary>
+    /// <param name="itemSlots"></param>
+    /// <param name="itemSize"></param>
+    /// <param name="startIndex"></param>
+    /// <returns></returns>
     public List<ItemSlot> FindAllMultiSizeSlots(List<ItemSlot> itemSlots, Vector2Int itemSize, Vector2Int startIndex)
     {
-        var setSlots = itemSlots.FindAll(x => x.slotIndex.x >= startIndex.x
+        var setSlots = itemSlots.FindAll(x => x.gameObject.activeSelf
+                                           && x.slotIndex.x >= startIndex.x
                                            && x.slotIndex.y >= startIndex.y
                                            && x.slotIndex.x < startIndex.x + itemSize.x
                                            && x.slotIndex.y < startIndex.y + itemSize.y);
@@ -1160,6 +1277,10 @@ public class InventoryManager : MonoBehaviour
         return setSlots;
     }
 
+    /// <summary>
+    /// 샘플 아이템 활성화
+    /// </summary>
+    /// <param name="item"></param>
     public void ActiveSampleItem(ItemHandler item)
     {
         sampleItem.transform.SetParent(item.transform.parent, false);
@@ -1167,6 +1288,11 @@ public class InventoryManager : MonoBehaviour
         sampleItem.SetSampleItemInfo(item);
     }
 
+    /// <summary>
+    /// 팝업창을 가져옴
+    /// </summary>
+    /// <param name="state"></param>
+    /// <returns></returns>
     public PopUp_Inventory GetPopUp(PopUpState state)
     {
         PopUp_Inventory popUp = null;
@@ -1219,6 +1345,10 @@ public class InventoryManager : MonoBehaviour
         return popUp;
     }
 
+    /// <summary>
+    /// 활성된 팝업을 제거
+    /// </summary>
+    /// <param name="removePopUp"></param>
     public void RemoveActivePopUp(PopUp_Inventory removePopUp)
     {
         removePopUp.item = null;
@@ -1229,6 +1359,9 @@ public class InventoryManager : MonoBehaviour
         ResetActivePopUp();
     }
 
+    /// <summary>
+    /// 활성된 팝업을 초기화
+    /// </summary>
     public void ResetActivePopUp()
     {
         for (int i = 0; i < activePopUp.Count; i++)
@@ -1240,6 +1373,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 아이템 비활성화
+    /// </summary>
+    /// <param name="item"></param>
     public void InActiveItem(ItemHandler item)
     {
         item.itemData = null;
@@ -1264,6 +1401,9 @@ public class InventoryManager : MonoBehaviour
         activeItem.Remove(item);
     }
 
+    /// <summary>
+    /// 샘플 아이템 비활성화
+    /// </summary>
     public void InactiveSampleItem()
     {
         sampleItem.transform.SetParent(itemPool, false);
@@ -1281,6 +1421,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 캔버스 간 거리를 가져옴
+    /// </summary>
+    /// <returns></returns>
     public int GetCanvasDistance()
     {
         if (gameMgr != null)
@@ -1293,6 +1437,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 결과창 UI 설정
+    /// </summary>
+    /// <param name="value"></param>
     public void SetResultUI(bool value)
     {
         switch (value)

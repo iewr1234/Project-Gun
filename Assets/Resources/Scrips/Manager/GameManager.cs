@@ -900,14 +900,14 @@ public class GameManager : MonoBehaviour
         if (intMag)
         {
             rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                     && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                     && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                      && x.itemData.type == ItemType.Bullet
                                                      && x.bulletData.caliber == weaponData.caliber).ToList();
         }
         else
         {
             rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                     && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                     && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                      && x.itemData.type == ItemType.Magazine
                                                      && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
                                           .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
@@ -980,7 +980,7 @@ public class GameManager : MonoBehaviour
         ClearLine();
         RemoveTargetNode();
         rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                 && x.itemSlots[0].myStorage.type == MyStorageType.Rig
+                                                 && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                  && x.itemData.type == ItemType.Grenade);
         if (rigItems.Count == 0) return;
 

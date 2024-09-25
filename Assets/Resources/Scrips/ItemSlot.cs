@@ -37,7 +37,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 
         //slotIndex = _slotIndex;
         //transform.name = $"Slot_X{slotIndex.x}/Y{slotIndex.y}";
-        gameObject.SetActive(false); 
+        gameObject.SetActive(false);
     }
 
     public void SetComponents(OtherStorage _otherStorage, Vector2Int _slotIndex)
@@ -94,10 +94,13 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                            && invenMgr.onSlot.item.itemData.maxNesting > 1
                            && invenMgr.onSlot.item.TotalCount < invenMgr.onSlot.item.itemData.maxNesting;
             var canMove = !findSlot && sizeCount == invenMgr.onSlots.Count;
+            var storageInTheStorage = myStorage != null
+                                   && (myStorage.type == MyStorageType.Rig && item.itemData.type == ItemType.Rig
+                                   || myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
             for (int i = 0; i < invenMgr.onSlots.Count; i++)
             {
                 var onSlot = invenMgr.onSlots[i];
-                if (itemNesting || canMove)
+                if (itemNesting || (canMove && !storageInTheStorage))
                 {
                     onSlot.SetItemSlot(DataUtility.slot_moveColor);
                 }

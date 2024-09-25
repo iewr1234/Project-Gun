@@ -29,7 +29,7 @@ public class MyStorage : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public MyStorageType type;
     public Vector2Int size;
-    private int reSizeNum;
+    //private int reSizeNum;
 
     private readonly Vector2Int minRectSize_my = new Vector2Int(700, 170);
     private readonly Vector2Int expandRectSize_my = new Vector2Int(700, 230);
@@ -79,7 +79,7 @@ public class MyStorage : MonoBehaviour
         switch (type)
         {
             case MyStorageType.Pocket:
-                SetStorageSize(new Vector2Int(4, 3));
+                SetStorageSize(new Vector2Int(4, 1));
                 break;
             case MyStorageType.Rig:
                 SetStorageSize(Vector2Int.zero);

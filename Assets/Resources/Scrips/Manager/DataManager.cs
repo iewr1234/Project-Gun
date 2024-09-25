@@ -94,6 +94,8 @@ public class DataManager : MonoBehaviour
 
         if (armorData == null) armorData = Resources.Load<ArmorData>("ScriptableObjects/ArmorData");
 
+        if (rigData == null) rigData = Resources.Load<RigData>("ScriptableObjects/RigData");
+
         if (backpackData == null) backpackData = Resources.Load<BackpackData>("ScriptableObjects/BackpackData");
 
         if (itemOptionData == null) itemOptionData = Resources.Load<ItemOptionData>("ScriptableObjects/ItemOptionData");
@@ -1157,6 +1159,48 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region Rig Data
+    [HideInInspector] public RigData rigData;
+    private readonly string rigDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=3068856&range=A3:D";
+    private enum RigVariable
+    {
+        ID,
+        RigName,
+        X_Size,
+        Y_Size,
+    }
+
+    public void UpdateRigData()
+    {
+        if (rigData == null) rigData = Resources.Load<RigData>("ScriptableObjects/RigData");
+        if (rigData.rigInfos.Count > 0) rigData.rigInfos.Clear();
+
+        StartCoroutine(ReadRigData());
+
+        IEnumerator ReadRigData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(rigDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var rigInfo = new RigDataInfo
+                {
+                    indexName = $"{data[(int)RigVariable.ID]}: {data[(int)RigVariable.RigName]}",
+                    ID = data[(int)RigVariable.ID],
+                    rigName = data[(int)RigVariable.RigName],
+                    storageSize = new Vector2Int(int.Parse(data[(int)RigVariable.X_Size]), int.Parse(data[(int)RigVariable.Y_Size])),
+                };
+                rigData.rigInfos.Add(rigInfo);
+            }
+            Debug.Log("Update Rig Data");
+        }
+    }
+    #endregion
+
     #region Backpack Data
     [HideInInspector] public BackpackData backpackData;
     private readonly string backpackDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=954121519&range=A3:D";
@@ -1548,6 +1592,11 @@ public class DataManager : MonoBehaviour
             {
                 dataMgr.UpdateArmorData();
                 EditorUtility.SetDirty(dataMgr.armorData);
+            }
+            if (GUILayout.Button("Update the Rig Database"))
+            {
+                dataMgr.UpdateRigData();
+                EditorUtility.SetDirty(dataMgr.rigData);
             }
             if (GUILayout.Button("Update the Backpack Database"))
             {
