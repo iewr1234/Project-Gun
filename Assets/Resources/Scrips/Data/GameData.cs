@@ -26,6 +26,7 @@ public class StorageItemInfo
     public Vector2Int slotIndex;
     public Vector2Int itemSize;
     public int totalCount;
+    public bool rotation;
     public ItemDataInfo itemData;
 }
 

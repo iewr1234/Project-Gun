@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class OtherStorage : MonoBehaviour
 {
@@ -108,9 +108,57 @@ public class OtherStorage : MonoBehaviour
             var setSlot = invenMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
             if (setSlot.Count == storageItem.itemSize.x * storageItem.itemSize.y)
             {
-                invenMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, setSlot);
+                invenMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, storageItem.rotation, setSlot);
             }
         }
+    }
+
+    /// <summary>
+    /// 바닥에 아이템을 버림
+    /// </summary>
+    /// <param name="item"></param>
+    public void DropItmeOnTheFloor(ItemHandler item)
+    {
+        var floor = storageInfos[^1];
+        var emptySlots = (from y in Enumerable.Range(0, floor.slotSize.y)
+                          from x in Enumerable.Range(0, floor.slotSize.x)
+                          select new Vector2Int(x, y)).ToList();
+
+        for (int i = 0; i < floor.itemList.Count; i++)
+        {
+            var itemInfo = floor.itemList[i];
+            var fullSlots = from y in Enumerable.Range(0, itemInfo.itemSize.y)
+                            from x in Enumerable.Range(0, itemInfo.itemSize.x)
+                            select new Vector2Int(itemInfo.slotIndex.x + x, itemInfo.slotIndex.y + y);
+            emptySlots = emptySlots.Except(fullSlots).ToList();
+        }
+
+        var slotCount = item.size.x * item.size.y;
+        for (int i = 0; i < emptySlots.Count; i++)
+        {
+            var emptySlot = emptySlots[i];
+            var itemSlots = from y in Enumerable.Range(0, item.size.y)
+                            from x in Enumerable.Range(0, item.size.x)
+                            select new Vector2Int(emptySlot.x + x, emptySlot.y + y);
+            var setSlots = emptySlots.Intersect(itemSlots).ToList();
+            if (setSlots.Count == slotCount)
+            {
+                var storageItemInfo = new StorageItemInfo()
+                {
+                    indexName = $"{item.itemData.itemName}_{setSlots[0].x}/{setSlots[0].y}",
+                    slotIndex = setSlots[0],
+                    itemSize = item.size,
+                    totalCount = item.TotalCount,
+                    rotation = item.rotation,
+                    itemData = item.itemData,
+                };
+                floor.itemList.Add(storageItemInfo);
+                invenMgr.InActiveItem(item);
+                return;
+            }
+        }
+
+        Debug.Log("no EmptySlot int the FloorStorage");
     }
 
     public void ClearStorage()

@@ -15,8 +15,8 @@ public class InventoryManager : MonoBehaviour
     [HideInInspector] public GameManager gameMgr;
     [HideInInspector] public BaseManager baseMgr;
 
-    //[HideInInspector] public PopUp_Inventory popUp;
-    public List<PopUp_Inventory> activePopUp;
+    private PopUp_Warning popUp_warning;
+    [HideInInspector] public List<PopUp_Inventory> activePopUp;
     private List<PopUp_Inventory> popUpList;
 
     [HideInInspector] public ContextMenu contextMenu;
@@ -85,6 +85,7 @@ public class InventoryManager : MonoBehaviour
 
         //popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
         //popUp.SetComponents(this);
+        popUp_warning = FindAnyObjectByType<PopUp_Warning>();
         popUpList = transform.Find("InventoryUI/PopUpList").GetComponentsInChildren<PopUp_Inventory>().ToList();
         for (int i = 0; i < popUpList.Count; i++)
         {
@@ -191,27 +192,15 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
-            if (gameMgr.gameState == GameState.Result) return;
-            if (gameMgr.playerList.Count == 0) return;
-
-            itemSplit = false;
-            var player = gameMgr.playerList[0];
             var value = invenUI.gameObject.activeSelf;
-            if (player.state == CharacterState.Base)
+            if (value && otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
             {
-                gameMgr.gameState = value ? GameState.Base : GameState.Inventory;
+                popUp_warning.SetWarning(WarningState.DeleteDropItems);
             }
             else
             {
-                gameMgr.gameState = value ? GameState.None : GameState.Inventory;
+                InventoryProcess(value);
             }
-            gameMgr.camMgr.lockCam = !value;
-            if (!value)
-            {
-                SetOtherStorage(null);
-            }
-            SetStorageUI(!value);
-            ShowInventory();
         }
 
         if (!invenUI.gameObject.activeSelf) return;
@@ -233,6 +222,30 @@ public class InventoryManager : MonoBehaviour
         {
             itemSplit = false;
         }
+    }
+
+    public void InventoryProcess(bool value)
+    {
+        if (gameMgr.gameState == GameState.Result) return;
+        if (gameMgr.playerList.Count == 0) return;
+
+        itemSplit = false;
+        var player = gameMgr.playerList[0];
+        if (player.state == CharacterState.Base)
+        {
+            gameMgr.gameState = value ? GameState.Base : GameState.Inventory;
+        }
+        else
+        {
+            gameMgr.gameState = value ? GameState.None : GameState.Inventory;
+        }
+        gameMgr.camMgr.lockCam = !value;
+        if (!value)
+        {
+            SetOtherStorage(null);
+        }
+        SetStorageUI(!value);
+        ShowInventory();
     }
 
     /// <summary>
@@ -269,23 +282,23 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetItemStorage(bool value)
-    {
-        if (otherStorage.storageInfos.Count == 0) return;
+    //public void SetItemStorage(bool value)
+    //{
+    //    if (otherStorage.storageInfos.Count == 0) return;
 
-        otherStorage.SetActive(value);
-        showStorage = value;
-        switch (value)
-        {
-            case true:
-                otherStorage.ActiveTabButtons(otherStorage.storageInfos.Count);
-                otherStorage.GetStorageInfo(0);
-                break;
-            case false:
-                otherStorage.DeactiveTabButtons();
-                break;
-        }
-    }
+    //    otherStorage.SetActive(value);
+    //    showStorage = value;
+    //    switch (value)
+    //    {
+    //        case true:
+    //            otherStorage.ActiveTabButtons(otherStorage.storageInfos.Count);
+    //            otherStorage.GetStorageInfo(0);
+    //            break;
+    //        case false:
+    //            otherStorage.DeactiveTabButtons();
+    //            break;
+    //    }
+    //}
 
     /// <summary>
     /// 아이템 회전
@@ -477,8 +490,7 @@ public class InventoryManager : MonoBehaviour
         var emptySlots = FindEmptySlots(item, itemSlots);
         if (emptySlots == null)
         {
-            Debug.Log("not found ItemSlot");
-            InActiveItem(item);
+            otherStorage.DropItmeOnTheFloor(item);
         }
         else
         {
@@ -523,10 +535,11 @@ public class InventoryManager : MonoBehaviour
         return emptySlots;
     }
 
-    public void SetItemInStorage(ItemDataInfo itemData, int count, List<ItemSlot> itemSlots)
+    public void SetItemInStorage(ItemDataInfo itemData, int count, bool rotation, List<ItemSlot> itemSlots)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(itemData, count, false);
+        item.SetItemRotation(rotation);
         PutTheItem(item, itemSlots);
     }
 
@@ -866,6 +879,7 @@ public class InventoryManager : MonoBehaviour
                     slotIndex = itemSlots[0].slotIndex,
                     itemSize = item.size,
                     totalCount = item.TotalCount,
+                    rotation = item.rotation,
                     itemData = item.itemData,
                 };
                 storageInfo.itemList.Add(storageItemInfo);

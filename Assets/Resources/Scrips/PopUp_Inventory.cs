@@ -170,7 +170,7 @@ public class PopUp_Inventory : MonoBehaviour
         else if (split.slider.value > 0)
         {
             item.ResultTotalCount((int)-split.slider.value);
-            invenMgr.SetItemInStorage(item.itemData, (int)split.slider.value, itemSlots);
+            invenMgr.SetItemInStorage(item.itemData, (int)split.slider.value, false, itemSlots);
         }
         else
         {

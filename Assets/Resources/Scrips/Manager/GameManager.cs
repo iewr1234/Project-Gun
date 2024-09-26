@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -707,8 +708,7 @@ public class GameManager : MonoBehaviour
                         if (playerList.Count == 0) return;
 
                         var player = playerList[0];
-                        if (player.commandList.Count > 0) return;
-
+                        var moveCommand = player.commandList.Find(x => x.type == CommandType.Move);
                         if (node.markerType == MarkerType.Base)
                         {
                             // BaseNode Process
@@ -729,18 +729,44 @@ public class GameManager : MonoBehaviour
                             }
                             if (enterNode == null) return;
 
-                            FindMovableNodes(player);
-                            ResultNodePass(player, enterNode);
-                            CharacterMove(player, node);
+                            if (moveCommand == null)
+                            {
+                                FindMovableNodes(player);
+                                ResultNodePass(player, enterNode);
+                                CharacterMove(player, node);
+                            }
+                            else if (moveCommand.targetNode != node)
+                            {
+                                ChangeMoveDestination(player, enterNode, node);
+                            }
                         }
                         else
                         {
                             if (!node.canMove) return;
 
-                            FindMovableNodes(player);
-                            ResultNodePass(player, node);
-                            CharacterMove(player, node);
+                            eventActive = false;
+                            if (moveCommand == null)
+                            {
+                                FindMovableNodes(player);
+                                ResultNodePass(player, node);
+                                CharacterMove(player, node);
+                            }
+                            else if (moveCommand.targetNode != node)
+                            {
+                                ChangeMoveDestination(player, node, node);
+                            }
                         }
+
+                        //else
+                        //{
+                        //    var moveChange = player.commandList.Find(x => x.type == CommandType.MoveChange);
+                        //    if (moveChange != null)
+                        //    {
+                        //        player.commandList.Remove(moveChange);
+                        //    }
+
+                        //    player.AddCommand(CommandType.MoveChange, )
+                        //}
                         break;
                     default:
                         break;
@@ -777,6 +803,17 @@ public class GameManager : MonoBehaviour
                 default:
                     break;
             }
+        }
+
+        void ChangeMoveDestination(CharacterController player, FieldNode endNode, FieldNode targetNode)
+        {
+            var moveChange = player.commandList.Find(x => x.type == CommandType.MoveChange);
+            if (moveChange != null)
+            {
+                player.commandList.Remove(moveChange);
+            }
+
+            player.AddCommand(CommandType.MoveChange, endNode, targetNode);
         }
     }
 
@@ -1212,6 +1249,13 @@ public class GameManager : MonoBehaviour
         }
         charCtr.AddCommand(CommandType.Move, movePass, targetNode);
         //charCtr.AddCommand(CommandType.TakeCover);
+    }
+
+    public void CharacterMoveChange(CharacterController charCtr, CharacterCommand command)
+    {
+        FindMovableNodes(charCtr);
+        ResultNodePass(charCtr, command.endNode);
+        CharacterMove(charCtr, command.targetNode);
     }
 
     /// <summary>

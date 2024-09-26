@@ -51,15 +51,74 @@ MonoBehaviour:
     createPos: 1
   - ID: BP0001
     num: 1
-    createPos: 2
+    createPos: 1
   - ID: R0001
     num: 1
     createPos: 1
+  - ID: W0004
+    num: 1
+    createPos: 4
+  - ID: B0001
+    num: 50
+    createPos: 3
+  - ID: B0001
+    num: 50
+    createPos: 3
+  - ID: B0001
+    num: 50
+    createPos: 3
+  - ID: B0004
+    num: 50
+    createPos: 3
+  - ID: B0004
+    num: 50
+    createPos: 3
+  - ID: B0004
+    num: 50
+    createPos: 3
   baseStorages:
   - storageName: "\uCC3D\uACE01"
     nodePos: {x: 4, y: 0}
     slotSize: {x: 7, y: 3}
-    itemList: []
+    itemList:
+    - indexName: Backpack_1_5/0
+      slotIndex: {x: 5, y: 0}
+      itemSize: {x: 2, y: 3}
+      totalCount: 1
+      rotation: 0
+      itemData:
+        indexName: 'T6001: Backpack_1'
+        ID: T6001
+        dataID: BP0001
+        itemName: Backpack_1
+        type: 4
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 100
+        size: {x: 2, y: 3}
+        addOption: 1
+        setDropTable: 0
+        itemOptions: []
+    - indexName: Revolver_1_1/0
+      slotIndex: {x: 1, y: 0}
+      itemSize: {x: 2, y: 2}
+      totalCount: 1
+      rotation: 0
+      itemData:
+        indexName: 'T0501: Revolver_1'
+        ID: T0501
+        dataID: W0005
+        itemName: Revolver_1
+        type: 11
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 2, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions: []
   - storageName: "\uCC3D\uACE02"
     nodePos: {x: 5, y: 0}
     slotSize: {x: 7, y: 5}

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using UnityEditor.Experimental.GraphView;
 
 public enum CharacterOwner
 {
@@ -27,6 +28,7 @@ public enum CommandType
     None,
     Wait,
     Move,
+    MoveChange,
     TakeCover,
     LeaveCover,
     BackCover,
@@ -51,6 +53,7 @@ public class CharacterCommand
 
     [Header("[Move]")]
     public List<FieldNode> movePass;
+    public FieldNode endNode;
     public FieldNode targetNode;
 
     [Header("[Cover]")]
@@ -738,11 +741,12 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
+            if (currentNode != command.movePass[0]) currentNode = command.movePass[0];
             if (!animator.GetBool("isMove"))
             {
                 animator.SetBool("isAim", false);
                 animator.SetBool("isMove", true);
-                currentNode = command.movePass[0];
+                //currentNode = command.movePass[0];
             }
 
             var canLook = animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Move");
@@ -769,24 +773,38 @@ public class CharacterController : MonoBehaviour
                 prevNode = targetNode;
                 command.movePass.Remove(targetNode);
                 //ShowVisibleNodes(sight, targetNode);
-                switch (ownerType)
+                if (gameMgr.gameState != GameState.Base)
                 {
-                    case CharacterOwner.Player:
-                        if (targetNode.hitNode)
-                        {
-                            targetNode.watcher.AddCommand(CommandType.Shoot, this, targetNode);
-                            targetNode.hitNode = false;
-                            targetNode.watcher = null;
-                        }
-                        break;
-                    case CharacterOwner.Enemy:
-                        CheckWatcher(targetNode);
-                        break;
-                    default:
-                        break;
+                    switch (ownerType)
+                    {
+                        case CharacterOwner.Player:
+                            if (targetNode.hitNode)
+                            {
+                                targetNode.watcher.AddCommand(CommandType.Shoot, this, targetNode);
+                                targetNode.hitNode = false;
+                                targetNode.watcher = null;
+                            }
+                            break;
+                        case CharacterOwner.Enemy:
+                            CheckWatcher(targetNode);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                if (command.movePass.Count == 0)
+                var moveChangeCommand = commandList.Find(x => x.type == CommandType.MoveChange);
+                if (moveChangeCommand != null)
+                {
+                    commandList.Remove(command);
+                    currentNode.charCtr = null;
+                    currentNode.canMove = true;
+                    currentNode = targetNode;
+
+                    gameMgr.CharacterMoveChange(this, moveChangeCommand);
+                    commandList.Remove(moveChangeCommand);
+                }
+                else if (command.movePass.Count == 0)
                 {
                     animator.SetBool("isMove", false);
                     var _targetNode = command.targetNode;
@@ -2649,6 +2667,25 @@ public class CharacterController : MonoBehaviour
                     time = time,
                 };
                 commandList.Add(waitCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void AddCommand(CommandType type, FieldNode endNode, FieldNode targetNode)
+    {
+        switch (type)
+        {
+            case CommandType.MoveChange:
+                var moveChangeCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.MoveChange,
+                    endNode = endNode,
+                    targetNode = targetNode,
+                };
+                commandList.Add(moveChangeCommand);
                 break;
             default:
                 break;
