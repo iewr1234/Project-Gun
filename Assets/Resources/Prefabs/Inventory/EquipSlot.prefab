@@ -54,6 +54,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e3fc8313e2a9aa4d9cac802ee277e89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  invenMgr: {fileID: 0}
+  myStorage: {fileID: 0}
+  popUp: {fileID: 0}
   outline: {fileID: 0}
   backImage: {fileID: 0}
   slotText: {fileID: 0}
@@ -62,6 +65,7 @@ MonoBehaviour:
   sizeList: 
   model: 0
   caliber: 0
+  intMagMax: 0
   item: {fileID: 0}
 --- !u!114 &3814618555308821798
 MonoBehaviour:
@@ -314,7 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 1101b3e4e03303d49b592f861ddd8123, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -525,7 +529,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 1101b3e4e03303d49b592f861ddd8123, type: 2}
   m_Color: {r: 0.09803922, g: 0.09803922, b: 0.09803922, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}

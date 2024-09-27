@@ -66,7 +66,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < samplesTf.childCount; i++)
         {
             var sample = samplesTf.GetChild(i).gameObject;
-            if (gameObject.layer == LayerMask.NameToLayer("Sample"))
+            if (gameObject.name == "SampleItem")
             {
                 var meshs = sample.transform.GetComponentsInChildren<MeshRenderer>().ToList();
                 for (int j = 0; j < meshs.Count; j++)
@@ -117,7 +117,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         for (int i = 0; i < samplesTf.childCount; i++)
         {
             var sample = samplesTf.GetChild(i).gameObject;
-            if (gameObject.layer == LayerMask.NameToLayer("Sample"))
+            if (gameObject.name == "SampleItem")
             {
                 var meshs = sample.transform.GetComponentsInChildren<MeshRenderer>().ToList();
                 for (int j = 0; j < meshs.Count; j++)
@@ -457,7 +457,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void FollowMouse()
     {
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance()));
+        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance() - 100));
         transform.position = worldPos;
     }
 
@@ -495,16 +495,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             itemSlot.item = item;
             itemSlot.SetItemSlot(color);
         }
-
-        //if (item == null)
-        //{
-        //    itemSlots.Clear();
-        //}
     }
 
     private bool CheckItemDrag()
     {
         if (invenMgr == null) return false;
+        if (invenMgr.popUp_warning.state != WarningState.None) return false;
         if (Input.GetMouseButton(1)) return false;
 
         return true;

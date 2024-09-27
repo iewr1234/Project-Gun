@@ -75,7 +75,6 @@ public class MapEditor : MonoBehaviour
 
     [Header("---Access Script---")]
     private GameManager gameMgr;
-    private BaseManager baseMgr;
 
     [Header("---Access Component---")]
     private Transform components;
@@ -206,80 +205,6 @@ public class MapEditor : MonoBehaviour
         baseUI = components.Find("Top/UI/BaseCamp").gameObject;
         baseDropdown = baseUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
         baseUI.SetActive(false);
-
-        sideButtons = components.Find("Side/Buttons").gameObject;
-        sideUI = components.Find("Side/UI").gameObject;
-        setDirText = sideUI.transform.Find("SetDirection/Text").GetComponent<TextMeshProUGUI>();
-        allFloorText = sideUI.transform.Find("SubButtons/AllFloor/Text").GetComponent<TextMeshProUGUI>();
-        floorRandomText = sideUI.transform.Find("SubButtons/FloorRandom/Text").GetComponent<TextMeshProUGUI>();
-        gridSwitchText = sideUI.transform.Find("SubButtons/GridSwitch/Text").GetComponent<TextMeshProUGUI>();
-
-        sidePos_On = sideUI.transform.localPosition;
-        var width = sideUI.GetComponent<RectTransform>().rect.width;
-        sidePos_Off = sidePos_On + new Vector3(width, 0f, 0f);
-        sideButtons.transform.localPosition = sidePos_Off;
-        sideUI.transform.localPosition = sidePos_Off;
-
-        floorUI = components.Find("Side/UI/Floor").gameObject;
-        floorObjectUI = components.Find("Side/UI/FloorObject").gameObject;
-        hurdleUI = components.Find("Side/UI/Hurdle").gameObject;
-        halfCoverUI = components.Find("Side/UI/HalfCover").gameObject;
-        fullCoverUI = components.Find("Side/UI/FullCover").gameObject;
-        sideObjectUI = components.Find("Side/UI/SideObject").gameObject;
-        baseObjectUI = components.Find("Side/UI/BaseObject").gameObject;
-        SetActiveAllSideUI(true);
-        mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
-        for (int i = 0; i < mapItems.Count; i++)
-        {
-            var mapItem = mapItems[i];
-            mapItem.SetComponents(this);
-        }
-        SetActiveAllSideUI(false);
-
-        void SetActiveAllSideUI(bool value)
-        {
-            floorUI.SetActive(value);
-            floorObjectUI.SetActive(value);
-            hurdleUI.SetActive(value);
-            halfCoverUI.SetActive(value);
-            fullCoverUI.SetActive(value);
-            sideObjectUI.SetActive(value);
-            baseObjectUI.SetActive(value);
-        }
-    }
-
-    public void SetComponents(BaseManager _baseMgr)
-    {
-        baseMgr = _baseMgr;
-
-        fieldNodeTf = GameObject.FindGameObjectWithTag("FieldNodes").transform;
-        nodeOutlineTf = GameObject.FindGameObjectWithTag("NodeOutlines").transform;
-        characterTf = GameObject.FindGameObjectWithTag("Characters").transform;
-
-        components = transform.Find("Components");
-        dataUI = components.Find("Top/UI/Data").gameObject;
-        saveInput = components.Find("Top/UI/Data/InputField_Save").GetComponent<TMP_InputField>();
-        loadDropdown = components.Find("Top/UI/Data/Dropdown_Load").GetComponent<TMP_Dropdown>();
-        dataUI.SetActive(false);
-
-        createNodeUI = components.Find("Top/UI/CreateNode").gameObject;
-        xSizeInput = createNodeUI.transform.Find("InputFields/Size_X/InputField_Value").GetComponent<TMP_InputField>();
-        ySizeInput = createNodeUI.transform.Find("InputFields/Size_Y/InputField_Value").GetComponent<TMP_InputField>();
-        createNodeUI.SetActive(false);
-
-        setAreaUI = components.Find("Top/UI/SetArea").gameObject;
-        coverFormText = setAreaUI.transform.Find("CoverForm/Text").GetComponent<TextMeshProUGUI>();
-        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetUnableMove/Outline").GetComponent<Image>());
-        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetHalfCover/Outline").GetComponent<Image>());
-        setTypeOutlines.Add(setAreaUI.transform.Find("SetTypes/SetFullCover/Outline").GetComponent<Image>());
-        setAreaUI.SetActive(false);
-
-        playerUI = components.Find("Top/UI/Player").gameObject;
-        playerUI.SetActive(false);
-
-        enemyUI = components.Find("Top/UI/Enemy").gameObject;
-        enemyDropdown = enemyUI.transform.Find("Dropdown").GetComponent<TMP_Dropdown>();
-        enemyUI.SetActive(false);
 
         sideButtons = components.Find("Side/Buttons").gameObject;
         sideUI = components.Find("Side/UI").gameObject;

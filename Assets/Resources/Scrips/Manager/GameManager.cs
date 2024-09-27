@@ -175,7 +175,7 @@ public class GameManager : MonoBehaviour
         }
         if (invenMgr.invenCam.enabled)
         {
-            invenMgr.ShowInventory();
+            invenMgr.ShowInventory(false);
         }
         currentTurn = CharacterOwner.Player;
 
@@ -1607,7 +1607,7 @@ public class GameManager : MonoBehaviour
             case BaseCampMarker.Storage_Node:
                 invenMgr.SetOtherStorage(node);
                 invenMgr.SetStorageUI(true);
-                invenMgr.ShowInventory();
+                invenMgr.ShowInventory(true);
                 break;
             default:
                 break;
@@ -1643,7 +1643,7 @@ public class GameManager : MonoBehaviour
             dataMgr.gameData.RandomMapSelection();
             invenMgr.SetLootStorage();
             invenMgr.SetResultUI(true);
-            invenMgr.ShowInventory();
+            invenMgr.ShowInventory(true);
         }
     }
 

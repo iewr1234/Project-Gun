@@ -102,7 +102,7 @@ public class PopUp_Warning : MonoBehaviour
     public void Button_DeleteDropItems_Check()
     {
         CloseWarning();
-        invenMgr.InventoryProcess(true);
+        invenMgr.ShowInventory(false);
     }
 
     public void Button_DeleteDropItems_Cancel()

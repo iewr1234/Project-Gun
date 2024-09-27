@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -13,9 +15,8 @@ public class InventoryManager : MonoBehaviour
 
     [HideInInspector] public DataManager dataMgr;
     [HideInInspector] public GameManager gameMgr;
-    [HideInInspector] public BaseManager baseMgr;
 
-    private PopUp_Warning popUp_warning;
+    [HideInInspector] public PopUp_Warning popUp_warning;
     [HideInInspector] public List<PopUp_Inventory> activePopUp;
     private List<PopUp_Inventory> popUpList;
 
@@ -25,7 +26,7 @@ public class InventoryManager : MonoBehaviour
     public ItemHandler sampleItem;
 
     [HideInInspector] public Camera invenCam;
-    [HideInInspector] public Camera subCam;
+    //[HideInInspector] public Camera subCam;
     private Canvas invenUI;
 
     private ScrollRect myScrollRect;
@@ -96,7 +97,7 @@ public class InventoryManager : MonoBehaviour
         contextMenu.SetComponents(this);
 
         invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
-        subCam = transform.Find("InventoryCamera/SubCamera").GetComponent<Camera>();
+        //subCam = transform.Find("InventoryCamera/SubCamera").GetComponent<Camera>();
         invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
         invenUI.worldCamera = invenCam;
 
@@ -192,14 +193,15 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
         {
-            var value = invenUI.gameObject.activeSelf;
-            if (value && otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
+            var value = !invenUI.gameObject.activeSelf;
+            if (!value && otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
             {
+                ItemMoveCancel(holdingItem, onSlots);
                 popUp_warning.SetWarning(WarningState.DeleteDropItems);
             }
             else
             {
-                InventoryProcess(value);
+                ShowInventory(value);
             }
         }
 
@@ -224,8 +226,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void InventoryProcess(bool value)
+    public void ShowInventory(bool showInven)
     {
+        if (gameMgr == null) return;
+        if (gameMgr.gameState == GameState.Shoot) return;
+        if (gameMgr.gameState == GameState.Watch) return;
         if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
@@ -233,37 +238,30 @@ public class InventoryManager : MonoBehaviour
         var player = gameMgr.playerList[0];
         if (player.state == CharacterState.Base)
         {
-            gameMgr.gameState = value ? GameState.Base : GameState.Inventory;
+            gameMgr.gameState = showInven ? GameState.Inventory : GameState.Base;
         }
         else
         {
-            gameMgr.gameState = value ? GameState.None : GameState.Inventory;
+            gameMgr.gameState = showInven ? GameState.Inventory : GameState.None;
         }
-        gameMgr.camMgr.lockCam = !value;
-        if (!value)
+        gameMgr.camMgr.lockCam = !showInven;
+        if (showInven)
         {
             SetOtherStorage(null);
         }
-        SetStorageUI(!value);
-        ShowInventory();
-    }
+        else
+        {
+            ItemMoveCancel(holdingItem, onSlots);
+        }
+        SetStorageUI(showInven);
 
-    /// <summary>
-    /// 인벤토리 열기
-    /// </summary>
-    public void ShowInventory()
-    {
-        if (gameMgr == null) return;
-        if (gameMgr.gameState == GameState.Shoot || gameMgr.gameState == GameState.Watch) return;
-
-        var value = !invenCam.enabled;
-        invenCam.enabled = value;
-        subCam.enabled = value;
-        invenUI.gameObject.SetActive(value);
-
+        //var value = !invenCam.enabled;
+        invenCam.enabled = showInven;
+        //subCam.enabled = showInven;
+        invenUI.gameObject.SetActive(showInven);
         gameMgr.DeselectCharacter();
         //gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
-        if (!value && activePopUp.Count > 0)
+        if (!showInven && activePopUp.Count > 0)
         {
             for (int i = activePopUp.Count - 1; i >= 0; i--)
             {
@@ -274,31 +272,13 @@ public class InventoryManager : MonoBehaviour
 
         if (gameMgr.uiMgr != null)
         {
-            gameMgr.uiMgr.playUI.SetActive(!value);
+            gameMgr.uiMgr.playUI.SetActive(!showInven);
         }
         if (gameMgr.mapEdt != null)
         {
-            gameMgr.mapEdt.gameObject.SetActive(!value);
+            gameMgr.mapEdt.gameObject.SetActive(!showInven);
         }
     }
-
-    //public void SetItemStorage(bool value)
-    //{
-    //    if (otherStorage.storageInfos.Count == 0) return;
-
-    //    otherStorage.SetActive(value);
-    //    showStorage = value;
-    //    switch (value)
-    //    {
-    //        case true:
-    //            otherStorage.ActiveTabButtons(otherStorage.storageInfos.Count);
-    //            otherStorage.GetStorageInfo(0);
-    //            break;
-    //        case false:
-    //            otherStorage.DeactiveTabButtons();
-    //            break;
-    //    }
-    //}
 
     /// <summary>
     /// 아이템 회전
@@ -426,13 +406,13 @@ public class InventoryManager : MonoBehaviour
     /// <param name="count"></param>
     /// <param name="itemSlots"></param>
     /// <param name="insertOption"></param>
-    public void SetItemInStorage(string dataID, int count, List<ItemSlot> itemSlots, bool insertOption)
+    public bool SetItemInStorage(string dataID, int count, List<ItemSlot> itemSlots, bool insertOption)
     {
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == dataID);
         if (itemData == null)
         {
             Debug.Log("Not found item");
-            return;
+            return false;
         }
 
         var item = items.Find(x => !x.gameObject.activeSelf);
@@ -443,10 +423,12 @@ public class InventoryManager : MonoBehaviour
         {
             Debug.Log("not found ItemSlot");
             InActiveItem(item);
+            return false;
         }
         else
         {
             PutTheItem(item, emptySlots);
+            return true;
         }
     }
 
@@ -721,27 +703,28 @@ public class InventoryManager : MonoBehaviour
                 else if (itemMove)
                 {
                     CheckBaseStorage();
-                    ItemMove(true);
+                    ItemMove(item, itemSlots, true);
                 }
                 else
                 {
-                    ItemMove(false);
+                    ItemMove(item, itemSlots, false);
                 }
             }
             else
             {
-                var itemMove = itemSlots.Find(x => x.item != null && x.item != item) == null && itemSlots.Count == item.size.x * item.size.y;
+                var itemMove = itemSlots.Find(x => x.item != null && x.item != item) == null
+                            && itemSlots.Count == item.size.x * item.size.y;
                 var storageInTheStorage = itemSlots.Count > 0 && itemSlots[0].myStorage != null
                                        && (itemSlots[0].myStorage.type == MyStorageType.Rig && item.itemData.type == ItemType.Rig
-                                       || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
+                                        || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
                 if (itemMove && !storageInTheStorage)
                 {
                     CheckBaseStorage();
-                    ItemMove(true);
+                    ItemMove(item, itemSlots, true);
                 }
                 else
                 {
-                    ItemMove(false);
+                    ItemMove(item, itemSlots, false);
                 }
             }
 
@@ -761,70 +744,6 @@ public class InventoryManager : MonoBehaviour
             if (find != null)
             {
                 storageInfo.itemList.Remove(find);
-            }
-        }
-
-        void ItemMove(bool value)
-        {
-            switch (value)
-            {
-                case true:
-                    ItemRegistration();
-                    item.SetItemSlots(null, DataUtility.slot_noItemColor);
-                    item.itemSlots = new List<ItemSlot>(itemSlots);
-
-                    for (int i = 0; i < item.itemSlots.Count; i++)
-                    {
-                        var itemSlot = item.itemSlots[i];
-                        itemSlot.item = item;
-                        itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
-                    }
-                    UnequipItem(item);
-
-                    item.SetItemScale(false);
-                    item.ChangeRectPivot(false);
-                    item.transform.SetParent(item.itemSlots[0].transform, false);
-                    item.transform.localPosition = Vector3.zero;
-                    if (item.itemData.type == ItemType.Magazine)
-                    {
-                        item.countText.enabled = true;
-                    }
-                    break;
-                case false:
-                    if (item.equipSlot != null)
-                    {
-                        item.equipSlot.slotText.enabled = false;
-                        item.SetItemRotation(false);
-                        item.SetItemScale(true);
-                        item.ChangeRectPivot(true);
-                        item.transform.SetParent(item.equipSlot.transform, false);
-                        item.transform.localPosition = Vector3.zero;
-                    }
-                    else
-                    {
-                        item.SetItemRotation(sampleItem.rotation);
-                        item.transform.SetParent(item.itemSlots[0].transform, false);
-                        item.transform.position = item.itemSlots[0].transform.position;
-                    }
-
-                    for (int i = 0; i < itemSlots.Count; i++)
-                    {
-                        var itemSlot = itemSlots[i];
-                        if (itemSlot.item == null)
-                        {
-                            itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
-                        }
-                        else
-                        {
-                            itemSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
-                        }
-                    }
-                    break;
-            }
-
-            if (holdingItem != null)
-            {
-                item.targetImage.raycastTarget = true;
             }
         }
 
@@ -864,6 +783,70 @@ public class InventoryManager : MonoBehaviour
 
             item.targetImage.color = Color.clear;
         }
+    }
+
+    private void ItemMove(ItemHandler item, List<ItemSlot> itemSlots, bool value)
+    {
+        switch (value)
+        {
+            case true:
+                ItemRegistration();
+                item.SetItemSlots(null, DataUtility.slot_noItemColor);
+                item.itemSlots = new List<ItemSlot>(itemSlots);
+
+                for (int i = 0; i < item.itemSlots.Count; i++)
+                {
+                    var itemSlot = item.itemSlots[i];
+                    itemSlot.item = item;
+                    itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
+                }
+                UnequipItem(item);
+
+                item.SetItemScale(false);
+                item.ChangeRectPivot(false);
+                item.transform.SetParent(item.itemSlots[0].transform, false);
+                item.transform.localPosition = Vector3.zero;
+                if (item.itemData.type == ItemType.Magazine)
+                {
+                    item.countText.enabled = true;
+                }
+                break;
+            case false:
+                if (item.equipSlot != null)
+                {
+                    item.equipSlot.slotText.enabled = false;
+                    item.SetItemRotation(false);
+                    item.SetItemScale(true);
+                    item.ChangeRectPivot(true);
+                    item.transform.SetParent(item.equipSlot.transform, false);
+                    item.transform.localPosition = Vector3.zero;
+                }
+                else
+                {
+                    item.SetItemRotation(sampleItem.rotation);
+                    item.transform.SetParent(item.itemSlots[0].transform, false);
+                    item.transform.position = item.itemSlots[0].transform.position;
+                }
+
+                for (int i = 0; i < itemSlots.Count; i++)
+                {
+                    var itemSlot = itemSlots[i];
+                    if (itemSlot.item == null)
+                    {
+                        itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
+                    }
+                    else
+                    {
+                        itemSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
+                    }
+                }
+                break;
+        }
+
+        if (holdingItem != null)
+        {
+            item.targetImage.raycastTarget = true;
+        }
 
         void ItemRegistration()
         {
@@ -893,6 +876,23 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void ItemMoveCancel(ItemHandler item, List<ItemSlot> itemSlots)
+    {
+        if (holdingItem == null) return;
+
+        if (onEquip != null)
+        {
+            onEquip.PointerExit_EquipSlot();
+            onEquip = null;
+        }
+        onSlot = null;
+        ItemMove(item, itemSlots, false);
+        item.targetImage.color = Color.clear;
+        holdingItem = null;
+        onSlots.Clear();
+        InactiveSampleItem();
     }
 
     /// <summary>

@@ -99,14 +99,35 @@ public class ContextMenu : MonoBehaviour
         for (int i = 0; i < invenMgr.selectItem.magData.loadedBullets.Count; i++)
         {
             var loadedBullet = invenMgr.selectItem.magData.loadedBullets[i];
-            var sameBullet = invenMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID);
+            var sameBullet = invenMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
+                                                        && x.TotalCount < x.itemData.maxNesting
+                                                        && ((x.itemSlots[0].myStorage != null && invenMgr.selectItem.itemSlots[0].myStorage != null
+                                                          && x.itemSlots[0].myStorage.type == invenMgr.selectItem.itemSlots[0].myStorage.type)
+                                                          || x.itemSlots[0].otherStorage != null && invenMgr.selectItem.itemSlots[0].otherStorage != null));
             if (sameBullet != null)
             {
                 sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
             }
             else
             {
-                invenMgr.SetItemInStorage(loadedBullet.ID, 1, invenMgr.otherStorage.itemSlots, false);
+                var inMagStorage = invenMgr.selectItem.itemSlots[0].myStorage;
+                if (inMagStorage != null)
+                {
+                    if (!invenMgr.SetItemInStorage(loadedBullet.ID, 1, inMagStorage.itemSlots, false))
+                    {
+                        sameBullet = invenMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
+                                                           && x.TotalCount < x.itemData.maxNesting
+                                                           && x.itemSlots[0].otherStorage != null);
+                        if (sameBullet != null)
+                        {
+                            sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
+                        }
+                        else
+                        {
+                            invenMgr.SetItemInStorage(loadedBullet.ID, 1, invenMgr.otherStorage.itemSlots, false);
+                        }
+                    }
+                }
             }
         }
         invenMgr.selectItem.magData.loadedBullets.Clear();

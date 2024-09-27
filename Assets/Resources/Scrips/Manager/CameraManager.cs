@@ -17,7 +17,6 @@ public class CameraManager : MonoBehaviour
 {
     [Header("---Access Script---")]
     private GameManager gameMgr;
-    private BaseManager baseMgr;
 
     [Header("---Access Component---")]
     public Camera mainCam;
@@ -48,23 +47,6 @@ public class CameraManager : MonoBehaviour
     public void SetComponents(GameManager _gameMgr)
     {
         gameMgr = _gameMgr;
-
-        pivotPoint = transform.Find("PivotPoint");
-        mainCam = Camera.main;
-        subCam = mainCam.transform.Find("SubCamera").GetComponent<Camera>();
-        camDirection = Vector3.Normalize(defaultPos - pivotPoint.position);
-        mainCam.transform.localPosition = camDirection * camDistance;
-        mainCam.transform.LookAt(pivotPoint);
-
-        cambrain = mainCam.GetComponent<CinemachineBrain>();
-        virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
-
-        lockCam = false;
-    }
-
-    public void SetComponents(BaseManager _baseMgr)
-    {
-        baseMgr = _baseMgr;
 
         pivotPoint = transform.Find("PivotPoint");
         mainCam = Camera.main;
