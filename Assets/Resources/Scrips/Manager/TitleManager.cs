@@ -6,13 +6,13 @@ public class TitleManager : MonoBehaviour
 {
     [Header("---Access Script---")]
     private DataManager dataMgr;
-    private InventoryManager invenMgr;
+    private GameMenuManager gameMenuMgr;
     private SceneHandler sceneHlr;
 
     private void Start()
     {
         dataMgr = FindAnyObjectByType<DataManager>();
-        invenMgr = FindAnyObjectByType<InventoryManager>();
+        gameMenuMgr = FindAnyObjectByType<GameMenuManager>();
         sceneHlr = FindAnyObjectByType<SceneHandler>();
     }
 

@@ -1,52 +1,64 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
-public class InventoryManager : MonoBehaviour
+public enum GameMenuState
+{
+    None,
+    Status,
+    Inventory,
+}
+
+public class GameMenuManager : MonoBehaviour
 {
     [Header("---Access Script---")]
+    public DataManager dataMgr;
+    public GameManager gameMgr;
+
+    [Header("[InventoryUI]")]
     public List<EquipSlot> allEquips = new List<EquipSlot>();
     public List<MyStorage> myStorages = new List<MyStorage>();
     public OtherStorage otherStorage;
-
-    [HideInInspector] public DataManager dataMgr;
-    [HideInInspector] public GameManager gameMgr;
-
-    [HideInInspector] public PopUp_Warning popUp_warning;
-    [HideInInspector] public List<PopUp_Inventory> activePopUp;
     private List<PopUp_Inventory> popUpList;
 
+    [HideInInspector] public PopUp_Warning popUp_warning;
     [HideInInspector] public ContextMenu contextMenu;
 
     [Header("---Access Component---")]
-    public ItemHandler sampleItem;
+    public Camera gameMenuCam;
+    private Canvas gameMenuUI;
 
-    [HideInInspector] public Camera invenCam;
-    //[HideInInspector] public Camera subCam;
-    private Canvas invenUI;
+    [Header("[StatusUI]")]
+    private GameObject statusUI;
 
+    [Header("[InventoryUI]")]
+    private GameObject invenUI;
     private ScrollRect myScrollRect;
     private GameObject myScrollbar;
-
     private ScrollRect otherScrollRect;
     private GameObject otherScrollbar;
 
+    private ItemHandler sampleItem;
+    private Transform itemPool;
+
+    [Header("[Right Buttons]")]
+    public Button statusButton;
+    public Button invenButton;
+
+    [Header("[Right Buttons]")]
     public Button nextButton;
     public Button returnButton;
     public Button closeButton;
 
-    private Transform itemPool;
-
     [Header("--- Assignment Variable---")]
+    public GameMenuState state;
     public EquipSlot onEquip;
     public ItemSlot onSlot;
     public List<ItemSlot> onSlots;
     public ItemHandler holdingItem;
     public ItemHandler selectItem;
+    [HideInInspector] public List<PopUp_Inventory> activePopUp;
 
     private bool click;
     private float clickTime;
@@ -62,7 +74,7 @@ public class InventoryManager : MonoBehaviour
 
     private void Awake()
     {
-        var find = FindObjectsOfType<InventoryManager>();
+        var find = FindObjectsOfType<GameMenuManager>();
         if (find.Length == 1)
         {
             DontDestroyOnLoad(gameObject);
@@ -81,89 +93,99 @@ public class InventoryManager : MonoBehaviour
 
     public void SetComponents()
     {
-        //gameMgr = _gmaeMgr;
         dataMgr = FindAnyObjectByType<DataManager>();
-
-        //popUp = transform.Find("InventoryUI/PopUp").GetComponent<PopUp_Inventory>();
-        //popUp.SetComponents(this);
         popUp_warning = FindAnyObjectByType<PopUp_Warning>();
-        popUpList = transform.Find("InventoryUI/PopUpList").GetComponentsInChildren<PopUp_Inventory>().ToList();
+        popUpList = transform.Find("GameMenuUI/InventoryUI/PopUpList").GetComponentsInChildren<PopUp_Inventory>().ToList();
         for (int i = 0; i < popUpList.Count; i++)
         {
             var popUp = popUpList[i];
             popUp.SetComponents(this);
         }
-        contextMenu = transform.Find("InventoryUI/ContextMenu").GetComponent<ContextMenu>();
+        contextMenu = transform.Find("GameMenuUI/ContextMenu").GetComponent<ContextMenu>();
         contextMenu.SetComponents(this);
 
-        invenCam = transform.Find("InventoryCamera").GetComponent<Camera>();
-        //subCam = transform.Find("InventoryCamera/SubCamera").GetComponent<Camera>();
-        invenUI = transform.Find("InventoryUI").GetComponent<Canvas>();
-        invenUI.worldCamera = invenCam;
+        gameMenuCam = transform.Find("GameMenuCamera").GetComponent<Camera>();
+        gameMenuUI = transform.Find("GameMenuUI").GetComponent<Canvas>();
+        gameMenuUI.worldCamera = gameMenuCam;
+        SetStatusUI();
+        SetInventoryUI();
 
-        myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
-        myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
+        statusButton = gameMenuUI.transform.Find("TopBar/LeftButtons/Status").GetComponent<Button>();
+        invenButton = gameMenuUI.transform.Find("TopBar/LeftButtons/Inventory").GetComponent<Button>();
 
-        otherScrollRect = invenUI.transform.Find("OtherStorage/Components/ScrollView").GetComponent<ScrollRect>();
-        otherScrollbar = invenUI.transform.Find("OtherStorage/Components/ScrollView/Scrollbar Vertical").gameObject;
-
-        nextButton = invenUI.transform.Find("TopBar/Buttons/Next").GetComponent<Button>();
+        nextButton = gameMenuUI.transform.Find("TopBar/RightButtons/Next").GetComponent<Button>();
         nextButton.gameObject.SetActive(false);
-        returnButton = invenUI.transform.Find("TopBar/Buttons/Return").GetComponent<Button>();
+        returnButton = gameMenuUI.transform.Find("TopBar/RightButtons/Return").GetComponent<Button>();
         returnButton.gameObject.SetActive(false);
-        closeButton = invenUI.transform.Find("TopBar/Buttons/Close").GetComponent<Button>();
+        closeButton = gameMenuUI.transform.Find("TopBar/RightButtons/Close").GetComponent<Button>();
         closeButton.gameObject.SetActive(false);
 
-        itemPool = invenUI.transform.Find("ItemPool");
-        sampleItem = itemPool.transform.Find("SampleItem").GetComponent<ItemHandler>();
-        sampleItem.SetComponents(this);
-        InactiveSampleItem();
-
-        var charEquips = invenUI.transform.Find("Equip/Slots").GetComponentsInChildren<EquipSlot>().ToList();
-        for (int i = 0; i < charEquips.Count; i++)
+        void SetStatusUI()
         {
-            var charEquip = charEquips[i];
-            charEquip.SetComponents(this);
+            statusUI = gameMenuUI.transform.Find("StatusUI").gameObject;
+
+            statusUI.SetActive(false);
         }
 
-        myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
-        for (int i = 0; i < myStorages.Count; i++)
+        void SetInventoryUI()
         {
-            var storage = myStorages[i];
-            storage.SetComponents(this);
-        }
-        otherStorage = invenUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
-        otherStorage.SetComponents(this);
-        otherStorage.SetActive(false);
-
-        CreateItems();
-        invenUI.gameObject.SetActive(false);
-
-        if (dataMgr == null) return;
-
-        for (int i = 0; i < dataMgr.gameData.initialItemIDList.Count; i++)
-        {
-            var initialItem = dataMgr.gameData.initialItemIDList[i];
-            switch (initialItem.createPos)
+            invenUI = gameMenuUI.transform.Find("InventoryUI").gameObject;
+            var charEquips = invenUI.transform.Find("Equip/Slots").GetComponentsInChildren<EquipSlot>().ToList();
+            for (int i = 0; i < charEquips.Count; i++)
             {
-                case CreatePos.Equip:
-                    SetItemInEquipSlot(initialItem);
-                    break;
-                case CreatePos.Pocket:
-                    var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
-                    SetItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
-                    break;
-                case CreatePos.Rig:
-                    var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
-                    SetItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
-                    break;
-                case CreatePos.Backpack:
-                    var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
-                    SetItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
-                    break;
-                default:
-                    break;
+                var charEquip = charEquips[i];
+                charEquip.SetComponents(this);
             }
+
+            myStorages = invenUI.transform.Find("MyStorage/ScrollView/Viewport/Content").GetComponentsInChildren<MyStorage>().ToList();
+            for (int i = 0; i < myStorages.Count; i++)
+            {
+                var storage = myStorages[i];
+                storage.SetComponents(this);
+            }
+            otherStorage = invenUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
+            otherStorage.SetComponents(this);
+            otherStorage.SetActive(false);
+
+            myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
+            myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
+            otherScrollRect = invenUI.transform.Find("OtherStorage/Components/ScrollView").GetComponent<ScrollRect>();
+            otherScrollbar = invenUI.transform.Find("OtherStorage/Components/ScrollView/Scrollbar Vertical").gameObject;
+
+            itemPool = invenUI.transform.Find("ItemPool");
+            sampleItem = itemPool.transform.Find("SampleItem").GetComponent<ItemHandler>();
+            sampleItem.SetComponents(this);
+            InactiveSampleItem();
+            CreateItems();
+
+            if (dataMgr != null)
+            {
+                for (int i = 0; i < dataMgr.gameData.initialItemIDList.Count; i++)
+                {
+                    var initialItem = dataMgr.gameData.initialItemIDList[i];
+                    switch (initialItem.createPos)
+                    {
+                        case CreatePos.Equip:
+                            SetItemInEquipSlot(initialItem);
+                            break;
+                        case CreatePos.Pocket:
+                            var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
+                            SetItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
+                            break;
+                        case CreatePos.Rig:
+                            var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
+                            SetItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
+                            break;
+                        case CreatePos.Backpack:
+                            var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
+                            SetItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            invenUI.SetActive(false);
         }
     }
 
@@ -191,60 +213,103 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     private void KeyboardInput()
     {
-        if (gameMgr != null && Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyUp(KeyCode.O))
         {
-            var value = !invenUI.gameObject.activeSelf;
-            if (!value && otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
+            StatusProcess();
+        }
+        else if (Input.GetKeyDown(KeyCode.I))
+        {
+            InventoryProcess();
+        }
+
+        if (invenUI.activeSelf)
+        {
+            if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
+            {
+                RotateItem();
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (activePopUp.Count > 0)
+                {
+                    activePopUp[^1].Button_PopUp_Close();
+                }
+                else
+                {
+                    ShowInventory(false);
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                itemSplit = true;
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftControl))
+            {
+                itemSplit = false;
+            }
+        }
+    }
+
+    private void StatusProcess()
+    {
+        if (gameMgr == null) return;
+
+        if (state != GameMenuState.Status)
+        {
+            TurnOffGameMenuUI();
+            ShowStatus(true);
+        }
+        else
+        {
+            ShowStatus(false);
+        }
+    }
+
+    public void ShowStatus(bool showStatus)
+    {
+        if (gameMgr.gameState == GameState.Shoot) return;
+        if (gameMgr.gameState == GameState.Watch) return;
+        if (gameMgr.gameState == GameState.Result) return;
+        if (gameMgr.playerList.Count == 0) return;
+
+        ConvertGameMenu(showStatus, GameMenuState.Status);
+        statusUI.SetActive(showStatus);
+    }
+
+    private void InventoryProcess()
+    {
+        if (gameMgr == null) return;
+
+        if (state != GameMenuState.Inventory)
+        {
+            TurnOffGameMenuUI();
+            ShowInventory(true);
+        }
+        else
+        {
+            if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
             {
                 ItemMoveCancel(holdingItem, onSlots);
                 popUp_warning.SetWarning(WarningState.DeleteDropItems);
             }
             else
             {
-                ShowInventory(value);
+                ShowInventory(false);
             }
-        }
-
-        if (!invenUI.gameObject.activeSelf) return;
-
-        if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
-        {
-            RotateItem();
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape) && activePopUp.Count > 0)
-        {
-            activePopUp[^1].Button_PopUp_Close();
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            itemSplit = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftControl))
-        {
-            itemSplit = false;
         }
     }
 
     public void ShowInventory(bool showInven)
     {
-        if (gameMgr == null) return;
         if (gameMgr.gameState == GameState.Shoot) return;
         if (gameMgr.gameState == GameState.Watch) return;
         if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
+        ConvertGameMenu(showInven, GameMenuState.Inventory);
+        invenUI.SetActive(showInven);
         itemSplit = false;
-        var player = gameMgr.playerList[0];
-        if (player.state == CharacterState.Base)
-        {
-            gameMgr.gameState = showInven ? GameState.Inventory : GameState.Base;
-        }
-        else
-        {
-            gameMgr.gameState = showInven ? GameState.Inventory : GameState.None;
-        }
-        gameMgr.camMgr.lockCam = !showInven;
         if (showInven)
         {
             SetOtherStorage(null);
@@ -255,12 +320,6 @@ public class InventoryManager : MonoBehaviour
         }
         SetStorageUI(showInven);
 
-        //var value = !invenCam.enabled;
-        invenCam.enabled = showInven;
-        //subCam.enabled = showInven;
-        invenUI.gameObject.SetActive(showInven);
-        gameMgr.DeselectCharacter();
-        //gameMgr.gameState = invenUI.gameObject.activeSelf ? GameState.Inventory : GameState.None;
         if (!showInven && activePopUp.Count > 0)
         {
             for (int i = activePopUp.Count - 1; i >= 0; i--)
@@ -269,14 +328,49 @@ public class InventoryManager : MonoBehaviour
                 popUp.Button_PopUp_Close();
             }
         }
+    }
+
+    private void ConvertGameMenu(bool value, GameMenuState state)
+    {
+        var player = gameMgr.playerList[0];
+        if (player.state == CharacterState.Base)
+        {
+            gameMgr.gameState = value ? GameState.GameMenu : GameState.Base;
+        }
+        else
+        {
+            gameMgr.gameState = value ? GameState.GameMenu : GameState.None;
+        }
+        gameMgr.camMgr.lockCam = !value;
+
+        gameMenuCam.enabled = value;
+        gameMgr.DeselectCharacter();
 
         if (gameMgr.uiMgr != null)
         {
-            gameMgr.uiMgr.playUI.SetActive(!showInven);
+            gameMgr.uiMgr.playUI.SetActive(!value);
         }
         if (gameMgr.mapEdt != null)
         {
-            gameMgr.mapEdt.gameObject.SetActive(!showInven);
+            gameMgr.mapEdt.gameObject.SetActive(!value);
+        }
+        this.state = value ? state : GameMenuState.None;
+    }
+
+    private void TurnOffGameMenuUI()
+    {
+        if (state == GameMenuState.None) return;
+
+        switch (state)
+        {
+            case GameMenuState.Status:
+                StatusProcess();
+                break;
+            case GameMenuState.Inventory:
+                InventoryProcess();
+                break;
+            default:
+                break;
         }
     }
 
@@ -321,7 +415,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     private void MouseInput()
     {
-        if (!invenUI.gameObject.activeSelf) return;
+        if (!invenUI.activeSelf) return;
 
         DoubleClick();
         if (Input.GetMouseButtonDown(0))
@@ -364,7 +458,7 @@ public class InventoryManager : MonoBehaviour
 
     private void StorageScrollView()
     {
-        if (!invenUI.gameObject.activeSelf) return;
+        if (!invenUI.activeSelf) return;
 
         myScrollRect.vertical = myScrollbar.activeSelf;
         otherScrollRect.vertical = otherScrollbar.activeSelf;
@@ -1443,7 +1537,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (gameMgr != null)
         {
-            return (int)invenUI.planeDistance;
+            return (int)gameMenuUI.planeDistance;
         }
         else
         {
@@ -1620,6 +1714,22 @@ public class InventoryManager : MonoBehaviour
                 otherStorage.DeactiveTabButtons();
                 break;
         }
+    }
+
+    public void Button_Status()
+    {
+        if (state == GameMenuState.Status) return;
+
+        TurnOffGameMenuUI();
+        StatusProcess();
+    }
+
+    public void Button_Inventory()
+    {
+        if (state == GameMenuState.Inventory) return;
+
+        TurnOffGameMenuUI();
+        InventoryProcess();
     }
 
     public void Button_Result_Next()

@@ -63,7 +63,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 
     public void PointerEnter_ItemSlot()
     {
-        var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
+        var invenMgr = myStorage != null ? myStorage.gameMenuMgr : otherStorage.gameMenuMgr;
         invenMgr.onEquip = null;
         invenMgr.onSlot = this;
         if (invenMgr.holdingItem != null)
@@ -118,7 +118,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
 
     public void PointerExit_ItemSlot()
     {
-        var invenMgr = myStorage != null ? myStorage.invenMgr : otherStorage.invenMgr;
+        var invenMgr = myStorage != null ? myStorage.gameMenuMgr : otherStorage.gameMenuMgr;
         invenMgr.onSlot = null;
         if (invenMgr.holdingItem != null)
         {

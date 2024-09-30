@@ -24,7 +24,7 @@ public enum EquipType
 public class EquipSlot : MonoBehaviour
 {
     [Header("---Access Script---")]
-    [SerializeField] private InventoryManager invenMgr;
+    [SerializeField] private GameMenuManager gameMenuMgr;
     public MyStorage myStorage;
     public PopUp_Inventory popUp;
 
@@ -42,9 +42,9 @@ public class EquipSlot : MonoBehaviour
     public int intMagMax;
     public ItemHandler item;
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
 
         outline = transform.Find("Outline").GetComponent<Image>();
         outline.enabled = false;
@@ -53,12 +53,12 @@ public class EquipSlot : MonoBehaviour
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
 
-        invenMgr.allEquips.Add(this);
+        gameMenuMgr.allEquips.Add(this);
     }
 
-    public void SetComponents(InventoryManager _invenMgr, PopUp_Inventory _popUp)
+    public void SetComponents(GameMenuManager _gameMenuMgr, PopUp_Inventory _popUp)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
         popUp = _popUp;
 
         outline = transform.Find("Outline").GetComponent<Image>();
@@ -68,12 +68,12 @@ public class EquipSlot : MonoBehaviour
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
 
-        invenMgr.allEquips.Add(this);
+        gameMenuMgr.allEquips.Add(this);
     }
 
-    public void SetComponents(InventoryManager _invenMgr, MyStorage _myStorage)
+    public void SetComponents(GameMenuManager _gameMenuMgr, MyStorage _myStorage)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
         myStorage = _myStorage;
 
         outline = transform.Find("Outline").GetComponent<Image>();
@@ -83,7 +83,7 @@ public class EquipSlot : MonoBehaviour
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
 
-        invenMgr.allEquips.Add(this);
+        gameMenuMgr.allEquips.Add(this);
     }
 
     public bool CheckEquip(ItemHandler item)
@@ -161,12 +161,12 @@ public class EquipSlot : MonoBehaviour
 
     public void PointerEnter_EquipSlot()
     {
-        invenMgr.onSlot = null;
-        invenMgr.onSlots.Clear();
-        invenMgr.onEquip = this;
-        if (invenMgr.holdingItem != null)
+        gameMenuMgr.onSlot = null;
+        gameMenuMgr.onSlots.Clear();
+        gameMenuMgr.onEquip = this;
+        if (gameMenuMgr.holdingItem != null)
         {
-            if (CheckEquip(invenMgr.holdingItem))
+            if (CheckEquip(gameMenuMgr.holdingItem))
             {
                 backImage.color = DataUtility.slot_onItemColor;
             }
@@ -183,7 +183,7 @@ public class EquipSlot : MonoBehaviour
 
     public void PointerExit_EquipSlot()
     {
-        invenMgr.onEquip = null;
+        gameMenuMgr.onEquip = null;
         backImage.color = DataUtility.equip_defaultColor;
         if (item != null)
         {

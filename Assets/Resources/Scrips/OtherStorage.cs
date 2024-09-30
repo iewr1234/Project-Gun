@@ -8,7 +8,7 @@ using TMPro;
 public class OtherStorage : MonoBehaviour
 {
     [Header("---Access Script---")]
-    public InventoryManager invenMgr;
+    public GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
@@ -25,9 +25,9 @@ public class OtherStorage : MonoBehaviour
     private readonly Color activeColor_tab = new Color(0.78f, 0.78f, 0.78f);
     private readonly Color noneActiveColor_tab = new Color(0.52f, 0.52f, 0.52f);
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
 
         components = transform.Find("Components").gameObject;
         nameText = components.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
@@ -105,10 +105,10 @@ public class OtherStorage : MonoBehaviour
         for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
         {
             var storageItem = storageInfos[tabIndex].itemList[i];
-            var setSlot = invenMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
+            var setSlot = gameMenuMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
             if (setSlot.Count == storageItem.itemSize.x * storageItem.itemSize.y)
             {
-                invenMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, storageItem.rotation, setSlot);
+                gameMenuMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, storageItem.rotation, setSlot);
             }
         }
     }
@@ -153,7 +153,7 @@ public class OtherStorage : MonoBehaviour
                     itemData = item.itemData,
                 };
                 floor.itemList.Add(storageItemInfo);
-                invenMgr.InActiveItem(item);
+                gameMenuMgr.InActiveItem(item);
                 return;
             }
         }
@@ -163,13 +163,15 @@ public class OtherStorage : MonoBehaviour
 
     public void ClearStorage()
     {
+        if (storageInfos.Count == 0) return;
+
         for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
         {
             var slotIndex = storageInfos[tabIndex].itemList[i].slotIndex;
             var itemSlot = itemSlots.Find(x => x.slotIndex == slotIndex && x.item != null);
             if (itemSlot != null)
             {
-                invenMgr.InActiveItem(itemSlot.item);
+                gameMenuMgr.InActiveItem(itemSlot.item);
             }
         }
     }

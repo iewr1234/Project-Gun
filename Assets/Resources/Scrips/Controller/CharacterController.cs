@@ -2519,7 +2519,6 @@ public class CharacterController : MonoBehaviour
     {
         var shooter = targetInfo.shooter;
         var target = targetInfo.target;
-
         if (ownerType == CharacterOwner.All || target.ownerType == ownerType)
         {
             if (target.cover != null)
@@ -2533,7 +2532,7 @@ public class CharacterController : MonoBehaviour
                     target.AddCommand(CommandType.LeaveCover);
                     target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
                 }
-                else
+                else if (targetInfo.targetRight != target.animator.GetBool("isRight"))
                 {
                     //target.animator.SetBool("isRight", targetInfo.targetRight);
                     target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
@@ -2543,10 +2542,10 @@ public class CharacterController : MonoBehaviour
             {
                 target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
             }
-            else
-            {
-                target.transform.LookAt(shooter.transform);
-            }
+            //else
+            //{
+            //    target.transform.LookAt(shooter.transform);
+            //}
             target.AddCommand(CommandType.Targeting, true, shooter.transform);
         }
 
@@ -2563,7 +2562,7 @@ public class CharacterController : MonoBehaviour
                     shooter.AddCommand(CommandType.LeaveCover);
                     shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
                 }
-                else
+                else if (targetInfo.isRight != shooter.animator.GetBool("isRight"))
                 {
                     //shooter.animator.SetBool("isRight", targetInfo.isRight);
                     shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
@@ -2757,6 +2756,9 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Targeting:
+                var find = commandList.Find(x => x.type == CommandType.Targeting && x.targeting == targeting);
+                if (find != null) return;
+
                 var targetingCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2899,6 +2901,40 @@ public class CharacterController : MonoBehaviour
                 };
                 commandList.Add(command);
                 break;
+        }
+    }
+
+    public CharacterCommand GetCommand(CommandType type)
+    {
+        switch (type)
+        {
+            case CommandType.LeaveCover:
+                var leaveCoverCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.LeaveCover,
+                };
+                return leaveCoverCommand;
+            default:
+                return null;
+        }
+    }
+
+    public CharacterCommand GetCommand(CommandType type, Cover cover, bool isRight)
+    {
+        switch (type)
+        {
+            case CommandType.TakeCover:
+                var takeCoverCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.TakeCover,
+                    cover = cover,
+                    isRight = isRight,
+                };
+                return takeCoverCommand;
+            default:
+                return null;
         }
     }
 

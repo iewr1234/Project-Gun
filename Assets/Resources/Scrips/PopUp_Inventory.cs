@@ -36,7 +36,7 @@ public class PopUp_Inventory : MonoBehaviour
     }
 
     [Header("---Access Script---")]
-    private InventoryManager invenMgr;
+    private GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     public TextMeshProUGUI topText;
@@ -53,9 +53,9 @@ public class PopUp_Inventory : MonoBehaviour
     [HideInInspector] public List<ItemSlot> itemSlots = new List<ItemSlot>();
     [HideInInspector] public int index;
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
 
         topText = transform.Find("Top/Text").GetComponent<TextMeshProUGUI>();
 
@@ -99,7 +99,7 @@ public class PopUp_Inventory : MonoBehaviour
             for (int i = 0; i < equipSlots.Length; i++)
             {
                 var equipSlot = equipSlots[i];
-                equipSlot.SetComponents(invenMgr, this);
+                equipSlot.SetComponents(gameMenuMgr, this);
             }
 
             return equipSlots.ToList();
@@ -162,15 +162,15 @@ public class PopUp_Inventory : MonoBehaviour
 
     public void Button_PopUp_Split_Accept()
     {
-        invenMgr.InactiveSampleItem();
+        gameMenuMgr.InactiveSampleItem();
         if (split.slider.value == item.TotalCount)
         {
-            invenMgr.PutTheItem(item, itemSlots);
+            gameMenuMgr.PutTheItem(item, itemSlots);
         }
         else if (split.slider.value > 0)
         {
             item.ResultTotalCount((int)-split.slider.value);
-            invenMgr.SetItemInStorage(item.itemData, (int)split.slider.value, false, itemSlots);
+            gameMenuMgr.SetItemInStorage(item.itemData, (int)split.slider.value, false, itemSlots);
         }
         else
         {
@@ -205,7 +205,7 @@ public class PopUp_Inventory : MonoBehaviour
                 var equipSlot = itemInfo.equipSlots[i];
                 if (equipSlot.item == null) continue;
 
-                invenMgr.InActiveItem(equipSlot.item);
+                gameMenuMgr.InActiveItem(equipSlot.item);
             }
         }
         else
@@ -508,7 +508,7 @@ public class PopUp_Inventory : MonoBehaviour
                     {
                         if (equipSlot.item == null)
                         {
-                            invenMgr.SetItemInEquipSlot(magData.loadedBullets[0], magData.loadedBullets.Count, equipSlot);
+                            gameMenuMgr.SetItemInEquipSlot(magData.loadedBullets[0], magData.loadedBullets.Count, equipSlot);
                         }
 
                         equipSlot.countText.text = $"{magData.loadedBullets.Count}";
@@ -518,7 +518,7 @@ public class PopUp_Inventory : MonoBehaviour
                     {
                         if (equipSlot.item == null)
                         {
-                            invenMgr.SetItemInEquipSlot(magData, 1, equipSlot);
+                            gameMenuMgr.SetItemInEquipSlot(magData, 1, equipSlot);
                         }
 
                         var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.prefabName);
@@ -542,7 +542,7 @@ public class PopUp_Inventory : MonoBehaviour
                     {
                         if (equipSlot.item == null)
                         {
-                            invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
+                            gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
                         }
 
                         //if (equipSlot.item && equipSlot.item.partsData != partsData)
@@ -588,7 +588,7 @@ public class PopUp_Inventory : MonoBehaviour
     private void FollowMouse()
     {
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, invenMgr.GetCanvasDistance()));
+        var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, gameMenuMgr.GetCanvasDistance()));
         transform.position = worldPos;
 
         SetPopUpPosition();
@@ -625,12 +625,12 @@ public class PopUp_Inventory : MonoBehaviour
 
     public void BeginDrag_PopUp()
     {
-        var activePopUps = invenMgr.activePopUp.FindAll(x => x.state == state);
+        var activePopUps = gameMenuMgr.activePopUp.FindAll(x => x.state == state);
         if (activePopUps.Count > 1 && activePopUps[^1] != this)
         {
-            invenMgr.activePopUp.Remove(this);
-            invenMgr.activePopUp.Add(this);
-            invenMgr.ResetActivePopUp();
+            gameMenuMgr.activePopUp.Remove(this);
+            gameMenuMgr.activePopUp.Add(this);
+            gameMenuMgr.ResetActivePopUp();
         }
 
         FollowMouse();
@@ -646,7 +646,7 @@ public class PopUp_Inventory : MonoBehaviour
         switch (state)
         {
             case PopUpState.Split:
-                invenMgr.InactiveSampleItem();
+                gameMenuMgr.InactiveSampleItem();
                 for (int i = 0; i < itemSlots.Count; i++)
                 {
                     var itemSlot = itemSlots[i];
@@ -660,13 +660,13 @@ public class PopUp_Inventory : MonoBehaviour
                     var equipSlot = itemInfo.equipSlots[i];
                     if (equipSlot.item == null) continue;
 
-                    invenMgr.InActiveItem(equipSlot.item);
+                    gameMenuMgr.InActiveItem(equipSlot.item);
                 }
-                invenMgr.selectItem = null;
+                gameMenuMgr.selectItem = null;
                 break;
             default:
                 break;
         }
-        invenMgr.RemoveActivePopUp(this);
+        gameMenuMgr.RemoveActivePopUp(this);
     }
 }

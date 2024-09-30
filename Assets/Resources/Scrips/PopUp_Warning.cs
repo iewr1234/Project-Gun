@@ -13,7 +13,7 @@ public enum WarningState
 public class PopUp_Warning : MonoBehaviour
 {
     [Header("---Access Script---")]
-    [SerializeField] private InventoryManager invenMgr;
+    [SerializeField] private GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     public GameObject components;
@@ -29,7 +29,7 @@ public class PopUp_Warning : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
 
-        invenMgr = FindAnyObjectByType<InventoryManager>();
+        gameMenuMgr = FindAnyObjectByType<GameMenuManager>();
 
         components = transform.Find("Components").gameObject;
         fade = transform.Find("Fade").GetComponent<Image>();
@@ -102,7 +102,7 @@ public class PopUp_Warning : MonoBehaviour
     public void Button_DeleteDropItems_Check()
     {
         CloseWarning();
-        invenMgr.ShowInventory(false);
+        gameMenuMgr.ShowInventory(false);
     }
 
     public void Button_DeleteDropItems_Cancel()

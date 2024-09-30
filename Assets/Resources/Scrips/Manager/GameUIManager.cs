@@ -299,7 +299,7 @@ public class GameUIManager : MonoBehaviour
 
     public void SetActiveAimUI(CharacterController charCtr, bool value)
     {
-        playUI.SetActive(value);
+        //playUI.SetActive(value);
         aimUI.SetActive(value);
         bottomUI.SetActive(!value);
         turnEndButton.gameObject.SetActive(!value);

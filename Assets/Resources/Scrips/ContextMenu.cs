@@ -13,7 +13,7 @@ public class ContextMenu : MonoBehaviour
     }
 
     [Header("---Access Script---")]
-    private InventoryManager invenMgr;
+    private GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     private List<Button> buttons = new List<Button>();
@@ -21,9 +21,9 @@ public class ContextMenu : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [SerializeField] private bool onPointer;
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
 
         buttons = transform.Find("Buttons").GetComponentsInChildren<Button>().ToList();
 
@@ -48,9 +48,9 @@ public class ContextMenu : MonoBehaviour
             button.gameObject.SetActive(false);
         }
 
-        invenMgr.selectItem = item;
+        gameMenuMgr.selectItem = item;
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.z);
-        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, invenMgr.GetCanvasDistance()));
+        var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, gameMenuMgr.GetCanvasDistance()));
         transform.position = worldPos;
 
         //buttons[(int)ButtonType.ItemInformation].gameObject.SetActive(true);
@@ -69,7 +69,7 @@ public class ContextMenu : MonoBehaviour
     {
         if (value)
         {
-            invenMgr.selectItem = null;
+            gameMenuMgr.selectItem = null;
         }
         gameObject.SetActive(false);
     }
@@ -86,36 +86,36 @@ public class ContextMenu : MonoBehaviour
 
     public void Button_ContextMenu_ItemInformation()
     {
-        if (invenMgr.activePopUp.Find(x => x.item == invenMgr.selectItem) == null)
+        if (gameMenuMgr.activePopUp.Find(x => x.item == gameMenuMgr.selectItem) == null)
         {
-            var popUp = invenMgr.GetPopUp(PopUpState.ItemInformation);
-            popUp.PopUp_ItemInformation(invenMgr.selectItem);
+            var popUp = gameMenuMgr.GetPopUp(PopUpState.ItemInformation);
+            popUp.PopUp_ItemInformation(gameMenuMgr.selectItem);
         }
         CloseTheContextMenu(false);
     }
 
     public void Button_ContextMenu_UninstallBullets()
     {
-        for (int i = 0; i < invenMgr.selectItem.magData.loadedBullets.Count; i++)
+        for (int i = 0; i < gameMenuMgr.selectItem.magData.loadedBullets.Count; i++)
         {
-            var loadedBullet = invenMgr.selectItem.magData.loadedBullets[i];
-            var sameBullet = invenMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
+            var loadedBullet = gameMenuMgr.selectItem.magData.loadedBullets[i];
+            var sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
                                                         && x.TotalCount < x.itemData.maxNesting
-                                                        && ((x.itemSlots[0].myStorage != null && invenMgr.selectItem.itemSlots[0].myStorage != null
-                                                          && x.itemSlots[0].myStorage.type == invenMgr.selectItem.itemSlots[0].myStorage.type)
-                                                          || x.itemSlots[0].otherStorage != null && invenMgr.selectItem.itemSlots[0].otherStorage != null));
+                                                        && ((x.itemSlots[0].myStorage != null && gameMenuMgr.selectItem.itemSlots[0].myStorage != null
+                                                          && x.itemSlots[0].myStorage.type == gameMenuMgr.selectItem.itemSlots[0].myStorage.type)
+                                                          || x.itemSlots[0].otherStorage != null && gameMenuMgr.selectItem.itemSlots[0].otherStorage != null));
             if (sameBullet != null)
             {
                 sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
             }
             else
             {
-                var inMagStorage = invenMgr.selectItem.itemSlots[0].myStorage;
+                var inMagStorage = gameMenuMgr.selectItem.itemSlots[0].myStorage;
                 if (inMagStorage != null)
                 {
-                    if (!invenMgr.SetItemInStorage(loadedBullet.ID, 1, inMagStorage.itemSlots, false))
+                    if (!gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, inMagStorage.itemSlots, false))
                     {
-                        sameBullet = invenMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
+                        sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
                                                            && x.TotalCount < x.itemData.maxNesting
                                                            && x.itemSlots[0].otherStorage != null);
                         if (sameBullet != null)
@@ -124,18 +124,18 @@ public class ContextMenu : MonoBehaviour
                         }
                         else
                         {
-                            invenMgr.SetItemInStorage(loadedBullet.ID, 1, invenMgr.otherStorage.itemSlots, false);
+                            gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, gameMenuMgr.otherStorage.itemSlots, false);
                         }
                     }
                 }
             }
         }
-        invenMgr.selectItem.magData.loadedBullets.Clear();
-        if (invenMgr.selectItem.equipSlot != null)
+        gameMenuMgr.selectItem.magData.loadedBullets.Clear();
+        if (gameMenuMgr.selectItem.equipSlot != null)
         {
-            invenMgr.selectItem.equipSlot.countText.text = "0";
+            gameMenuMgr.selectItem.equipSlot.countText.text = "0";
         }
-        invenMgr.selectItem.SetTotalCount(0);
+        gameMenuMgr.selectItem.SetTotalCount(0);
         CloseTheContextMenu(true);
     }
 }

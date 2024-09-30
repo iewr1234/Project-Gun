@@ -13,7 +13,7 @@ public enum GameState
     Reload,
     Watch,
     Throw,
-    Inventory,
+    GameMenu,
     Base,
     Result,
 }
@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
     public CameraManager camMgr;
     public GameUIManager uiMgr;
     public MapEditor mapEdt;
-    public InventoryManager invenMgr;
+    public GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     [SerializeField] private ArrowPointer arrowPointer;
@@ -160,22 +160,23 @@ public class GameManager : MonoBehaviour
         CreatePassPoint();
         CreateFloatText();
 
-        if (dataMgr.gameData.invenMgr == null)
+        if (dataMgr.gameData.gameMenuMgr == null)
         {
-            invenMgr = FindAnyObjectByType<InventoryManager>();
+            gameMenuMgr = FindAnyObjectByType<GameMenuManager>();
             //invenMgr.SetComponents(this);
-            invenMgr.gameMgr = this;
-            invenMgr.dataMgr = dataMgr;
-            dataMgr.gameData.invenMgr = invenMgr;
+            gameMenuMgr.gameMgr = this;
+            gameMenuMgr.dataMgr = dataMgr;
+            dataMgr.gameData.gameMenuMgr = gameMenuMgr;
         }
         else
         {
-            invenMgr = dataMgr.gameData.invenMgr;
-            invenMgr.gameMgr = this;
+            gameMenuMgr = dataMgr.gameData.gameMenuMgr;
+            gameMenuMgr.gameMgr = this;
         }
-        if (invenMgr.invenCam.enabled)
+        if (gameMenuMgr.gameMenuCam.enabled)
         {
-            invenMgr.ShowInventory(false);
+            gameMenuMgr.ShowInventory(false);
+
         }
         currentTurn = CharacterOwner.Player;
 
@@ -267,7 +268,7 @@ public class GameManager : MonoBehaviour
             charCtr.transform.position = node.transform.position;
             charCtr.SetComponents(this, ownerType, playerData, node);
 
-            var weapons = invenMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
+            var weapons = gameMenuMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
             for (int i = 0; i < weapons.Count; i++)
             {
                 var weaponData = weapons[i].item.weaponData;
@@ -389,7 +390,7 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         //if (camMgr.lockCam) return;
-        if (gameState == GameState.Inventory) return;
+        if (gameState == GameState.GameMenu) return;
 
         switch (currentTurn)
         {
@@ -703,7 +704,7 @@ public class GameManager : MonoBehaviour
                         break;
                     case GameState.Base:
                         if (dontMove) return;
-                        if (invenMgr.showStorage) return;
+                        if (gameMenuMgr.showStorage) return;
                         if (node == null) return;
                         if (playerList.Count == 0) return;
 
@@ -936,14 +937,14 @@ public class GameManager : MonoBehaviour
         var intMag = weaponData.isMag && weaponData.equipMag.intMag;
         if (intMag)
         {
-            rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+            rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
                                                      && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                      && x.itemData.type == ItemType.Bullet
                                                      && x.bulletData.caliber == weaponData.caliber).ToList();
         }
         else
         {
-            rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+            rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
                                                      && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                      && x.itemData.type == ItemType.Magazine
                                                      && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
@@ -978,7 +979,7 @@ public class GameManager : MonoBehaviour
         var weapon = selectChar.currentWeapon;
         if (weapon == null) return;
 
-        var weaponItem = invenMgr.activeItem.Find(x => x.equipSlot != null
+        var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null
                                                     && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                     && x.weaponData.ID == weapon.weaponData.ID);
         var rigMag = rigItems[uiMgr.iconIndex];
@@ -987,14 +988,14 @@ public class GameManager : MonoBehaviour
             var equipMag = weapon.weaponData.equipMag;
             if (equipMag.intMag)
             {
-                invenMgr.QuickEquip(weaponItem, rigMag);
+                gameMenuMgr.QuickEquip(weaponItem, rigMag);
                 var reloadNum = uiMgr.GetAmmoIcon().value;
                 selectChar.AddCommand(CommandType.Reload, reloadNum);
             }
             else
             {
-                invenMgr.SetItemInStorage(equipMag);
-                invenMgr.QuickEquip(weaponItem, rigMag);
+                gameMenuMgr.SetItemInStorage(equipMag);
+                gameMenuMgr.QuickEquip(weaponItem, rigMag);
                 selectChar.AddCommand(CommandType.Reload);
             }
         }
@@ -1016,7 +1017,7 @@ public class GameManager : MonoBehaviour
         SwitchMovableNodes(false);
         ClearLine();
         RemoveTargetNode();
-        rigItems = invenMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+        rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
                                                  && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                  && x.itemData.type == ItemType.Grenade);
         if (rigItems.Count == 0) return;
@@ -1039,7 +1040,7 @@ public class GameManager : MonoBehaviour
 
     public void ThrowAction_Grenade()
     {
-        invenMgr.InActiveItem(rigItems[uiMgr.iconIndex]);
+        gameMenuMgr.InActiveItem(rigItems[uiMgr.iconIndex]);
         rigItems.Clear();
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.throwButton.SetActiveButton(false);
@@ -1605,9 +1606,9 @@ public class GameManager : MonoBehaviour
                 uiMgr.SetStageUI(true);
                 break;
             case BaseCampMarker.Storage_Node:
-                invenMgr.SetOtherStorage(node);
-                invenMgr.SetStorageUI(true);
-                invenMgr.ShowInventory(true);
+                gameMenuMgr.SetOtherStorage(node);
+                gameMenuMgr.SetStorageUI(true);
+                gameMenuMgr.ShowInventory(true);
                 break;
             default:
                 break;
@@ -1641,9 +1642,9 @@ public class GameManager : MonoBehaviour
         else
         {
             dataMgr.gameData.RandomMapSelection();
-            invenMgr.SetLootStorage();
-            invenMgr.SetResultUI(true);
-            invenMgr.ShowInventory(true);
+            gameMenuMgr.SetLootStorage();
+            gameMenuMgr.SetResultUI(true);
+            gameMenuMgr.ShowInventory(true);
         }
     }
 

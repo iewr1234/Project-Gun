@@ -43,7 +43,7 @@ public class StorageInfo
 public class GameData : ScriptableObject
 {
     [HideInInspector] public DataManager dataMgr;
-    [HideInInspector] public InventoryManager invenMgr;
+    [HideInInspector] public GameMenuManager gameMenuMgr;
 
     [Header("[Stage]")]
     public StageDataInfo stageData;

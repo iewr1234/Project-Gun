@@ -9,7 +9,7 @@ using TMPro;
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("---Access Script---")]
-    public InventoryManager invenMgr;
+    public GameMenuManager gameMenuMgr;
     [Space(5f)]
 
     public RigDataInfo rigData;
@@ -49,9 +49,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     private readonly Vector3 defaultScale = new Vector3(400f, 400f, 400f);
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
         weaponData = null;
         bulletData = null;
         magData = null;
@@ -97,12 +97,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     }
 
-    public void SetComponents(InventoryManager _invenMgr, int _index)
+    public void SetComponents(GameMenuManager _gameMenuMgr, int _index)
     {
         index = _index;
         transform.name = $"Item_{index}";
 
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
         weaponData = null;
         bulletData = null;
         magData = null;
@@ -156,31 +156,31 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         switch (itemData.type)
         {
             case ItemType.Rig:
-                var _rigData = invenMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
+                var _rigData = gameMenuMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
                 rigData = _rigData.CopyData();
                 break;
             case ItemType.Backpack:
-                var _backpackData = invenMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
+                var _backpackData = gameMenuMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
                 backpackData = _backpackData.CopyData();
                 break;
             case ItemType.MainWeapon:
-                var _mainWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _mainWeaponData.CopyData(invenMgr.dataMgr);
+                var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
                 SetPartsSample();
                 break;
             case ItemType.SubWeapon:
-                var _subWeaponData = invenMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                weaponData = _subWeaponData.CopyData(invenMgr.dataMgr);
+                var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
                 SetPartsSample();
                 break;
             case ItemType.Bullet:
-                var _bulletData = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
+                var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
                 bulletData = _bulletData.CopyData();
                 break;
             case ItemType.Magazine:
-                var _magData = invenMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
+                var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
                 magData = _magData.CopyData();
-                var loadedBullet = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
+                var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
                 if (loadedBullet != null)
                 {
                     for (int i = 0; i < magData.magSize; i++)
@@ -190,11 +190,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 }
                 break;
             case ItemType.Sight:
-                var _partsData = invenMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                var _partsData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
                 partsData = _partsData.CopyData();
                 break;
             case ItemType.Grenade:
-                var _grenadeData = invenMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
+                var _grenadeData = gameMenuMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
                 grenadeData = _grenadeData.CopyData();
                 break;
             default:
@@ -222,16 +222,16 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         activeSample.SetActive(true);
         gameObject.SetActive(true);
 
-        if (!invenMgr.activeItem.Contains(this))
+        if (!gameMenuMgr.activeItem.Contains(this))
         {
-            invenMgr.activeItem.Add(this);
+            gameMenuMgr.activeItem.Add(this);
         }
 
         void InsertItemOption()
         {
             if (!insertOption) return;
 
-            var optionSheet = invenMgr.dataMgr.optionSheetData.optionSheetInfos.Find(x => x.levelInfo.minLevel < itemData.level && x.levelInfo.maxLevel >= itemData.level);
+            var optionSheet = gameMenuMgr.dataMgr.optionSheetData.optionSheetInfos.Find(x => x.levelInfo.minLevel < itemData.level && x.levelInfo.maxLevel >= itemData.level);
             var rankOption = optionSheet.rankOptions[(int)itemData.rarity - 1];
             AddOption(rankOption.option1_rank);
             AddOption(rankOption.option2_rank);
@@ -243,7 +243,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             if (optionRank == 0) return;
 
-            var options = invenMgr.dataMgr.itemOptionData.itemOptionInfos.FindAll(x => x.rank == optionRank && (x.mainType == 0 || x.mainType == (int)itemData.type));
+            var options = gameMenuMgr.dataMgr.itemOptionData.itemOptionInfos.FindAll(x => x.rank == optionRank && (x.mainType == 0 || x.mainType == (int)itemData.type));
             if (options.Count == 0) return;
 
             var option = options[Random.Range(0, options.Count)];
@@ -262,10 +262,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void SetItemInfo(MagazineDataInfo _magData)
     {
-        itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _magData.ID);
+        itemData = gameMenuMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _magData.ID);
         size = itemData.size;
         magData = _magData.CopyData();
-        var loadedBullet = invenMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
+        var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
         if (loadedBullet != null)
         {
             for (int i = 0; i < magData.magSize; i++)
@@ -284,9 +284,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         activeSample.SetActive(true);
         gameObject.SetActive(true);
 
-        if (!invenMgr.activeItem.Contains(this))
+        if (!gameMenuMgr.activeItem.Contains(this))
         {
-            invenMgr.activeItem.Add(this);
+            gameMenuMgr.activeItem.Add(this);
         }
     }
 
@@ -457,7 +457,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void FollowMouse()
     {
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.localPosition.z);
-        var worldPos = invenMgr.invenCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, invenMgr.GetCanvasDistance() - 100));
+        var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x + movePivot.x, mousePos.y + movePivot.y, gameMenuMgr.GetCanvasDistance() - 100));
         transform.position = worldPos;
     }
 
@@ -499,8 +499,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     private bool CheckItemDrag()
     {
-        if (invenMgr == null) return false;
-        if (invenMgr.popUp_warning.state != WarningState.None) return false;
+        if (gameMenuMgr == null) return false;
+        if (gameMenuMgr.popUp_warning.state != WarningState.None) return false;
         if (Input.GetMouseButton(1)) return false;
 
         return true;
@@ -520,7 +520,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         color.a = 100 / 255f;
         targetImage.color = color;
 
-        invenMgr.TakeTheItem(this);
+        gameMenuMgr.TakeTheItem(this);
         FollowMouse();
     }
 
@@ -535,13 +535,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (!CheckItemDrag()) return;
 
-        if (invenMgr.onEquip && !invenMgr.onSlot)
+        if (gameMenuMgr.onEquip && !gameMenuMgr.onSlot)
         {
-            invenMgr.EquipItem(this, invenMgr.onEquip);
+            gameMenuMgr.EquipItem(this, gameMenuMgr.onEquip);
         }
         else
         {
-            invenMgr.PutTheItem(this, invenMgr.onSlots);
+            gameMenuMgr.PutTheItem(this, gameMenuMgr.onSlots);
         }
     }
 
@@ -549,7 +549,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            invenMgr.contextMenu.OpenTheContextMenu(this);
+            gameMenuMgr.contextMenu.OpenTheContextMenu(this);
         }
     }
 

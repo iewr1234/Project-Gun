@@ -15,7 +15,7 @@ public enum MyStorageType
 public class MyStorage : MonoBehaviour
 {
     [Header("---Access Script---")]
-    public InventoryManager invenMgr;
+    public GameMenuManager gameMenuMgr;
 
     [Header("---Access Component---")]
     private RectTransform rect;
@@ -35,9 +35,9 @@ public class MyStorage : MonoBehaviour
     private readonly Vector2Int expandRectSize_my = new Vector2Int(700, 230);
     private readonly int expandY = 70;
 
-    public void SetComponents(InventoryManager _invenMgr)
+    public void SetComponents(GameMenuManager _gameMenuMgr)
     {
-        invenMgr = _invenMgr;
+        gameMenuMgr = _gameMenuMgr;
 
         rect = GetComponent<RectTransform>();
         rect.sizeDelta = minRectSize_my;
@@ -48,7 +48,7 @@ public class MyStorage : MonoBehaviour
         equipSlot = GetComponentInChildren<EquipSlot>();
         if (equipSlot != null)
         {
-            equipSlot.SetComponents(invenMgr, this);
+            equipSlot.SetComponents(gameMenuMgr, this);
             switch (type)
             {
                 case MyStorageType.Rig:
