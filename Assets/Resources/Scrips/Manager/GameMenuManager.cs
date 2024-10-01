@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +32,8 @@ public class GameMenuManager : MonoBehaviour
 
     [Header("[StatusUI]")]
     private GameObject statusUI;
+    [SerializeField] private List<StatusValue> statusTexts = new List<StatusValue>();
+    [SerializeField] private List<StatusValue> abilityTexts = new List<StatusValue>();
 
     [Header("[InventoryUI]")]
     private GameObject invenUI;
@@ -123,6 +126,8 @@ public class GameMenuManager : MonoBehaviour
         void SetStatusUI()
         {
             statusUI = gameMenuUI.transform.Find("StatusUI").gameObject;
+            statusTexts = statusUI.transform.Find("Status/Group_0").GetComponentsInChildren<StatusValue>().ToList();
+            abilityTexts = statusUI.transform.Find("Status/Group_1").GetComponentsInChildren<StatusValue>().ToList();
 
             statusUI.SetActive(false);
         }
@@ -273,8 +278,41 @@ public class GameMenuManager : MonoBehaviour
         if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
-        ConvertGameMenu(showStatus, GameMenuState.Status);
+        var player = gameMgr.playerList[0];
+        ConvertGameMenu(player, showStatus, GameMenuState.Status);
+        SetStatusTexts();
+        SetAbilityTexts();
         statusUI.SetActive(showStatus);
+
+        void SetStatusTexts()
+        {
+            if (!showStatus) return;
+
+            statusTexts[0].SetAbilityText("힘", player.strength);
+            statusTexts[1].SetAbilityText("활력", player.strength);
+            statusTexts[2].SetAbilityText("지능", player.strength);
+            statusTexts[3].SetAbilityText("지혜", player.strength);
+            statusTexts[4].SetAbilityText("민첩", player.strength);
+            statusTexts[5].SetAbilityText("솜씨", player.strength);
+            statusTexts[6].SetAbilityText("이동력", player.Mobility);
+        }
+
+        void SetAbilityTexts()
+        {
+            if (!showStatus) return;
+
+            abilityTexts[0].SetAbilityText("발사속도", player.RPM);
+            abilityTexts[1].SetAbilityText("사거리", player.range);
+            abilityTexts[2].SetAbilityText("경계각", player.watchAngle);
+            abilityTexts[3].SetAbilityText("정확도", player.MOA);
+            abilityTexts[4].SetAbilityText("안정성", player.stability);
+            abilityTexts[5].SetAbilityText("반동", player.rebound);
+            abilityTexts[6].SetAbilityText("장약", player.propellant);
+            abilityTexts[7].SetAbilityText("피해량", player.damage);
+            abilityTexts[8].SetAbilityText("관통", player.penetrate);
+            abilityTexts[9].SetAbilityText("방어구 손상", player.armorBreak);
+            abilityTexts[10].SetAbilityText("파편화", player.critical);
+        }
     }
 
     private void InventoryProcess()
@@ -307,7 +345,8 @@ public class GameMenuManager : MonoBehaviour
         if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
-        ConvertGameMenu(showInven, GameMenuState.Inventory);
+        var player = gameMgr.playerList[0];
+        ConvertGameMenu(player, showInven, GameMenuState.Inventory);
         invenUI.SetActive(showInven);
         itemSplit = false;
         if (showInven)
@@ -330,10 +369,9 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    private void ConvertGameMenu(bool value, GameMenuState state)
+    private void ConvertGameMenu(CharacterController charCtr, bool value, GameMenuState state)
     {
-        var player = gameMgr.playerList[0];
-        if (player.state == CharacterState.Base)
+        if (charCtr.state == CharacterState.Base)
         {
             gameMgr.gameState = value ? GameState.GameMenu : GameState.Base;
         }
@@ -364,10 +402,12 @@ public class GameMenuManager : MonoBehaviour
         switch (state)
         {
             case GameMenuState.Status:
-                StatusProcess();
+                statusUI.SetActive(false);
+                //StatusProcess();
                 break;
             case GameMenuState.Inventory:
-                InventoryProcess();
+                invenUI.SetActive(false);
+                //InventoryProcess();
                 break;
             default:
                 break;
