@@ -174,6 +174,7 @@ public class OtherStorage : MonoBehaviour
                 gameMenuMgr.InActiveItem(itemSlot.item);
             }
         }
+        storageInfos.Clear();
     }
 
     public void Button_Tab(int index)

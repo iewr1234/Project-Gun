@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +32,9 @@ public class GameMenuManager : MonoBehaviour
     [Header("[StatusUI]")]
     private GameObject statusUI;
     [SerializeField] private List<StatusValue> statusTexts = new List<StatusValue>();
+    private Button main1Tab;
+    private Button main2Tab;
+    private Button subTab;
     [SerializeField] private List<StatusValue> abilityTexts = new List<StatusValue>();
 
     [Header("[InventoryUI]")]
@@ -61,7 +63,6 @@ public class GameMenuManager : MonoBehaviour
     public List<ItemSlot> onSlots;
     public ItemHandler holdingItem;
     public ItemHandler selectItem;
-    [HideInInspector] public List<PopUp_Inventory> activePopUp;
 
     private bool click;
     private float clickTime;
@@ -71,8 +72,9 @@ public class GameMenuManager : MonoBehaviour
 
     [Space(5f)]
     public List<ItemHandler> activeItem = new List<ItemHandler>();
+    public List<PopUp_Inventory> activePopUp;
 
-    [HideInInspector] public bool showStorage;
+    [HideInInspector] public bool showMenu;
     private bool itemSplit;
 
     private void Awake()
@@ -127,8 +129,13 @@ public class GameMenuManager : MonoBehaviour
         {
             statusUI = gameMenuUI.transform.Find("StatusUI").gameObject;
             statusTexts = statusUI.transform.Find("Status/Group_0").GetComponentsInChildren<StatusValue>().ToList();
+            main1Tab = statusUI.transform.Find("Status/Group_1/AbilityTab/Main1").GetComponent<Button>();
+            main1Tab.interactable = false;
+            main2Tab = statusUI.transform.Find("Status/Group_1/AbilityTab/Main2").GetComponent<Button>();
+            main2Tab.interactable = false;
+            subTab = statusUI.transform.Find("Status/Group_1/AbilityTab/Sub").GetComponent<Button>();
+            subTab.interactable = false;
             abilityTexts = statusUI.transform.Find("Status/Group_1").GetComponentsInChildren<StatusValue>().ToList();
-
             statusUI.SetActive(false);
         }
 
@@ -267,7 +274,15 @@ public class GameMenuManager : MonoBehaviour
         }
         else
         {
-            ShowStatus(false);
+            if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
+            {
+                ItemMoveCancel(holdingItem, onSlots);
+                popUp_warning.SetWarning(WarningState.DeleteDropItems);
+            }
+            else
+            {
+                ShowStatus(false);
+            }
         }
     }
 
@@ -279,10 +294,33 @@ public class GameMenuManager : MonoBehaviour
         if (gameMgr.playerList.Count == 0) return;
 
         var player = gameMgr.playerList[0];
-        ConvertGameMenu(player, showStatus, GameMenuState.Status);
         SetStatusTexts();
-        SetAbilityTexts();
+        if (player.weapons.Count == 0)
+        {
+            abilityTexts[0].SetAbilityText("발사속도", player.RPM);
+            abilityTexts[1].SetAbilityText("사거리", player.Range);
+            abilityTexts[2].SetAbilityText("경계각", player.WatchAngle);
+            abilityTexts[3].SetAbilityText("정확도", player.MOA);
+            abilityTexts[4].SetAbilityText("안정성", player.Stability);
+            abilityTexts[5].SetAbilityText("반동", player.Rebound);
+            abilityTexts[6].SetAbilityText("장약", player.Propellant);
+            abilityTexts[7].SetAbilityText("피해량", player.Damage);
+            abilityTexts[8].SetAbilityText("관통", player.Penetrate);
+            abilityTexts[9].SetAbilityText("방어구 손상", player.ArmorBreak);
+            abilityTexts[10].SetAbilityText("파편화", player.Critical);
+            main1Tab.interactable = false;
+            main2Tab.interactable = false;
+            subTab.interactable = false;
+        }
+        else
+        {
+            main1Tab.interactable = FindWeapon(EquipType.MainWeapon1);
+            main2Tab.interactable = FindWeapon(EquipType.MainWeapon2);
+            subTab.interactable = FindWeapon(EquipType.SubWeapon);
+        }
+        showMenu = showStatus;
         statusUI.SetActive(showStatus);
+        ConvertGameMenu(player, showStatus, GameMenuState.Status);
 
         void SetStatusTexts()
         {
@@ -297,21 +335,48 @@ public class GameMenuManager : MonoBehaviour
             statusTexts[6].SetAbilityText("이동력", player.Mobility);
         }
 
-        void SetAbilityTexts()
+        bool FindWeapon(EquipType equipType)
         {
-            if (!showStatus) return;
+            var weapon = player.weapons.Find(x => x.equipType == equipType);
+            if (weapon != null)
+            {
+                if (weapon == player.currentWeapon) ChangeAbilityTexts(player.ability, weapon.weaponData);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 
-            abilityTexts[0].SetAbilityText("발사속도", player.RPM);
-            abilityTexts[1].SetAbilityText("사거리", player.range);
-            abilityTexts[2].SetAbilityText("경계각", player.watchAngle);
-            abilityTexts[3].SetAbilityText("정확도", player.MOA);
-            abilityTexts[4].SetAbilityText("안정성", player.stability);
-            abilityTexts[5].SetAbilityText("반동", player.rebound);
-            abilityTexts[6].SetAbilityText("장약", player.propellant);
-            abilityTexts[7].SetAbilityText("피해량", player.damage);
-            abilityTexts[8].SetAbilityText("관통", player.penetrate);
-            abilityTexts[9].SetAbilityText("방어구 손상", player.armorBreak);
-            abilityTexts[10].SetAbilityText("파편화", player.critical);
+    private void ChangeAbilityTexts(CharacterController.Ability ability, WeaponDataInfo weaponData)
+    {
+        if (weaponData == null) return;
+
+        abilityTexts[0].SetAbilityText("발사속도", ability.RPM + weaponData.RPM);
+        abilityTexts[1].SetAbilityText("사거리", ability.range + weaponData.range);
+        abilityTexts[2].SetAbilityText("경계각", ability.watchAngle + weaponData.watchAngle);
+        abilityTexts[3].SetAbilityText("정확도", ability.MOA + weaponData.MOA);
+        abilityTexts[4].SetAbilityText("안정성", ability.stability + weaponData.stability);
+        abilityTexts[5].SetAbilityText("반동", ability.rebound + weaponData.rebound);
+
+        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        {
+            var bulletData = weaponData.equipMag.loadedBullets[^1];
+            abilityTexts[6].SetAbilityText("장약", ability.propellant + bulletData.propellant);
+            abilityTexts[7].SetAbilityText("피해량", ability.damage + bulletData.damage);
+            abilityTexts[8].SetAbilityText("관통", ability.penetrate + bulletData.penetrate);
+            abilityTexts[9].SetAbilityText("방어구 손상", ability.armorBreak + bulletData.armorBreak);
+            abilityTexts[10].SetAbilityText("파편화", ability.critical + bulletData.critical);
+        }
+        else
+        {
+            abilityTexts[6].SetAbilityText("장약", ability.propellant);
+            abilityTexts[7].SetAbilityText("피해량", ability.damage);
+            abilityTexts[8].SetAbilityText("관통", ability.penetrate);
+            abilityTexts[9].SetAbilityText("방어구 손상", ability.armorBreak);
+            abilityTexts[10].SetAbilityText("파편화", ability.critical);
         }
     }
 
@@ -346,22 +411,22 @@ public class GameMenuManager : MonoBehaviour
         if (gameMgr.playerList.Count == 0) return;
 
         var player = gameMgr.playerList[0];
-        ConvertGameMenu(player, showInven, GameMenuState.Inventory);
         invenUI.SetActive(showInven);
         itemSplit = false;
-        if (showInven)
+        if (showInven && otherStorage.storageInfos.Count == 0)
         {
             SetOtherStorage(null);
+            SetStorageUI(true);
         }
         else
         {
             ItemMoveCancel(holdingItem, onSlots);
         }
-        SetStorageUI(showInven);
+        ConvertGameMenu(player, showInven, GameMenuState.Inventory);
 
-        if (!showInven && activePopUp.Count > 0)
+        if (!showInven)
         {
-            for (int i = activePopUp.Count - 1; i >= 0; i--)
+            for (int i = 0; i < activePopUp.Count; i++)
             {
                 var popUp = activePopUp[i];
                 popUp.Button_PopUp_Close();
@@ -392,6 +457,11 @@ public class GameMenuManager : MonoBehaviour
         {
             gameMgr.mapEdt.gameObject.SetActive(!value);
         }
+
+        if (!value && this.state != GameMenuState.None)
+        {
+            SetStorageUI(false);
+        }
         this.state = value ? state : GameMenuState.None;
     }
 
@@ -406,6 +476,11 @@ public class GameMenuManager : MonoBehaviour
                 //StatusProcess();
                 break;
             case GameMenuState.Inventory:
+                for (int i = 0; i < activePopUp.Count; i++)
+                {
+                    var popUp = activePopUp[i];
+                    popUp.Button_PopUp_Close();
+                }
                 invenUI.SetActive(false);
                 //InventoryProcess();
                 break;
@@ -1036,7 +1111,7 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="equipSlot"></param>
     public void EquipItem(ItemHandler putItem, EquipSlot equipSlot)
     {
-        if (equipSlot.CheckEquip(putItem))
+        if (equipSlot.CheckEquip(putItem) && equipSlot != putItem.equipSlot)
         {
             if (putItem.itemSlots.Count > 0 && putItem.itemSlots[0].otherStorage != null)
             {
@@ -1084,14 +1159,14 @@ public class GameMenuManager : MonoBehaviour
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        playerCtr.AddWeapon(putItem);
+                        playerCtr.AddWeapon(putItem, equipSlot.type);
                     }
                     break;
                 case ItemType.SubWeapon:
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        playerCtr.AddWeapon(putItem);
+                        playerCtr.AddWeapon(putItem, equipSlot.type);
                     }
                     break;
                 //case ItemType.Bullet:
@@ -1192,6 +1267,7 @@ public class GameMenuManager : MonoBehaviour
             putItem.transform.position = putItem.itemSlots[0].transform.position;
         }
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
+        putItem.targetImage.raycastTarget = true;
         putItem.targetImage.color = Color.clear;
 
         holdingItem = null;
@@ -1743,7 +1819,7 @@ public class GameMenuManager : MonoBehaviour
     {
         //closeButton.gameObject.SetActive(value);
         otherStorage.SetActive(value);
-        showStorage = value;
+        showMenu = value;
         switch (value)
         {
             case true:
@@ -1762,6 +1838,27 @@ public class GameMenuManager : MonoBehaviour
 
         TurnOffGameMenuUI();
         StatusProcess();
+    }
+
+    public void Button_Status_Main1()
+    {
+        var player = gameMgr.playerList[0];
+        var weaponData = player.weapons.Find(x => x.equipType == EquipType.MainWeapon1).weaponData;
+        ChangeAbilityTexts(player.ability, weaponData);
+    }
+
+    public void Button_Status_Main2()
+    {
+        var player = gameMgr.playerList[0];
+        var weaponData = player.weapons.Find(x => x.equipType == EquipType.MainWeapon2).weaponData;
+        ChangeAbilityTexts(player.ability, weaponData);
+    }
+
+    public void Button_Status_Sub()
+    {
+        var player = gameMgr.playerList[0];
+        var weaponData = player.weapons.Find(x => x.equipType == EquipType.SubWeapon).weaponData;
+        ChangeAbilityTexts(player.ability, weaponData);
     }
 
     public void Button_Inventory()

@@ -31,6 +31,7 @@ public class Weapon : MonoBehaviour
     private Transform bulletTf;
 
     [Header("--- Assignment Variable---")]
+    public EquipType equipType;
     public WeaponDataInfo weaponData;
     [Space(5f)]
 
@@ -66,17 +67,18 @@ public class Weapon : MonoBehaviour
     private readonly float shootDisparity_bullet = 0.15f;
     private readonly float shootDisparity_pellet = 0.15f;
 
-    public void SetComponets(CharacterController _charCtr, WeaponDataInfo _weaponData)
+    public void SetComponets(CharacterController _charCtr, EquipType _equipType, WeaponDataInfo _weaponData)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
+        equipType = _equipType;
         weaponData = _weaponData;
         //charCtr.SetWeaponAbility(true, weaponData);
-        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-        {
-            var chamberBullet = weaponData.equipMag.loadedBullets[0];
-            charCtr.SetBulletAbility(true, chamberBullet);
-        }
+        //if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        //{
+        //    var chamberBullet = weaponData.equipMag.loadedBullets[0];
+        //    charCtr.SetBulletAbility(true, chamberBullet);
+        //}
         charCtr.weapons.Add(this);
 
         bulletTf = transform.Find("BulletTransform");
@@ -194,14 +196,18 @@ public class Weapon : MonoBehaviour
 
     public void Initialize()
     {
-        charCtr.SetWeaponAbility(false, weaponData);
-        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        if (charCtr.currentWeapon == this)
         {
-            var chamberBullet = weaponData.equipMag.loadedBullets[0];
-            charCtr.SetBulletAbility(false, chamberBullet);
+            charCtr.SetWeaponAbility(false, weaponData);
+            if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+            {
+                var chamberBullet = weaponData.equipMag.loadedBullets[0];
+                charCtr.SetBulletAbility(false, chamberBullet);
+            }
         }
-        charCtr.weapons.Remove(this);
+        //charCtr.weapons.Remove(this);
         charCtr = null;
+        equipType = EquipType.None;
         weaponData = null;
 
         var activeParts = partsObjects.FindAll(x => x.gameObject.activeSelf);
@@ -225,6 +231,11 @@ public class Weapon : MonoBehaviour
         }
 
         charCtr.SetWeaponAbility(true, weaponData);
+        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        {
+            var chamberBullet = weaponData.equipMag.loadedBullets[0];
+            charCtr.SetBulletAbility(true, chamberBullet);
+        }
         switch (weaponData.type)
         {
             case WeaponType.Pistol:

@@ -268,14 +268,17 @@ public class GameManager : MonoBehaviour
             charCtr.transform.position = node.transform.position;
             charCtr.SetComponents(this, ownerType, playerData, node);
 
-            var weapons = gameMenuMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon || x.type == EquipType.SubWeapon));
+            var weapons = gameMenuMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon1
+                                                                             || x.type == EquipType.MainWeapon2
+                                                                             || x.type == EquipType.SubWeapon));
             for (int i = 0; i < weapons.Count; i++)
             {
                 var weaponData = weapons[i].item.weaponData;
                 if (weaponData.type == WeaponType.None) continue;
 
+                var equipType = weapons[i].item.equipSlot.type;
                 var weapon = charCtr.GetWeapon(weaponData.weaponName);
-                weapon.SetComponets(charCtr, weaponData);
+                weapon.SetComponets(charCtr, equipType, weaponData);
             }
 
             return charCtr;
@@ -704,7 +707,7 @@ public class GameManager : MonoBehaviour
                         break;
                     case GameState.Base:
                         if (dontMove) return;
-                        if (gameMenuMgr.showStorage) return;
+                        if (gameMenuMgr.showMenu) return;
                         if (node == null) return;
                         if (playerList.Count == 0) return;
 
@@ -1692,7 +1695,7 @@ public class GameManager : MonoBehaviour
                     var shooterPos = targetInfo.shooterNode.transform.position;
                     var targetPos = targetInfo.targetNode.transform.position;
                     var dist = DataUtility.GetDistance(shooterPos, targetPos);
-                    if (!enemy.CheckTheCoverAlongPath(enemy.range, shooterPos, targetPos, false))
+                    if (!enemy.CheckTheCoverAlongPath(enemy.Range, shooterPos, targetPos, false))
                     {
                         shootScore = 0;
                         continue;

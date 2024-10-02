@@ -11,7 +11,8 @@ public enum EquipType
     Body,
     Rig,
     Backpack,
-    MainWeapon,
+    MainWeapon1,
+    MainWeapon2,
     SubWeapon,
     //Chamber,
     Magazine,
@@ -101,7 +102,9 @@ public class EquipSlot : MonoBehaviour
                 return item.itemData.type == ItemType.Rig;
             case EquipType.Backpack:
                 return item.itemData.type == ItemType.Backpack;
-            case EquipType.MainWeapon:
+            case EquipType.MainWeapon1:
+                return item.itemData.type == ItemType.MainWeapon;
+            case EquipType.MainWeapon2:
                 return item.itemData.type == ItemType.MainWeapon;
             case EquipType.SubWeapon:
                 return item.itemData.type == ItemType.SubWeapon;

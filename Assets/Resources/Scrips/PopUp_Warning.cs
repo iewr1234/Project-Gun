@@ -102,7 +102,18 @@ public class PopUp_Warning : MonoBehaviour
     public void Button_DeleteDropItems_Check()
     {
         CloseWarning();
-        gameMenuMgr.ShowInventory(false);
+        switch (gameMenuMgr.state)
+        {
+            case GameMenuState.Status:
+                gameMenuMgr.otherStorage.DeactiveTabButtons();
+                gameMenuMgr.ShowStatus(false);
+                break;
+            case GameMenuState.Inventory:
+                gameMenuMgr.ShowInventory(false);
+                break;
+            default:
+                break;
+        }
     }
 
     public void Button_DeleteDropItems_Cancel()
