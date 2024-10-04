@@ -185,14 +185,14 @@ public class GameUIManager : MonoBehaviour
     {
         var targetInfo = charCtr.targetList[charCtr.targetIndex];
         var hitAccuracy = DataUtility.GetHitAccuracy(targetInfo);
-        if (hitAccuracy > 100)
-        {
-            hitAccuracy = 100;
-        }
-        else if (hitAccuracy < 0)
-        {
-            hitAccuracy = 0;
-        }
+        //if (hitAccuracy > 100)
+        //{
+        //    hitAccuracy = 100;
+        //}
+        //else if (hitAccuracy < DataUtility.minHitAccuracy)
+        //{
+        //    hitAccuracy = DataUtility.minHitAccuracy;
+        //}
         hitAccuracyText.text = $"{hitAccuracy}%";
     }
 

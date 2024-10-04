@@ -32,10 +32,11 @@ public class GameMenuManager : MonoBehaviour
     [Header("[StatusUI]")]
     private GameObject statusUI;
     [SerializeField] private List<StatusValue> statusTexts = new List<StatusValue>();
+    [SerializeField] private List<StatusValue> physicalTexts = new List<StatusValue>();
+    [SerializeField] private List<StatusValue> abilityTexts = new List<StatusValue>();
     private Button main1Tab;
     private Button main2Tab;
     private Button subTab;
-    [SerializeField] private List<StatusValue> abilityTexts = new List<StatusValue>();
 
     [Header("[InventoryUI]")]
     private GameObject invenUI;
@@ -128,14 +129,16 @@ public class GameMenuManager : MonoBehaviour
         void SetStatusUI()
         {
             statusUI = gameMenuUI.transform.Find("StatusUI").gameObject;
-            statusTexts = statusUI.transform.Find("Status/Group_0").GetComponentsInChildren<StatusValue>().ToList();
-            main1Tab = statusUI.transform.Find("Status/Group_1/AbilityTab/Main1").GetComponent<Button>();
+            statusTexts = statusUI.transform.Find("ValueGroups/StatusGroup").GetComponentsInChildren<StatusValue>().ToList();
+            physicalTexts = statusUI.transform.Find("ValueGroups/PhysicalGroup").GetComponentsInChildren<StatusValue>().ToList();
+            abilityTexts = statusUI.transform.Find("ValueGroups/AbilityGroup").GetComponentsInChildren<StatusValue>().ToList();
+            main1Tab = statusUI.transform.Find("ValueGroups/AbilityGroup/AbilityTab/Main1").GetComponent<Button>();
             main1Tab.interactable = false;
-            main2Tab = statusUI.transform.Find("Status/Group_1/AbilityTab/Main2").GetComponent<Button>();
+            main2Tab = statusUI.transform.Find("ValueGroups/AbilityGroup/AbilityTab/Main2").GetComponent<Button>();
             main2Tab.interactable = false;
-            subTab = statusUI.transform.Find("Status/Group_1/AbilityTab/Sub").GetComponent<Button>();
+            subTab = statusUI.transform.Find("ValueGroups/AbilityGroup/AbilityTab/Sub").GetComponent<Button>();
             subTab.interactable = false;
-            abilityTexts = statusUI.transform.Find("Status/Group_1").GetComponentsInChildren<StatusValue>().ToList();
+
             statusUI.SetActive(false);
         }
 
@@ -295,29 +298,8 @@ public class GameMenuManager : MonoBehaviour
 
         var player = gameMgr.playerList[0];
         SetStatusTexts();
-        if (player.weapons.Count == 0)
-        {
-            abilityTexts[0].SetAbilityText("발사속도", player.RPM);
-            abilityTexts[1].SetAbilityText("사거리", player.Range);
-            abilityTexts[2].SetAbilityText("경계각", player.WatchAngle);
-            abilityTexts[3].SetAbilityText("정확도", player.MOA);
-            abilityTexts[4].SetAbilityText("안정성", player.Stability);
-            abilityTexts[5].SetAbilityText("반동", player.Rebound);
-            abilityTexts[6].SetAbilityText("장약", player.Propellant);
-            abilityTexts[7].SetAbilityText("피해량", player.Damage);
-            abilityTexts[8].SetAbilityText("관통", player.Penetrate);
-            abilityTexts[9].SetAbilityText("방어구 손상", player.ArmorBreak);
-            abilityTexts[10].SetAbilityText("파편화", player.Critical);
-            main1Tab.interactable = false;
-            main2Tab.interactable = false;
-            subTab.interactable = false;
-        }
-        else
-        {
-            main1Tab.interactable = FindWeapon(EquipType.MainWeapon1);
-            main2Tab.interactable = FindWeapon(EquipType.MainWeapon2);
-            subTab.interactable = FindWeapon(EquipType.SubWeapon);
-        }
+        SetPhysicalTexts();
+        SetAbilityTexts();
         showMenu = showStatus;
         statusUI.SetActive(showStatus);
         ConvertGameMenu(player, showStatus, GameMenuState.Status);
@@ -327,25 +309,66 @@ public class GameMenuManager : MonoBehaviour
             if (!showStatus) return;
 
             statusTexts[0].SetAbilityText("힘", player.strength);
-            statusTexts[1].SetAbilityText("활력", player.strength);
-            statusTexts[2].SetAbilityText("지능", player.strength);
-            statusTexts[3].SetAbilityText("지혜", player.strength);
-            statusTexts[4].SetAbilityText("민첩", player.strength);
-            statusTexts[5].SetAbilityText("솜씨", player.strength);
+            statusTexts[1].SetAbilityText("활력", player.vitality);
+            statusTexts[2].SetAbilityText("지능", player.intellect);
+            statusTexts[3].SetAbilityText("지혜", player.wisdom);
+            statusTexts[4].SetAbilityText("민첩", player.agility);
+            statusTexts[5].SetAbilityText("솜씨", player.dexterity);
             statusTexts[6].SetAbilityText("이동력", player.Mobility);
         }
 
-        bool FindWeapon(EquipType equipType)
+        void SetPhysicalTexts()
         {
-            var weapon = player.weapons.Find(x => x.equipType == equipType);
-            if (weapon != null)
+            if (!showStatus) return;
+
+            physicalTexts[0].SetAbilityText("최대행동력", player.maxAction);
+            physicalTexts[1].SetAbilityText("최대체력", player.maxHealth);
+            physicalTexts[2].SetAbilityText("최대기력", player.maxStamina);
+            physicalTexts[3].SetAbilityText("시야", player.sight);
+            physicalTexts[4].SetAbilityText("조준", player.aiming);
+            physicalTexts[5].SetAbilityText("반응", player.reaction);
+        }
+
+        void SetAbilityTexts()
+        {
+            if (!showStatus) return;
+
+            if (player.weapons.Count == 0)
             {
-                if (weapon == player.currentWeapon) ChangeAbilityTexts(player.ability, weapon.weaponData);
-                return true;
+                abilityTexts[0].SetAbilityText("발사속도", player.RPM);
+                abilityTexts[1].SetAbilityText("사거리", player.Range);
+                abilityTexts[2].SetAbilityText("경계각", player.WatchAngle);
+                abilityTexts[3].SetAbilityText("정확도", player.MOA);
+                abilityTexts[4].SetAbilityText("안정성", player.Stability);
+                abilityTexts[5].SetAbilityText("반동", player.Rebound);
+                abilityTexts[6].SetAbilityText("장약", player.Propellant);
+                abilityTexts[7].SetAbilityText("피해량", player.Damage);
+                abilityTexts[8].SetAbilityText("관통", player.Penetrate);
+                abilityTexts[9].SetAbilityText("방어구 손상", player.ArmorBreak);
+                abilityTexts[10].SetAbilityText("파편화", player.Critical);
+                main1Tab.interactable = false;
+                main2Tab.interactable = false;
+                subTab.interactable = false;
             }
             else
             {
-                return false;
+                main1Tab.interactable = FindWeapon(EquipType.MainWeapon1);
+                main2Tab.interactable = FindWeapon(EquipType.MainWeapon2);
+                subTab.interactable = FindWeapon(EquipType.SubWeapon);
+            }
+
+            bool FindWeapon(EquipType equipType)
+            {
+                var weapon = player.weapons.Find(x => x.equipType == equipType);
+                if (weapon != null)
+                {
+                    if (weapon == player.currentWeapon) ChangeAbilityTexts(player.ability, weapon.weaponData);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

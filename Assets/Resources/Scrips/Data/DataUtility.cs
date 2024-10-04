@@ -32,6 +32,7 @@ public static class DataUtility
     public static readonly Color color_EnemyMarker = new Color(150 / 255f, 35 / 255f, 35 / 255f);
     public static readonly Color color_baseMarker = new Color(220 / 255f, 220 / 255f, 0f);
 
+    public static readonly int minHitAccuracy = 5;
     public static readonly float aimPointY = 0.9f;
     public static readonly float aimPointZ = 5f;
 
@@ -165,33 +166,48 @@ public static class DataUtility
     /// <param name="charCtr"></param>
     /// <param name="targetInfo"></param>
     /// <returns></returns>
-    public static float GetHitAccuracy(TargetInfo targetInfo)
+    public static int GetHitAccuracy(TargetInfo targetInfo)
     {
         var shooter = targetInfo.shooter;
-        var pos = targetInfo.shooterNode.transform.position;
-        var targetPos = targetInfo.targetNode.transform.position;
-        var dist = GetDistance(pos, targetPos);
-        var weapon = shooter.currentWeapon;
-        var reboundCheck = 0;
-        if (shooter.stamina == 0)
-        {
-            reboundCheck++;
-        }
-        //var value = Random.Range(0, 100);
-        var shootNum = GetShootNum(weapon.weaponData.RPM, shooter.fiarRate);
-        var extraAccuracy = shooter.aiming * ((0.1f * shooter.sightRate) / shootNum);
-        var shooterHit = (shooter.aiming + extraAccuracy) - (shooter.MOA * dist) + (15 / (dist / 3)) - (shooter.Rebound * reboundCheck);
-        //if (shooterHit < 0f)
+        var target = targetInfo.target;
+        //var pos = targetInfo.shooterNode.transform.position;
+        //var targetPos = targetInfo.targetNode.transform.position;
+        //var dist = GetDistance(pos, targetPos);
+        //var weapon = shooter.currentWeapon;
+        //var reboundCheck = 0;
+        //if (shooter.stamina == 0)
         //{
-        //    shooterHit = 0f;
+        //    reboundCheck++;
         //}
-        var coverBonus = GetCoverBonus();
-        var reactionBonus = GetReactionBonus();
-        var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
 
-        var hitAccuracy = Mathf.Floor(shooterHit - targetEvasion);
+        var shooterHit = targetInfo.shooter.AimShot_aim * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
+        var hitAccuracy = Mathf.FloorToInt(shooterHit);
+        if (hitAccuracy > 100)
+        {
+            hitAccuracy = 100;
+        }
+        else if (hitAccuracy < minHitAccuracy)
+        {
+            hitAccuracy = minHitAccuracy;
+        }
 
-        return Mathf.Floor(hitAccuracy * 100f) / 100f;
+        return hitAccuracy;
+
+        ////var value = Random.Range(0, 100);
+        //var shootNum = GetShootNum(weapon.weaponData.RPM, shooter.fiarRate);
+        //var extraAccuracy = shooter.aiming * ((0.1f * shooter.sightRate) / shootNum);
+        //var shooterHit = (shooter.aiming + extraAccuracy) - (shooter.MOA * dist) + (15 / (dist / 3)) - (shooter.Rebound * reboundCheck);
+        ////if (shooterHit < 0f)
+        ////{
+        ////    shooterHit = 0f;
+        ////}
+        //var coverBonus = GetCoverBonus();
+        //var reactionBonus = GetReactionBonus();
+        //var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
+
+        //var hitAccuracy = Mathf.Floor(shooterHit - targetEvasion);
+
+        //return Mathf.Floor(hitAccuracy * 100f) / 100f;
 
         int GetCoverBonus()
         {
@@ -205,17 +221,17 @@ public static class DataUtility
             }
         }
 
-        float GetReactionBonus()
-        {
-            if (targetInfo.targetCover == null)
-            {
-                return 0.1f;
-            }
-            else
-            {
-                return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
-            }
-        }
+        //float GetReactionBonus()
+        //{
+        //    if (targetInfo.targetCover == null)
+        //    {
+        //        return 0.1f;
+        //    }
+        //    else
+        //    {
+        //        return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
+        //    }
+        //}
     }
 
     /// <summary>

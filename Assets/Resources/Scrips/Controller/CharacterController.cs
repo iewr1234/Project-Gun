@@ -175,6 +175,9 @@ public class CharacterController : MonoBehaviour
     [Header("[Ability]")]
     public Ability ability;
     public Ability addAbility;
+    public int AimShot_point => ability.aimShot_point + addAbility.aimShot_point;
+    public int AimShot_aim => ability.aimShot_aim + addAbility.aimShot_aim;
+    public int AimShot_sight => ability.aimShot_sight + addAbility.aimShot_sight;
     public int RPM => ability.RPM + addAbility.RPM;
     public float Range => ability.range + addAbility.range;
     public int WatchAngle => ability.watchAngle + addAbility.watchAngle;
@@ -3251,6 +3254,9 @@ public class CharacterController : MonoBehaviour
     [System.Serializable]
     public class Ability
     {
+        [Tooltip("지향조준")] public int aimShot_point;
+        [Tooltip("조준")] public int aimShot_aim;
+        [Tooltip("정조준")] public int aimShot_sight;
         [Tooltip("발사속도")] public int RPM;
         [Tooltip("사거리")] public float range;
         [Tooltip("경계각")] public int watchAngle;
@@ -3265,6 +3271,9 @@ public class CharacterController : MonoBehaviour
 
         public void SetAbility(PlayerDataInfo playerData)
         {
+            aimShot_point = playerData.aimShot_point;
+            aimShot_aim = playerData.aimShot_aim;
+            aimShot_sight = playerData.aimShot_sight;
             RPM = playerData.RPM;
             range = playerData.range;
             watchAngle = playerData.watchAngle;
@@ -3280,6 +3289,7 @@ public class CharacterController : MonoBehaviour
 
         public void SetAbility(EnemyDataInfo enemyData)
         {
+            aimShot_aim = enemyData.aimShot;
             RPM = enemyData.RPM;
             range = enemyData.range;
             watchAngle = enemyData.watchAngle;
@@ -3295,6 +3305,9 @@ public class CharacterController : MonoBehaviour
 
         public void AddAbility(WeaponDataInfo weaponData)
         {
+            aimShot_point += weaponData.aimShot_point;
+            aimShot_aim += weaponData.aimShot_aim;
+            aimShot_sight += weaponData.aimShot_sight;
             RPM += weaponData.RPM;
             range += weaponData.range;
             watchAngle += weaponData.watchAngle;
@@ -3314,6 +3327,9 @@ public class CharacterController : MonoBehaviour
 
         public void RemoveAbility(WeaponDataInfo weaponData)
         {
+            aimShot_point -= weaponData.aimShot_point;
+            aimShot_aim -= weaponData.aimShot_aim;
+            aimShot_sight -= weaponData.aimShot_sight;
             RPM -= weaponData.RPM;
             range -= weaponData.range;
             watchAngle -= weaponData.watchAngle;

@@ -337,31 +337,76 @@ public class Weapon : MonoBehaviour
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
     {
         hitList.Clear();
-        var pos = targetInfo.shooterNode.transform.position;
-        var targetPos = targetInfo.targetNode.transform.position;
-        var dist = DataUtility.GetDistance(pos, targetPos);
-        var allMiss = true;
-        for (int i = 0; i < shootNum; i++)
+        var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
+        var value = Random.Range(0, 100);
+        var isHit = value >= hitAccuracy;
+        Debug.Log($"{charCtr.name}: hitAccuracy = {hitAccuracy}, value = {value}, isHit = {isHit}");
+        bool allMiss;
+        if (isHit)
         {
-            charCtr.SetStamina(-DataUtility.GetAimStaminaCost(charCtr));
-            var hitAccuracy = DataUtility.GetHitAccuracy(targetInfo);
-            if (i > 0)
+            allMiss = false;
+            var hitValue = value - hitAccuracy;
+            for (int i = 0; i < shootNum; i++)
             {
-                hitAccuracy -= DataUtility.GetHitAccuracyReduction(charCtr, dist);
+                bool billetHit;
+                if (i == 0)
+                {
+                    billetHit = true;
+                }
+                else
+                {
+                    var index = weaponData.equipMag.loadedBullets.Count - (1 + i);
+                    int propellant;
+                    if (charCtr.ownerType == CharacterOwner.Player)
+                    {
+                        propellant = charCtr.ability.propellant + weaponData.equipMag.loadedBullets[index].propellant;
+                    }
+                    else
+                    {
+                        propellant = charCtr.Propellant;
+                    }
+                    hitValue -= propellant;
+                    billetHit = hitValue >= 0;
+                }
+                hitList.Add(billetHit);
+                var text = billetHit ? "¸íÁß" : "ºø³ª°¨";
+                Debug.Log($"{charCtr.name}: {i + 1}¹øÂ° Åº: hitValue = {hitValue}, {text}");
             }
-
-            var value = Random.Range(0, 100);
-            var isHit = value < hitAccuracy;
-            if (isHit && allMiss)
+        }
+        else
+        {
+            allMiss = true;
+            for (int i = 0; i < shootNum; i++)
             {
-                allMiss = false;
+                hitList.Add(false);
             }
-            hitList.Add(isHit);
         }
 
-        var hit = hitList.FindAll(x => x == true);
-        var miss = hitList.FindAll(x => x == false);
-        Debug.Log($"{charCtr.name}: ShootNum = {shootNum}, Hit = {hit.Count}, Miss = {miss.Count}");
+        //var pos = targetInfo.shooterNode.transform.position;
+        //var targetPos = targetInfo.targetNode.transform.position;
+        //var dist = DataUtility.GetDistance(pos, targetPos);
+        //var allMiss = true;
+        //for (int i = 0; i < shootNum; i++)
+        //{
+        //    charCtr.SetStamina(-DataUtility.GetAimStaminaCost(charCtr));
+        //    var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
+        //    //if (i > 0)
+        //    //{
+        //    //    hitAccuracy -= DataUtility.GetHitAccuracyReduction(charCtr, dist);
+        //    //}
+
+        //    var value = Random.Range(0, 100);
+        //    var isHit = value >= hitAccuracy;
+        //    if (isHit && allMiss)
+        //    {
+        //        allMiss = false;
+        //    }
+        //    hitList.Add(isHit);
+        //}
+
+        //var hit = hitList.FindAll(x => x == true);
+        //var miss = hitList.FindAll(x => x == false);
+        //Debug.Log($"{charCtr.name}: ShootNum = {shootNum}, Hit = {hit.Count}, Miss = {miss.Count}");
 
         return allMiss;
     }

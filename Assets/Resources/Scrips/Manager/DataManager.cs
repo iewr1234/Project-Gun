@@ -274,7 +274,7 @@ public class DataManager : MonoBehaviour
 
     #region Player Data
     [HideInInspector] public PlayerData playerData;
-    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:Z";
+    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:AC";
     private enum PlayerVariable
     {
         ID,
@@ -292,6 +292,9 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
+        AimShot_point,
+        AimShot_aim,
+        AimShot_sight,
         RPM,
         Range,
         WatchAngle,
@@ -340,6 +343,9 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)PlayerVariable.Sight]),
                     aiming = int.Parse(data[(int)PlayerVariable.Aiming]),
                     reaction = int.Parse(data[(int)PlayerVariable.Reaction]),
+                    aimShot_point = int.Parse(data[(int)PlayerVariable.AimShot_point]),
+                    aimShot_aim = int.Parse(data[(int)PlayerVariable.AimShot_aim]),
+                    aimShot_sight = int.Parse(data[(int)PlayerVariable.AimShot_sight]),
                     RPM = int.Parse(data[(int)PlayerVariable.RPM]),
                     range = float.Parse(data[(int)PlayerVariable.Range]),
                     watchAngle = int.Parse(data[(int)PlayerVariable.WatchAngle]),
@@ -361,7 +367,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AR";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AS";
     private enum EnemyVariable
     {
         ID,
@@ -382,6 +388,7 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
+        AimShot,
         RPM,
         Range,
         WatchAngle,
@@ -448,6 +455,7 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)EnemyVariable.Sight]),
                     aiming = int.Parse(data[(int)EnemyVariable.Aiming]),
                     reaction = int.Parse(data[(int)EnemyVariable.Reaction]),
+                    aimShot = int.Parse(data[(int)EnemyVariable.AimShot]),
                     RPM = int.Parse(data[(int)EnemyVariable.RPM]),
                     range = float.Parse(data[(int)EnemyVariable.Range]),
                     watchAngle = int.Parse(data[(int)EnemyVariable.WatchAngle]),
@@ -713,7 +721,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:V";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:Y";
     private enum WeaponVariable
     {
         ID,
@@ -724,6 +732,9 @@ public class DataManager : MonoBehaviour
         Weight,
         IsMain,
         WeaponType,
+        AimShot_point,
+        AimShot_aim,
+        AimShot_sight,
         RPM,
         Range,
         WatchAngle,
@@ -770,6 +781,9 @@ public class DataManager : MonoBehaviour
                     weight = float.Parse(data[(int)WeaponVariable.Weight]),
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
+                    aimShot_point = int.Parse(data[(int)WeaponVariable.AimShot_point]),
+                    aimShot_aim = int.Parse(data[(int)WeaponVariable.AimShot_aim]),
+                    aimShot_sight = int.Parse(data[(int)WeaponVariable.AimShot_sight]),
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
