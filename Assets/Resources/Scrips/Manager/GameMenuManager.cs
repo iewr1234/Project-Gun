@@ -467,7 +467,7 @@ public class GameMenuManager : MonoBehaviour
         {
             gameMgr.gameState = value ? GameState.GameMenu : GameState.None;
         }
-        gameMgr.camMgr.lockCam = !value;
+        gameMgr.camMgr.lockCam = value;
 
         gameMenuCam.enabled = value;
         gameMgr.DeselectCharacter();

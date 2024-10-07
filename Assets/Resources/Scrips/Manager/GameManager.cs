@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum GameState
 {
@@ -92,11 +90,13 @@ public class GameManager : MonoBehaviour
     public CharacterController selectChar;
     [Space(5f)]
 
+    public ScheduleState scheduleState;
+    [HideInInspector] public int scheduleSignal;
     [SerializeField] private List<AttackSchedule> scheduleList;
-    [SerializeField] private ScheduleState scheduleState;
     [SerializeField] private CoverState targetState;
     private float timer;
 
+    private readonly float waitSignalTime = 0.6f;
     private readonly float scheduleWaitTime = 0.5f;
 
     [Header("[FieldNode]")]
@@ -476,12 +476,12 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.E))
                 {
-                    uiMgr.SetSightGauge(selectChar);
+                    uiMgr.SetShootingMode(selectChar);
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
                     var weapon = selectChar.currentWeapon;
-                    var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + selectChar.sightRate;
+                    var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + (int)selectChar.sMode;
                     if (totalCost > selectChar.action)
                     {
                         Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
@@ -1830,12 +1830,12 @@ public class GameManager : MonoBehaviour
                             totalCost += enemy.fiarRate;
                             break;
                         case UseActionType.Aim:
-                            enemy.sightRate = remCost;
-                            if (enemy.sightRate > DataUtility.shootRateMax)
+                            enemy.sMode = (ShootingMode)remCost;
+                            if ((int)enemy.sMode > DataUtility.sModeMax)
                             {
-                                enemy.sightRate = DataUtility.shootRateMax;
+                                enemy.sMode = (ShootingMode)DataUtility.shootRateMax;
                             }
-                            totalCost += enemy.sightRate;
+                            totalCost += (int)enemy.sMode;
                             break;
                         default:
                             break;
@@ -1885,6 +1885,7 @@ public class GameManager : MonoBehaviour
             scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
             scheduleState = ScheduleState.Check;
             targetState = CoverState.None;
+            scheduleSignal = 0;
         }
     }
 
@@ -1898,9 +1899,9 @@ public class GameManager : MonoBehaviour
             case ScheduleState.Check:
                 Check();
                 break;
-            case ScheduleState.Wait:
-                Wait();
-                break;
+            //case ScheduleState.Wait:
+            //    Wait();
+            //    break;
             case ScheduleState.Shoot:
                 Shoot();
                 break;
@@ -1931,14 +1932,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        void Wait()
-        {
-            var targetInfo = scheduleList[0].targetInfo;
-            if (targetInfo.target.commandList.Count == 0)
-            {
-                scheduleState = ScheduleState.Shoot;
-            }
-        }
+        //void Wait()
+        //{
+        //    var targetInfo = scheduleList[0].targetInfo;
+        //    if (targetInfo.target.commandList.Count == 0)
+        //    {
+        //        scheduleState = ScheduleState.Shoot;
+        //    }
+        //}
 
         void Shoot()
         {
@@ -1992,6 +1993,13 @@ public class GameManager : MonoBehaviour
         {
             return CoverState.NoCover;
         }
+    }
+
+    public void ReceiveScheduleSignal()
+    {
+        if (scheduleState != ScheduleState.Wait) return;
+
+        scheduleState = ScheduleState.Shoot;
     }
     #endregion
 }

@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
-using Unity.VisualScripting;
 
 [System.Serializable]
 public struct ObjectData
@@ -343,9 +342,9 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)PlayerVariable.Sight]),
                     aiming = int.Parse(data[(int)PlayerVariable.Aiming]),
                     reaction = int.Parse(data[(int)PlayerVariable.Reaction]),
-                    aimShot_point = int.Parse(data[(int)PlayerVariable.AimShot_point]),
-                    aimShot_aim = int.Parse(data[(int)PlayerVariable.AimShot_aim]),
-                    aimShot_sight = int.Parse(data[(int)PlayerVariable.AimShot_sight]),
+                    sModeInfos = ReadShootingModesInfo(data[(int)PlayerVariable.AimShot_point],
+                                                       data[(int)PlayerVariable.AimShot_aim],
+                                                       data[(int)PlayerVariable.AimShot_sight]),
                     RPM = int.Parse(data[(int)PlayerVariable.RPM]),
                     range = float.Parse(data[(int)PlayerVariable.Range]),
                     watchAngle = int.Parse(data[(int)PlayerVariable.WatchAngle]),
@@ -388,7 +387,7 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
-        AimShot,
+        ShootingModeValue,
         RPM,
         Range,
         WatchAngle,
@@ -455,7 +454,12 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)EnemyVariable.Sight]),
                     aiming = int.Parse(data[(int)EnemyVariable.Aiming]),
                     reaction = int.Parse(data[(int)EnemyVariable.Reaction]),
-                    aimShot = int.Parse(data[(int)EnemyVariable.AimShot]),
+                    sModeInfo = new ShootingModeInfo()
+                    {
+                        indexName = $"{ShootingMode.PointShot}: {int.Parse(data[(int)EnemyVariable.ShootingModeValue])}",
+                        modeType = ShootingMode.PointShot,
+                        value = int.Parse(data[(int)EnemyVariable.ShootingModeValue]),
+                    },
                     RPM = int.Parse(data[(int)EnemyVariable.RPM]),
                     range = float.Parse(data[(int)EnemyVariable.Range]),
                     watchAngle = int.Parse(data[(int)EnemyVariable.WatchAngle]),
@@ -781,9 +785,9 @@ public class DataManager : MonoBehaviour
                     weight = float.Parse(data[(int)WeaponVariable.Weight]),
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
-                    aimShot_point = int.Parse(data[(int)WeaponVariable.AimShot_point]),
-                    aimShot_aim = int.Parse(data[(int)WeaponVariable.AimShot_aim]),
-                    aimShot_sight = int.Parse(data[(int)WeaponVariable.AimShot_sight]),
+                    sModeInfos = ReadShootingModesInfo(data[(int)WeaponVariable.AimShot_point],
+                                                       data[(int)WeaponVariable.AimShot_aim],
+                                                       data[(int)WeaponVariable.AimShot_sight]),
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
@@ -1522,6 +1526,25 @@ public class DataManager : MonoBehaviour
         }
     }
     #endregion
+
+    private List<ShootingModeInfo> ReadShootingModesInfo(string pointValue, string aimValue, string sightValue)
+    {
+        var sModeInfos = new List<ShootingModeInfo>();
+        ShootingMode[] modes = { ShootingMode.PointShot, ShootingMode.AimShot, ShootingMode.SightShot };
+        string[] values = { pointValue, aimValue, sightValue };
+        for (int i = 0; i < modes.Length; i++)
+        {
+            var sModeInfo = new ShootingModeInfo()
+            {
+                indexName = $"{modes[i]}: {int.Parse(values[i])}",
+                modeType = modes[i],
+                value = int.Parse(values[i]),
+            };
+            sModeInfos.Add(sModeInfo);
+        }
+
+        return sModeInfos;
+    }
 
     private List<int> ReadCompatModelInfo(string modelData)
     {

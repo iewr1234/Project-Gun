@@ -22,9 +22,16 @@ MonoBehaviour:
     weight: 3
     isMain: 1
     type: 2
-    aimShot_point: 60
-    aimShot_aim: 70
-    aimShot_sight: 80
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
     RPM: 650
     range: 20
     watchAngle: 30
@@ -62,9 +69,16 @@ MonoBehaviour:
     weight: 3
     isMain: 1
     type: 2
-    aimShot_point: 60
-    aimShot_aim: 70
-    aimShot_sight: 80
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
     RPM: 600
     range: 20
     watchAngle: 30
@@ -102,9 +116,16 @@ MonoBehaviour:
     weight: 3
     isMain: 0
     type: 1
-    aimShot_point: 60
-    aimShot_aim: 70
-    aimShot_sight: 80
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
     RPM: 100
     range: 15
     watchAngle: 30
@@ -142,9 +163,16 @@ MonoBehaviour:
     weight: 3
     isMain: 1
     type: 3
-    aimShot_point: 60
-    aimShot_aim: 70
-    aimShot_sight: 80
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
     RPM: 50
     range: 10
     watchAngle: 30
@@ -182,9 +210,16 @@ MonoBehaviour:
     weight: 3
     isMain: 0
     type: 4
-    aimShot_point: 60
-    aimShot_aim: 70
-    aimShot_sight: 80
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
     RPM: 80
     range: 15
     watchAngle: 30

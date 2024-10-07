@@ -50,6 +50,7 @@ public static class DataUtility
     public static readonly Vector3Int popUp_defaultPos_split = new Vector3Int(0, 150, -50);
 
     public static readonly int shootRateMax = 4;
+    public static readonly int sModeMax = 2;
 
     public static readonly Vector2Int floorSlotSize = new Vector2Int(7, 17);
 
@@ -180,7 +181,23 @@ public static class DataUtility
         //    reboundCheck++;
         //}
 
-        var shooterHit = targetInfo.shooter.AimShot_aim * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
+        int sModeValue;
+        switch (targetInfo.shooter.sMode)
+        {
+            case ShootingMode.PointShot:
+                sModeValue = targetInfo.shooter.ShootingMode_point;
+                break;
+            case ShootingMode.AimShot:
+                sModeValue = targetInfo.shooter.ShootingMode_aim;
+                break;
+            case ShootingMode.SightShot:
+                sModeValue = targetInfo.shooter.ShootingMode_sight;
+                break;
+            default:
+                sModeValue = 0;
+                break;
+        }
+        var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
         var hitAccuracy = Mathf.FloorToInt(shooterHit);
         if (hitAccuracy > 100)
         {

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -39,6 +40,13 @@ public enum CommandType
     Reload,
     ChangeWeapon,
     Throw,
+}
+
+public enum ShootingMode
+{
+    PointShot,
+    AimShot,
+    SightShot,
 }
 
 [System.Serializable]
@@ -175,9 +183,9 @@ public class CharacterController : MonoBehaviour
     [Header("[Ability]")]
     public Ability ability;
     public Ability addAbility;
-    public int AimShot_point => ability.aimShot_point + addAbility.aimShot_point;
-    public int AimShot_aim => ability.aimShot_aim + addAbility.aimShot_aim;
-    public int AimShot_sight => ability.aimShot_sight + addAbility.aimShot_sight;
+    public int ShootingMode_point => ability.sModeInfos[(int)ShootingMode.PointShot].value + addAbility.sModeInfos[(int)ShootingMode.PointShot].value;
+    public int ShootingMode_aim => ability.sModeInfos[(int)ShootingMode.AimShot].value + addAbility.sModeInfos[(int)ShootingMode.AimShot].value;
+    public int ShootingMode_sight => ability.sModeInfos[(int)ShootingMode.SightShot].value + addAbility.sModeInfos[(int)ShootingMode.SightShot].value;
     public int RPM => ability.RPM + addAbility.RPM;
     public float Range => ability.range + addAbility.range;
     public int WatchAngle => ability.watchAngle + addAbility.watchAngle;
@@ -196,7 +204,7 @@ public class CharacterController : MonoBehaviour
     [Space(5f)]
     public Weapon currentWeapon;
     [HideInInspector] public int fiarRate;
-    [HideInInspector] public int sightRate;
+    [HideInInspector] public ShootingMode sMode;
 
     public FieldNode currentNode;
     private FieldNode prevNode;
@@ -326,13 +334,15 @@ public class CharacterController : MonoBehaviour
         aiming = playerData.aiming;
         reaction = playerData.reaction;
 
+        ability.ResetShootingModeInfos();
+        addAbility.ResetShootingModeInfos();
         ability.SetAbility(playerData);
 
         baseIndex = 1;
         upperIndex = 2;
 
         fiarRate = 0;
-        sightRate = 0;
+        sMode = ShootingMode.PointShot;
 
         currentNode = _currentNode;
         currentNode.charCtr = this;
@@ -419,6 +429,8 @@ public class CharacterController : MonoBehaviour
         aiming = enemyData.aiming;
         reaction = enemyData.reaction;
 
+        ability.ResetShootingModeInfos();
+        addAbility.ResetShootingModeInfos();
         ability.SetAbility(enemyData);
 
         aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
@@ -1159,13 +1171,15 @@ public class CharacterController : MonoBehaviour
             switch (command.targeting)
             {
                 case true:
-                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Cover"))
+                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle")
+                     || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Cover"))
                     {
                         canTargeting = true;
                     }
                     break;
                 case false:
-                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle") || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
+                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle")
+                     || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
                     {
                         canTargeting = true;
                     }
@@ -1189,8 +1203,7 @@ public class CharacterController : MonoBehaviour
                     animator.SetTrigger("unTargeting");
                     break;
             }
-            canTargeting = false;
-            commandList.Remove(command);
+            EndTargeting();
         }
         else if (animator.GetBool("isCover"))
         {
@@ -1224,9 +1237,8 @@ public class CharacterController : MonoBehaviour
                 }
                 else
                 {
-                    canTargeting = false;
                     targetingMove = false;
-                    commandList.Remove(command);
+                    EndTargeting();
                 }
             }
         }
@@ -1235,9 +1247,12 @@ public class CharacterController : MonoBehaviour
             if (command.targeting)
             {
                 transform.LookAt(command.lookAt);
+                if (ownerType == CharacterOwner.Player)
+                {
+                    gameMgr.ReceiveScheduleSignal();
+                }
             }
-            canTargeting = false;
-            commandList.Remove(command);
+            EndTargeting();
         }
 
         float GetDistance()
@@ -1248,6 +1263,10 @@ public class CharacterController : MonoBehaviour
                     return 0.45f;
                 case WeaponType.Rifle:
                     return 0.7f;
+                case WeaponType.Shotgun:
+                    return 0.7f;
+                case WeaponType.Revolver:
+                    return 0.45f;
                 default:
                     return 0f;
             }
@@ -1261,9 +1280,19 @@ public class CharacterController : MonoBehaviour
                     return targetingMoveSpeed_Pistol;
                 case WeaponType.Rifle:
                     return targetingMoveSpeed_Rifle;
+                case WeaponType.Shotgun:
+                    return targetingMoveSpeed_Rifle;
+                case WeaponType.Revolver:
+                    return targetingMoveSpeed_Pistol;
                 default:
                     return 0f;
             }
+        }
+
+        void EndTargeting()
+        {
+            canTargeting = false;
+            commandList.Remove(command);
         }
     }
 
@@ -1592,6 +1621,8 @@ public class CharacterController : MonoBehaviour
     /// <param name="weaponData"></param>
     public void SetWeaponAbility(bool apply, WeaponDataInfo weaponData)
     {
+        if (ownerType != CharacterOwner.Player) return;
+
         switch (apply)
         {
             case true:
@@ -2407,7 +2438,7 @@ public class CharacterController : MonoBehaviour
         {
             targetIndex = 0;
             fiarRate = 0;
-            sightRate = 0;
+            sMode = ShootingMode.PointShot;
             var targetInfo = targetList[targetIndex];
             targetInfo.target.SetActiveOutline(true);
             SetTargeting(targetInfo, CharacterOwner.All);
@@ -2935,7 +2966,8 @@ public class CharacterController : MonoBehaviour
             bulletproof = 0f;
         }
 
-        var damage = (int)Mathf.Floor(bullet.damage * (bullet.penetrate / (bullet.penetrate + bulletproof)));
+        var penetrate = bulletproof - bullet.penetrate < 0 ? 0 : bulletproof - bullet.penetrate;
+        var damage = (int)Mathf.Floor(bullet.damage * (1 + penetrate * 0.01f));
         if (isPenetrate)
         {
             SetHealth(-damage);
@@ -3249,14 +3281,20 @@ public class CharacterController : MonoBehaviour
         throwing = false;
     }
 
+    public void Event_TargetingOn()
+    {
+        Debug.Log("!");
+        if (ownerType != CharacterOwner.Player) return;
+
+        Debug.Log("!!");
+        gameMgr.ReceiveScheduleSignal();
+    }
     #endregion
 
     [System.Serializable]
     public class Ability
     {
-        [Tooltip("지향조준")] public int aimShot_point;
-        [Tooltip("조준")] public int aimShot_aim;
-        [Tooltip("정조준")] public int aimShot_sight;
+        public List<ShootingModeInfo> sModeInfos;
         [Tooltip("발사속도")] public int RPM;
         [Tooltip("사거리")] public float range;
         [Tooltip("경계각")] public int watchAngle;
@@ -3269,11 +3307,34 @@ public class CharacterController : MonoBehaviour
         [Tooltip("방어구 손상")] public int armorBreak;
         [Tooltip("파편화")] public int critical;
 
+        public void ResetShootingModeInfos()
+        {
+            sModeInfos = new List<ShootingModeInfo>
+            {
+                new ShootingModeInfo()
+                {
+                    indexName = $"{ShootingMode.PointShot}: 0",
+                    modeType = ShootingMode.PointShot,
+                    value = 0,
+                },
+                new ShootingModeInfo()
+                {
+                    indexName = $"{ShootingMode.AimShot}: 0",
+                    modeType = ShootingMode.AimShot,
+                    value = 0,
+                },
+                new ShootingModeInfo()
+                {
+                    indexName = $"{ShootingMode.SightShot}: 0",
+                    modeType = ShootingMode.SightShot,
+                    value = 0,
+                },
+            };
+        }
+
         public void SetAbility(PlayerDataInfo playerData)
         {
-            aimShot_point = playerData.aimShot_point;
-            aimShot_aim = playerData.aimShot_aim;
-            aimShot_sight = playerData.aimShot_sight;
+            sModeInfos = playerData.sModeInfos;
             RPM = playerData.RPM;
             range = playerData.range;
             watchAngle = playerData.watchAngle;
@@ -3289,7 +3350,8 @@ public class CharacterController : MonoBehaviour
 
         public void SetAbility(EnemyDataInfo enemyData)
         {
-            aimShot_aim = enemyData.aimShot;
+            var _sModeInfos = new List<ShootingModeInfo> { enemyData.sModeInfo };
+            sModeInfos = _sModeInfos;
             RPM = enemyData.RPM;
             range = enemyData.range;
             watchAngle = enemyData.watchAngle;
@@ -3305,9 +3367,19 @@ public class CharacterController : MonoBehaviour
 
         public void AddAbility(WeaponDataInfo weaponData)
         {
-            aimShot_point += weaponData.aimShot_point;
-            aimShot_aim += weaponData.aimShot_aim;
-            aimShot_sight += weaponData.aimShot_sight;
+            int[] modeValues =
+            {
+              weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+              weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+              weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+            };
+            for (int i = 0; i < modeValues.Length; i++)
+            {
+                var sModeInfo = sModeInfos[i];
+                var newValue = sModeInfo.value + modeValues[i];
+                sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
+                sModeInfo.value = newValue;
+            }
             RPM += weaponData.RPM;
             range += weaponData.range;
             watchAngle += weaponData.watchAngle;
@@ -3327,9 +3399,19 @@ public class CharacterController : MonoBehaviour
 
         public void RemoveAbility(WeaponDataInfo weaponData)
         {
-            aimShot_point -= weaponData.aimShot_point;
-            aimShot_aim -= weaponData.aimShot_aim;
-            aimShot_sight -= weaponData.aimShot_sight;
+            int[] modeValues =
+            {
+              weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+              weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+              weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+            };
+            for (int i = 0; i < modeValues.Length; i++)
+            {
+                var sModeInfo = sModeInfos[i];
+                var newValue = sModeInfo.value - modeValues[i];
+                sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
+                sModeInfo.value = newValue;
+            }
             RPM -= weaponData.RPM;
             range -= weaponData.range;
             watchAngle -= weaponData.watchAngle;

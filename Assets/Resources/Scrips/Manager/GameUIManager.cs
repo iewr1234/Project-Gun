@@ -38,9 +38,10 @@ public class GameUIManager : MonoBehaviour
     public GameObject aimUI;
     [HideInInspector] public TextMeshProUGUI shootNumText;
     [HideInInspector] public TextMeshProUGUI hitAccuracyText;
+    [HideInInspector] public TextMeshProUGUI sModeText;
     [HideInInspector] public TextMeshProUGUI actionPointText;
     [HideInInspector] public Image fireRateGauge;
-    [HideInInspector] public Image sightGauge;
+    //[HideInInspector] public Image sightGauge;
     [HideInInspector] public Slider armorGauge;
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
@@ -102,9 +103,10 @@ public class GameUIManager : MonoBehaviour
         aimUI = playUI.transform.Find("AimUI").gameObject;
         shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
         hitAccuracyText = aimUI.transform.Find("HitAccuracy").GetComponent<TextMeshProUGUI>();
+        sModeText = aimUI.transform.Find("ShootingMode").GetComponent<TextMeshProUGUI>();
         actionPointText = aimUI.transform.Find("ActionPoint/Text").GetComponent<TextMeshProUGUI>();
         fireRateGauge = aimUI.transform.Find("FireRateGauge").GetComponent<Image>();
-        sightGauge = aimUI.transform.Find("SightGauge").GetComponent<Image>();
+        //sightGauge = aimUI.transform.Find("SightGauge").GetComponent<Image>();
         armorGauge = aimUI.transform.Find("TargetInfo/ArmorGauge").GetComponent<Slider>();
         healthGauge = aimUI.transform.Find("TargetInfo/HealthGauge").GetComponent<Slider>();
         staminaGauge = aimUI.transform.Find("TargetInfo/StaminaGauge").GetComponent<Slider>();
@@ -179,6 +181,11 @@ public class GameUIManager : MonoBehaviour
         shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";
         SetHitAccuracy(charCtr);
+    }
+
+    public void SetShootingModeText(ShootingMode sMode)
+    {
+        sModeText.text = $"{sMode}";
     }
 
     public void SetHitAccuracy(CharacterController charCtr)
@@ -306,18 +313,19 @@ public class GameUIManager : MonoBehaviour
         if (value)
         {
             SetShootNum(charCtr);
+            SetShootingModeText(charCtr.sMode);
             SetActionPoint_Aim(charCtr);
         }
         else
         {
             fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + "1");
-            sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + "1");
+            //sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + "1");
         }
     }
 
     public void SetActionPoint_Aim(CharacterController charCtr)
     {
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
         if (totalCost > charCtr.action)
         {
             actionPointText.color = Color.red;
@@ -338,23 +346,24 @@ public class GameUIManager : MonoBehaviour
         }
 
         fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fiarRate + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
     }
 
-    public void SetSightGauge(CharacterController charCtr)
+    public void SetShootingMode(CharacterController charCtr)
     {
-        charCtr.sightRate++;
-        if (charCtr.sightRate > DataUtility.shootRateMax)
+        charCtr.sMode++;
+        if ((int)charCtr.sMode > DataUtility.sModeMax)
         {
-            charCtr.sightRate = 0;
+            charCtr.sMode = ShootingMode.PointShot;
         }
 
-        sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightRate + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + charCtr.sightRate;
+        //sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightRate + 1}");
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
+        SetShootingModeText(charCtr.sMode);
         SetHitAccuracy(charCtr);
         SetActionPoint_Aim(charCtr);
     }

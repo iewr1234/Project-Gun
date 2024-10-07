@@ -27,9 +27,7 @@ public class WeaponDataInfo
     [Tooltip("무게")] public float weight;
     [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType type;
-    [Tooltip("지향조준")] public int aimShot_point;
-    [Tooltip("조준")] public int aimShot_aim;
-    [Tooltip("정조준")] public int aimShot_sight;
+    public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
@@ -72,9 +70,7 @@ public class WeaponDataInfo
             weight = weight,
             isMain = isMain,
             type = type,
-            aimShot_point = aimShot_point,
-            aimShot_aim = aimShot_aim,
-            aimShot_sight = aimShot_sight,
+            sModeInfos = new List<ShootingModeInfo>(sModeInfos),
             RPM = RPM,
             range = range,
             watchAngle = watchAngle,

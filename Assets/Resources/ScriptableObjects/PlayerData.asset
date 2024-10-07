@@ -30,9 +30,16 @@ MonoBehaviour:
     sight: 8
     aiming: 75
     reaction: 20
-    aimShot_point: 0
-    aimShot_aim: 0
-    aimShot_sight: 0
+    sModeInfos:
+    - indexName: 'PointShot: 0'
+      modeType: 0
+      value: 0
+    - indexName: 'AimShot: 0'
+      modeType: 1
+      value: 0
+    - indexName: 'SightShot: 0'
+      modeType: 2
+      value: 0
     RPM: 0
     range: 0
     watchAngle: 0

@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
+public class ShootingModeInfo
+{
+    public string indexName;
+    public ShootingMode modeType;
+    public int value;
+}
+
+[System.Serializable]
 public class PlayerDataInfo
 {
     public string indexName;
@@ -30,9 +38,7 @@ public class PlayerDataInfo
     public int reaction;
     [Space(5f)]
 
-    [Tooltip("지향조준")] public int aimShot_point;
-    [Tooltip("조준")] public int aimShot_aim;
-    [Tooltip("정조준")] public int aimShot_sight;
+    public List<ShootingModeInfo> sModeInfos;
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
