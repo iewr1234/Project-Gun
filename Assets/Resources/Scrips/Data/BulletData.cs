@@ -16,6 +16,7 @@ public class BulletDataInfo
     public int level;
     [Tooltip("구경")] public float caliber;
     [Tooltip("펠릿 수")] public int pelletNum;
+    [Tooltip("확산")] public int spread;
     [Tooltip("무게")] public float weight;
     [Tooltip("장약")] public int propellant;
     [Tooltip("피해량")] public int damage;
@@ -36,6 +37,7 @@ public class BulletDataInfo
             level = level,
             caliber = caliber,
             pelletNum = pelletNum,
+            spread = spread,
             weight = weight,
             propellant = propellant,
             damage = damage,

@@ -114,7 +114,7 @@ public class AmmoIcon : MonoBehaviour
                 bullet.upArrowImage.enabled = false;
                 bullet.downArrowImage.enabled = false;
                 maxValue = _item.TotalCount;
-                value = 0;
+                value = 1;
                 bullet.numText.enabled = false;
                 bullet.numText.text = $"{value}";
                 break;
@@ -183,7 +183,7 @@ public class AmmoIcon : MonoBehaviour
                 break;
             case false:
                 nextValue = value - 1;
-                if (nextValue < 0) return;
+                if (nextValue < 1) return;
 
                 value = nextValue;
                 break;

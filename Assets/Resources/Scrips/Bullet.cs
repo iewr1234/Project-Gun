@@ -26,7 +26,8 @@ public class Bullet : MonoBehaviour
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private float speed = 30f;
     [SerializeField] private bool isHit;
-    [SerializeField] private bool isMiss;
+    [SerializeField] private int hitNum;
+    private bool isMiss;
     private bool isCheck;
     private float timer;
     private float destroyTime;
@@ -60,7 +61,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit, int _hitNum)
     {
         shooter = _shooter;
         target = _target;
@@ -82,6 +83,7 @@ public class Bullet : MonoBehaviour
         if (isHit)
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
+            hitNum = _hitNum;
             isMiss = false;
         }
         else
@@ -113,7 +115,7 @@ public class Bullet : MonoBehaviour
             var charCtr = hit.collider.GetComponentInParent<CharacterController>();
             if (charCtr != null && charCtr == target && isHit)
             {
-                charCtr.OnHit(transform.forward, this);
+                charCtr.OnHit(transform.forward, this, hitNum);
                 isHit = false;
                 Debug.Log($"{charCtr.name}: Hit");
             }

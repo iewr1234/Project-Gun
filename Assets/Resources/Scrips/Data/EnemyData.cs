@@ -9,6 +9,7 @@ public struct EnemyWeapon
     public string prefabName;
     public int meshType;
     public int pelletNum;
+    public int spread;
     public int magMax;
 }
 

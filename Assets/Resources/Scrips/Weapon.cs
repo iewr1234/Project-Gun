@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public enum FireModeType
 {
     SingleFire,
     AutoFire,
+}
+
+public struct HitInfo
+{
+    public bool isHit;
+    public int hitNum;
 }
 
 public class Weapon : MonoBehaviour
@@ -41,11 +49,13 @@ public class Weapon : MonoBehaviour
 
     public int meshType;
     public int pelletNum;
+    public int spread;
     [Tooltip("ÅºÃ¢¿ë·®")] public int magMax;
     [Tooltip("ÀåÀüµÈ ÅºÈ¯ ¼ö")] public int loadedNum;
     //[Tooltip("»ç¿ëÅºÈ¯")] public BulletDataInfo useBullet;
 
-    [SerializeField] private List<bool> hitList = new List<bool>();
+    //[SerializeField] private List<bool> hitList = new List<bool>();
+    private List<HitInfo> hitInfos = new List<HitInfo>();
 
     private Vector3 holsterPos;
     private Vector3 holsterRot;
@@ -65,7 +75,7 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponRot_Shotgun = new Vector3(-5f, 95.5f, -95f);
 
     private readonly float shootDisparity_bullet = 0.15f;
-    private readonly float shootDisparity_pellet = 0.15f;
+    private readonly float shootDisparity_pellet = 0.3f;
 
     public void SetComponets(CharacterController _charCtr, EquipType _equipType, WeaponDataInfo _weaponData)
     {
@@ -97,21 +107,22 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void SetComponets(CharacterController _charCtr, WeaponType _type, int _meshType, int _pelletNum, int _magMax)
+    public void SetComponets(CharacterController _charCtr, EnemyWeapon weapon)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
 
-        weaponData.type = _type;
+        weaponData.type = weapon.type;
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
         SetWeaponPositionAndRotation();
 
-        meshType = _meshType;
-        pelletNum = _pelletNum;
-        magMax = _magMax;
+        meshType = weapon.meshType;
+        pelletNum = weapon.pelletNum;
+        spread = weapon.spread;
+        magMax = weapon.magMax;
         loadedNum = magMax;
         gameObject.SetActive(true);
     }
@@ -336,41 +347,60 @@ public class Weapon : MonoBehaviour
 
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
     {
-        hitList.Clear();
+        //hitList.Clear();
+        hitInfos.Clear();
+        bool allMiss;
         var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
         var value = Random.Range(0, 100);
-        var isHit = value >= hitAccuracy;
-        Debug.Log($"{charCtr.name}: hitAccuracy = {hitAccuracy}, value = {value}, isHit = {isHit}");
-        bool allMiss;
-        if (isHit)
+        Debug.Log($"{charCtr.name}: hitAccuracy = {hitAccuracy}, value = {value}, isHit = {value >= hitAccuracy}");
+
+        int hitValue;
+        bool isHit;
+        int hitNum;
+        int propellant;
+        int pelletNum;
+        int spread;
+        var dist = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
+        if (value >= hitAccuracy)
         {
             allMiss = false;
-            var hitValue = value - hitAccuracy;
+            hitValue = value - hitAccuracy;
             for (int i = 0; i < shootNum; i++)
             {
-                bool billetHit;
+                hitNum = 0;
+                propellant = 0;
+                pelletNum = 0;
+                spread = 0;
                 if (i == 0)
                 {
-                    billetHit = true;
+                    SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+                    ResultHitNum();
                 }
                 else
                 {
-                    var index = weaponData.equipMag.loadedBullets.Count - (1 + i);
-                    int propellant;
-                    if (charCtr.ownerType == CharacterOwner.Player)
+                    SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+                    var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
+                    if (rebound < 1) rebound = 1;
+
+                    hitValue -= rebound;
+                    if (hitValue >= 0)
                     {
-                        propellant = charCtr.ability.propellant + weaponData.equipMag.loadedBullets[index].propellant;
+                        ResultHitNum();
                     }
                     else
                     {
-                        propellant = charCtr.Propellant;
+                        isHit = false;
                     }
-                    hitValue -= propellant;
-                    billetHit = hitValue >= 0;
                 }
-                hitList.Add(billetHit);
-                var text = billetHit ? "¸íÁß" : "ºø³ª°¨";
-                Debug.Log($"{charCtr.name}: {i + 1}¹øÂ° Åº: hitValue = {hitValue}, {text}");
+
+                var hitInfo = new HitInfo()
+                {
+                    isHit = isHit,
+                    hitNum = hitNum,
+                };
+                hitInfos.Add(hitInfo);
+                var hitText = hitInfo.isHit ? "¸íÁß" : "ºø³ª°¨";
+                Debug.Log($"{charCtr.name}: {i + 1}¹øÂ° Åº ¸íÁß¿©ºÎ = {hitText}, ¸ÂÃá ¹ß ¼ö = {hitInfo.hitNum}");
             }
         }
         else
@@ -378,37 +408,67 @@ public class Weapon : MonoBehaviour
             allMiss = true;
             for (int i = 0; i < shootNum; i++)
             {
-                hitList.Add(false);
+                hitNum = 0;
+                propellant = 0;
+                pelletNum = 0;
+                spread = 0;
+                SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+
+                var hitInfo = new HitInfo()
+                {
+                    isHit = false,
+                    hitNum = hitNum,
+                };
+                hitInfos.Add(hitInfo);
+                var hitText = hitInfo.isHit ? "¸íÁß" : "ºø³ª°¨";
+                Debug.Log($"{charCtr.name}: {i + 1}¹øÂ° Åº ¸íÁß¿©ºÎ = {hitText}, ¸ÂÃá ¹ß ¼ö = {hitInfo.hitNum}");
             }
         }
 
-        //var pos = targetInfo.shooterNode.transform.position;
-        //var targetPos = targetInfo.targetNode.transform.position;
-        //var dist = DataUtility.GetDistance(pos, targetPos);
-        //var allMiss = true;
-        //for (int i = 0; i < shootNum; i++)
-        //{
-        //    charCtr.SetStamina(-DataUtility.GetAimStaminaCost(charCtr));
-        //    var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
-        //    //if (i > 0)
-        //    //{
-        //    //    hitAccuracy -= DataUtility.GetHitAccuracyReduction(charCtr, dist);
-        //    //}
-
-        //    var value = Random.Range(0, 100);
-        //    var isHit = value >= hitAccuracy;
-        //    if (isHit && allMiss)
-        //    {
-        //        allMiss = false;
-        //    }
-        //    hitList.Add(isHit);
-        //}
-
-        //var hit = hitList.FindAll(x => x == true);
-        //var miss = hitList.FindAll(x => x == false);
-        //Debug.Log($"{charCtr.name}: ShootNum = {shootNum}, Hit = {hit.Count}, Miss = {miss.Count}");
-
         return allMiss;
+
+        void SetUseValue(int index, ref int propellant, ref int pelletNum, ref int spread)
+        {
+            switch (charCtr.ownerType)
+            {
+                case CharacterOwner.Player:
+                    var bulletIndex = weaponData.equipMag.loadedBullets.Count - (1 + index);
+                    var bullet = weaponData.equipMag.loadedBullets[bulletIndex];
+                    propellant = charCtr.ability.propellant + bullet.propellant;
+                    pelletNum = bullet.pelletNum;
+                    spread = bullet.spread;
+                    break;
+                default:
+                    propellant = charCtr.Propellant;
+                    pelletNum = this.pelletNum;
+                    spread = this.spread;
+                    break;
+            }
+        }
+
+        void ResultHitNum()
+        {
+            isHit = true;
+            if (pelletNum == 0)
+            {
+                hitNum = 1;
+            }
+            else
+            {
+                hitNum++;
+                for (int i = 1; i < pelletNum; i++)
+                {
+                    var pelletSpread = Mathf.FloorToInt(dist * spread * 0.01f);
+                    if (pelletSpread < 1) pelletSpread = 1;
+
+                    hitValue -= pelletSpread;
+                    if (hitValue >= 0)
+                    {
+                        hitNum++;
+                    }
+                }
+            }
+        }
     }
 
     public void FireBullet(CharacterController target)
@@ -440,7 +500,8 @@ public class Weapon : MonoBehaviour
         //        break;
         //}
 
-        var isHit = hitList[0];
+        //var isHit = hitList[0];
+        var hitInfo = hitInfos[0];
         int count;
         switch (charCtr.ownerType)
         {
@@ -456,10 +517,11 @@ public class Weapon : MonoBehaviour
                         return;
                     }
 
-                    SetBulletDirection(bullet, i == 0 && isHit);
-                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && isHit);
+                    SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
+                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && hitInfo.isHit, hitInfo.hitNum);
                 }
-                hitList.RemoveAt(0);
+                //hitList.RemoveAt(0);
+                hitInfos.RemoveAt(0);
                 charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
                 if (weaponData.equipMag.loadedBullets.Count == 0) return;
@@ -478,10 +540,11 @@ public class Weapon : MonoBehaviour
                         return;
                     }
 
-                    SetBulletDirection(bullet, i == 0 && isHit);
-                    bullet.SetBullet(charCtr, target, meshType, i == 0 && isHit);
+                    SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
+                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, hitInfo.hitNum);
                 }
-                hitList.RemoveAt(0);
+                //hitList.RemoveAt(0);
+                hitInfos.RemoveAt(0);
                 loadedNum--;
                 break;
             default:

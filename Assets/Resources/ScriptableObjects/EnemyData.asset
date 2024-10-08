@@ -40,9 +40,9 @@ MonoBehaviour:
     range: 20
     watchAngle: 30
     MOA: 2
-    stability: 2
-    rebound: 5
-    propellant: 30
+    stability: 100
+    rebound: 100
+    propellant: 100
     damage: 2
     penetrate: 0
     armorBreak: 0
@@ -52,18 +52,21 @@ MonoBehaviour:
       prefabName: Rifle_2
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 30
     mainWeapon2:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     subWeapon:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
   - indexName: 'E0002: Insurgent_B'
     ID: E0002
@@ -92,9 +95,9 @@ MonoBehaviour:
     range: 15
     watchAngle: 30
     MOA: 1
-    stability: 1
-    rebound: 5
-    propellant: 10
+    stability: 100
+    rebound: 100
+    propellant: 100
     damage: 1
     penetrate: 0
     armorBreak: 0
@@ -104,18 +107,21 @@ MonoBehaviour:
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     mainWeapon2:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     subWeapon:
       type: 1
       prefabName: Pistol_1
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 12
   - indexName: 'E0003: Insurgent_C'
     ID: E0003
@@ -144,9 +150,9 @@ MonoBehaviour:
     range: 15
     watchAngle: 30
     MOA: 1
-    stability: 1
-    rebound: 5
-    propellant: 10
+    stability: 100
+    rebound: 100
+    propellant: 100
     damage: 1
     penetrate: 0
     armorBreak: 0
@@ -156,18 +162,21 @@ MonoBehaviour:
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     mainWeapon2:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     subWeapon:
       type: 1
       prefabName: Pistol_1
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 12
   - indexName: 'E0004: Insurgent_D'
     ID: E0004
@@ -196,9 +205,9 @@ MonoBehaviour:
     range: 15
     watchAngle: 30
     MOA: 1
-    stability: 1
-    rebound: 5
-    propellant: 10
+    stability: 100
+    rebound: 100
+    propellant: 100
     damage: 1
     penetrate: 0
     armorBreak: 0
@@ -208,18 +217,21 @@ MonoBehaviour:
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     mainWeapon2:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     subWeapon:
       type: 1
       prefabName: Pistol_1
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 12
   - indexName: 'E0010: Insurgent_G'
     ID: E0010
@@ -248,9 +260,9 @@ MonoBehaviour:
     range: 20
     watchAngle: 30
     MOA: 3
-    stability: 3
-    rebound: 5
-    propellant: 30
+    stability: 100
+    rebound: 100
+    propellant: 100
     damage: 3
     penetrate: 0
     armorBreak: 0
@@ -260,16 +272,19 @@ MonoBehaviour:
       prefabName: Rifle_2
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 30
     mainWeapon2:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0
     subWeapon:
       type: 0
       prefabName: None
       meshType: 0
       pelletNum: 0
+      spread: 0
       magMax: 0

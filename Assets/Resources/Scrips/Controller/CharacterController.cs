@@ -2938,7 +2938,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, Bullet bullet)
+    public void OnHit(Vector3 dir, Bullet bullet, int hitNum)
     {
         if (state == CharacterState.Dead) return;
 
@@ -2967,7 +2967,7 @@ public class CharacterController : MonoBehaviour
         }
 
         var penetrate = bulletproof - bullet.penetrate < 0 ? 0 : bulletproof - bullet.penetrate;
-        var damage = (int)Mathf.Floor(bullet.damage * (1 + penetrate * 0.01f));
+        var damage = (int)Mathf.Floor((bullet.damage * hitNum) * (1 + penetrate * 0.01f));
         if (isPenetrate)
         {
             SetHealth(-damage);
@@ -3283,10 +3283,8 @@ public class CharacterController : MonoBehaviour
 
     public void Event_TargetingOn()
     {
-        Debug.Log("!");
         if (ownerType != CharacterOwner.Player) return;
 
-        Debug.Log("!!");
         gameMgr.ReceiveScheduleSignal();
     }
     #endregion

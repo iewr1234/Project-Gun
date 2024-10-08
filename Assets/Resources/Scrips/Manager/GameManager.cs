@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CoverState targetState;
     private float timer;
 
-    private readonly float waitSignalTime = 0.6f;
+    //private readonly float waitSignalTime = 0.6f;
     private readonly float scheduleWaitTime = 0.5f;
 
     [Header("[FieldNode]")]
@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour
                 if (weaponData.type == WeaponType.None) continue;
 
                 var weapon = charCtr.GetWeapon(weaponData.prefabName);
-                weapon.SetComponets(charCtr, weaponData.type, weaponData.meshType, weaponData.pelletNum, weaponData.magMax);
+                weapon.SetComponets(charCtr, weaponData);
             }
 
             return charCtr;
@@ -664,6 +664,8 @@ public class GameManager : MonoBehaviour
                     case GameState.None:
                         if (node.charCtr != null && selectChar == null)
                         {
+                            if (node.charCtr.ownerType == CharacterOwner.Enemy) return;
+
                             selectChar = node.charCtr;
                             if (selectChar.state == CharacterState.Watch)
                             {
@@ -926,16 +928,8 @@ public class GameManager : MonoBehaviour
     public void ReloadAction_Move()
     {
         if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
-
-        gameState = GameState.Reload;
-        uiMgr.reloadButton.SetActiveButton(true);
-        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
-        SwitchMovableNodes(false);
-        ClearLine();
-        RemoveTargetNode();
         if (selectChar.currentWeapon == null) return;
 
-        camMgr.lockCam = true;
         var weaponData = selectChar.currentWeapon.weaponData;
         var intMag = weaponData.isMag && weaponData.equipMag.intMag;
         if (intMag)
@@ -951,11 +945,19 @@ public class GameManager : MonoBehaviour
                                                      && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                      && x.itemData.type == ItemType.Magazine
                                                      && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
-                                          .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+                                             .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
         }
 
         if (rigItems.Count == 0) return;
 
+        gameState = GameState.Reload;
+        uiMgr.reloadButton.SetActiveButton(true);
+        uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
+        SwitchMovableNodes(false);
+        ClearLine();
+        RemoveTargetNode();
+
+        camMgr.lockCam = true;
         uiMgr.iconIndex = 0;
         uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)

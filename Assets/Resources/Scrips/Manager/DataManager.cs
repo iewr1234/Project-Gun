@@ -366,7 +366,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AS";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AV";
     private enum EnemyVariable
     {
         ID,
@@ -403,16 +403,19 @@ public class DataManager : MonoBehaviour
         MainWeapon1_prefabName,
         MainWeapon1_meshType,
         MainWeapon1_pelletNum,
+        MainWeapon1_spread,
         MainWeapon1_magMax,
         MainWeapon2_type,
         MainWeapon2_prefabName,
         MainWeapon2_meshType,
         MainWeapon2_pelletNum,
+        MainWeapon2_spread,
         MainWeapon2_magMax,
         SubWeapon_type,
         SubWeapon_prefabName,
         SubWeapon_meshType,
         SubWeapon_pelletNum,
+        SubWeapon_spread,
         SubWeapon_magMax,
     }
 
@@ -475,16 +478,19 @@ public class DataManager : MonoBehaviour
                                                   data[(int)EnemyVariable.MainWeapon1_prefabName],
                                                   data[(int)EnemyVariable.MainWeapon1_meshType],
                                                   data[(int)EnemyVariable.MainWeapon1_pelletNum],
+                                                  data[(int)EnemyVariable.MainWeapon1_spread],
                                                   data[(int)EnemyVariable.MainWeapon1_magMax]),
                     mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_type],
                                                   data[(int)EnemyVariable.MainWeapon2_prefabName],
                                                   data[(int)EnemyVariable.MainWeapon2_meshType],
                                                   data[(int)EnemyVariable.MainWeapon2_pelletNum],
+                                                  data[(int)EnemyVariable.MainWeapon2_spread],
                                                   data[(int)EnemyVariable.MainWeapon2_magMax]),
                     subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_type],
                                                 data[(int)EnemyVariable.SubWeapon_prefabName],
                                                 data[(int)EnemyVariable.SubWeapon_meshType],
                                                 data[(int)EnemyVariable.SubWeapon_pelletNum],
+                                                data[(int)EnemyVariable.SubWeapon_spread],
                                                 data[(int)EnemyVariable.SubWeapon_magMax]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
@@ -492,7 +498,7 @@ public class DataManager : MonoBehaviour
             Debug.Log("Update Enemy Data");
         }
 
-        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string meshType, string pelletNum, string magMaxData)
+        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string meshType, string pelletNum, string spread, string magMaxData)
         {
             var enemyWeapon = new EnemyWeapon()
             {
@@ -500,6 +506,7 @@ public class DataManager : MonoBehaviour
                 prefabName = prefabNameData,
                 meshType = int.Parse(meshType),
                 pelletNum = int.Parse(pelletNum),
+                spread = int.Parse(spread),
                 magMax = int.Parse(magMaxData),
             };
 
@@ -1015,7 +1022,7 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:M";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:N";
     private enum BulletVariable
     {
         ID,
@@ -1024,6 +1031,7 @@ public class DataManager : MonoBehaviour
         Level,
         Caliber,
         PelletNum,
+        Spread,
         Weight,
         Propellant,
         Damage,
@@ -1064,6 +1072,7 @@ public class DataManager : MonoBehaviour
                     level = int.Parse(data[(int)BulletVariable.Level]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
                     pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),
+                    spread = int.Parse(data[(int)BulletVariable.Spread]),
                     weight = float.Parse(data[(int)BulletVariable.Weight]),
                     propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     damage = int.Parse(data[(int)BulletVariable.Damage]),
