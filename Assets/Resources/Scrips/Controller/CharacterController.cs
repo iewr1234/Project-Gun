@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
-using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -507,6 +506,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="value"></param>
     public void SetActiveOutline(bool value)
     {
+        outlinable.enabled = value;
         if (value)
         {
             outlinable.BackParameters.Color = Color.red;
@@ -1457,6 +1457,8 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void ShootProcess(CharacterCommand command)
     {
+        if (charUI.aimState == CharacterUI.AimState.Check) return;
+
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0) return;
 
@@ -1464,6 +1466,15 @@ public class CharacterController : MonoBehaviour
         if (timer > aimTime && chestRig.weight == 1f
          && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
+            switch (charUI.aimState)
+            {
+                case CharacterUI.AimState.None:
+                    charUI.SetAimGauge(true);
+                    return;
+                default:
+                    break;
+            }
+
             if (!animator.GetBool("fireTrigger"))
             {
                 animator.SetBool("fireTrigger", true);
@@ -2439,6 +2450,11 @@ public class CharacterController : MonoBehaviour
             targetIndex = 0;
             fiarRate = 0;
             sMode = ShootingMode.PointShot;
+            for (int i = 0; i < gameMgr.enemyList.Count; i++)
+            {
+                var enemy = gameMgr.enemyList[i];
+                enemy.outlinable.enabled = false;
+            }
             var targetInfo = targetList[targetIndex];
             targetInfo.target.SetActiveOutline(true);
             SetTargeting(targetInfo, CharacterOwner.All);
@@ -2582,6 +2598,11 @@ public class CharacterController : MonoBehaviour
     public void SetTargetOff()
     {
         targetList[targetIndex].target.SetActiveOutline(false);
+        for (int i = 0; i < gameMgr.enemyList.Count; i++)
+        {
+            var enemy = gameMgr.enemyList[i];
+            enemy.outlinable.enabled = true;
+        }
         gameMgr.uiMgr.SetActiveAimUI(this, false);
     }
 
@@ -3144,6 +3165,7 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+        charUI.SetAimGauge(false);
         commandList.Remove(command);
     }
     #endregion
@@ -3212,7 +3234,6 @@ public class CharacterController : MonoBehaviour
 
     public void Event_WeaponChange()
     {
-        Debug.Log("Event_WeaponChange");
         //SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon.WeaponSwitching("Holster");
         currentWeapon = weapons[changeIndex];
@@ -3222,7 +3243,6 @@ public class CharacterController : MonoBehaviour
 
     public void Event_WeaponChange_OrderType()
     {
-        Debug.Log("Event_WeaponChange_OrderType");
         if (!animator.GetBool("otherType")) return;
 
         SetWeaponAbility(false, currentWeapon.weaponData);

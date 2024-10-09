@@ -61,7 +61,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit, int _hitNum)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit, bool _isMiss, int _hitNum)
     {
         shooter = _shooter;
         target = _target;
@@ -80,16 +80,15 @@ public class Bullet : MonoBehaviour
         critical = shooter.Critical;
 
         isHit = _isHit;
+        isMiss = _isMiss;
         if (isHit)
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts");
             hitNum = _hitNum;
-            isMiss = false;
         }
         else
         {
             targetLayer = LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
-            isMiss = true;
         }
         isCheck = false;
 
@@ -159,9 +158,10 @@ public class Bullet : MonoBehaviour
         }
         isCheck = true;
 
-        if (!isHit)
+        if (!isHit && isMiss)
         {
             target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
+            isMiss = false;
         }
     }
 }

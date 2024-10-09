@@ -46,9 +46,14 @@ public class GameUIManager : MonoBehaviour
     [HideInInspector] public Slider healthGauge;
     [HideInInspector] public Slider staminaGauge;
 
+    private Slider aimGauge;
+    private List<Image> gaugeScales = new List<Image>();
+
     [Header("--- Assignment Variable---")]
     public Button onButton;
     [HideInInspector] public int iconIndex;
+
+    private float gaugeScaleLength;
 
     private List<StageIcon> stageIcons = new List<StageIcon>();
     private bool selcetStage;
@@ -99,7 +104,6 @@ public class GameUIManager : MonoBehaviour
         }
         ammoIcons.SetActive(false);
 
-
         aimUI = playUI.transform.Find("AimUI").gameObject;
         shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
         hitAccuracyText = aimUI.transform.Find("HitAccuracy").GetComponent<TextMeshProUGUI>();
@@ -110,6 +114,16 @@ public class GameUIManager : MonoBehaviour
         armorGauge = aimUI.transform.Find("TargetInfo/ArmorGauge").GetComponent<Slider>();
         healthGauge = aimUI.transform.Find("TargetInfo/HealthGauge").GetComponent<Slider>();
         staminaGauge = aimUI.transform.Find("TargetInfo/StaminaGauge").GetComponent<Slider>();
+
+        aimGauge = aimUI.transform.Find("AimGauge").GetComponent<Slider>();
+        gaugeScales = aimUI.transform.Find("AimGauge/Components/FillArea/GaugeScales").GetComponentsInChildren<Image>().ToList();
+        for (int i = 0; i < gaugeScales.Count; i++)
+        {
+            var gaugeScale = gaugeScales[i];
+            gaugeScale.enabled = false;
+        }
+        var gaugeLength = aimUI.transform.Find("AimGauge/Components/FillArea").GetComponent<RectTransform>().sizeDelta.x;
+        gaugeScaleLength = gaugeLength * 0.01f;
         aimUI.SetActive(false);
 
         var actionButtons = bottomUI.transform.Find("ActionButtons").GetComponentsInChildren<ActionButton>().ToList();
@@ -201,6 +215,35 @@ public class GameUIManager : MonoBehaviour
         //    hitAccuracy = DataUtility.minHitAccuracy;
         //}
         hitAccuracyText.text = $"{hitAccuracy}%";
+    }
+
+    public void SetAimGauge(CharacterController charCtr)
+    {
+        var activeScales = gaugeScales.FindAll(x => x.enabled);
+        for (int i = 0; i < activeScales.Count; i++)
+        {
+            var gaugeScale = activeScales[i];
+            gaugeScale.enabled = false;
+        }
+
+        var targetInfo = charCtr.targetList[charCtr.targetIndex];
+        var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
+        var weapon = charCtr.currentWeapon;
+        weapon.CheckHitBullet(targetInfo, shootNum);
+        for (int i = 0; i < weapon.hitInfos.Count; i++)
+        {
+            var hitInfo = weapon.hitInfos[i];
+            if (hitInfo.hitAccuracys[0] >= 100) break;
+
+            for (int j = 0; j < hitInfo.hitAccuracys.Count; j++)
+            {
+                var hitAccuracy = hitInfo.hitAccuracys[j];
+                var gaugeScale = gaugeScales.Find(x => !x.enabled);
+                var pos = gaugeScale.transform.localPosition;
+                gaugeScale.transform.localPosition = new Vector3(gaugeScaleLength * hitAccuracy, pos.y, pos.z);
+                gaugeScale.enabled = true;
+            }
+        }
     }
 
     public void SetActiveAmmoIcon(bool value)
@@ -315,6 +358,7 @@ public class GameUIManager : MonoBehaviour
             SetShootNum(charCtr);
             SetShootingModeText(charCtr.sMode);
             SetActionPoint_Aim(charCtr);
+            SetAimGauge(charCtr);
         }
         else
         {
@@ -350,6 +394,7 @@ public class GameUIManager : MonoBehaviour
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
+        SetAimGauge(charCtr);
     }
 
     public void SetShootingMode(CharacterController charCtr)
@@ -366,11 +411,13 @@ public class GameUIManager : MonoBehaviour
         SetShootingModeText(charCtr.sMode);
         SetHitAccuracy(charCtr);
         SetActionPoint_Aim(charCtr);
+        SetAimGauge(charCtr);
     }
 
     public void SetTargetInfo(TargetInfo targetInfo)
     {
         SetHitAccuracy(targetInfo.shooter);
+        SetAimGauge(targetInfo.shooter);
         if (targetInfo.target.armor != null)
         {
             armorGauge.maxValue = targetInfo.target.armor.maxDurability;

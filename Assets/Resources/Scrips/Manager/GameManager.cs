@@ -253,7 +253,7 @@ public class GameManager : MonoBehaviour
         //}
 
         // Set CharacterUI
-        var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/Character/CharacterUI"));
+        var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/CharacterUI/CharacterUI"));
         charUI.transform.SetParent(characterUI_Tf, false);
         charUI.SetComponents(charCtr);
         CreateRange();

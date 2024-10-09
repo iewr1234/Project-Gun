@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public enum FireModeType
@@ -10,8 +8,11 @@ public enum FireModeType
     AutoFire,
 }
 
+[System.Serializable]
 public struct HitInfo
 {
+    public string indexName;
+    public List<int> hitAccuracys;
     public bool isHit;
     public int hitNum;
 }
@@ -55,7 +56,8 @@ public class Weapon : MonoBehaviour
     //[Tooltip("사용탄환")] public BulletDataInfo useBullet;
 
     //[SerializeField] private List<bool> hitList = new List<bool>();
-    private List<HitInfo> hitInfos = new List<HitInfo>();
+    public List<HitInfo> hitInfos = new List<HitInfo>();
+    [HideInInspector] public int hitValue;
 
     private Vector3 holsterPos;
     private Vector3 holsterRot;
@@ -347,82 +349,51 @@ public class Weapon : MonoBehaviour
 
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
     {
-        //hitList.Clear();
         hitInfos.Clear();
-        bool allMiss;
+        hitValue = Random.Range(1, 101);
         var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
-        var value = Random.Range(0, 100);
-        Debug.Log($"{charCtr.name}: hitAccuracy = {hitAccuracy}, value = {value}, isHit = {value >= hitAccuracy}");
+        var isHit = hitAccuracy <= hitValue;
+        var allMiss = !isHit;
 
-        int hitValue;
-        bool isHit;
+        var hitAccuracys = new List<int>();
         int hitNum;
         int propellant;
         int pelletNum;
         int spread;
         var dist = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
-        if (value >= hitAccuracy)
+        for (int i = 0; i < shootNum; i++)
         {
-            allMiss = false;
-            hitValue = value - hitAccuracy;
-            for (int i = 0; i < shootNum; i++)
+            hitAccuracys.Clear();
+            hitNum = 0;
+            propellant = 0;
+            pelletNum = 0;
+            spread = 0;
+            if (i == 0)
             {
-                hitNum = 0;
-                propellant = 0;
-                pelletNum = 0;
-                spread = 0;
-                if (i == 0)
-                {
-                    SetUseValue(i, ref propellant, ref pelletNum, ref spread);
-                    ResultHitNum();
-                }
-                else
-                {
-                    SetUseValue(i, ref propellant, ref pelletNum, ref spread);
-                    var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
-                    if (rebound < 1) rebound = 1;
-
-                    hitValue -= rebound;
-                    if (hitValue >= 0)
-                    {
-                        ResultHitNum();
-                    }
-                    else
-                    {
-                        isHit = false;
-                    }
-                }
-
-                var hitInfo = new HitInfo()
-                {
-                    isHit = isHit,
-                    hitNum = hitNum,
-                };
-                hitInfos.Add(hitInfo);
-                var hitText = hitInfo.isHit ? "명중" : "빗나감";
-                Debug.Log($"{charCtr.name}: {i + 1}번째 탄 명중여부 = {hitText}, 맞춘 발 수 = {hitInfo.hitNum}");
-            }
-        }
-        else
-        {
-            allMiss = true;
-            for (int i = 0; i < shootNum; i++)
-            {
-                hitNum = 0;
-                propellant = 0;
-                pelletNum = 0;
-                spread = 0;
                 SetUseValue(i, ref propellant, ref pelletNum, ref spread);
-
-                var hitInfo = new HitInfo()
-                {
-                    isHit = false,
-                    hitNum = hitNum,
-                };
-                hitInfos.Add(hitInfo);
-                var hitText = hitInfo.isHit ? "명중" : "빗나감";
-                Debug.Log($"{charCtr.name}: {i + 1}번째 탄 명중여부 = {hitText}, 맞춘 발 수 = {hitInfo.hitNum}");
+                ResultHitNum();
             }
+            else
+            {
+                SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+                var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
+                if (rebound < 1) rebound = 1;
+
+                hitAccuracy += rebound;
+                ResultHitNum();
+            }
+
+            var hitText = isHit ? $"{hitNum}발 명중" : "빗나감";
+            var hitAccuracyText = hitAccuracys.Count > 1 ? $"{hitAccuracys[0]}~{hitAccuracys[^1]}" : $"{hitAccuracys[0]}";
+            var hitInfo = new HitInfo()
+            {
+                indexName = $"명중값(무작위값) = {hitValue}, 명중수치 = {hitAccuracyText}, {hitText}",
+                hitAccuracys = new List<int>(hitAccuracys),
+                isHit = isHit,
+                hitNum = hitNum,
+            };
+            hitInfos.Add(hitInfo);
+            Debug.Log($"{charCtr.name}: {i + 1}번째 탄: {hitText}");
         }
 
         return allMiss;
@@ -448,24 +419,27 @@ public class Weapon : MonoBehaviour
 
         void ResultHitNum()
         {
-            isHit = true;
+            isHit = hitAccuracy <= hitValue;
             if (pelletNum == 0)
             {
                 hitNum = 1;
+                hitAccuracys.Add(hitAccuracy);
             }
             else
             {
                 hitNum++;
+                hitAccuracys.Add(hitAccuracy);
                 for (int i = 1; i < pelletNum; i++)
                 {
                     var pelletSpread = Mathf.FloorToInt(dist * spread * 0.01f);
                     if (pelletSpread < 1) pelletSpread = 1;
 
-                    hitValue -= pelletSpread;
-                    if (hitValue >= 0)
+                    hitAccuracy += pelletSpread;
+                    if (hitAccuracy <= hitValue)
                     {
                         hitNum++;
                     }
+                    hitAccuracys.Add(hitAccuracy);
                 }
             }
         }
@@ -500,7 +474,6 @@ public class Weapon : MonoBehaviour
         //        break;
         //}
 
-        //var isHit = hitList[0];
         var hitInfo = hitInfos[0];
         int count;
         switch (charCtr.ownerType)
@@ -518,9 +491,8 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
-                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
-                //hitList.RemoveAt(0);
                 hitInfos.RemoveAt(0);
                 charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
@@ -541,9 +513,8 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
-                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
-                //hitList.RemoveAt(0);
                 hitInfos.RemoveAt(0);
                 loadedNum--;
                 break;
