@@ -196,6 +196,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, false));
+                    uiMgr.bottomUI.SetActive(true);
                     uiMgr.playUI.SetActive(true);
                 }
                 dataMgr.gameData.mapLoad = false;
@@ -480,45 +481,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
                 {
-                    var weapon = selectChar.currentWeapon;
-                    var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + (int)selectChar.sMode;
-                    if (totalCost > selectChar.action)
-                    {
-                        Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
-                        return;
-                    }
-                    var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
-                    var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-                    //if (weapon.weaponData.isChamber) loadedAmmo++;
-
-                    if (shootNum > loadedAmmo)
-                    {
-                        Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");
-                        return;
-                    }
-
-                    selectChar.animator.SetInteger("shootNum", shootNum);
-                    if (selectChar.animator.GetBool("isCover"))
-                    {
-                        selectChar.AddCommand(CommandType.Aim);
-                        selectChar.AddCommand(CommandType.Shoot);
-                        selectChar.AddCommand(CommandType.BackCover);
-                    }
-                    else
-                    {
-                        selectChar.AddCommand(CommandType.Aim);
-                        selectChar.AddCommand(CommandType.Shoot);
-                    }
-                    SwitchMovableNodes(false);
-                    SwitchCharacterUI(true);
-                    selectChar.SetTargetOff();
-                    selectChar.SetAction(-totalCost);
-                    camMgr.SetCameraState(CameraState.None);
-                    uiMgr.SetActionPoint_Bottom(selectChar);
-                    uiMgr.SetActiveAimUI(selectChar, false);
-                    uiMgr.SetMagNum(selectChar, weapon.weaponData.equipMag.loadedBullets.Count - shootNum);
-                    selectChar = null;
-                    gameState = GameState.None;
+                    ShootingAction_Shoot();
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
@@ -560,12 +523,18 @@ public class GameManager : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    for (int i = 0; i < enemyList.Count; i++)
+                    {
+                        var enemy = enemyList[i];
+                        enemy.outlinable.enabled = true;
+                    }
+                    camMgr.SetCameraState(CameraState.None);
+                    camMgr.lockCam = false;
                     uiMgr.SetActiveAmmoIcon(false);
                     uiMgr.reloadButton.SetActiveButton(false);
                     FindMovableNodes(selectChar, true);
                     rigItems.Clear();
                     gameState = GameState.Move;
-                    camMgr.lockCam = false;
                 }
                 break;
             case GameState.Watch:
@@ -628,21 +597,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SwitchCharacterUI(bool value)
+    public void SwitchCharacterUI(bool value)
     {
         for (int i = 0; i < playerList.Count; i++)
         {
             var player = playerList[i];
             if (player.state == CharacterState.Dead) continue;
 
-            player.charUI.gameObject.SetActive(value);
+            player.charUI.components.SetActive(value);
         }
         for (int i = 0; i < enemyList.Count; i++)
         {
             var enemy = enemyList[i];
             if (enemy.state == CharacterState.Dead) continue;
 
-            enemy.charUI.gameObject.SetActive(value);
+            enemy.charUI.components.SetActive(value);
         }
     }
 
@@ -920,9 +889,54 @@ public class GameManager : MonoBehaviour
         {
             RemoveTargetNode();
             SwitchMovableNodes(false);
-            SwitchCharacterUI(false);
+            //SwitchCharacterUI(false);
             gameState = GameState.Shoot;
         }
+    }
+
+    public void ShootingAction_Shoot()
+    {
+        var weapon = selectChar.currentWeapon;
+        var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + (int)selectChar.sMode;
+        if (totalCost > selectChar.action)
+        {
+            Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
+            return;
+        }
+        var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
+        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
+        //if (weapon.weaponData.isChamber) loadedAmmo++;
+
+        if (shootNum > loadedAmmo)
+        {
+            Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");
+            return;
+        }
+
+        selectChar.animator.SetInteger("shootNum", shootNum);
+        if (selectChar.animator.GetBool("isCover"))
+        {
+            selectChar.AddCommand(CommandType.Aim);
+            selectChar.AddCommand(CommandType.Shoot);
+            selectChar.AddCommand(CommandType.BackCover);
+        }
+        else
+        {
+            selectChar.AddCommand(CommandType.Aim);
+            selectChar.AddCommand(CommandType.Shoot);
+        }
+        SwitchMovableNodes(false);
+        //SwitchCharacterUI(true);
+        //selectChar.SetTargetOff();
+        var target = selectChar.targetList[selectChar.targetIndex].target;
+        target.SetActiveOutline(false);
+        selectChar.SetAction(-totalCost);
+        //camMgr.SetCameraState(CameraState.None);
+        uiMgr.SetActionPoint_Bottom(selectChar);
+        uiMgr.SetActiveAimUI(selectChar, false);
+        uiMgr.SetMagNum(selectChar, weapon.weaponData.equipMag.loadedBullets.Count - shootNum);
+        selectChar = null;
+        gameState = GameState.None;
     }
 
     public void ReloadAction_Move()
@@ -950,7 +964,13 @@ public class GameManager : MonoBehaviour
 
         if (rigItems.Count == 0) return;
 
+        for (int i = 0; i < enemyList.Count; i++)
+        {
+            var enemy = enemyList[i];
+            enemy.outlinable.enabled = false;
+        }
         gameState = GameState.Reload;
+        camMgr.SetCameraState(CameraState.Reload, selectChar);
         uiMgr.reloadButton.SetActiveButton(true);
         uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
         SwitchMovableNodes(false);
@@ -1009,7 +1029,7 @@ public class GameManager : MonoBehaviour
         uiMgr.reloadButton.SetActiveButton(false);
         rigItems.Clear();
         gameState = GameState.None;
-        camMgr.lockCam = false;
+        //camMgr.lockCam = false;
     }
 
     public void ThrowAction_Move()

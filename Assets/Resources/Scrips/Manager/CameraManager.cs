@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Cinemachine;
-using UnityEngine.Windows.WebCam;
 
 public enum CameraState
 {
@@ -11,6 +10,7 @@ public enum CameraState
     FrontAim,
     RightAim,
     LeftAim,
+    Reload,
 }
 
 public class CameraManager : MonoBehaviour
@@ -31,6 +31,8 @@ public class CameraManager : MonoBehaviour
     public bool lockCam;
 
     private CinemachineVirtualCamera currrentActionCam;
+    private CinemachineTransposer reloadTransposer;
+    private CinemachineComposer reloadComposer;
 
     private readonly float moveSpeed = 15f;
     private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
@@ -43,6 +45,13 @@ public class CameraManager : MonoBehaviour
     private readonly float zoomSpeed = 20f;
     private readonly float zoomMin = 10f;
     private readonly float zoomMax = 45f;
+
+    private readonly Vector3 reloadCamBody_Idle = new Vector3(2.5f, 2f, 2.5f);
+    private readonly Vector3 reloadCamBody_half = new Vector3(3.5f, 1.25f, -0.25f);
+    private readonly Vector3 reloadCamBody_fullRight = new Vector3(3.5f, 2f, -2f);
+    private readonly Vector3 reloadCamBody_fullLeft = new Vector3(-3.5f, 2f, -2f);
+    private readonly Vector3 reloadCamAim_noneHalf = new Vector3(0f, 1f, 0f);
+    private readonly Vector3 reloadCamAim_half = new Vector3(0f, 0.5f, 0f);
 
     public void SetComponents(GameManager _gameMgr)
     {
@@ -57,6 +66,8 @@ public class CameraManager : MonoBehaviour
 
         cambrain = mainCam.GetComponent<CinemachineBrain>();
         virCams = GetComponentsInChildren<CinemachineVirtualCamera>().ToList();
+        reloadTransposer = virCams[(int)CameraState.Reload].GetCinemachineComponent<CinemachineTransposer>();
+        reloadComposer = virCams[(int)CameraState.Reload].GetCinemachineComponent<CinemachineComposer>();
 
         lockCam = false;
     }
@@ -168,11 +179,11 @@ public class CameraManager : MonoBehaviour
         state = _state;
     }
 
-    public void SetCameraState(CameraState _state, Transform follow, Transform lookAt)
+    public void SetCameraState(CameraState _state, CharacterController charCtr)
     {
         if (_state == CameraState.None)
         {
-            Debug.LogError($"invalid call: SetCameraState(CameraState.None), {follow}, {lookAt}");
+            Debug.LogError($"invalid call: SetCameraState(CameraState.None), {charCtr}");
             return;
         }
 
@@ -181,21 +192,60 @@ public class CameraManager : MonoBehaviour
             currrentActionCam.enabled = false;
         }
         currrentActionCam = virCams[(int)_state];
-        switch (_state)
+        state = _state;
+        switch (state)
         {
-            case CameraState.FrontAim:
-                SetVirtualCamera(follow, lookAt);
+            case CameraState.None:
                 break;
-            case CameraState.RightAim:
-                SetVirtualCamera(follow, lookAt);
-                break;
-            case CameraState.LeftAim:
-                SetVirtualCamera(follow, lookAt);
+            case CameraState.Reload:
+                SetVirtualCamera(charCtr.transform, charCtr.transform);
+                if (charCtr.animator.GetBool("isCover"))
+                {
+                    if (charCtr.animator.GetBool("fullCover"))
+                    {
+                        reloadTransposer.m_FollowOffset = charCtr.animator.GetBool("isRight") ? reloadCamBody_fullRight : reloadCamBody_fullLeft;
+                        reloadComposer.m_TrackedObjectOffset = reloadCamAim_noneHalf;
+                    }
+                    else
+                    {
+                        reloadTransposer.m_FollowOffset = reloadCamBody_half;
+                        reloadComposer.m_TrackedObjectOffset = reloadCamAim_half;
+                    }
+                }
+                else
+                {
+                    reloadTransposer.m_FollowOffset = reloadCamBody_Idle;
+                    reloadComposer.m_TrackedObjectOffset = reloadCamAim_noneHalf;
+                }
                 break;
             default:
+                SetVirtualCamera(charCtr.transform, charCtr.transform);
                 break;
         }
+    }
+
+    public void SetCameraState(CameraState _state, CharacterController charCtr_follow, CharacterController charCtr_lookAt)
+    {
+        if (_state == CameraState.None)
+        {
+            Debug.LogError($"invalid call: SetCameraState(CameraState.None), {charCtr_follow}, {charCtr_lookAt}");
+            return;
+        }
+
+        if (currrentActionCam != null)
+        {
+            currrentActionCam.enabled = false;
+        }
+        currrentActionCam = virCams[(int)_state];
         state = _state;
+        switch (state)
+        {
+            case CameraState.None:
+                break;
+            default:
+                SetVirtualCamera(charCtr_follow.transform, charCtr_lookAt.transform);
+                break;
+        }
     }
 
     private void SetVirtualCamera(Transform follow, Transform lookAt)

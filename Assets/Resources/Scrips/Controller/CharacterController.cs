@@ -131,7 +131,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
-    private Outlinable outlinable;
+    public Outlinable outlinable;
     [SerializeField] private Collider cd;
 
     [SerializeField] private MultiAimConstraint headRig;
@@ -1166,6 +1166,8 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void TargetingProcess(CharacterCommand command)
     {
+        if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Switching")) return;
+
         if (!canTargeting)
         {
             switch (command.targeting)
@@ -1216,13 +1218,15 @@ public class CharacterController : MonoBehaviour
                         headAim = true;
                         var moveDir = animator.GetBool("isRight") ? transform.right : -transform.right;
                         var moveDist = GetDistance();
-                        targetingPos = transform.position + (moveDir * moveDist);
+                        targetingPos = currentNode.transform.position + (moveDir * moveDist);
+                        animator.ResetTrigger("unTargeting");
                         animator.SetTrigger("targeting");
                         break;
                     case false:
                         aimTf = null;
                         headAim = false;
                         targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
+                        animator.ResetTrigger("targeting");
                         animator.SetTrigger("unTargeting");
                         break;
                 }
@@ -1457,8 +1461,6 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void ShootProcess(CharacterCommand command)
     {
-        if (charUI.aimState == CharacterUI.AimState.Check) return;
-
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0) return;
 
@@ -1466,11 +1468,32 @@ public class CharacterController : MonoBehaviour
         if (timer > aimTime && chestRig.weight == 1f
          && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
-            switch (charUI.aimState)
+            switch (ownerType)
             {
-                case CharacterUI.AimState.None:
-                    charUI.SetAimGauge(true);
-                    return;
+                case CharacterOwner.Player:
+                    switch (gameMgr.uiMgr.aimGauge.state)
+                    {
+                        case AimGauge.State.None:
+                            gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
+                            return;
+                        case AimGauge.State.Done:
+                            break;
+                        default:
+                            return;
+                    }
+                    break;
+                case CharacterOwner.Enemy:
+                    switch (charUI.aimGauge.state)
+                    {
+                        case AimGauge.State.None:
+                            charUI.aimGauge.SetAimGauge(true, currentWeapon);
+                            return;
+                        case AimGauge.State.Done:
+                            break;
+                        default:
+                            return;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -2475,9 +2498,13 @@ public class CharacterController : MonoBehaviour
             {
                 camState = CameraState.LeftAim;
             }
-            gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+            gameMgr.SwitchCharacterUI(false);
+            targetInfo.target.charUI.components.SetActive(true);
+
+            gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
             gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
+            gameMgr.uiMgr.aimGauge.components.SetActive(true);
             gameMgr.uiMgr.SetTargetInfo(targetInfo);
             return true;
         }
@@ -2491,6 +2518,7 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count < 2) return;
 
         var prevTargetInfo = targetList[targetIndex];
+        prevTargetInfo.target.charUI.components.SetActive(false);
         prevTargetInfo.target.SetActiveOutline(false);
         prevTargetInfo.target.AddCommand(CommandType.Targeting, false, transform);
         targetIndex++;
@@ -2501,6 +2529,7 @@ public class CharacterController : MonoBehaviour
         //ChangeTargetShader();
 
         var targetInfo = targetList[targetIndex];
+        targetInfo.target.charUI.components.SetActive(true);
         targetInfo.target.SetActiveOutline(true);
         SetTargeting(targetInfo, CharacterOwner.All);
         CameraState camState;
@@ -2520,7 +2549,7 @@ public class CharacterController : MonoBehaviour
         {
             camState = CameraState.LeftAim;
         }
-        gameMgr.camMgr.SetCameraState(camState, transform, targetInfo.target.transform);
+        gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
         gameMgr.uiMgr.SetTargetInfo(targetInfo);
     }
 
@@ -2779,7 +2808,7 @@ public class CharacterController : MonoBehaviour
 
                 var targetingCommand = new CharacterCommand
                 {
-                    indexName = $"{type}",
+                    indexName = $"{type}_{targeting}",
                     type = CommandType.Targeting,
                     targeting = targeting,
                     lookAt = lookAt,
@@ -3165,7 +3194,25 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
-        charUI.SetAimGauge(false);
+
+        if (ownerType == CharacterOwner.Player)
+        {
+            for (int i = 0; i < gameMgr.enemyList.Count; i++)
+            {
+                var enemy = gameMgr.enemyList[i];
+                if (enemy.state == CharacterState.Dead) continue;
+
+                enemy.charUI.components.SetActive(true);
+                enemy.outlinable.enabled = true;
+            }
+            gameMgr.camMgr.SetCameraState(CameraState.None);
+            gameMgr.camMgr.lockCam = false;
+            gameMgr.uiMgr.aimGauge.SetAimGauge(false);
+        }
+        else
+        {
+            charUI.aimGauge.SetAimGauge(false);
+        }
         commandList.Remove(command);
     }
     #endregion
@@ -3228,6 +3275,11 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
+        if (ownerType == CharacterOwner.Player)
+        {
+            gameMgr.camMgr.SetCameraState(CameraState.None);
+            gameMgr.camMgr.lockCam = false;
+        }
         commandList.RemoveAt(0);
         reloading = false;
     }

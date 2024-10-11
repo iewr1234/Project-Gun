@@ -403,11 +403,14 @@ public class Weapon : MonoBehaviour
             switch (charCtr.ownerType)
             {
                 case CharacterOwner.Player:
-                    var bulletIndex = weaponData.equipMag.loadedBullets.Count - (1 + index);
-                    var bullet = weaponData.equipMag.loadedBullets[bulletIndex];
-                    propellant = charCtr.ability.propellant + bullet.propellant;
-                    pelletNum = bullet.pelletNum;
-                    spread = bullet.spread;
+                    if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+                    {
+                        var bulletIndex = weaponData.equipMag.loadedBullets.Count - (1 + index);
+                        var bullet = weaponData.equipMag.loadedBullets[bulletIndex];
+                        propellant = charCtr.ability.propellant + bullet.propellant;
+                        pelletNum = bullet.pelletNum;
+                        spread = bullet.spread;
+                    }
                     break;
                 default:
                     propellant = charCtr.Propellant;

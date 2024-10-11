@@ -779,7 +779,7 @@ public class GameMenuManager : MonoBehaviour
             }
         }
 
-        if (emptySlots.Count < item.size.x * item.size.y)
+        if (emptySlots == null || emptySlots.Count < item.size.x * item.size.y)
         {
             var itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
             emptySlots = FindEmptySlots(item, itemSlots);

@@ -36,24 +36,24 @@ public class GameUIManager : MonoBehaviour
 
     [Header("[AimUI]")]
     public GameObject aimUI;
-    [HideInInspector] public TextMeshProUGUI shootNumText;
-    [HideInInspector] public TextMeshProUGUI hitAccuracyText;
-    [HideInInspector] public TextMeshProUGUI sModeText;
-    [HideInInspector] public TextMeshProUGUI actionPointText;
-    [HideInInspector] public Image fireRateGauge;
-    //[HideInInspector] public Image sightGauge;
-    [HideInInspector] public Slider armorGauge;
-    [HideInInspector] public Slider healthGauge;
-    [HideInInspector] public Slider staminaGauge;
+    private TextMeshProUGUI shootNumText;
+    private TextMeshProUGUI hitAccuracyText;
+    private TextMeshProUGUI sModeText;
+    private TextMeshProUGUI actionPointText;
+    private Image fireRateGauge;
+    //private Image sightGauge;
+    //private Slider armorGauge;
+    //private Slider healthGauge;
+    //private Slider staminaGauge;
+    //private TextMeshProUGUI armorText;
+    //private TextMeshProUGUI healthText;
+    //private TextMeshProUGUI staminaText;
 
-    private Slider aimGauge;
-    private List<Image> gaugeScales = new List<Image>();
+    [HideInInspector] public AimGauge aimGauge;
 
     [Header("--- Assignment Variable---")]
     public Button onButton;
     [HideInInspector] public int iconIndex;
-
-    private float gaugeScaleLength;
 
     private List<StageIcon> stageIcons = new List<StageIcon>();
     private bool selcetStage;
@@ -111,20 +111,16 @@ public class GameUIManager : MonoBehaviour
         actionPointText = aimUI.transform.Find("ActionPoint/Text").GetComponent<TextMeshProUGUI>();
         fireRateGauge = aimUI.transform.Find("FireRateGauge").GetComponent<Image>();
         //sightGauge = aimUI.transform.Find("SightGauge").GetComponent<Image>();
-        armorGauge = aimUI.transform.Find("TargetInfo/ArmorGauge").GetComponent<Slider>();
-        healthGauge = aimUI.transform.Find("TargetInfo/HealthGauge").GetComponent<Slider>();
-        staminaGauge = aimUI.transform.Find("TargetInfo/StaminaGauge").GetComponent<Slider>();
-
-        aimGauge = aimUI.transform.Find("AimGauge").GetComponent<Slider>();
-        gaugeScales = aimUI.transform.Find("AimGauge/Components/FillArea/GaugeScales").GetComponentsInChildren<Image>().ToList();
-        for (int i = 0; i < gaugeScales.Count; i++)
-        {
-            var gaugeScale = gaugeScales[i];
-            gaugeScale.enabled = false;
-        }
-        var gaugeLength = aimUI.transform.Find("AimGauge/Components/FillArea").GetComponent<RectTransform>().sizeDelta.x;
-        gaugeScaleLength = gaugeLength * 0.01f;
+        //armorGauge = aimUI.transform.Find("TargetInfo/ArmorGauge").GetComponent<Slider>();
+        //healthGauge = aimUI.transform.Find("TargetInfo/HealthGauge").GetComponent<Slider>();
+        //staminaGauge = aimUI.transform.Find("TargetInfo/StaminaGauge").GetComponent<Slider>();
+        //armorText = armorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        //healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        //staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         aimUI.SetActive(false);
+
+        aimGauge = playUI.transform.Find("AimGauge").GetComponent<AimGauge>();
+        aimGauge.SetComponents();
 
         var actionButtons = bottomUI.transform.Find("ActionButtons").GetComponentsInChildren<ActionButton>().ToList();
         for (int i = 0; i < actionButtons.Count; i++)
@@ -215,35 +211,6 @@ public class GameUIManager : MonoBehaviour
         //    hitAccuracy = DataUtility.minHitAccuracy;
         //}
         hitAccuracyText.text = $"{hitAccuracy}%";
-    }
-
-    public void SetAimGauge(CharacterController charCtr)
-    {
-        var activeScales = gaugeScales.FindAll(x => x.enabled);
-        for (int i = 0; i < activeScales.Count; i++)
-        {
-            var gaugeScale = activeScales[i];
-            gaugeScale.enabled = false;
-        }
-
-        var targetInfo = charCtr.targetList[charCtr.targetIndex];
-        var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
-        var weapon = charCtr.currentWeapon;
-        weapon.CheckHitBullet(targetInfo, shootNum);
-        for (int i = 0; i < weapon.hitInfos.Count; i++)
-        {
-            var hitInfo = weapon.hitInfos[i];
-            if (hitInfo.hitAccuracys[0] >= 100) break;
-
-            for (int j = 0; j < hitInfo.hitAccuracys.Count; j++)
-            {
-                var hitAccuracy = hitInfo.hitAccuracys[j];
-                var gaugeScale = gaugeScales.Find(x => !x.enabled);
-                var pos = gaugeScale.transform.localPosition;
-                gaugeScale.transform.localPosition = new Vector3(gaugeScaleLength * hitAccuracy, pos.y, pos.z);
-                gaugeScale.enabled = true;
-            }
-        }
     }
 
     public void SetActiveAmmoIcon(bool value)
@@ -358,7 +325,7 @@ public class GameUIManager : MonoBehaviour
             SetShootNum(charCtr);
             SetShootingModeText(charCtr.sMode);
             SetActionPoint_Aim(charCtr);
-            SetAimGauge(charCtr);
+            aimGauge.SetAimGauge(charCtr);
         }
         else
         {
@@ -394,7 +361,7 @@ public class GameUIManager : MonoBehaviour
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
-        SetAimGauge(charCtr);
+        aimGauge.SetAimGauge(charCtr);
     }
 
     public void SetShootingMode(CharacterController charCtr)
@@ -411,22 +378,26 @@ public class GameUIManager : MonoBehaviour
         SetShootingModeText(charCtr.sMode);
         SetHitAccuracy(charCtr);
         SetActionPoint_Aim(charCtr);
-        SetAimGauge(charCtr);
+        aimGauge.SetAimGauge(charCtr);
     }
 
     public void SetTargetInfo(TargetInfo targetInfo)
     {
         SetHitAccuracy(targetInfo.shooter);
-        SetAimGauge(targetInfo.shooter);
-        if (targetInfo.target.armor != null)
-        {
-            armorGauge.maxValue = targetInfo.target.armor.maxDurability;
-            armorGauge.value = targetInfo.target.armor.durability;
-        }
-        healthGauge.maxValue = targetInfo.target.maxHealth;
-        healthGauge.value = targetInfo.target.health;
-        staminaGauge.maxValue = targetInfo.target.maxStamina;
-        staminaGauge.value = targetInfo.target.stamina;
+        aimGauge.SetAimGauge(targetInfo.shooter);
+        //armorGauge.gameObject.SetActive(false);
+        //if (targetInfo.target.armor != null)
+        //{
+        //    armorGauge.maxValue = targetInfo.target.armor.maxDurability;
+        //    armorGauge.value = targetInfo.target.armor.durability;
+        //    armorText.text = $"{armorGauge.maxValue} / {armorGauge.value}";
+        //}
+        //healthGauge.maxValue = targetInfo.target.maxHealth;
+        //healthGauge.value = targetInfo.target.health;
+        //staminaGauge.maxValue = targetInfo.target.maxStamina;
+        //staminaGauge.value = targetInfo.target.stamina;
+        //healthText.text = $"{healthGauge.maxValue} / {healthGauge.value}";
+        //staminaText.text = $"{staminaGauge.maxValue} / {staminaGauge.value}";
     }
 
     public void EnterTheStage(StageDataInfo stageData)
