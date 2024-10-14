@@ -1172,7 +1172,6 @@ public class CharacterController : MonoBehaviour
 
         if (!canTargeting)
         {
-            Debug.Log("Targeting");
             switch (command.targeting)
             {
                 case true:
@@ -1446,7 +1445,7 @@ public class CharacterController : MonoBehaviour
     private void SetAiming(TargetInfo targetInfo)
     {
         aimTf = targetInfo.target.transform;
-        if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum")))
+        if (currentWeapon.CheckHitBullet_Shoot(targetInfo, animator.GetInteger("shootNum")))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
@@ -3080,10 +3079,11 @@ public class CharacterController : MonoBehaviour
 
     public void AddWeapon(ItemHandler item, EquipType type)
     {
-        var find = weapons.Find(x => x.weaponData == item.weaponData);
+        var weaponName = item.weaponData.GetWeaponName(type);
+        var find = weapons.Find(x => x.weaponData.weaponName == weaponName);
         if (find != null) return;
 
-        var weapon = weaponPool.Find(x => x.name == item.weaponData.weaponName);
+        var weapon = weaponPool.Find(x => x.name == weaponName);
         weapon.SetComponets(this, type, item.weaponData);
         if (currentWeapon == null)
         {
@@ -3095,11 +3095,12 @@ public class CharacterController : MonoBehaviour
         {
             weapon.WeaponSwitching("Holster");
         }
+        //weaponPool.Remove(weapon);
     }
 
     public void RemoveWeapon(string weaponName)
     {
-        var weapon = weaponPool.Find(x => x.name == weaponName);
+        var weapon = weapons.Find(x => x.name == weaponName);
         weapon.transform.SetParent(weaponPoolTf, false);
         weapon.Initialize();
         weapons.Remove(weapon);
@@ -3117,11 +3118,17 @@ public class CharacterController : MonoBehaviour
                 currentWeapon = null;
             }
         }
+        //weaponPool.Add(weapon);
     }
 
     public Weapon GetWeapon(string weaponName)
     {
-        return weaponPool.Find(x => x.name == weaponName);
+        var weapon = weaponPool.Find(x => x.name == weaponName);
+        //if (weapon != null)
+        //{
+        //    weaponPool.Remove(weapon);
+        //}
+        return weapon;
     }
 
     public void EnterTheBase()
@@ -3230,7 +3237,7 @@ public class CharacterController : MonoBehaviour
 
     public void Event_UnequipMagazine()
     {
-        currentWeapon.SetParts("Magazine", currentWeapon.weaponData.equipMag.magName, false);
+        currentWeapon.SetAllParts("Magazine", false);
     }
 
     public void Event_EquipMagazine()

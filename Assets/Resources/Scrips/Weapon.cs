@@ -313,9 +313,9 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void SetParts(string parentsName, string partsName, bool value)
+    public void SetAllParts(string parentsName, bool value)
     {
-        var partsList = partsObjects.FindAll(x => x.transform.parent.name == parentsName && x.name == partsName);
+        var partsList = partsObjects.FindAll(x => x.transform.parent.name == parentsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
@@ -352,18 +352,89 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void Reload()
+    public void CheckHitBullet_Aim(TargetInfo targetInfo, int shootNum)
     {
-        //var ammoNum = magMax;
-        //if (!chamberBullet)
-        //{
-        //    ammoNum--;
-        //    chamberBullet = true;
-        //}
-        //loadedAmmo = ammoNum;
+        hitInfos.Clear();
+        var hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo);
+        var hitAccuracys = new List<int>();
+        int propellant;
+        int pelletNum;
+        int spread;
+        var dist = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
+        for (int i = 0; i < shootNum; i++)
+        {
+            hitAccuracys.Clear();
+            propellant = 0;
+            pelletNum = 0;
+            spread = 0;
+            if (i == 0)
+            {
+                SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+                ResultHitNum();
+            }
+            else
+            {
+                SetUseValue(i, ref propellant, ref pelletNum, ref spread);
+                var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
+                if (rebound < 1) rebound = 1;
+
+                hitAccuracy += rebound;
+                ResultHitNum();
+            }
+
+            var hitAccuracyText = hitAccuracys.Count > 1 ? $"{hitAccuracys[0]}~{hitAccuracys[^1]}" : $"{hitAccuracys[0]}";
+            var hitInfo = new HitInfo()
+            {
+                indexName = $"명중수치 = {hitAccuracyText}",
+                hitAccuracys = new List<int>(hitAccuracys),
+            };
+            hitInfos.Add(hitInfo);
+        }
+
+        void SetUseValue(int index, ref int propellant, ref int pelletNum, ref int spread)
+        {
+            switch (charCtr.ownerType)
+            {
+                case CharacterOwner.Player:
+                    if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+                    {
+                        var bulletIndex = weaponData.equipMag.loadedBullets.Count - (1 + index);
+                        var bullet = weaponData.equipMag.loadedBullets[bulletIndex];
+                        propellant = charCtr.ability.propellant + bullet.propellant;
+                        pelletNum = bullet.pelletNum;
+                        spread = bullet.spread;
+                    }
+                    break;
+                default:
+                    propellant = charCtr.Propellant;
+                    pelletNum = this.pelletNum;
+                    spread = this.spread;
+                    break;
+            }
+        }
+
+        void ResultHitNum()
+        {
+            if (pelletNum == 0)
+            {
+                hitAccuracys.Add(hitAccuracy);
+            }
+            else
+            {
+                hitAccuracys.Add(hitAccuracy);
+                for (int i = 1; i < pelletNum; i++)
+                {
+                    var pelletSpread = Mathf.FloorToInt(dist * spread * 0.01f);
+                    if (pelletSpread < 1) pelletSpread = 1;
+
+                    hitAccuracy += pelletSpread;
+                    hitAccuracys.Add(hitAccuracy);
+                }
+            }
+        }
     }
 
-    public bool CheckHitBullet(TargetInfo targetInfo, int shootNum)
+    public bool CheckHitBullet_Shoot(TargetInfo targetInfo, int shootNum)
     {
         hitInfos.Clear();
         hitValue = Random.Range(1, 101);

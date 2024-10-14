@@ -266,7 +266,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         size = itemData.size;
         magData = _magData.CopyData();
         var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
-        if (loadedBullet != null)
+        if (magData.loadedBullets.Count == 0 && loadedBullet != null)
         {
             for (int i = 0; i < magData.magSize; i++)
             {

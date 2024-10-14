@@ -73,7 +73,7 @@ public class AimGauge : MonoBehaviour
         var targetInfo = charCtr.targetList[charCtr.targetIndex];
         var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
         var weapon = charCtr.currentWeapon;
-        weapon.CheckHitBullet(targetInfo, shootNum);
+        weapon.CheckHitBullet_Aim(targetInfo, shootNum);
         GaugeScalePlacement(weapon);
         aimGauge.value = 0;
     }

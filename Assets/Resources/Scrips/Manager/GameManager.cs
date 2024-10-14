@@ -278,7 +278,7 @@ public class GameManager : MonoBehaviour
                 if (weaponData.type == WeaponType.None) continue;
 
                 var equipType = weapons[i].item.equipSlot.type;
-                var weapon = charCtr.GetWeapon(weaponData.weaponName);
+                var weapon = charCtr.GetWeapon(weaponData.GetWeaponName(equipType));
                 weapon.SetComponets(charCtr, equipType, weaponData);
             }
 
@@ -996,9 +996,9 @@ public class GameManager : MonoBehaviour
         var weapon = selectChar.currentWeapon;
         if (weapon == null) return;
 
-        var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null
-                                                    && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
-                                                    && x.weaponData.ID == weapon.weaponData.ID);
+        var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null && x.equipSlot.type == weapon.equipType
+                                                      && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
+                                                       && x.weaponData.ID == weapon.weaponData.ID);
         var rigMag = rigItems[uiMgr.iconIndex];
         if (weapon.weaponData.isMag)
         {
@@ -1011,6 +1011,11 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                if (equipMag.loadedBullets.Count > 0)
+                {
+                    var chamberBullet = equipMag.loadedBullets[^1];
+                    selectChar.addAbility.RemoveAbility(chamberBullet);
+                }
                 gameMenuMgr.SetItemInStorage(equipMag);
                 gameMenuMgr.QuickEquip(weaponItem, rigMag);
                 selectChar.AddCommand(CommandType.Reload);
