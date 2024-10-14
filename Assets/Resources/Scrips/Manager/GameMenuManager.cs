@@ -269,6 +269,7 @@ public class GameMenuManager : MonoBehaviour
     private void StatusProcess()
     {
         if (gameMgr == null) return;
+        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Status)
         {
@@ -293,7 +294,6 @@ public class GameMenuManager : MonoBehaviour
     {
         if (gameMgr.gameState == GameState.Shoot) return;
         if (gameMgr.gameState == GameState.Watch) return;
-        if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
         var player = gameMgr.playerList[0];
@@ -406,6 +406,7 @@ public class GameMenuManager : MonoBehaviour
     private void InventoryProcess()
     {
         if (gameMgr == null) return;
+        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Inventory)
         {
@@ -430,7 +431,6 @@ public class GameMenuManager : MonoBehaviour
     {
         if (gameMgr.gameState == GameState.Shoot) return;
         if (gameMgr.gameState == GameState.Watch) return;
-        if (gameMgr.gameState == GameState.Result) return;
         if (gameMgr.playerList.Count == 0) return;
 
         var player = gameMgr.playerList[0];
@@ -1376,6 +1376,10 @@ public class GameMenuManager : MonoBehaviour
             {
                 for (int i = 0; i < reloadNum; i++)
                 {
+                    if (gameMgr != null && gameMgr.playerList.Count > 0 && onItem.weaponData.equipMag.loadedBullets.Count == 0)
+                    {
+                        gameMgr.playerList[0].SetBulletAbility(true, putItem.bulletData);
+                    }
                     onItem.weaponData.equipMag.loadedBullets.Add(putItem.bulletData);
                 }
                 putItem.SetTotalCount(putItem.TotalCount - reloadNum);
@@ -1894,8 +1898,19 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Next()
     {
-        nextButton.enabled = false;
+        nextButton.gameObject.SetActive(false);
         SetStorageUI(false);
+        switch (state)
+        {
+            case GameMenuState.Status:
+                ShowStatus(false);
+                break;
+            case GameMenuState.Inventory:
+                ShowInventory(false);
+                break;
+            default:
+                break;
+        }
         gameMgr.NextMap();
     }
 

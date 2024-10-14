@@ -211,12 +211,7 @@ public class Weapon : MonoBehaviour
     {
         if (charCtr.currentWeapon == this)
         {
-            charCtr.SetWeaponAbility(false, weaponData);
-            if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-            {
-                var chamberBullet = weaponData.equipMag.loadedBullets[0];
-                charCtr.SetBulletAbility(false, chamberBullet);
-            }
+            UnequipWeapon();
         }
         //charCtr.weapons.Remove(this);
         charCtr = null;
@@ -249,6 +244,7 @@ public class Weapon : MonoBehaviour
             var chamberBullet = weaponData.equipMag.loadedBullets[0];
             charCtr.SetBulletAbility(true, chamberBullet);
         }
+
         switch (weaponData.type)
         {
             case WeaponType.Pistol:
@@ -295,6 +291,16 @@ public class Weapon : MonoBehaviour
         //        charCtr.animator.Play("Base Layer.Cover.HalfCover.CoverIdle");
         //    }
         //}
+    }
+
+    public void UnequipWeapon()
+    {
+        charCtr.SetWeaponAbility(false, weaponData);
+        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        {
+            var chamberBullet = weaponData.equipMag.loadedBullets[0];
+            charCtr.SetBulletAbility(false, chamberBullet);
+        }
     }
 
     public void SetParts(string partsName, bool value)

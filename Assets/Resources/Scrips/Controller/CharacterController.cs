@@ -207,7 +207,7 @@ public class CharacterController : MonoBehaviour
 
     public FieldNode currentNode;
     private FieldNode prevNode;
-    [HideInInspector] public Cover cover;
+    public Cover currentCover;
     [HideInInspector] public bool isCopy;
 
     [Space(5f)]
@@ -506,6 +506,8 @@ public class CharacterController : MonoBehaviour
     /// <param name="value"></param>
     public void SetActiveOutline(bool value)
     {
+        if (state == CharacterState.Dead) return;
+
         outlinable.enabled = value;
         if (value)
         {
@@ -882,7 +884,7 @@ public class CharacterController : MonoBehaviour
             {
                 cover = command.cover;
                 transform.LookAt(cover.transform);
-                this.cover = cover;
+                currentCover = cover;
                 animator.SetBool("isCover", true);
                 switch (cover.coverType)
                 {
@@ -1072,7 +1074,7 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        cover = _cover;
+        currentCover = _cover;
         coverPos = currentNode.transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);
@@ -1105,7 +1107,7 @@ public class CharacterController : MonoBehaviour
     {
         if (!covering)
         {
-            cover = null;
+            currentCover = null;
             coverPos = currentNode.transform.position;
             covering = true;
             animator.SetBool("isCover", false);
@@ -1144,7 +1146,7 @@ public class CharacterController : MonoBehaviour
     /// <param name="command"></param>
     private void BackCoverProcess(CharacterCommand command)
     {
-        if (cover == null || cover.coverType == CoverType.None)
+        if (currentCover == null || currentCover.coverType == CoverType.None)
         {
             commandList.Remove(command);
             return;
@@ -1170,6 +1172,7 @@ public class CharacterController : MonoBehaviour
 
         if (!canTargeting)
         {
+            Debug.Log("Targeting");
             switch (command.targeting)
             {
                 case true:
@@ -1190,60 +1193,66 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        if (animator.GetBool("isCover") && !animator.GetBool("fullCover"))
+        if (currentCover != null)
         {
-            switch (command.targeting)
+            switch (currentCover.coverType)
             {
-                case true:
-                    aimTf = command.lookAt;
-                    headAim = true;
-                    animator.SetTrigger("targeting");
-                    break;
-                case false:
-                    aimTf = null;
-                    headAim = false;
-                    animator.SetTrigger("unTargeting");
-                    break;
-            }
-            EndTargeting();
-        }
-        else if (animator.GetBool("isCover"))
-        {
-            if (!targetingMove)
-            {
-                switch (command.targeting)
-                {
-                    case true:
-                        aimTf = command.lookAt;
-                        headAim = true;
-                        var moveDir = animator.GetBool("isRight") ? transform.right : -transform.right;
-                        var moveDist = GetDistance();
-                        targetingPos = currentNode.transform.position + (moveDir * moveDist);
-                        animator.ResetTrigger("unTargeting");
-                        animator.SetTrigger("targeting");
-                        break;
-                    case false:
-                        aimTf = null;
-                        headAim = false;
-                        targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
-                        animator.ResetTrigger("targeting");
-                        animator.SetTrigger("unTargeting");
-                        break;
-                }
-                targetingMove = true;
-            }
-            else
-            {
-                if (transform.position != targetingPos)
-                {
-                    var speed = GetSpeed();
-                    transform.position = Vector3.MoveTowards(transform.position, targetingPos, speed * Time.deltaTime);
-                }
-                else
-                {
-                    targetingMove = false;
+                case CoverType.Half:
+                    switch (command.targeting)
+                    {
+                        case true:
+                            aimTf = command.lookAt;
+                            headAim = true;
+                            animator.SetTrigger("targeting");
+                            break;
+                        case false:
+                            aimTf = null;
+                            headAim = false;
+                            animator.SetTrigger("unTargeting");
+                            break;
+                    }
                     EndTargeting();
-                }
+                    break;
+                case CoverType.Full:
+                    if (!targetingMove)
+                    {
+                        switch (command.targeting)
+                        {
+                            case true:
+                                aimTf = command.lookAt;
+                                headAim = true;
+                                var moveDir = animator.GetBool("isRight") ? transform.right : -transform.right;
+                                var moveDist = GetDistance();
+                                targetingPos = currentNode.transform.position + (moveDir * moveDist);
+                                animator.ResetTrigger("unTargeting");
+                                animator.SetTrigger("targeting");
+                                break;
+                            case false:
+                                aimTf = null;
+                                headAim = false;
+                                targetingPos = currentNode.transform.position + (transform.forward * coverInterval);
+                                animator.ResetTrigger("targeting");
+                                animator.SetTrigger("unTargeting");
+                                break;
+                        }
+                        targetingMove = true;
+                    }
+                    else
+                    {
+                        if (transform.position != targetingPos)
+                        {
+                            var speed = GetSpeed();
+                            transform.position = Vector3.MoveTowards(transform.position, targetingPos, speed * Time.deltaTime);
+                        }
+                        else
+                        {
+                            targetingMove = false;
+                            EndTargeting();
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         else
@@ -1540,15 +1549,16 @@ public class CharacterController : MonoBehaviour
             {
                 changeIndex = 0;
             }
-            var nextWeapon = weapons[changeIndex];
-            if (currentWeapon.weaponData.type != nextWeapon.weaponData.type)
-            {
-                animator.SetBool("otherType", true);
-            }
-            else
-            {
-                animator.SetBool("otherType", false);
-            }
+            //var nextWeapon = weapons[changeIndex];
+            //if (currentWeapon.weaponData.type != nextWeapon.weaponData.type)
+            //{
+            //    animator.SetBool("otherType", true);
+            //}
+            //else
+            //{
+            //    animator.SetBool("otherType", false);
+            //}
+            animator.SetBool("otherType", true);
             animator.SetTrigger("change");
             changing = true;
         }
@@ -2473,30 +2483,18 @@ public class CharacterController : MonoBehaviour
             targetIndex = 0;
             fiarRate = 0;
             sMode = ShootingMode.PointShot;
-            for (int i = 0; i < gameMgr.enemyList.Count; i++)
-            {
-                var enemy = gameMgr.enemyList[i];
-                enemy.outlinable.enabled = false;
-            }
+            gameMgr.SetEnemyOutlinable(false);
             var targetInfo = targetList[targetIndex];
             targetInfo.target.SetActiveOutline(true);
             SetTargeting(targetInfo, CharacterOwner.All);
             CameraState camState;
-            if (targetInfo.shooterCover == null)
+            if (targetInfo.shooterCover != null && targetInfo.shooterCover.coverType == CoverType.Full && !targetInfo.isRight)
             {
-                camState = CameraState.RightAim;
-            }
-            else if (targetInfo.shooterCover.coverType == CoverType.Half)
-            {
-                camState = CameraState.FrontAim;
-            }
-            else if (targetInfo.isRight)
-            {
-                camState = CameraState.RightAim;
+                camState = CameraState.LeftAim;
             }
             else
             {
-                camState = CameraState.LeftAim;
+                camState = CameraState.RightAim;
             }
             gameMgr.SwitchCharacterUI(false);
             targetInfo.target.charUI.components.SetActive(true);
@@ -2533,21 +2531,13 @@ public class CharacterController : MonoBehaviour
         targetInfo.target.SetActiveOutline(true);
         SetTargeting(targetInfo, CharacterOwner.All);
         CameraState camState;
-        if (cover == null)
+        if (targetInfo.shooterCover != null && targetInfo.shooterCover.coverType == CoverType.Full && !targetInfo.isRight)
         {
-            camState = CameraState.RightAim;
-        }
-        else if (cover.coverType == CoverType.Half)
-        {
-            camState = CameraState.FrontAim;
-        }
-        else if (targetInfo.isRight)
-        {
-            camState = CameraState.RightAim;
+            camState = CameraState.LeftAim;
         }
         else
         {
-            camState = CameraState.LeftAim;
+            camState = CameraState.RightAim;
         }
         gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
         gameMgr.uiMgr.SetTargetInfo(targetInfo);
@@ -2563,13 +2553,13 @@ public class CharacterController : MonoBehaviour
         var target = targetInfo.target;
         if (ownerType == CharacterOwner.All || target.ownerType == ownerType)
         {
-            if (target.cover != null)
+            if (target.currentCover != null)
             {
                 if (targetInfo.targetCover == null)
                 {
                     target.AddCommand(CommandType.LeaveCover);
                 }
-                else if (targetInfo.targetCover != null && targetInfo.targetCover != target.cover)
+                else if (targetInfo.targetCover != null && targetInfo.targetCover != target.currentCover)
                 {
                     target.AddCommand(CommandType.LeaveCover);
                     target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
@@ -2593,13 +2583,13 @@ public class CharacterController : MonoBehaviour
 
         if (ownerType == CharacterOwner.All || shooter.ownerType == ownerType)
         {
-            if (shooter.cover != null)
+            if (shooter.currentCover != null)
             {
                 if (targetInfo.shooterCover == null)
                 {
-                    shooter.AddCommand(CommandType.LeaveCover);
+                    shooter.AddCommand(CommandType.LeaveCover, target.transform);
                 }
-                else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.cover)
+                else if (targetInfo.shooterCover != null && targetInfo.shooterCover != shooter.currentCover)
                 {
                     shooter.AddCommand(CommandType.LeaveCover);
                     shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
@@ -2627,12 +2617,9 @@ public class CharacterController : MonoBehaviour
     public void SetTargetOff()
     {
         targetList[targetIndex].target.SetActiveOutline(false);
-        for (int i = 0; i < gameMgr.enemyList.Count; i++)
-        {
-            var enemy = gameMgr.enemyList[i];
-            enemy.outlinable.enabled = true;
-        }
+        gameMgr.SetEnemyOutlinable(true);
         gameMgr.uiMgr.SetActiveAimUI(this, false);
+        gameMgr.uiMgr.aimGauge.components.SetActive(false);
     }
 
     /// <summary>
@@ -2650,7 +2637,7 @@ public class CharacterController : MonoBehaviour
             {
                 AddCommand(CommandType.LeaveCover);
             }
-            else if (watchInfo.shooterCover != null && watchInfo.shooterCover != cover)
+            else if (watchInfo.shooterCover != null && watchInfo.shooterCover != currentCover)
             {
                 AddCommand(CommandType.LeaveCover);
                 AddCommand(CommandType.TakeCover, watchInfo.shooterCover, watchInfo.isRight);
@@ -2678,7 +2665,7 @@ public class CharacterController : MonoBehaviour
             {
                 AddCommand(CommandType.LeaveCover);
             }
-            else if (throwInfo.throwerCover != null && throwInfo.throwerCover != cover)
+            else if (throwInfo.throwerCover != null && throwInfo.throwerCover != currentCover)
             {
                 AddCommand(CommandType.LeaveCover);
                 AddCommand(CommandType.TakeCover, throwInfo.throwerCover, throwInfo.isRight);
@@ -2786,6 +2773,29 @@ public class CharacterController : MonoBehaviour
                     isRight = isRight,
                 };
                 commandList.Add(takeCoverCommand);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="lookAt"></param>
+    public void AddCommand(CommandType type, Transform lookAt)
+    {
+        switch (type)
+        {
+            case CommandType.LeaveCover:
+                var targetingCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.LeaveCover,
+                    lookAt = lookAt,
+                };
+                commandList.Add(targetingCommand);
                 break;
             default:
                 break;
@@ -2948,40 +2958,6 @@ public class CharacterController : MonoBehaviour
                 };
                 commandList.Add(command);
                 break;
-        }
-    }
-
-    public CharacterCommand GetCommand(CommandType type)
-    {
-        switch (type)
-        {
-            case CommandType.LeaveCover:
-                var leaveCoverCommand = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = CommandType.LeaveCover,
-                };
-                return leaveCoverCommand;
-            default:
-                return null;
-        }
-    }
-
-    public CharacterCommand GetCommand(CommandType type, Cover cover, bool isRight)
-    {
-        switch (type)
-        {
-            case CommandType.TakeCover:
-                var takeCoverCommand = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = CommandType.TakeCover,
-                    cover = cover,
-                    isRight = isRight,
-                };
-                return takeCoverCommand;
-            default:
-                return null;
         }
     }
 
@@ -3197,14 +3173,7 @@ public class CharacterController : MonoBehaviour
 
         if (ownerType == CharacterOwner.Player)
         {
-            for (int i = 0; i < gameMgr.enemyList.Count; i++)
-            {
-                var enemy = gameMgr.enemyList[i];
-                if (enemy.state == CharacterState.Dead) continue;
-
-                enemy.charUI.components.SetActive(true);
-                enemy.outlinable.enabled = true;
-            }
+            gameMgr.SetEnemyOutlinableAndUI(true);
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
             gameMgr.uiMgr.aimGauge.SetAimGauge(false);
@@ -3286,10 +3255,11 @@ public class CharacterController : MonoBehaviour
 
     public void Event_WeaponChange()
     {
+        Debug.Log("Event_WeaponChange");
         //SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon.WeaponSwitching("Holster");
-        currentWeapon = weapons[changeIndex];
-        //currentWeapon.EquipWeapon();
+        currentWeapon.UnequipWeapon();
+        weapons[changeIndex].EquipWeapon();
         currentWeapon.WeaponSwitching("Right");
     }
 
@@ -3297,7 +3267,8 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("otherType")) return;
 
-        SetWeaponAbility(false, currentWeapon.weaponData);
+        Debug.Log("Event_WeaponChange_OrderType");
+        currentWeapon.UnequipWeapon();
         currentWeapon = weapons[changeIndex];
         currentWeapon.EquipWeapon();
         animator.SetTrigger("change");
@@ -3439,9 +3410,9 @@ public class CharacterController : MonoBehaviour
         {
             int[] modeValues =
             {
-              weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
-              weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
-              weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+                weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.SightShot].value
             };
             for (int i = 0; i < modeValues.Length; i++)
             {
@@ -3471,9 +3442,9 @@ public class CharacterController : MonoBehaviour
         {
             int[] modeValues =
             {
-              weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
-              weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
-              weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+                weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.SightShot].value
             };
             for (int i = 0; i < modeValues.Length; i++)
             {

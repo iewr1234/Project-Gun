@@ -62,17 +62,15 @@ public class GameData : ScriptableObject
 
     public void RandomMapSelection()
     {
-        if (stageData.mapList.Count == 0) return;
-
-        var index = Random.Range(0, stageData.mapList.Count);
         stageData.waveNum--;
-        if (stageData.waveNum > 0)
+        if (stageData.waveNum > 0 && stageData.mapList.Count > 0)
         {
+            var index = Random.Range(0, stageData.mapList.Count);
             mapName = stageData.mapList[index];
             stageData.mapList.RemoveAt(index);
             mapLoad = true;
         }
-        else if (stageData.waveNum == 0)
+        else if (stageData.mapList.Count == 0 || stageData.waveNum == 0)
         {
             mapName = stageData.bossMap;
             mapLoad = true;

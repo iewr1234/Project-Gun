@@ -517,17 +517,13 @@ public class GameManager : MonoBehaviour
                     var reloadMax = weaponData.equipMag.magSize - weaponData.equipMag.loadedBullets.Count;
                     uiMgr.GetAmmoIcon().SetAmmoValue(reloadMax, Input.GetKeyDown(KeyCode.W));
                 }
-                else if (Input.GetKeyDown(KeyCode.R))
+                else if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Space))
                 {
                     ReloadAction_Reload();
                 }
                 else if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    for (int i = 0; i < enemyList.Count; i++)
-                    {
-                        var enemy = enemyList[i];
-                        enemy.outlinable.enabled = true;
-                    }
+                    SetEnemyOutlinable(true);
                     camMgr.SetCameraState(CameraState.None);
                     camMgr.lockCam = false;
                     uiMgr.SetActiveAmmoIcon(false);
@@ -964,11 +960,7 @@ public class GameManager : MonoBehaviour
 
         if (rigItems.Count == 0) return;
 
-        for (int i = 0; i < enemyList.Count; i++)
-        {
-            var enemy = enemyList[i];
-            enemy.outlinable.enabled = false;
-        }
+        SetEnemyOutlinable(false);
         gameState = GameState.Reload;
         camMgr.SetCameraState(CameraState.Reload, selectChar);
         uiMgr.reloadButton.SetActiveButton(true);
@@ -1527,6 +1519,29 @@ public class GameManager : MonoBehaviour
         {
             var fireWarning = warningPool[i];
             fireWarning.gameObject.SetActive(false);
+        }
+    }
+
+    public void SetEnemyOutlinable(bool value)
+    {
+        for (int i = 0; i < enemyList.Count; i++)
+        {
+            var enemy = enemyList[i];
+            if (enemy.state == CharacterState.Dead) continue;
+
+            enemy.outlinable.enabled = value;
+        }
+    }
+
+    public void SetEnemyOutlinableAndUI(bool value)
+    {
+        for (int i = 0; i < enemyList.Count; i++)
+        {
+            var enemy = enemyList[i];
+            if (enemy.state == CharacterState.Dead) continue;
+
+            enemy.charUI.components.SetActive(value);
+            enemy.outlinable.enabled = value;
         }
     }
 
