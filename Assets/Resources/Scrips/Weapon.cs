@@ -313,6 +313,16 @@ public class Weapon : MonoBehaviour
         }
     }
 
+    public void SetParts(string parentsName, string partsName, bool value)
+    {
+        var partsList = partsObjects.FindAll(x => x.transform.parent.name == parentsName && x.name == partsName);
+        for (int i = 0; i < partsList.Count; i++)
+        {
+            var parts = partsList[i];
+            parts.gameObject.SetActive(value);
+        }
+    }
+
     public void WeaponSwitching(string switchPos)
     {
         switch (switchPos)

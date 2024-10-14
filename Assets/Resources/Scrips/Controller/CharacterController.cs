@@ -3228,6 +3228,16 @@ public class CharacterController : MonoBehaviour
         animator.SetInteger("reloadNum", reloadNum - 1);
     }
 
+    public void Event_UnequipMagazine()
+    {
+        currentWeapon.SetParts("Magazine", currentWeapon.weaponData.equipMag.magName, false);
+    }
+
+    public void Event_EquipMagazine()
+    {
+        currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
+    }
+
     /// <summary>
     /// (애니메이션 이벤트)재장전 완료
     /// </summary>

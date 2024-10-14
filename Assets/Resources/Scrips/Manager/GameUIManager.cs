@@ -164,6 +164,8 @@ public class GameUIManager : MonoBehaviour
         if (charCtr.ownerType != CharacterOwner.Player || charCtr.weapons.Count == 0) return;
 
         var weapon = charCtr.currentWeapon;
+        if (!weapon.weaponData.isMag) return;
+
         var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
         //if (weapon.weaponData.isChamber) loadedAmmo++;
 

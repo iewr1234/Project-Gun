@@ -1016,6 +1016,11 @@ public class GameManager : MonoBehaviour
                 selectChar.AddCommand(CommandType.Reload);
             }
         }
+        else
+        {
+            gameMenuMgr.QuickEquip(weaponItem, rigMag);
+            selectChar.AddCommand(CommandType.Reload);
+        }
         selectChar = null;
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.reloadButton.SetActiveButton(false);
