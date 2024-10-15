@@ -325,12 +325,7 @@ public class PopUp_Inventory : MonoBehaviour
                     //    equipSlot.gameObject.SetActive(true);
                     //    break;
                     case EquipType.Magazine:
-                        if (item.weaponData.isMag && item.weaponData.equipMag.intMag)
-                        {
-                            equipSlot.slotText.text = "Åº¾à½Ç";
-                            equipSlot.gameObject.SetActive(true);
-                        }
-                        else if (item.weaponData.useMagazine.Count > 0)
+                        if (item.weaponData.useMagazine.Count > 0)
                         {
                             equipSlot.slotText.text = "ÅºÃ¢";
                             equipSlot.gameObject.SetActive(true);

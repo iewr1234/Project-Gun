@@ -715,7 +715,7 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count > 0)
         {
             var tagetInfo = targetList.OrderBy(x => DataUtility.GetDistance(x.shooterNode.transform.position, x.targetNode.transform.position)).FirstOrDefault();
-            if (tagetInfo.shooterCover)
+            if (tagetInfo.shooterCover != null)
             {
                 AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
             }
@@ -926,7 +926,8 @@ public class CharacterController : MonoBehaviour
 
             if (cover != null)
             {
-                switch (cover.coverType)
+                currentCover = cover;
+                switch (currentCover.coverType)
                 {
                     case CoverType.Half:
                         transform.LookAt(cover.transform);
@@ -935,7 +936,7 @@ public class CharacterController : MonoBehaviour
                         commandList.Remove(command);
                         break;
                     case CoverType.Full:
-                        FindDirectionForCover(cover);
+                        FindDirectionForCover();
                         break;
                     default:
                         break;
@@ -1010,9 +1011,9 @@ public class CharacterController : MonoBehaviour
     /// 엄폐 후 캐릭터 방향 찾기
     /// </summary>
     /// <param name="coverNode"></param>
-    private void FindDirectionForCover(Cover _cover)
+    private void FindDirectionForCover()
     {
-        transform.LookAt(_cover.transform);
+        transform.LookAt(currentCover.transform);
         var pos = currentNode.transform.position;
         var rightHit = false;
         var leftHit = false;
@@ -1074,7 +1075,7 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        currentCover = _cover;
+        //currentCover = _cover;
         coverPos = currentNode.transform.position + (transform.forward * coverInterval);
         covering = true;
         animator.SetBool("isCover", true);

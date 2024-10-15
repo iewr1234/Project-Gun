@@ -111,8 +111,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -1.5, y: 0}
+  m_SizeDelta: {x: -3, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9078609141940244933
 CanvasRenderer:
@@ -340,7 +340,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 667d3cabf88d8fa4a9c9c790bf952e08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  invenMgr: {fileID: 0}
+  gameMenuMgr: {fileID: 0}
+  rigData:
+    indexName: 
+    ID: 
+    rigName: 
+    storageSize: {x: 0, y: 0}
+  backpackData:
+    indexName: 
+    ID: 
+    backpackName: 
+    storageSize: {x: 0, y: 0}
   weaponData:
     indexName: 
     ID: 
@@ -351,6 +361,7 @@ MonoBehaviour:
     weight: 0
     isMain: 0
     type: 0
+    sModeInfos: []
     RPM: 0
     range: 0
     watchAngle: 0
@@ -368,6 +379,8 @@ MonoBehaviour:
     equipMag:
       indexName: 
       ID: 
+      intMag: 0
+      loadedBulletID: 
       prefabName: 
       magName: 
       compatModel: 
@@ -381,8 +394,11 @@ MonoBehaviour:
     indexName: 
     ID: 
     bulletName: 
+    meshType: 0
     level: 0
     caliber: 0
+    pelletNum: 0
+    spread: 0
     weight: 0
     propellant: 0
     damage: 0
@@ -392,6 +408,8 @@ MonoBehaviour:
   magData:
     indexName: 
     ID: 
+    intMag: 0
+    loadedBulletID: 
     prefabName: 
     magName: 
     compatModel: 
@@ -417,6 +435,15 @@ MonoBehaviour:
     ergonomy: 0
     headShot: 0
     actionCost: 0
+  grenadeData:
+    indexName: 
+    ID: 
+    grenadeName: 
+    FX_name: 
+    throwRange: 0
+    blastRange: 0
+    weight: 0
+    damage: 0
   rect: {fileID: 0}
   frameImage: {fileID: 0}
   targetImage: {fileID: 0}
@@ -434,6 +461,8 @@ MonoBehaviour:
     maxNesting: 0
     price: 0
     size: {x: 0, y: 0}
+    addOption: 0
+    setDropTable: 0
     itemOptions: []
   size: {x: 1, y: 1}
   rotation: 0

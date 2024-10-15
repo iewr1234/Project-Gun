@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 
 public enum EquipType
 {
@@ -159,6 +160,46 @@ public class EquipSlot : MonoBehaviour
                     && partsData.compatModel.Contains(model);
             default:
                 return false;
+        }
+    }
+
+    public void SetLoadedBulletCount()
+    {
+        if (item == null) return;
+
+        switch (item.itemData.type)
+        {
+            case ItemType.MainWeapon:
+                WeaponType();
+                break;
+            case ItemType.SubWeapon:
+                WeaponType();
+                break;
+            case ItemType.Magazine:
+                MagazineType();
+                break;
+            default:
+                countText.enabled = false;
+                break;
+        }
+
+        void WeaponType()
+        {
+            countText.enabled = true;
+            if (item.weaponData.isMag)
+            {
+                countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
+            }
+            else
+            {
+                countText.text = "0";
+            }
+        }
+
+        void MagazineType()
+        {
+            countText.enabled = true;
+            countText.text = $"{item.TotalCount}";
         }
     }
 
