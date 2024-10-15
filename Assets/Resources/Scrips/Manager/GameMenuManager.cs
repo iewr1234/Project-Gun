@@ -238,32 +238,42 @@ public class GameMenuManager : MonoBehaviour
             InventoryProcess();
         }
 
-        if (invenUI.activeSelf)
+        switch (state)
         {
-            if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
-            {
-                RotateItem();
-            }
-            else if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (activePopUp.Count > 0)
+            case GameMenuState.Status:
+                if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    activePopUp[^1].Button_PopUp_Close();
+                    StatusProcess();
                 }
-                else
+                break;
+            case GameMenuState.Inventory:
+                if (holdingItem != null && Input.GetKeyDown(KeyCode.R))
                 {
-                    ShowInventory(false);
+                    RotateItem();
                 }
-            }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    if (activePopUp.Count > 0)
+                    {
+                        activePopUp[^1].Button_PopUp_Close();
+                    }
+                    else
+                    {
+                        InventoryProcess();
+                    }
+                }
 
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                itemSplit = true;
-            }
-            else if (Input.GetKeyUp(KeyCode.LeftControl))
-            {
-                itemSplit = false;
-            }
+                if (Input.GetKeyDown(KeyCode.LeftControl))
+                {
+                    itemSplit = true;
+                }
+                else if (Input.GetKeyUp(KeyCode.LeftControl))
+                {
+                    itemSplit = false;
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -450,12 +460,11 @@ public class GameMenuManager : MonoBehaviour
 
         if (!showInven)
         {
-            for (int i = 0; i < activePopUp.Count; i++)
+            for (int i = activePopUp.Count - 1; i >= 0; i--)
             {
                 var popUp = activePopUp[i];
                 popUp.Button_PopUp_Close();
             }
-            activePopUp.Clear();
         }
     }
 
@@ -501,7 +510,7 @@ public class GameMenuManager : MonoBehaviour
                 //StatusProcess();
                 break;
             case GameMenuState.Inventory:
-                for (int i = 0; i < activePopUp.Count; i++)
+                for (int i = activePopUp.Count - 1; i >= 0; i--)
                 {
                     var popUp = activePopUp[i];
                     popUp.Button_PopUp_Close();
@@ -1626,7 +1635,7 @@ public class GameMenuManager : MonoBehaviour
         removePopUp.item = null;
         removePopUp.state = PopUpState.None;
         removePopUp.gameObject.SetActive(false);
-        //activePopUp.Remove(removePopUp);
+        activePopUp.Remove(removePopUp);
 
         ResetActivePopUp();
     }
