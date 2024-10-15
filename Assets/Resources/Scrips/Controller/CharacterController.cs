@@ -3077,14 +3077,13 @@ public class CharacterController : MonoBehaviour
         timer = 0f;
     }
 
-    public void AddWeapon(ItemHandler item, EquipType type)
+    public void AddWeapon(ItemHandler item, EquipType equipType)
     {
-        var weaponName = item.weaponData.GetWeaponName(type);
-        var find = weapons.Find(x => x.weaponData.weaponName == weaponName);
+        var find = weapons.Find(x => x.weaponData.ID == item.weaponData.ID && x.equipType == equipType);
         if (find != null) return;
 
-        var weapon = weaponPool.Find(x => x.name == weaponName);
-        weapon.SetComponets(this, type, item.weaponData);
+        var weapon = GetWeapon(item.weaponData.prefabName, equipType);
+        weapon.SetComponets(this, equipType, item.weaponData);
         if (currentWeapon == null)
         {
             weapon.WeaponSwitching("Right");
@@ -3098,9 +3097,11 @@ public class CharacterController : MonoBehaviour
         //weaponPool.Remove(weapon);
     }
 
-    public void RemoveWeapon(string weaponName)
+    public void RemoveWeapon(string weaponID, EquipType equipType)
     {
-        var weapon = weapons.Find(x => x.name == weaponName);
+        var weapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipType == equipType);
+        if (weapon == null) return;
+
         weapon.transform.SetParent(weaponPoolTf, false);
         weapon.Initialize();
         weapons.Remove(weapon);
@@ -3121,13 +3122,22 @@ public class CharacterController : MonoBehaviour
         //weaponPool.Add(weapon);
     }
 
-    public Weapon GetWeapon(string weaponName)
+    public Weapon GetWeapon(string prefabName, EquipType equipType)
     {
+        var weaponName = prefabName;
+        switch (equipType)
+        {
+            case EquipType.MainWeapon1:
+                weaponName += "_A";
+                break;
+            case EquipType.MainWeapon2:
+                weaponName += "_B";
+                break;
+            default:
+                break;
+        }
+
         var weapon = weaponPool.Find(x => x.name == weaponName);
-        //if (weapon != null)
-        //{
-        //    weaponPool.Remove(weapon);
-        //}
         return weapon;
     }
 

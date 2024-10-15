@@ -278,7 +278,7 @@ public class GameManager : MonoBehaviour
                 if (weaponData.type == WeaponType.None) continue;
 
                 var equipType = weapons[i].item.equipSlot.type;
-                var weapon = charCtr.GetWeapon(weaponData.GetWeaponName(equipType));
+                var weapon = charCtr.GetWeapon(weaponData.prefabName, equipType);
                 weapon.SetComponets(charCtr, equipType, weaponData);
             }
 
@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour
                 var weaponData = weaponDatas[i];
                 if (weaponData.type == WeaponType.None) continue;
 
-                var weapon = charCtr.GetWeapon(weaponData.prefabName);
+                var weapon = charCtr.GetWeapon(weaponData.prefabName, EquipType.MainWeapon1 + i);
                 weapon.SetComponets(charCtr, weaponData);
             }
 

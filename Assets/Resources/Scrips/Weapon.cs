@@ -1,12 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-
-public enum FireModeType
-{
-    SingleFire,
-    AutoFire,
-}
 
 [System.Serializable]
 public struct HitInfo
@@ -19,6 +14,12 @@ public struct HitInfo
 
 public class Weapon : MonoBehaviour
 {
+    public enum FireModeType
+    {
+        SingleFire,
+        AutoFire,
+    }
+
     private enum AnumationLayers_CharacterA
     {
         Base,
@@ -92,6 +93,10 @@ public class Weapon : MonoBehaviour
         //    charCtr.SetBulletAbility(true, chamberBullet);
         //}
         charCtr.weapons.Add(this);
+        if (charCtr.weapons.Count > 1)
+        {
+            charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipType).ToList();
+        }
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();

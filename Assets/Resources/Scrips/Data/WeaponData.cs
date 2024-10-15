@@ -120,18 +120,18 @@ public class WeaponDataInfo
         return weaponData;
     }
 
-    public string GetWeaponName(EquipType equipType)
-    {
-        switch (equipType)
-        {
-            case EquipType.MainWeapon1:
-                return $"{weaponName}_A";
-            case EquipType.MainWeapon2:
-                return $"{weaponName}_B";
-            default:
-                return weaponName;
-        }
-    }
+    //public string GetWeaponName(EquipType equipType)
+    //{
+    //    switch (equipType)
+    //    {
+    //        case EquipType.MainWeapon1:
+    //            return $"{weaponName}_A";
+    //        case EquipType.MainWeapon2:
+    //            return $"{weaponName}_B";
+    //        default:
+    //            return weaponName;
+    //    }
+    //}
 
     public float GetWeaponWeight()
     {

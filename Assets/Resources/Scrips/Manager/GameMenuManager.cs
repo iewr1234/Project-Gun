@@ -1518,8 +1518,8 @@ public class GameMenuManager : MonoBehaviour
         && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
         {
             var playerCtr = gameMgr.playerList[0];
-            var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
-            playerCtr.RemoveWeapon(item.weaponData.weaponName);
+            //var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
+            playerCtr.RemoveWeapon(item.weaponData.ID, item.equipSlot.type);
         }
 
         item.equipSlot.item = null;
