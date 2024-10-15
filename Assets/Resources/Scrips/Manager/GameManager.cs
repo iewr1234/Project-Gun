@@ -868,7 +868,12 @@ public class GameManager : MonoBehaviour
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
         var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isMag /*&& !weapon.weaponData.isChamber*/)
+        if (!weapon.weaponData.isMag)
+        {
+            Debug.Log($"{selectChar.name}: 무기에 탄창이 없음");
+            return;
+        }
+        if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count == 0)
         {
             Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
             return;

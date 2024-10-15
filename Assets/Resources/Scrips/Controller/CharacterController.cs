@@ -1182,8 +1182,12 @@ public class CharacterController : MonoBehaviour
                     }
                     break;
                 case false:
-                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle")
-                     || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
+                    if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Cover"))
+                    {
+                        EndTargeting();
+                    }
+                    else if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Idle")
+                          || animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
                     {
                         canTargeting = true;
                     }
@@ -2812,9 +2816,7 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Targeting:
-                var find = commandList.Find(x => x.type == CommandType.Targeting && x.targeting == targeting);
-                if (find != null) return;
-
+                CancelTargeting();
                 var targetingCommand = new CharacterCommand
                 {
                     indexName = $"{type}_{targeting}",
@@ -2826,6 +2828,20 @@ public class CharacterController : MonoBehaviour
                 break;
             default:
                 break;
+        }
+
+        void CancelTargeting()
+        {
+            if (ownerType == CharacterOwner.Player) return;
+
+            var targetingCommand = commandList.Find(x => x.type == CommandType.Targeting);
+            if (targetingCommand == null) return;
+
+            animator.ResetTrigger("unTargeting");
+            animator.ResetTrigger("targeting");
+            canTargeting = false;
+            targetingMove = false;
+            commandList.Remove(targetingCommand);
         }
     }
 
