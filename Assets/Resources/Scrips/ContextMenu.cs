@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +10,8 @@ public class ContextMenu : MonoBehaviour
     private enum ButtonType
     {
         ItemInformation,
-        UninstallBullets,
+        UninstallBullets_Magazine,
+        UninstallBullets_Weapon,
     }
 
     [Header("---Access Script---")]
@@ -56,8 +58,20 @@ public class ContextMenu : MonoBehaviour
         //buttons[(int)ButtonType.ItemInformation].gameObject.SetActive(true);
         switch (item.itemData.type)
         {
+            case ItemType.MainWeapon:
+                if (item.weaponData.isMag && item.weaponData.equipMag.intMag && item.weaponData.equipMag.loadedBullets.Count > 0)
+                {
+                    buttons[(int)ButtonType.UninstallBullets_Weapon].gameObject.SetActive(true);
+                }
+                break;
+            case ItemType.SubWeapon:
+                if (item.weaponData.isMag && item.weaponData.equipMag.intMag && item.weaponData.equipMag.loadedBullets.Count > 0)
+                {
+                    buttons[(int)ButtonType.UninstallBullets_Weapon].gameObject.SetActive(true);
+                }
+                break;
             case ItemType.Magazine:
-                buttons[(int)ButtonType.UninstallBullets].gameObject.SetActive(true);
+                buttons[(int)ButtonType.UninstallBullets_Magazine].gameObject.SetActive(true);
                 break;
             default:
                 break;
@@ -72,6 +86,117 @@ public class ContextMenu : MonoBehaviour
             gameMenuMgr.selectItem = null;
         }
         gameObject.SetActive(false);
+    }
+
+    private void RemoveLoadedBullets()
+    {
+        var onItem = gameMenuMgr.selectItem;
+        MagazineDataInfo magData = null;
+        switch (onItem.itemData.type)
+        {
+            case ItemType.MainWeapon:
+                magData = onItem.weaponData.equipMag;
+                break;
+            case ItemType.SubWeapon:
+                magData = onItem.weaponData.equipMag;
+                break;
+            case ItemType.Magazine:
+                magData = onItem.magData;
+                break;
+            default:
+                break;
+        }
+        if (magData == null) return;
+
+        for (int i = 0; i < magData.loadedBullets.Count; i++)
+        {
+            var loadedBullet = magData.loadedBullets[i];
+            if (onItem.equipSlot != null)
+            {
+                FindEmptyMyStorage(loadedBullet);
+            }
+            else
+            {
+                var sameBullet = gameMenuMgr.activeItem.Find(x => (x.itemSlots[0].myStorage != null && onItem.itemSlots[0].myStorage != null
+                                                                && x.itemSlots[0].myStorage.type == onItem.itemSlots[0].myStorage.type)
+                                                                && x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
+                                                                && x.TotalCount < x.itemData.maxNesting);
+                if (sameBullet != null)
+                {
+                    sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
+                }
+                else
+                {
+                    var myStorage = onItem.itemSlots[0].myStorage;
+                    if (myStorage != null)
+                    {
+                        if (!gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, myStorage.itemSlots, false, true))
+                        {
+                            NestingOrMove(loadedBullet);
+                        }
+                    }
+                    else
+                    {
+                        NestingOrMove(loadedBullet);
+                    }
+                }
+            }
+        }
+        magData.loadedBullets.Clear();
+
+        if (onItem.equipSlot != null)
+        {
+            onItem.equipSlot.SetLoadedBulletCount();
+        }
+        else
+        {
+            onItem.SetLoadedBulletCount();
+        }
+        CloseTheContextMenu(true);
+
+        void FindEmptyMyStorage(BulletDataInfo loadedBullet)
+        {
+            var storages = gameMenuMgr.myStorages.OrderByDescending(x => x.type).ToList();
+            var find = false;
+            for (int j = 0; j < storages.Count; j++)
+            {
+                var storage = storages[j];
+                var findSlot = storage.itemSlots.Find(x => x.item != null && x.item.itemData.type == ItemType.Bullet
+                                                        && x.item.bulletData.ID == loadedBullet.ID
+                                                        && x.item.TotalCount < x.item.itemData.maxNesting);
+                if (findSlot != null)
+                {
+                    findSlot.item.SetTotalCount(findSlot.item.TotalCount + 1);
+                    find = true;
+                    break;
+                }
+                else if (gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, storage.itemSlots, false, true))
+                {
+                    find = true;
+                    break;
+                }
+            }
+
+            if (!find)
+            {
+                NestingOrMove(loadedBullet);
+            }
+        }
+
+        void NestingOrMove(BulletDataInfo loadedBullet)
+        {
+            var findSlot = gameMenuMgr.otherStorage.itemSlots.Find(x => x.item != null && x.item.itemData.type == ItemType.Bullet
+                                                                     && x.item.bulletData.ID == loadedBullet.ID
+                                                                     && x.item.TotalCount < x.item.itemData.maxNesting);
+            if (findSlot != null)
+            {
+                findSlot.item.SetTotalCount(findSlot.item.TotalCount + 1);
+            }
+            else
+            {
+                gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, gameMenuMgr.otherStorage.itemSlots, false, true);
+            }
+        }
     }
 
     public void PointerEnter_ContextMenu()
@@ -96,46 +221,6 @@ public class ContextMenu : MonoBehaviour
 
     public void Button_ContextMenu_UninstallBullets()
     {
-        for (int i = 0; i < gameMenuMgr.selectItem.magData.loadedBullets.Count; i++)
-        {
-            var loadedBullet = gameMenuMgr.selectItem.magData.loadedBullets[i];
-            var sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
-                                                        && x.TotalCount < x.itemData.maxNesting
-                                                        && ((x.itemSlots[0].myStorage != null && gameMenuMgr.selectItem.itemSlots[0].myStorage != null
-                                                          && x.itemSlots[0].myStorage.type == gameMenuMgr.selectItem.itemSlots[0].myStorage.type)
-                                                          || x.itemSlots[0].otherStorage != null && gameMenuMgr.selectItem.itemSlots[0].otherStorage != null));
-            if (sameBullet != null)
-            {
-                sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
-            }
-            else
-            {
-                var inMagStorage = gameMenuMgr.selectItem.itemSlots[0].myStorage;
-                if (inMagStorage != null)
-                {
-                    if (!gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, inMagStorage.itemSlots, false))
-                    {
-                        sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
-                                                           && x.TotalCount < x.itemData.maxNesting
-                                                           && x.itemSlots[0].otherStorage != null);
-                        if (sameBullet != null)
-                        {
-                            sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
-                        }
-                        else
-                        {
-                            gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, gameMenuMgr.otherStorage.itemSlots, false);
-                        }
-                    }
-                }
-            }
-        }
-        gameMenuMgr.selectItem.magData.loadedBullets.Clear();
-        if (gameMenuMgr.selectItem.equipSlot != null)
-        {
-            gameMenuMgr.selectItem.equipSlot.countText.text = "0";
-        }
-        gameMenuMgr.selectItem.SetTotalCount(0);
-        CloseTheContextMenu(true);
+        RemoveLoadedBullets();
     }
 }

@@ -8,8 +8,8 @@ public enum MyStorageType
 {
     None,
     Pocket,
-    Rig,
     Backpack,
+    Rig,
 }
 
 public class MyStorage : MonoBehaviour
@@ -51,11 +51,11 @@ public class MyStorage : MonoBehaviour
             equipSlot.SetComponents(gameMenuMgr, this);
             switch (type)
             {
-                case MyStorageType.Rig:
-                    equipSlot.type = EquipType.Rig;
-                    break;
                 case MyStorageType.Backpack:
                     equipSlot.type = EquipType.Backpack;
+                    break;
+                case MyStorageType.Rig:
+                    equipSlot.type = EquipType.Rig;
                     break;
                 default:
                     break;
@@ -81,10 +81,10 @@ public class MyStorage : MonoBehaviour
             case MyStorageType.Pocket:
                 SetStorageSize(new Vector2Int(4, 1));
                 break;
-            case MyStorageType.Rig:
+            case MyStorageType.Backpack:
                 SetStorageSize(Vector2Int.zero);
                 break;
-            case MyStorageType.Backpack:
+            case MyStorageType.Rig:
                 SetStorageSize(Vector2Int.zero);
                 break;
             default:
@@ -111,38 +111,6 @@ public class MyStorage : MonoBehaviour
         {
             rect.sizeDelta = minRectSize_my;
         }
-        //switch (type)
-        //{
-        //    case MyStorageType.Pocket:
-        //        gridLayout.constraintCount = size.x;
-        //        reSizeNum = size.x * size.y;
-        //        break;
-        //    case MyStorageType.Rig:
-        //        if (equipSlot != null && equipSlot.item == null)
-        //        {
-        //            gridLayout.constraintCount = size.x;
-        //            reSizeNum = size.x * size.y;
-        //        }
-        //        else
-        //        {
-        //            gridLayout.constraintCount = 6;
-        //        }
-        //        break;
-        //    case MyStorageType.Backpack:
-        //        if (equipSlot != null && equipSlot.item == null)
-        //        {
-        //            gridLayout.constraintCount = size.x;
-        //            reSizeNum = size.x * size.y;
-        //        }
-        //        else
-        //        {
-        //            gridLayout.constraintCount = 6;
-        //        }
-        //        break;
-        //    default:
-        //        break;
-        //}
-
         if (size.x == 0 && size.y == 0) return;
 
         for (int i = 0; i < itemSlots.Count; i++)
