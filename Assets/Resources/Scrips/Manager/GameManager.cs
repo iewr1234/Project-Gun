@@ -277,9 +277,9 @@ public class GameManager : MonoBehaviour
                 var weaponData = weapons[i].item.weaponData;
                 if (weaponData.type == WeaponType.None) continue;
 
-                var equipType = weapons[i].item.equipSlot.type;
-                var weapon = charCtr.GetWeapon(weaponData.prefabName, equipType);
-                weapon.SetComponets(charCtr, equipType, weaponData);
+                var equipSlot = weapons[i].item.equipSlot;
+                var weapon = charCtr.GetWeapon(weaponData.prefabName, equipSlot.type);
+                weapon.SetComponets(charCtr, equipSlot, weaponData);
             }
 
             return charCtr;
@@ -949,17 +949,19 @@ public class GameManager : MonoBehaviour
         var intMag = weaponData.isMag && weaponData.equipMag.intMag;
         if (intMag)
         {
+            if (weaponData.equipMag.loadedBullets.Count == weaponData.equipMag.magSize) return;
+
             rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                     && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
-                                                     && x.itemData.type == ItemType.Bullet
-                                                     && x.bulletData.caliber == weaponData.caliber).ToList();
+                                                       && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
+                                                        && x.itemData.type == ItemType.Bullet
+                                                        && x.bulletData.caliber == weaponData.caliber).ToList();
         }
         else
         {
             rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                     && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
-                                                     && x.itemData.type == ItemType.Magazine
-                                                     && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
+                                                       && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
+                                                        && x.itemData.type == ItemType.Magazine
+                                                        && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
                                              .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
         }
 
@@ -1001,7 +1003,7 @@ public class GameManager : MonoBehaviour
         var weapon = selectChar.currentWeapon;
         if (weapon == null) return;
 
-        var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null && x.equipSlot.type == weapon.equipType
+        var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null && x.equipSlot.type == weapon.equipSlot.type
                                                       && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                        && x.weaponData.ID == weapon.weaponData.ID);
         var rigMag = rigItems[uiMgr.iconIndex];

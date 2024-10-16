@@ -412,6 +412,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void SetLoadedBulletCount()
     {
+        if (equipSlot != null)
+        {
+            equipSlot.SetLoadedBulletCount();
+            return;
+        }
+
         switch (itemData.type)
         {
             case ItemType.MainWeapon:

@@ -3094,13 +3094,13 @@ public class CharacterController : MonoBehaviour
         timer = 0f;
     }
 
-    public void AddWeapon(ItemHandler item, EquipType equipType)
+    public void AddWeapon(ItemHandler item, EquipSlot equipSlot)
     {
-        var find = weapons.Find(x => x.weaponData.ID == item.weaponData.ID && x.equipType == equipType);
+        var find = weapons.Find(x => x.weaponData.ID == item.weaponData.ID && x.equipSlot.type == equipSlot.type);
         if (find != null) return;
 
-        var weapon = GetWeapon(item.weaponData.prefabName, equipType);
-        weapon.SetComponets(this, equipType, item.weaponData);
+        var weapon = GetWeapon(item.weaponData.prefabName, equipSlot.type);
+        weapon.SetComponets(this, equipSlot, item.weaponData);
         if (currentWeapon == null)
         {
             weapon.WeaponSwitching("Right");
@@ -3114,9 +3114,9 @@ public class CharacterController : MonoBehaviour
         //weaponPool.Remove(weapon);
     }
 
-    public void RemoveWeapon(string weaponID, EquipType equipType)
+    public void RemoveWeapon(string weaponID, EquipSlot equipSlot)
     {
-        var weapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipType == equipType);
+        var weapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipSlot.type == equipSlot.type);
         if (weapon == null) return;
 
         weapon.transform.SetParent(weaponPoolTf, false);

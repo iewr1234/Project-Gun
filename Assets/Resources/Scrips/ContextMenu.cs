@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class ContextMenu : MonoBehaviour
 {
     private enum ButtonType
     {
         ItemInformation,
+        UnequipMagazine,
         UninstallBullets_Magazine,
         UninstallBullets_Weapon,
     }
@@ -54,21 +55,13 @@ public class ContextMenu : MonoBehaviour
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.z);
         var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, gameMenuMgr.GetCanvasDistance()));
         transform.position = worldPos;
-
-        //buttons[(int)ButtonType.ItemInformation].gameObject.SetActive(true);
         switch (item.itemData.type)
         {
             case ItemType.MainWeapon:
-                if (item.weaponData.isMag && item.weaponData.equipMag.intMag && item.weaponData.equipMag.loadedBullets.Count > 0)
-                {
-                    buttons[(int)ButtonType.UninstallBullets_Weapon].gameObject.SetActive(true);
-                }
+                WeaponType();
                 break;
             case ItemType.SubWeapon:
-                if (item.weaponData.isMag && item.weaponData.equipMag.intMag && item.weaponData.equipMag.loadedBullets.Count > 0)
-                {
-                    buttons[(int)ButtonType.UninstallBullets_Weapon].gameObject.SetActive(true);
-                }
+                WeaponType();
                 break;
             case ItemType.Magazine:
                 buttons[(int)ButtonType.UninstallBullets_Magazine].gameObject.SetActive(true);
@@ -77,6 +70,20 @@ public class ContextMenu : MonoBehaviour
                 break;
         }
         gameObject.SetActive(true);
+
+        void WeaponType()
+        {
+            if (!item.weaponData.isMag) return;
+
+            if (!item.weaponData.equipMag.intMag)
+            {
+                buttons[(int)ButtonType.UnequipMagazine].gameObject.SetActive(true);
+            }
+            else if (item.weaponData.equipMag.loadedBullets.Count > 0)
+            {
+                buttons[(int)ButtonType.UninstallBullets_Weapon].gameObject.SetActive(true);
+            }
+        }
     }
 
     public void CloseTheContextMenu(bool value)
@@ -117,10 +124,9 @@ public class ContextMenu : MonoBehaviour
             }
             else
             {
-                var sameBullet = gameMenuMgr.activeItem.Find(x => (x.itemSlots[0].myStorage != null && onItem.itemSlots[0].myStorage != null
-                                                                && x.itemSlots[0].myStorage.type == onItem.itemSlots[0].myStorage.type)
-                                                                && x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID
-                                                                && x.TotalCount < x.itemData.maxNesting);
+                var sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID && x.TotalCount < x.itemData.maxNesting
+                                                              && (x.itemSlots[0].myStorage != null && onItem.itemSlots[0].myStorage != null
+                                                               && x.itemSlots[0].myStorage.type == onItem.itemSlots[0].myStorage.type));
                 if (sameBullet != null)
                 {
                     sameBullet.SetTotalCount(sameBullet.TotalCount + 1);
@@ -130,7 +136,7 @@ public class ContextMenu : MonoBehaviour
                     var myStorage = onItem.itemSlots[0].myStorage;
                     if (myStorage != null)
                     {
-                        if (!gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, myStorage.itemSlots, false, true))
+                        if (!gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, myStorage.itemSlots, false))
                         {
                             NestingOrMove(loadedBullet);
                         }
@@ -143,15 +149,7 @@ public class ContextMenu : MonoBehaviour
             }
         }
         magData.loadedBullets.Clear();
-
-        if (onItem.equipSlot != null)
-        {
-            onItem.equipSlot.SetLoadedBulletCount();
-        }
-        else
-        {
-            onItem.SetLoadedBulletCount();
-        }
+        onItem.SetLoadedBulletCount();
         CloseTheContextMenu(true);
 
         void FindEmptyMyStorage(BulletDataInfo loadedBullet)
@@ -170,7 +168,7 @@ public class ContextMenu : MonoBehaviour
                     find = true;
                     break;
                 }
-                else if (gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, storage.itemSlots, false, true))
+                else if (gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, storage.itemSlots, false))
                 {
                     find = true;
                     break;
@@ -194,7 +192,7 @@ public class ContextMenu : MonoBehaviour
             }
             else
             {
-                gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, gameMenuMgr.otherStorage.itemSlots, false, true);
+                gameMenuMgr.SetItemInStorage(loadedBullet.ID, 1, gameMenuMgr.otherStorage.itemSlots, false);
             }
         }
     }
@@ -217,6 +215,12 @@ public class ContextMenu : MonoBehaviour
             popUp.PopUp_ItemInformation(gameMenuMgr.selectItem);
         }
         CloseTheContextMenu(false);
+    }
+
+    public void Button_ContextMenu_UnequipMagazine()
+    {
+        gameMenuMgr.MoveMagazineInStorage(gameMenuMgr.selectItem);
+        CloseTheContextMenu(true);
     }
 
     public void Button_ContextMenu_UninstallBullets()

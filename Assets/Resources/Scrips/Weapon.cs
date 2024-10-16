@@ -41,7 +41,7 @@ public class Weapon : MonoBehaviour
     private Transform bulletTf;
 
     [Header("--- Assignment Variable---")]
-    public EquipType equipType;
+    public EquipSlot equipSlot;
     public WeaponDataInfo weaponData;
     [Space(5f)]
 
@@ -80,11 +80,11 @@ public class Weapon : MonoBehaviour
     private readonly float shootDisparity_bullet = 0.15f;
     private readonly float shootDisparity_pellet = 0.3f;
 
-    public void SetComponets(CharacterController _charCtr, EquipType _equipType, WeaponDataInfo _weaponData)
+    public void SetComponets(CharacterController _charCtr, EquipSlot _equipSlot, WeaponDataInfo _weaponData)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
-        equipType = _equipType;
+        equipSlot = _equipSlot;
         weaponData = _weaponData;
         //charCtr.SetWeaponAbility(true, weaponData);
         //if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
@@ -95,7 +95,7 @@ public class Weapon : MonoBehaviour
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1)
         {
-            charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipType).ToList();
+            charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
         }
 
         bulletTf = transform.Find("BulletTransform");
@@ -220,7 +220,7 @@ public class Weapon : MonoBehaviour
         }
         //charCtr.weapons.Remove(this);
         charCtr = null;
-        equipType = EquipType.None;
+        equipSlot = null;
         weaponData = null;
 
         var activeParts = partsObjects.FindAll(x => x.gameObject.activeSelf);
@@ -591,6 +591,10 @@ public class Weapon : MonoBehaviour
                 hitInfos.RemoveAt(0);
                 charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+                if (equipSlot != null)
+                {
+                    equipSlot.SetLoadedBulletCount();
+                }
                 if (weaponData.equipMag.loadedBullets.Count == 0) return;
 
                 var chamberBullet = weaponData.equipMag.loadedBullets[^1];
