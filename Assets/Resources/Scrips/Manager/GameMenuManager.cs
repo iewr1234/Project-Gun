@@ -1998,8 +1998,19 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Return()
     {
-        returnButton.enabled = false;
+        returnButton.gameObject.SetActive(false);
         SetStorageUI(false);
+        switch (state)
+        {
+            case GameMenuState.Status:
+                ShowStatus(false);
+                break;
+            case GameMenuState.Inventory:
+                ShowInventory(false);
+                break;
+            default:
+                break;
+        }
         gameMgr.ReturnBase();
     }
 
