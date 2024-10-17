@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class OtherStorage : MonoBehaviour
 {
@@ -110,6 +111,19 @@ public class OtherStorage : MonoBehaviour
             {
                 gameMenuMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, storageItem.rotation, setSlot);
             }
+        }
+    }
+
+    public void CheckBaseStorage(ItemHandler item)
+    {
+        if (item.itemSlots.Count == 0) return;
+        if (item.itemSlots[0].otherStorage == null) return;
+
+        var storageInfo = storageInfos[tabIndex];
+        var find = storageInfo.itemList.Find(x => x.slotIndex == item.itemSlots[0].slotIndex);
+        if (find != null)
+        {
+            storageInfo.itemList.Remove(find);
         }
     }
 

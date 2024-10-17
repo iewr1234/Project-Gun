@@ -2081,84 +2081,25 @@ public class CharacterController : MonoBehaviour
             var pos = currentNode.transform.position;
             var targetPos = target.currentNode.transform.position;
             var distance = DataUtility.GetDistance(pos, targetPos);
+            var shooterCover = FindCoverNode(currentNode, target.currentNode);
+            Cover targetCover = null;
             FieldNode RN = null;
             FieldNode LN = null;
             FieldNode targetRN = null;
             FieldNode targetLN = null;
-            var shooterCover = FindCoverNode(node, target.currentNode);
-            var targetCover = FindCoverNode(target.currentNode, node);
-            if (shooterCover != null && shooterCover.coverType == CoverType.Full
-             && targetCover != null && targetCover.coverType == CoverType.Full)
+            if (shooterCover != null && shooterCover.coverType == CoverType.Full)
             {
                 RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
                 LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
                 if (RN == null && LN == null)
                 {
-                    //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
-                    continue;
+                    shooterCover = null;
                 }
-                targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
-                targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
-                if (targetRN == null && targetLN == null)
-                {
-                    //Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
-                    continue;
-                }
-
-                if (!FindNodeOfShooterAndTarget())
-                {
-                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
-                }
-            }
-            else if (shooterCover != null && shooterCover.coverType == CoverType.Full)
-            {
-                RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
-                LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
-                if (RN == null && LN == null)
-                {
-                    //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
-                    continue;
-                }
-
-                if (!FindNodeOfShooterAndTarget())
-                {
-                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
-                }
-            }
-            else if (targetCover != null && targetCover.coverType == CoverType.Full)
-            {
-                targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
-                targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
-                if (targetRN == null && targetLN == null)
-                {
-                    Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
-                    continue;
-                }
-
-                if (!FindNodeOfShooterAndTarget())
-                {
-                    //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
-                }
+                FindNodeOfShooterAndTarget();
             }
             else
             {
-                if (CheckTheCoverAlongPath(Range, pos, targetPos, noRange))
-                {
-                    var targetInfo = new TargetInfo
-                    {
-                        shooter = this,
-                        target = target,
-                        shooterNode = currentNode,
-                        shooterCover = shooterCover,
-                        targetNode = target.currentNode,
-                        targetCover = targetCover,
-                    };
-                    targetList.Add(targetInfo);
-                }
-                //else
-                //{
-                //    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
-                //}
+                FindNodeOfShooterAndTarget();
             }
 
             bool FindNodeOfShooterAndTarget()
@@ -2170,65 +2111,72 @@ public class CharacterController : MonoBehaviour
                 Vector3 pos;
                 Vector3 targetPos;
                 var distance = 999999f;
-
                 if (shooterCover != null && shooterCover.coverType == CoverType.Full)
                 {
                     if (RN != null)
                     {
-                        if (targetCover != null && targetCover.coverType == CoverType.Full)
+                        var _targetCover = FindCoverNode(target.currentNode, RN);
+                        if (_targetCover != null && _targetCover.coverType == CoverType.Full)
                         {
+                            targetRN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Right);
+                            targetLN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Left);
                             if (targetRN != null)
                             {
-                                CheckNodes(RN, targetRN, true, true);
+                                CheckNodes(RN, _targetCover, targetRN, true, true);
                             }
                             if (targetLN != null)
                             {
-                                CheckNodes(RN, targetLN, true, false);
+                                CheckNodes(RN, _targetCover, targetLN, true, false);
                             }
                         }
                         else
                         {
-                            CheckNodes(RN, target.currentNode, true, false);
+                            CheckNodes(RN, _targetCover, target.currentNode, true, false);
                         }
                     }
                     if (LN != null)
                     {
-                        if (targetCover != null && targetCover.coverType == CoverType.Full)
+                        var _targetCover = FindCoverNode(target.currentNode, LN);
+                        if (_targetCover != null && _targetCover.coverType == CoverType.Full)
                         {
+                            targetRN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Right);
+                            targetLN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Left);
                             if (targetRN != null)
                             {
-                                CheckNodes(LN, targetRN, false, true);
+                                CheckNodes(LN, _targetCover, targetRN, false, true);
                             }
                             if (targetLN != null)
                             {
-                                CheckNodes(LN, targetLN, false, false);
+                                CheckNodes(LN, _targetCover, targetLN, false, false);
                             }
                         }
                         else
                         {
-                            CheckNodes(LN, target.currentNode, false, false);
+                            CheckNodes(LN, _targetCover, target.currentNode, false, false);
                         }
                     }
                 }
                 else
                 {
-                    if (targetCover != null && targetCover.coverType == CoverType.Full)
+                    var _targetCover = FindCoverNode(target.currentNode, currentNode);
+                    if (_targetCover != null && _targetCover.coverType == CoverType.Full)
                     {
+                        targetRN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Right);
+                        targetLN = CheckTheCanMoveNode(target.currentNode, _targetCover, TargetDirection.Left);
                         if (targetRN != null)
                         {
-                            CheckNodes(currentNode, targetRN, false, true);
+                            CheckNodes(currentNode, _targetCover, targetRN, false, true);
                         }
                         if (targetLN != null)
                         {
-                            CheckNodes(currentNode, targetLN, false, false);
+                            CheckNodes(currentNode, _targetCover, targetLN, false, false);
                         }
                     }
                     else
                     {
-                        CheckNodes(currentNode, target.currentNode, true, false);
+                        CheckNodes(currentNode, _targetCover, target.currentNode, true, false);
                     }
                 }
-
 
                 if (shooterNode != null && targetNode != null)
                 {
@@ -2251,7 +2199,7 @@ public class CharacterController : MonoBehaviour
                     return false;
                 }
 
-                void CheckNodes(FieldNode _shooterNode, FieldNode _targetNode, bool _isRight, bool _targetRight)
+                void CheckNodes(FieldNode _shooterNode, Cover _targetCover, FieldNode _targetNode, bool _isRight, bool _targetRight)
                 {
                     pos = _shooterNode.transform.position;
                     targetPos = _targetNode.transform.position;
@@ -2260,7 +2208,10 @@ public class CharacterController : MonoBehaviour
                         var dist = DataUtility.GetDistance(pos, targetPos);
                         if (dist < distance)
                         {
+                            if (targetCover != null && _targetCover != null && targetCover.coverType < _targetCover.coverType) return;
+
                             shooterNode = _shooterNode;
+                            targetCover = _targetCover;
                             targetNode = _targetNode;
                             isRight = _isRight;
                             targetRight = _targetRight;
@@ -2286,11 +2237,15 @@ public class CharacterController : MonoBehaviour
         var dir = Vector3.zero;
         RayCastOfCoverLayer();
 
+        if (cover != null) return cover;
+
         var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
         var interval = rightDir * 0.4f;
         shooterPos = shooterNode.transform.position + interval;
         endPos = targetNode.transform.position + interval;
         RayCastOfCoverLayer();
+
+        if (cover != null) return cover;
 
         var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
         interval = leftDir * 0.4f;
@@ -2303,52 +2258,11 @@ public class CharacterController : MonoBehaviour
 
         void RayCastOfCoverLayer()
         {
-            if (cover != null) return;
-
             dir = Vector3.Normalize(endPos - shooterPos);
             if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
             {
                 var _cover = hit.collider.GetComponentInParent<Cover>();
                 if (_cover == null) return;
-                //if (_cover.coverType == CoverType.Half)
-                //{
-                //    cover = _cover;
-                //    return;
-                //}
-
-                //switch (_cover.formType)
-                //{
-                //    case CoverForm.Node:
-                //        if (!shooterNode.onAxisNodes.Contains(_cover.coverNode)) return;
-
-                //        for (int i = 0; i < _cover.coverNode.allAxisNodes.Count; i++)
-                //        {
-                //            var axisNode = _cover.coverNode.allAxisNodes[i];
-                //            if (axisNode == null) continue;
-                //            if (axisNode == shooterNode) continue;
-
-                //            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
-                //             && axisNode.cover != null) return;
-                //        }
-                //        break;
-                //    case CoverForm.Line:
-                //        if (!shooterNode.outlines.Find(x => x.lineCover == _cover)) return;
-
-                //        var _coverNode = _cover.frontNode != shooterNode ? _cover.frontNode : _cover.backNode;
-                //        for (int i = 0; i < _coverNode.allAxisNodes.Count; i++)
-                //        {
-                //            var axisNode = _coverNode.allAxisNodes[i];
-                //            if (axisNode == null) continue;
-                //            if (axisNode == shooterNode) continue;
-
-                //            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
-                //             && axisNode.cover != null) return;
-                //        }
-                //        break;
-                //    default:
-                //        break;
-                //}
-                //cover = _cover;
 
                 if (shooterNode.onAxisNodes.Contains(_cover.coverNode) || shooterNode.outlines.Find(x => x.lineCover == _cover))
                 {
@@ -2386,33 +2300,6 @@ public class CharacterController : MonoBehaviour
             var _cover = hit.collider.GetComponentInParent<Cover>();
             if (_cover.coverType == CoverType.Full) return null;
         }
-        //switch (cover.formType)
-        //{
-        //    case CoverForm.Node:
-
-        //        for (int i = 0; i < moveNode.offAxisNodes.Count; i++)
-        //        {
-        //            var axisNode = moveNode.offAxisNodes[i];
-        //            if (axisNode == null) continue;
-
-        //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != node && x.allAxisNodes.Contains(moveNode));
-        //            if (checkNode != null && checkNode.cover != null) return null;
-        //        }
-        //        break;
-        //    case CoverForm.Line:
-        //        var _node = cover.frontNode != node ? cover.frontNode : cover.backNode;
-        //        for (int i = 0; i < _node.allAxisNodes.Count; i++)
-        //        {
-        //            var axisNode = _node.offAxisNodes[i];
-        //            if (axisNode == null) continue;
-
-        //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != _node && x.allAxisNodes.Contains(axisNode));
-        //            if (checkNode != null && checkNode.cover != null) return null;
-        //        }
-        //        break;
-        //    default:
-        //        break;
-        //}
 
         return moveNode;
     }
@@ -3526,4 +3413,369 @@ public class CharacterController : MonoBehaviour
         private set { turnEnd = value; }
         get { return turnEnd; }
     }
+
+    #region Old Code
+    ///// <summary>
+    ///// 사격 가능한 타겟 찾음
+    ///// </summary>
+    //public void FindTargets(FieldNode node, bool noRange)
+    //{
+    //    targetList.Clear();
+    //    if (currentWeapon == null) return;
+
+    //    var currentNode = node;
+    //    var _targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList.FindAll(x => x.state != CharacterState.Dead)
+    //                                                         : gameMgr.enemyList.FindAll(x => x.state != CharacterState.Dead);
+    //    for (int i = 0; i < _targetList.Count; i++)
+    //    {
+    //        var target = _targetList[i];
+    //        var pos = currentNode.transform.position;
+    //        var targetPos = target.currentNode.transform.position;
+    //        var distance = DataUtility.GetDistance(pos, targetPos);
+    //        var shooterCover = FindCoverNode(currentNode, target.currentNode);
+    //        Cover targetCover = null;
+    //        FieldNode RN = null;
+    //        FieldNode LN = null;
+    //        FieldNode targetRN = null;
+    //        FieldNode targetLN = null;
+    //        //if (shooterCover != null && shooterCover.coverType == CoverType.Full
+    //        // && targetCover != null && targetCover.coverType == CoverType.Full)
+    //        //{
+    //        //    RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
+    //        //    LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
+    //        //    if (RN == null && LN == null)
+    //        //    {
+    //        //        //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+    //        //        continue;
+    //        //    }
+    //        //    //targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+    //        //    //targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
+    //        //    //if (targetRN == null && targetLN == null)
+    //        //    //{
+    //        //    //    //Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
+    //        //    //    continue;
+    //        //    //}
+
+    //        //    if (!FindNodeOfShooterAndTarget())
+    //        //    {
+    //        //        //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+    //        //    }
+    //        //}
+    //        //else if (shooterCover != null && shooterCover.coverType == CoverType.Full)
+    //        if (shooterCover != null && shooterCover.coverType == CoverType.Full)
+    //        {
+    //            RN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Right);
+    //            LN = CheckTheCanMoveNode(node, shooterCover, TargetDirection.Left);
+    //            if (RN == null && LN == null)
+    //            {
+    //                //Debug.Log($"{transform.name}: 사격할 공간이 없음(=> {target.name})");
+    //                //continue;
+    //                shooterCover = null;
+    //            }
+
+    //            if (!FindNodeOfShooterAndTarget())
+    //            {
+    //                //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+    //            }
+    //        }
+    //        else /*if (targetCover != null && targetCover.coverType == CoverType.Full)*/
+    //        {
+    //            //targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+    //            //targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
+    //            //if (targetRN == null && targetLN == null)
+    //            //{
+    //            //    Debug.Log($"{transform.name}: 적이 나올 공간이 없음(=> {target.name})");
+    //            //    continue;
+    //            //}
+
+    //            if (!FindNodeOfShooterAndTarget())
+    //            {
+    //                //Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+    //            }
+    //        }
+    //        //else
+    //        //{
+    //        //    if (CheckTheCoverAlongPath(Range, pos, targetPos, noRange))
+    //        //    {
+    //        //        var targetInfo = new TargetInfo
+    //        //        {
+    //        //            shooter = this,
+    //        //            target = target,
+    //        //            shooterNode = currentNode,
+    //        //            shooterCover = shooterCover,
+    //        //            targetNode = target.currentNode,
+    //        //            targetCover = targetCover,
+    //        //        };
+    //        //        targetList.Add(targetInfo);
+    //        //    }
+    //        //    //else
+    //        //    //{
+    //        //    //    Debug.Log($"{transform.name}: 사격 불가(=> {target.name})");
+    //        //    //}
+    //        //}
+
+    //        bool FindNodeOfShooterAndTarget()
+    //        {
+    //            FieldNode shooterNode = null;
+    //            FieldNode targetNode = null;
+    //            bool isRight = false;
+    //            bool targetRight = false;
+    //            Vector3 pos;
+    //            Vector3 targetPos;
+    //            var distance = 999999f;
+    //            if (shooterCover != null && shooterCover.coverType == CoverType.Full)
+    //            {
+    //                if (RN != null)
+    //                {
+    //                    targetCover = FindCoverNode(target.currentNode, RN);
+    //                    if (targetCover != null && targetCover.coverType == CoverType.Full)
+    //                    {
+    //                        targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+    //                        targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
+    //                        if (targetRN != null)
+    //                        {
+    //                            CheckNodes(RN, targetRN, true, true);
+    //                        }
+    //                        if (targetLN != null)
+    //                        {
+    //                            CheckNodes(RN, targetLN, true, false);
+    //                        }
+    //                    }
+    //                    else
+    //                    {
+    //                        CheckNodes(RN, target.currentNode, true, false);
+    //                    }
+    //                }
+    //                if (LN != null)
+    //                {
+    //                    targetCover = FindCoverNode(target.currentNode, LN);
+    //                    if (targetCover != null && targetCover.coverType == CoverType.Full)
+    //                    {
+    //                        targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+    //                        targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
+    //                        if (targetRN != null)
+    //                        {
+    //                            CheckNodes(LN, targetRN, false, true);
+    //                        }
+    //                        if (targetLN != null)
+    //                        {
+    //                            CheckNodes(LN, targetLN, false, false);
+    //                        }
+    //                    }
+    //                    else
+    //                    {
+    //                        CheckNodes(LN, target.currentNode, false, false);
+    //                    }
+    //                }
+    //            }
+    //            else
+    //            {
+    //                targetCover = FindCoverNode(target.currentNode, currentNode);
+    //                if (targetCover != null && targetCover.coverType == CoverType.Full)
+    //                {
+    //                    targetRN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Right);
+    //                    targetLN = CheckTheCanMoveNode(target.currentNode, targetCover, TargetDirection.Left);
+    //                    if (targetRN != null)
+    //                    {
+    //                        CheckNodes(currentNode, targetRN, false, true);
+    //                    }
+    //                    if (targetLN != null)
+    //                    {
+    //                        CheckNodes(currentNode, targetLN, false, false);
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    CheckNodes(currentNode, target.currentNode, true, false);
+    //                }
+    //            }
+
+
+    //            if (shooterNode != null && targetNode != null)
+    //            {
+    //                var targetInfo = new TargetInfo
+    //                {
+    //                    shooter = this,
+    //                    target = target,
+    //                    shooterNode = shooterNode,
+    //                    shooterCover = shooterCover,
+    //                    targetNode = targetNode,
+    //                    targetCover = targetCover,
+    //                    targetRight = targetRight,
+    //                    isRight = isRight,
+    //                };
+    //                targetList.Add(targetInfo);
+    //                return true;
+    //            }
+    //            else
+    //            {
+    //                return false;
+    //            }
+
+    //            void CheckNodes(FieldNode _shooterNode, FieldNode _targetNode, bool _isRight, bool _targetRight)
+    //            {
+    //                pos = _shooterNode.transform.position;
+    //                targetPos = _targetNode.transform.position;
+    //                if (CheckTheCoverAlongPath(Range, pos, targetPos, noRange))
+    //                {
+    //                    var dist = DataUtility.GetDistance(pos, targetPos);
+    //                    if (dist < distance)
+    //                    {
+    //                        shooterNode = _shooterNode;
+    //                        targetNode = _targetNode;
+    //                        isRight = _isRight;
+    //                        targetRight = _targetRight;
+    //                        distance = dist;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+
+    ///// <summary>
+    ///// 엄폐물 노드를 찾음
+    ///// </summary>
+    ///// <param name="shooterNode"></param>
+    ///// <param name="targetNode"></param>
+    ///// <returns></returns>
+    //private Cover FindCoverNode(FieldNode shooterNode, FieldNode targetNode)
+    //{
+    //    Cover cover = null;
+    //    var shooterPos = shooterNode.transform.position;
+    //    var endPos = targetNode.transform.position;
+    //    var dir = Vector3.zero;
+    //    RayCastOfCoverLayer();
+
+    //    var rightDir = Quaternion.Euler(0f, 90f, 0f) * dir;
+    //    var interval = rightDir * 0.4f;
+    //    shooterPos = shooterNode.transform.position + interval;
+    //    endPos = targetNode.transform.position + interval;
+    //    RayCastOfCoverLayer();
+
+    //    var leftDir = Quaternion.Euler(0f, -90f, 0f) * dir;
+    //    interval = leftDir * 0.4f;
+    //    shooterPos = shooterNode.transform.position + interval;
+    //    endPos = targetNode.transform.position + interval;
+    //    dir = Vector3.Normalize(endPos - shooterPos);
+    //    RayCastOfCoverLayer();
+
+    //    return cover;
+
+    //    void RayCastOfCoverLayer()
+    //    {
+    //        if (cover != null) return;
+
+    //        dir = Vector3.Normalize(endPos - shooterPos);
+    //        if (Physics.Raycast(shooterPos, dir, out RaycastHit hit, DataUtility.nodeSize, gameMgr.coverLayer))
+    //        {
+    //            var _cover = hit.collider.GetComponentInParent<Cover>();
+    //            if (_cover == null) return;
+    //            //if (_cover.coverType == CoverType.Half)
+    //            //{
+    //            //    cover = _cover;
+    //            //    return;
+    //            //}
+
+    //            //switch (_cover.formType)
+    //            //{
+    //            //    case CoverForm.Node:
+    //            //        if (!shooterNode.onAxisNodes.Contains(_cover.coverNode)) return;
+
+    //            //        for (int i = 0; i < _cover.coverNode.allAxisNodes.Count; i++)
+    //            //        {
+    //            //            var axisNode = _cover.coverNode.allAxisNodes[i];
+    //            //            if (axisNode == null) continue;
+    //            //            if (axisNode == shooterNode) continue;
+
+    //            //            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
+    //            //             && axisNode.cover != null) return;
+    //            //        }
+    //            //        break;
+    //            //    case CoverForm.Line:
+    //            //        if (!shooterNode.outlines.Find(x => x.lineCover == _cover)) return;
+
+    //            //        var _coverNode = _cover.frontNode != shooterNode ? _cover.frontNode : _cover.backNode;
+    //            //        for (int i = 0; i < _coverNode.allAxisNodes.Count; i++)
+    //            //        {
+    //            //            var axisNode = _coverNode.allAxisNodes[i];
+    //            //            if (axisNode == null) continue;
+    //            //            if (axisNode == shooterNode) continue;
+
+    //            //            if (axisNode.nodePos.x != shooterNode.nodePos.x && axisNode.nodePos.y != shooterNode.nodePos.y
+    //            //             && axisNode.cover != null) return;
+    //            //        }
+    //            //        break;
+    //            //    default:
+    //            //        break;
+    //            //}
+    //            //cover = _cover;
+
+    //            if (shooterNode.onAxisNodes.Contains(_cover.coverNode) || shooterNode.outlines.Find(x => x.lineCover == _cover))
+    //            {
+    //                cover = _cover;
+    //            }
+    //        }
+    //    }
+    //}
+
+    ///// <summary>
+    ///// 이동가능한 노드를 체크
+    ///// </summary>
+    ///// <param name="pos"></param>
+    ///// <param name="coverNode"></param>
+    ///// <param name="targetDir"></param>
+    ///// <returns></returns>
+    //private FieldNode CheckTheCanMoveNode(FieldNode node, Cover cover, TargetDirection targetDir)
+    //{
+    //    FieldNode moveNode = null;
+    //    var frontDir = Vector3.Normalize(cover.transform.position - node.transform.position);
+    //    var dir = targetDir == TargetDirection.Right ? Quaternion.Euler(0, 90f, 0) * frontDir : Quaternion.Euler(0, -90f, 0) * frontDir;
+    //    RaycastHit hit;
+    //    if (Physics.Raycast(node.transform.position, dir, out hit, DataUtility.nodeSize, gameMgr.nodeLayer))
+    //    {
+    //        moveNode = hit.collider.GetComponentInParent<FieldNode>();
+    //        if (!moveNode.canMove)
+    //        {
+    //            moveNode = null;
+    //        }
+    //    }
+    //    if (moveNode == null) return null;
+
+    //    if (Physics.Raycast(moveNode.transform.position, frontDir, out hit, DataUtility.nodeSize, gameMgr.coverLayer))
+    //    {
+    //        var _cover = hit.collider.GetComponentInParent<Cover>();
+    //        if (_cover.coverType == CoverType.Full) return null;
+    //    }
+    //    //switch (cover.formType)
+    //    //{
+    //    //    case CoverForm.Node:
+
+    //    //        for (int i = 0; i < moveNode.offAxisNodes.Count; i++)
+    //    //        {
+    //    //            var axisNode = moveNode.offAxisNodes[i];
+    //    //            if (axisNode == null) continue;
+
+    //    //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != node && x.allAxisNodes.Contains(moveNode));
+    //    //            if (checkNode != null && checkNode.cover != null) return null;
+    //    //        }
+    //    //        break;
+    //    //    case CoverForm.Line:
+    //    //        var _node = cover.frontNode != node ? cover.frontNode : cover.backNode;
+    //    //        for (int i = 0; i < _node.allAxisNodes.Count; i++)
+    //    //        {
+    //    //            var axisNode = _node.offAxisNodes[i];
+    //    //            if (axisNode == null) continue;
+
+    //    //            var checkNode = cover.coverNode.allAxisNodes.Find(x => x != _node && x.allAxisNodes.Contains(axisNode));
+    //    //            if (checkNode != null && checkNode.cover != null) return null;
+    //    //        }
+    //    //        break;
+    //    //    default:
+    //    //        break;
+    //    //}
+
+    //    return moveNode;
+    //}
+    #endregion
 }

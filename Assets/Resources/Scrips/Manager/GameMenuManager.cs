@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public enum GameMenuState
 {
@@ -242,6 +243,8 @@ public class GameMenuManager : MonoBehaviour
             case GameMenuState.Status:
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    if (gameMgr.gameState == GameState.Result) return;
+
                     StatusProcess();
                 }
                 break;
@@ -256,7 +259,7 @@ public class GameMenuManager : MonoBehaviour
                     {
                         activePopUp[^1].Button_PopUp_Close();
                     }
-                    else
+                    else if (gameMgr.gameState != GameState.Result)
                     {
                         InventoryProcess();
                     }
@@ -279,14 +282,13 @@ public class GameMenuManager : MonoBehaviour
     private void StatusProcess()
     {
         if (gameMgr == null) return;
-        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Status)
         {
             TurnOffGameMenuUI();
             ShowStatus(true);
         }
-        else
+        else if (gameMgr.gameState != GameState.Result)
         {
             if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
             {
@@ -416,14 +418,13 @@ public class GameMenuManager : MonoBehaviour
     private void InventoryProcess()
     {
         if (gameMgr == null) return;
-        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Inventory)
         {
             TurnOffGameMenuUI();
             ShowInventory(true);
         }
-        else
+        else if (gameMgr.gameState != GameState.Result)
         {
             if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
             {
@@ -469,13 +470,16 @@ public class GameMenuManager : MonoBehaviour
 
     private void ConvertGameMenu(CharacterController charCtr, bool value, GameMenuState state)
     {
-        if (charCtr.state == CharacterState.Base)
+        if (gameMgr.gameState != GameState.Result)
         {
-            gameMgr.gameState = value ? GameState.GameMenu : GameState.Base;
-        }
-        else
-        {
-            gameMgr.gameState = value ? GameState.GameMenu : GameState.None;
+            if (charCtr.state == CharacterState.Base)
+            {
+                gameMgr.gameState = value ? GameState.GameMenu : GameState.Base;
+            }
+            else
+            {
+                gameMgr.gameState = value ? GameState.GameMenu : GameState.None;
+            }
         }
         gameMgr.camMgr.lockCam = value;
 
@@ -977,7 +981,7 @@ public class GameMenuManager : MonoBehaviour
                 }
                 else if (itemMove)
                 {
-                    CheckBaseStorage();
+                    otherStorage.CheckBaseStorage(item);
                     ItemMove(item, itemSlots, true);
                 }
                 else
@@ -994,7 +998,7 @@ public class GameMenuManager : MonoBehaviour
                                         || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
                 if (itemMove && !storageInTheStorage)
                 {
-                    CheckBaseStorage();
+                    otherStorage.CheckBaseStorage(item);
                     ItemMove(item, itemSlots, true);
                 }
                 else
@@ -1007,19 +1011,6 @@ public class GameMenuManager : MonoBehaviour
             holdingItem = null;
             onSlots.Clear();
             InactiveSampleItem();
-        }
-
-        void CheckBaseStorage()
-        {
-            if (item.itemSlots.Count == 0) return;
-            if (item.itemSlots[0].otherStorage == null) return;
-
-            var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
-            var find = storageInfo.itemList.Find(x => x.slotIndex == item.itemSlots[0].slotIndex);
-            if (find != null)
-            {
-                storageInfo.itemList.Remove(find);
-            }
         }
 
         void ItemNesting()
@@ -1177,20 +1168,8 @@ public class GameMenuManager : MonoBehaviour
     {
         if (equipSlot.CheckEquip(putItem) && equipSlot != putItem.equipSlot)
         {
-            if (putItem.itemSlots.Count > 0 && putItem.itemSlots[0].otherStorage != null)
-            {
-                var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
-                var find = storageInfo.itemList.Find(x => x.slotIndex == putItem.itemSlots[0].slotIndex);
-                if (find != null)
-                {
-                    storageInfo.itemList.Remove(find);
-                }
-            }
-            else if (putItem.equipSlot != null)
-            {
-                UnequipItem(putItem);
-            }
-
+            otherStorage.CheckBaseStorage(putItem);
+            UnequipItem(putItem);
             var itemSlots = new List<ItemSlot>(putItem.itemSlots);
             equipSlot.item = putItem;
             equipSlot.slotText.enabled = false;
@@ -1278,7 +1257,7 @@ public class GameMenuManager : MonoBehaviour
                     if (gameMgr != null && gameMgr.playerList.Count > 0 && equipSlot.popUp.item.equipSlot != null)
                     {
                         var playerCtr = gameMgr.playerList[0];
-                        var weapon = playerCtr.weapons.Find(x => x.weaponData.ID == equipSlot.popUp.item.weaponData.ID 
+                        var weapon = playerCtr.weapons.Find(x => x.weaponData.ID == equipSlot.popUp.item.weaponData.ID
                                                               && x.equipSlot.type == equipSlot.popUp.item.equipSlot.type);
                         if (weapon != null)
                         {
@@ -1349,11 +1328,8 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="putItem"></param>
     public void QuickEquip(ItemHandler onItem, ItemHandler putItem)
     {
-        if (putItem.equipSlot != null)
-        {
-            UnequipItem(putItem);
-        }
-
+        otherStorage.CheckBaseStorage(putItem);
+        UnequipItem(putItem);
         onItem.SetItemSlots(DataUtility.slot_onItemColor);
         switch (putItem.itemData.type)
         {
@@ -1394,7 +1370,6 @@ public class GameMenuManager : MonoBehaviour
                 onItem.weaponData.equipMag = putItem.magData;
                 onItem.weaponData.isMag = true;
                 onItem.SetLoadedBulletCount();
-                //putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
                 InActiveItem(putItem);
                 onItem.SetPartsSample();
                 if (gameMgr != null && gameMgr.playerList.Count > 0 && onItem.equipSlot != null)
@@ -1412,7 +1387,6 @@ public class GameMenuManager : MonoBehaviour
                 break;
             case ItemType.Sight:
                 onItem.weaponData.equipPartsList.Add(putItem.partsData);
-                //putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
                 InActiveItem(putItem);
                 onItem.SetPartsSample();
                 break;
