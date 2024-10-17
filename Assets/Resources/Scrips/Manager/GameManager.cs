@@ -1018,11 +1018,11 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                if (equipMag.loadedBullets.Count > 0)
-                {
-                    var chamberBullet = equipMag.loadedBullets[^1];
-                    selectChar.addAbility.RemoveAbility(chamberBullet);
-                }
+                //if (equipMag.loadedBullets.Count > 0)
+                //{
+                //    var chamberBullet = equipMag.loadedBullets[^1];
+                //    selectChar.addAbility.RemoveAbility(chamberBullet);
+                //}
                 gameMenuMgr.SetItemInStorage(equipMag);
                 gameMenuMgr.QuickEquip(weaponItem, rigMag);
                 selectChar.AddCommand(CommandType.Reload);
@@ -1749,7 +1749,7 @@ public class GameManager : MonoBehaviour
                     var shooterPos = targetInfo.shooterNode.transform.position;
                     var targetPos = targetInfo.targetNode.transform.position;
                     var dist = DataUtility.GetDistance(shooterPos, targetPos);
-                    if (!enemy.CheckTheCoverAlongPath(enemy.Range, shooterPos, targetPos, false))
+                    if (!enemy.CheckTheCoverAlongPath(enemy.range, shooterPos, targetPos, false))
                     {
                         shootScore = 0;
                         continue;

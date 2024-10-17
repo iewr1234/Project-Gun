@@ -348,16 +348,16 @@ public class GameMenuManager : MonoBehaviour
             if (player.weapons.Count == 0)
             {
                 abilityTexts[0].SetAbilityText("발사속도", player.RPM);
-                abilityTexts[1].SetAbilityText("사거리", player.Range);
-                abilityTexts[2].SetAbilityText("경계각", player.WatchAngle);
+                abilityTexts[1].SetAbilityText("사거리", player.range);
+                abilityTexts[2].SetAbilityText("경계각", player.watchAngle);
                 abilityTexts[3].SetAbilityText("정확도", player.MOA);
-                abilityTexts[4].SetAbilityText("안정성", player.Stability);
-                abilityTexts[5].SetAbilityText("반동", player.Rebound);
-                abilityTexts[6].SetAbilityText("장약", player.Propellant);
-                abilityTexts[7].SetAbilityText("피해량", player.Damage);
-                abilityTexts[8].SetAbilityText("관통", player.Penetrate);
-                abilityTexts[9].SetAbilityText("방어구 손상", player.ArmorBreak);
-                abilityTexts[10].SetAbilityText("파편화", player.Critical);
+                abilityTexts[4].SetAbilityText("안정성", player.stability);
+                abilityTexts[5].SetAbilityText("반동", player.rebound);
+                abilityTexts[6].SetAbilityText("장약", player.propellant);
+                abilityTexts[7].SetAbilityText("피해량", player.damage);
+                abilityTexts[8].SetAbilityText("관통", player.penetrate);
+                abilityTexts[9].SetAbilityText("방어구 손상", player.armorBreak);
+                abilityTexts[10].SetAbilityText("파편화", player.critical);
                 main1Tab.interactable = false;
                 main2Tab.interactable = false;
                 subTab.interactable = false;
@@ -733,11 +733,10 @@ public class GameMenuManager : MonoBehaviour
 
     public void MoveMagazineInStorage(ItemHandler item)
     {
-        if (gameMgr != null && gameMgr.playerList.Count > 0 && item.weaponData.equipMag.loadedBullets.Count > 0)
+        if (gameMgr != null && gameMgr.playerList.Count > 0)
         {
             var player = gameMgr.playerList[0];
-            var chamberBullet = item.weaponData.equipMag.loadedBullets[^1];
-            player.addAbility.RemoveAbility(chamberBullet);
+            player.SetAbility();
         }
         var magData = item.weaponData.equipMag.CopyData();
         item.weaponData.equipMag = null;
@@ -1254,20 +1253,10 @@ public class GameMenuManager : MonoBehaviour
                     equipSlot.popUp.item.weaponData.isMag = true;
                     equipSlot.popUp.item.SetLoadedBulletCount();
                     equipSlot.SetLoadedBulletCount();
-                    if (gameMgr != null && gameMgr.playerList.Count > 0 && equipSlot.popUp.item.equipSlot != null)
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
-                        var playerCtr = gameMgr.playerList[0];
-                        var weapon = playerCtr.weapons.Find(x => x.weaponData.ID == equipSlot.popUp.item.weaponData.ID
-                                                              && x.equipSlot.type == equipSlot.popUp.item.equipSlot.type);
-                        if (weapon != null)
-                        {
-                            weapon.SetParts(putItem.magData.magName, true);
-                            if (putItem.magData.loadedBullets.Count > 0)
-                            {
-                                var chamberBullet = putItem.magData.loadedBullets[^1];
-                                playerCtr.SetBulletAbility(true, chamberBullet);
-                            }
-                        }
+                        var player = gameMgr.playerList[0];
+                        player.SetAbility();
                     }
                     break;
                 default:
@@ -1372,17 +1361,10 @@ public class GameMenuManager : MonoBehaviour
                 onItem.SetLoadedBulletCount();
                 InActiveItem(putItem);
                 onItem.SetPartsSample();
-                if (gameMgr != null && gameMgr.playerList.Count > 0 && onItem.equipSlot != null)
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
-                    var playerCtr = gameMgr.playerList[0];
-                    var weapon = playerCtr.weapons.Find(x => x.weaponData == onItem.weaponData && x.equipSlot.type == onItem.equipSlot.type);
-                    if (weapon != null && weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count > 0)
-                    {
-                        weapon.weaponData.equipMag = onItem.weaponData.equipMag;
-                        weapon.weaponData.isMag = true;
-                        var chamberBullet = onItem.weaponData.equipMag.loadedBullets[^1];
-                        playerCtr.addAbility.AddAbility(chamberBullet);
-                    }
+                    var player = gameMgr.playerList[0];
+                    player.SetAbility();
                 }
                 break;
             case ItemType.Sight:
@@ -1415,11 +1397,12 @@ public class GameMenuManager : MonoBehaviour
                 {
                     for (int i = 0; i < reloadNum; i++)
                     {
-                        if (gameMgr != null && gameMgr.playerList.Count > 0 && onItem.weaponData.equipMag.loadedBullets.Count == 0)
-                        {
-                            gameMgr.playerList[0].SetBulletAbility(true, putItem.bulletData);
-                        }
                         onItem.weaponData.equipMag.loadedBullets.Add(putItem.bulletData);
+                        if (gameMgr != null && gameMgr.playerList.Count > 0)
+                        {
+                            var player = gameMgr.playerList[0];
+                            player.SetAbility();
+                        }
                     }
                     putItem.SetTotalCount(putItem.TotalCount - reloadNum);
                 }
@@ -1500,9 +1483,19 @@ public class GameMenuManager : MonoBehaviour
                 break;
             case ItemType.MainWeapon:
                 //item.SetLoadedBulletCount();
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var player = gameMgr.playerList[0];
+                    player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+                }
                 break;
             case ItemType.SubWeapon:
                 //item.SetLoadedBulletCount();
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var player = gameMgr.playerList[0];
+                    player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+                }
                 break;
             case ItemType.Bullet:
                 item.equipSlot.popUp.item.weaponData.equipMag.loadedBullets.Clear();
@@ -1512,17 +1505,8 @@ public class GameMenuManager : MonoBehaviour
                 //item.SetLoadedBulletCount();
                 if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
-                    var playerCtr = gameMgr.playerList[0];
-                    var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
-                    if (weapon != null)
-                    {
-                        weapon.SetParts(item.magData.magName, false);
-                        if (weapon.weaponData.equipMag.loadedBullets.Count > 0)
-                        {
-                            var chamberBullet = weapon.weaponData.equipMag.loadedBullets[^1];
-                            playerCtr.addAbility.RemoveAbility(chamberBullet);
-                        }
-                    }
+                    var player = gameMgr.playerList[0];
+                    player.SetAbility();
                 }
                 item.equipSlot.popUp.item.weaponData.equipMag = null;
                 item.equipSlot.popUp.item.weaponData.isMag = false;
@@ -1547,13 +1531,13 @@ public class GameMenuManager : MonoBehaviour
                 break;
         }
 
-        if (gameMgr != null && gameMgr.playerList.Count > 0
-        && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
-        {
-            var playerCtr = gameMgr.playerList[0];
-            //var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
-            playerCtr.RemoveWeapon(item.weaponData.ID, item.equipSlot);
-        }
+        //if (gameMgr != null && gameMgr.playerList.Count > 0
+        //&& (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+        //{
+        //    var playerCtr = gameMgr.playerList[0];
+        //    //var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
+        //    playerCtr.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+        //}
 
         item.equipSlot.item = null;
         item.equipSlot.SetLoadedBulletCount();

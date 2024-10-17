@@ -27,14 +27,19 @@ public class WeaponDataInfo
     [Tooltip("무게")] public float weight;
     [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType type;
+    [Space(5f)]
+
     public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
+    [Tooltip("행동소모")] public int actionCost;
+    [Space(5f)]
+
     [Tooltip("정확도")] public float MOA;
     [Tooltip("안정성")] public int stability;
     [Tooltip("반동")] public int rebound;
-    [Tooltip("행동소모")] public int actionCost;
+    [Tooltip("장약")] public int propellant;
     [Space(5f)]
 
     [Tooltip("탄창 사용")] public List<WeaponPartsSize> useMagazine;
@@ -74,10 +79,12 @@ public class WeaponDataInfo
             RPM = RPM,
             range = range,
             watchAngle = watchAngle,
+            actionCost = actionCost,
+
             MOA = MOA,
             stability = stability,
             rebound = rebound,
-            actionCost = actionCost,
+            propellant = propellant,
 
             useMagazine = new List<WeaponPartsSize>(useMagazine),
             useMuzzle = new List<WeaponPartsSize>(useMuzzle),

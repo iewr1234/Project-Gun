@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -180,22 +181,22 @@ public class CharacterController : MonoBehaviour
     [Tooltip("반응")] public int reaction;
 
     [Header("[Ability]")]
-    public Ability ability;
-    public Ability addAbility;
-    public int ShootingMode_point => ability.sModeInfos[(int)ShootingMode.PointShot].value + addAbility.sModeInfos[(int)ShootingMode.PointShot].value;
-    public int ShootingMode_aim => ability.sModeInfos[(int)ShootingMode.AimShot].value + addAbility.sModeInfos[(int)ShootingMode.AimShot].value;
-    public int ShootingMode_sight => ability.sModeInfos[(int)ShootingMode.SightShot].value + addAbility.sModeInfos[(int)ShootingMode.SightShot].value;
-    public int RPM => ability.RPM + addAbility.RPM;
-    public float Range => ability.range + addAbility.range;
-    public int WatchAngle => ability.watchAngle + addAbility.watchAngle;
-    public float MOA => ability.MOA + addAbility.MOA;
-    public int Stability => ability.stability + addAbility.stability;
-    public int Rebound => ability.rebound + addAbility.rebound;
-    public int Propellant => ability.propellant + addAbility.propellant;
-    public int Damage => ability.damage + addAbility.damage;
-    public int Penetrate => ability.penetrate + addAbility.penetrate;
-    public int ArmorBreak => ability.armorBreak + addAbility.armorBreak;
-    public int Critical => ability.critical + addAbility.critical;
+    public int shootingMode_point;
+    public int shootingMode_aim;
+    public int shootingMode_sight;
+    public int RPM;
+    public float range;
+    public int watchAngle;
+    public float MOA;
+    public int stability;
+    public int rebound;
+    public int propellant;
+    public int damage;
+    public int penetrate;
+    public int armorBreak;
+    public int critical;
+    public Ability ability = new Ability();
+    public Ability addAbility = new Ability();
 
     [HideInInspector] public int baseIndex;
     [HideInInspector] public int upperIndex;
@@ -333,8 +334,10 @@ public class CharacterController : MonoBehaviour
         aiming = playerData.aiming;
         reaction = playerData.reaction;
 
-        ability.ResetShootingModeInfos();
-        addAbility.ResetShootingModeInfos();
+        ability.charCtr = this;
+        addAbility.charCtr = this;
+        //ability.ResetShootingModeInfos();
+        //addAbility.ResetShootingModeInfos();
         ability.SetAbility(playerData);
 
         baseIndex = 1;
@@ -428,8 +431,10 @@ public class CharacterController : MonoBehaviour
         aiming = enemyData.aiming;
         reaction = enemyData.reaction;
 
-        ability.ResetShootingModeInfos();
-        addAbility.ResetShootingModeInfos();
+        ability.charCtr = this;
+        addAbility.charCtr = this;
+        //ability.ResetShootingModeInfos();
+        //addAbility.ResetShootingModeInfos();
         ability.SetAbility(enemyData);
 
         aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
@@ -581,11 +586,11 @@ public class CharacterController : MonoBehaviour
         var segments = 30f;
         var angleStep = 360f / segments;
         var angle = 0 * angleStep * Mathf.Deg2Rad;
-        var startPos = new Vector3(Mathf.Cos(angle) * Range, height, Mathf.Sin(angle) * Range);
+        var startPos = new Vector3(Mathf.Cos(angle) * range, height, Mathf.Sin(angle) * range);
         for (int i = 0; i <= segments; i++)
         {
             angle = i * angleStep * Mathf.Deg2Rad;
-            var endPos = new Vector3(Mathf.Cos(angle) * Range, height, Mathf.Sin(angle) * Range);
+            var endPos = new Vector3(Mathf.Cos(angle) * range, height, Mathf.Sin(angle) * range);
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
@@ -955,7 +960,7 @@ public class CharacterController : MonoBehaviour
         Cover FindTargetDirectionCover()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < Range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -1084,7 +1089,7 @@ public class CharacterController : MonoBehaviour
         TargetDirection FindCloseTargetDirection()
         {
             var targetList = ownerType != CharacterOwner.Player ? gameMgr.playerList : gameMgr.enemyList;
-            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < Range);
+            var closeList = targetList.FindAll(x => DataUtility.GetDistance(pos, x.currentNode.transform.position) < range);
             if (closeList.Count > 0)
             {
                 var closeTarget = closeList.OrderBy(x => DataUtility.GetDistance(pos, x.currentNode.transform.position)).ToList()[0];
@@ -1662,42 +1667,61 @@ public class CharacterController : MonoBehaviour
     //}
     #endregion
 
-    /// <summary>
-    /// 무기 능력치 설정
-    /// </summary>
-    /// <param name="apply"></param>
-    /// <param name="weaponData"></param>
-    public void SetWeaponAbility(bool apply, WeaponDataInfo weaponData)
-    {
-        if (ownerType != CharacterOwner.Player) return;
+    ///// <summary>
+    ///// 무기 능력치 설정
+    ///// </summary>
+    ///// <param name="apply"></param>
+    ///// <param name="weaponData"></param>
+    //public void SetWeaponAbility(bool apply, WeaponDataInfo weaponData)
+    //{
+    //    if (ownerType != CharacterOwner.Player) return;
 
-        switch (apply)
-        {
-            case true:
-                addAbility.AddAbility(weaponData);
-                break;
-            case false:
-                addAbility.RemoveAbility(weaponData);
-                break;
-        }
-    }
+    //    switch (apply)
+    //    {
+    //        case true:
+    //            addAbility.AddAbility(weaponData);
+    //            break;
+    //        case false:
+    //            addAbility.RemoveAbility(weaponData);
+    //            break;
+    //    }
+    //}
 
-    /// <summary>
-    /// 총알 능력치 설정
-    /// </summary>
-    /// <param name="apply"></param>
-    /// <param name="bulletData"></param>
-    public void SetBulletAbility(bool apply, BulletDataInfo bulletData)
+    ///// <summary>
+    ///// 총알 능력치 설정
+    ///// </summary>
+    ///// <param name="apply"></param>
+    ///// <param name="bulletData"></param>
+    //public void SetBulletAbility(bool apply, BulletDataInfo bulletData)
+    //{
+    //    switch (apply)
+    //    {
+    //        case true:
+    //            addAbility.AddAbility(bulletData);
+    //            break;
+    //        case false:
+    //            addAbility.RemoveAbility(bulletData);
+    //            break;
+    //    }
+    //}
+
+    public void SetAbility()
     {
-        switch (apply)
-        {
-            case true:
-                addAbility.AddAbility(bulletData);
-                break;
-            case false:
-                addAbility.RemoveAbility(bulletData);
-                break;
-        }
+        addAbility.SetAddAbility();
+        shootingMode_point = ability.sModeInfos[(int)ShootingMode.PointShot].value + addAbility.sModeInfos[(int)ShootingMode.PointShot].value;
+        shootingMode_aim = ability.sModeInfos[(int)ShootingMode.AimShot].value + addAbility.sModeInfos[(int)ShootingMode.AimShot].value;
+        shootingMode_sight = ability.sModeInfos[(int)ShootingMode.SightShot].value + addAbility.sModeInfos[(int)ShootingMode.SightShot].value;
+        RPM = ability.RPM + addAbility.RPM;
+        range = ability.range + addAbility.range;
+        watchAngle = ability.watchAngle + addAbility.watchAngle;
+        MOA = ability.MOA + addAbility.MOA;
+        stability = ability.stability + addAbility.stability;
+        rebound = ability.rebound + addAbility.rebound;
+        propellant = ability.propellant + addAbility.propellant;
+        damage = ability.damage + addAbility.damage;
+        penetrate = ability.penetrate + addAbility.penetrate;
+        armorBreak = ability.armorBreak + addAbility.armorBreak;
+        critical = ability.critical + addAbility.critical;
     }
 
     /// <summary>
@@ -1849,7 +1873,7 @@ public class CharacterController : MonoBehaviour
         var pos = watchNode.transform.position;
         var nodeAngleRad = Mathf.Atan2(targetNode.transform.position.x - pos.x, targetNode.transform.position.z - pos.z);
         var nodeAngle = (nodeAngleRad * Mathf.Rad2Deg + 360) % 360;
-        var halfAngle = WatchAngle / 2f;
+        var halfAngle = watchAngle / 2f;
         watchInfo = new WatchInfo()
         {
             drawRang = drawRange,
@@ -2203,7 +2227,7 @@ public class CharacterController : MonoBehaviour
                 {
                     pos = _shooterNode.transform.position;
                     targetPos = _targetNode.transform.position;
-                    if (CheckTheCoverAlongPath(Range, pos, targetPos, noRange))
+                    if (CheckTheCoverAlongPath(range, pos, targetPos, noRange))
                     {
                         var dist = DataUtility.GetDistance(pos, targetPos);
                         if (dist < distance)
@@ -2999,6 +3023,7 @@ public class CharacterController : MonoBehaviour
             weapon.WeaponSwitching("Holster");
         }
         //weaponPool.Remove(weapon);
+        SetAbility();
     }
 
     public void RemoveWeapon(string weaponID, EquipSlot equipSlot)
@@ -3024,6 +3049,7 @@ public class CharacterController : MonoBehaviour
             }
         }
         //weaponPool.Add(weapon);
+        SetAbility();
     }
 
     public Weapon GetWeapon(string prefabName, EquipType equipType)
@@ -3189,8 +3215,9 @@ public class CharacterController : MonoBehaviour
         Debug.Log("Event_WeaponChange");
         //SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon.WeaponSwitching("Holster");
-        currentWeapon.UnequipWeapon();
+        //currentWeapon.UnequipWeapon();
         weapons[changeIndex].EquipWeapon();
+        SetAbility();
         currentWeapon.WeaponSwitching("Right");
     }
 
@@ -3199,9 +3226,10 @@ public class CharacterController : MonoBehaviour
         if (!animator.GetBool("otherType")) return;
 
         Debug.Log("Event_WeaponChange_OrderType");
-        currentWeapon.UnequipWeapon();
+        //currentWeapon.UnequipWeapon();
         currentWeapon = weapons[changeIndex];
         currentWeapon.EquipWeapon();
+        SetAbility();
         animator.SetTrigger("change");
         animator.SetTrigger("isCut");
     }
@@ -3263,10 +3291,11 @@ public class CharacterController : MonoBehaviour
     }
     #endregion
 
-    [System.Serializable]
     public class Ability
     {
-        public List<ShootingModeInfo> sModeInfos;
+        public CharacterController charCtr;
+
+        public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
         [Tooltip("발사속도")] public int RPM;
         [Tooltip("사거리")] public float range;
         [Tooltip("경계각")] public int watchAngle;
@@ -3306,6 +3335,7 @@ public class CharacterController : MonoBehaviour
 
         public void SetAbility(PlayerDataInfo playerData)
         {
+            ResetShootingModeInfos();
             sModeInfos = playerData.sModeInfos;
             RPM = playerData.RPM;
             range = playerData.range;
@@ -3337,68 +3367,78 @@ public class CharacterController : MonoBehaviour
             critical = enemyData.critical;
         }
 
-        public void AddAbility(WeaponDataInfo weaponData)
+        public void SetAddAbility()
         {
-            int[] modeValues =
+            ResetShootingModeInfos();
+            RPM = 0;
+            range = 0;
+            watchAngle = 0;
+            MOA = 0;
+            stability = 0;
+            rebound = 0;
+            propellant = 0;
+            damage = 0;
+            penetrate = 0;
+            armorBreak = 0;
+            critical = 0;
+
+            var weaponData = charCtr.currentWeapon != null ? charCtr.currentWeapon.weaponData : null;
+            var bulletData = weaponData != null && weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0
+                           ? weaponData.equipMag.loadedBullets[^1] : null;
+            ApllyAbilitys(this, weaponData, bulletData);
+        }
+
+        public Ability GetAddAbility(int bulletIndex)
+        {
+            var addAbility = new Ability();
+            addAbility.ResetShootingModeInfos();
+
+            var weaponData = charCtr.currentWeapon != null ? charCtr.currentWeapon.weaponData : null;
+            var bulletData = weaponData != null && weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0
+                         && (weaponData.equipMag.loadedBullets.Count - 1) - bulletIndex >= 0
+                           ? weaponData.equipMag.loadedBullets[(weaponData.equipMag.loadedBullets.Count - 1) - bulletIndex] : null;
+            ApllyAbilitys(addAbility, weaponData, bulletData);
+
+            return addAbility;
+        }
+
+        private void ApllyAbilitys(Ability ability, WeaponDataInfo weaponData, BulletDataInfo bulletData)
+        {
+            if (weaponData != null)
             {
-                weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
-                weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
-                weaponData.sModeInfos[(int)ShootingMode.SightShot].value
-            };
-            for (int i = 0; i < modeValues.Length; i++)
-            {
-                var sModeInfo = sModeInfos[i];
-                var newValue = sModeInfo.value + modeValues[i];
-                sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
-                sModeInfo.value = newValue;
+                int[] modeValues =
+                {
+                    weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+                    weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+                    weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+                };
+                for (int i = 0; i < modeValues.Length; i++)
+                {
+                    var sModeInfo = ability.sModeInfos[i];
+                    var newValue = sModeInfo.value + modeValues[i];
+                    sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
+                    sModeInfo.value = newValue;
+                }
+                ability.RPM += weaponData.RPM;
+                ability.range += weaponData.range;
+                ability.watchAngle += weaponData.watchAngle;
+                ability.MOA += weaponData.MOA;
+                ability.stability += weaponData.stability;
+                ability.rebound += weaponData.rebound;
+                ability.propellant += weaponData.propellant;
+
+                if (bulletData != null)
+                {
+                    ability.MOA += bulletData.MOA;
+                    ability.stability += bulletData.stability;
+                    ability.rebound += bulletData.rebound;
+                    ability.propellant += bulletData.propellant;
+                    ability.damage += bulletData.damage;
+                    ability.penetrate += bulletData.penetrate;
+                    ability.armorBreak += bulletData.armorBreak;
+                    ability.critical += bulletData.critical;
+                }
             }
-            RPM += weaponData.RPM;
-            range += weaponData.range;
-            watchAngle += weaponData.watchAngle;
-            MOA += weaponData.MOA;
-            stability += weaponData.stability;
-            rebound += weaponData.rebound;
-        }
-
-        public void AddAbility(BulletDataInfo bulletData)
-        {
-            propellant += bulletData.propellant;
-            damage += bulletData.damage;
-            penetrate += bulletData.penetrate;
-            armorBreak += bulletData.armorBreak;
-            critical += bulletData.critical;
-        }
-
-        public void RemoveAbility(WeaponDataInfo weaponData)
-        {
-            int[] modeValues =
-            {
-                weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
-                weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
-                weaponData.sModeInfos[(int)ShootingMode.SightShot].value
-            };
-            for (int i = 0; i < modeValues.Length; i++)
-            {
-                var sModeInfo = sModeInfos[i];
-                var newValue = sModeInfo.value - modeValues[i];
-                sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
-                sModeInfo.value = newValue;
-            }
-            RPM -= weaponData.RPM;
-            range -= weaponData.range;
-            watchAngle -= weaponData.watchAngle;
-            MOA -= weaponData.MOA;
-            stability -= weaponData.stability;
-            rebound -= weaponData.rebound;
-        }
-
-        public void RemoveAbility(BulletDataInfo bulletData)
-        {
-            propellant -= bulletData.propellant;
-            damage -= bulletData.damage;
-            penetrate -= bulletData.penetrate;
-            armorBreak -= bulletData.armorBreak;
-            critical -= bulletData.critical;
         }
     }
 

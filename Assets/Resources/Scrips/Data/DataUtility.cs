@@ -153,7 +153,7 @@ public static class DataUtility
     public static int GetAimStaminaCost(CharacterController charCtr)
     {
         var weaponData = charCtr.currentWeapon.weaponData;
-        var rebound = charCtr.Rebound;
+        var rebound = charCtr.rebound;
         var weight = weaponData.GetWeaponWeight();
         var strength = charCtr.strength;
         var result = 3 + (rebound * weight * 0.01f) * (1 / (1 + strength * 0.01f));
@@ -185,13 +185,13 @@ public static class DataUtility
         switch (targetInfo.shooter.sMode)
         {
             case ShootingMode.PointShot:
-                sModeValue = targetInfo.shooter.ShootingMode_point;
+                sModeValue = targetInfo.shooter.shootingMode_point;
                 break;
             case ShootingMode.AimShot:
-                sModeValue = targetInfo.shooter.ShootingMode_aim;
+                sModeValue = targetInfo.shooter.shootingMode_aim;
                 break;
             case ShootingMode.SightShot:
-                sModeValue = targetInfo.shooter.ShootingMode_sight;
+                sModeValue = targetInfo.shooter.shootingMode_sight;
                 break;
             default:
                 sModeValue = 0;
@@ -260,7 +260,7 @@ public static class DataUtility
     public static float GetHitAccuracyReduction(CharacterController charCtr, float dist)
     {
         var weaponData = charCtr.currentWeapon.weaponData;
-        var rebound = weaponData.GetWeaponRebound(charCtr.Propellant);
+        var rebound = weaponData.GetWeaponRebound(charCtr.propellant);
         var result = Mathf.Pow(2, dist / 5) * (rebound * 0.1f);
 
         return GetFloorValue(result, 2);

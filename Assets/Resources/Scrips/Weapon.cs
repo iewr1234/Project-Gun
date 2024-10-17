@@ -214,10 +214,10 @@ public class Weapon : MonoBehaviour
 
     public void Initialize()
     {
-        if (charCtr.currentWeapon == this)
-        {
-            UnequipWeapon();
-        }
+        //if (charCtr.currentWeapon == this)
+        //{
+        //    UnequipWeapon();
+        //}
         //charCtr.weapons.Remove(this);
         charCtr = null;
         equipSlot = null;
@@ -243,12 +243,12 @@ public class Weapon : MonoBehaviour
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
 
-        charCtr.SetWeaponAbility(true, weaponData);
-        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-        {
-            var chamberBullet = weaponData.equipMag.loadedBullets[0];
-            charCtr.SetBulletAbility(true, chamberBullet);
-        }
+        //charCtr.SetWeaponAbility(true, weaponData);
+        //if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+        //{
+        //    var chamberBullet = weaponData.equipMag.loadedBullets[0];
+        //    charCtr.SetBulletAbility(true, chamberBullet);
+        //}
 
         switch (weaponData.type)
         {
@@ -298,15 +298,15 @@ public class Weapon : MonoBehaviour
         //}
     }
 
-    public void UnequipWeapon()
-    {
-        charCtr.SetWeaponAbility(false, weaponData);
-        if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-        {
-            var chamberBullet = weaponData.equipMag.loadedBullets[0];
-            charCtr.SetBulletAbility(false, chamberBullet);
-        }
-    }
+    //public void UnequipWeapon()
+    //{
+    //    charCtr.SetWeaponAbility(false, weaponData);
+    //    if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+    //    {
+    //        var chamberBullet = weaponData.equipMag.loadedBullets[0];
+    //        charCtr.SetBulletAbility(false, chamberBullet);
+    //    }
+    //}
 
     public void SetParts(string partsName, bool value)
     {
@@ -368,6 +368,8 @@ public class Weapon : MonoBehaviour
         var dist = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
         for (int i = 0; i < shootNum; i++)
         {
+            if (i == weaponData.equipMag.loadedBullets.Count) break;
+
             hitAccuracys.Clear();
             propellant = 0;
             pelletNum = 0;
@@ -380,7 +382,7 @@ public class Weapon : MonoBehaviour
             else
             {
                 SetUseValue(i, ref propellant, ref pelletNum, ref spread);
-                var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
+                var rebound = Mathf.FloorToInt(charCtr.rebound * 0.01f * propellant * 0.1f);
                 if (rebound < 1) rebound = 1;
 
                 hitAccuracy += rebound;
@@ -411,7 +413,7 @@ public class Weapon : MonoBehaviour
                     }
                     break;
                 default:
-                    propellant = charCtr.Propellant;
+                    propellant = charCtr.propellant;
                     pelletNum = this.pelletNum;
                     spread = this.spread;
                     break;
@@ -468,7 +470,7 @@ public class Weapon : MonoBehaviour
             else
             {
                 SetUseValue(i, ref propellant, ref pelletNum, ref spread);
-                var rebound = Mathf.FloorToInt(charCtr.Rebound * 0.01f * propellant * 0.1f);
+                var rebound = Mathf.FloorToInt(charCtr.rebound * 0.01f * propellant * 0.1f);
                 if (rebound < 1) rebound = 1;
 
                 hitAccuracy += rebound;
@@ -505,7 +507,7 @@ public class Weapon : MonoBehaviour
                     }
                     break;
                 default:
-                    propellant = charCtr.Propellant;
+                    propellant = charCtr.propellant;
                     pelletNum = this.pelletNum;
                     spread = this.spread;
                     break;
@@ -589,16 +591,17 @@ public class Weapon : MonoBehaviour
                     bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
-                charCtr.SetBulletAbility(false, loadedBullet);
+                //charCtr.SetBulletAbility(false, loadedBullet);
                 weaponData.equipMag.loadedBullets.Remove(loadedBullet);
                 if (equipSlot != null)
                 {
                     equipSlot.SetLoadedBulletCount();
                 }
-                if (weaponData.equipMag.loadedBullets.Count == 0) return;
+                //if (weaponData.equipMag.loadedBullets.Count == 0)
 
-                var chamberBullet = weaponData.equipMag.loadedBullets[^1];
-                charCtr.SetBulletAbility(true, chamberBullet);
+                //var chamberBullet = weaponData.equipMag.loadedBullets[^1];
+                //charCtr.SetBulletAbility(true, chamberBullet);
+                charCtr.SetAbility();
                 break;
             case CharacterOwner.Enemy:
                 count = pelletNum == 0 ? 1 : pelletNum;

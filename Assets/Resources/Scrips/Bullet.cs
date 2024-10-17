@@ -73,11 +73,11 @@ public class Bullet : MonoBehaviour
         bulletRb.velocity = transform.forward * speed;
         meshs[_meshType].SetActive(true);
 
-        propellant = shooter.Propellant;
-        damage = shooter.Damage;
-        penetrate = shooter.Penetrate;
-        armorBreak = shooter.ArmorBreak;
-        critical = shooter.Critical;
+        propellant = shooter.propellant;
+        damage = shooter.damage;
+        penetrate = shooter.penetrate;
+        armorBreak = shooter.armorBreak;
+        critical = shooter.critical;
 
         isHit = _isHit;
         isMiss = _isMiss;

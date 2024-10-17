@@ -18,7 +18,14 @@ public class BulletDataInfo
     [Tooltip("펠릿 수")] public int pelletNum;
     [Tooltip("확산")] public int spread;
     [Tooltip("무게")] public float weight;
+    [Space(5f)]
+
+    [Tooltip("정확도")] public float MOA;
+    [Tooltip("안정성")] public int stability;
+    [Tooltip("반동")] public int rebound;
     [Tooltip("장약")] public int propellant;
+    [Space(5f)]
+
     [Tooltip("피해량")] public int damage;
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
@@ -39,7 +46,12 @@ public class BulletDataInfo
             pelletNum = pelletNum,
             spread = spread,
             weight = weight,
+
+            MOA = MOA,
+            stability = stability,
+            rebound = rebound,
             propellant = propellant,
+
             damage = damage,
             penetrate = penetrate,
             armorBreak = armorBreak,

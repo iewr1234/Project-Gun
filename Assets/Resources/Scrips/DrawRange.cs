@@ -30,19 +30,19 @@ public class DrawRange : MonoBehaviour
             gameObject.SetActive(true);
         }
         transform.position = charCtr.watchInfo.watchNode.transform.position;
-        angle = charCtr.WatchAngle;
+        angle = charCtr.watchAngle;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
                 var range = DataUtility.GetDistance(transform.position, targetNode.transform.position);
-                if (range > charCtr.Range)
+                if (range > charCtr.range)
                 {
-                    range = charCtr.Range;
+                    range = charCtr.range;
                 }
                 radius = range;
                 break;
             case CharacterOwner.Enemy:
-                radius = charCtr.Range;
+                radius = charCtr.range;
                 break;
             default:
                 break;

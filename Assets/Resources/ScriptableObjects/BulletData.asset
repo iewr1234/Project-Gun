@@ -22,7 +22,10 @@ MonoBehaviour:
     pelletNum: 0
     spread: 0
     weight: 0.1
-    propellant: 50
+    MOA: -5
+    stability: -5
+    rebound: -5
+    propellant: 5
     damage: 5
     penetrate: 10
     armorBreak: 15
@@ -36,7 +39,10 @@ MonoBehaviour:
     pelletNum: 0
     spread: 0
     weight: 0.1
-    propellant: 50
+    MOA: 0
+    stability: 0
+    rebound: 0
+    propellant: 0
     damage: 5
     penetrate: 10
     armorBreak: 15
@@ -50,7 +56,10 @@ MonoBehaviour:
     pelletNum: 0
     spread: 0
     weight: 0.1
-    propellant: 100
+    MOA: 5
+    stability: 5
+    rebound: 5
+    propellant: -5
     damage: 3
     penetrate: 5
     armorBreak: 5
@@ -64,7 +73,10 @@ MonoBehaviour:
     pelletNum: 8
     spread: 75
     weight: 0.1
-    propellant: 100
+    MOA: -10
+    stability: -10
+    rebound: -10
+    propellant: 10
     damage: 5
     penetrate: 10
     armorBreak: 15

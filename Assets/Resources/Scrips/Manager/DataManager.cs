@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
+using static CharacterController;
+using Unity.VisualScripting;
 
 [System.Serializable]
 public struct ObjectData
@@ -732,7 +734,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:Y";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:Z";
     private enum WeaponVariable
     {
         ID,
@@ -749,10 +751,11 @@ public class DataManager : MonoBehaviour
         RPM,
         Range,
         WatchAngle,
+        ActionCost,
         MOA,
         Stability,
         Rebound,
-        ActionCost,
+        Propellant,
         UseMagazine,
         UseMuzzle,
         UseScope,
@@ -798,10 +801,11 @@ public class DataManager : MonoBehaviour
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
+                    actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
                     MOA = float.Parse(data[(int)WeaponVariable.MOA]),
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),
-                    actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
+                    propellant = int.Parse(data[(int)WeaponVariable.Propellant]),
                     useMagazine = ReadUseMagazineSize(data[(int)WeaponVariable.UseMagazine]),
                     useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
                     useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
@@ -1022,7 +1026,7 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:N";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:Q";
     private enum BulletVariable
     {
         ID,
@@ -1033,6 +1037,9 @@ public class DataManager : MonoBehaviour
         PelletNum,
         Spread,
         Weight,
+        MOA,
+        Stability,
+        Rebound,
         Propellant,
         Damage,
         Penetrate,
@@ -1074,6 +1081,9 @@ public class DataManager : MonoBehaviour
                     pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),
                     spread = int.Parse(data[(int)BulletVariable.Spread]),
                     weight = float.Parse(data[(int)BulletVariable.Weight]),
+                    MOA = int.Parse(data[(int)BulletVariable.MOA]),
+                    stability = int.Parse(data[(int)BulletVariable.Stability]),
+                    rebound = int.Parse(data[(int)BulletVariable.Rebound]),
                     propellant = int.Parse(data[(int)BulletVariable.Propellant]),
                     damage = int.Parse(data[(int)BulletVariable.Damage]),
                     penetrate = int.Parse(data[(int)BulletVariable.Penetrate]),
