@@ -73,7 +73,7 @@ public class AimGauge : MonoBehaviour
         var targetInfo = charCtr.targetList[charCtr.targetIndex];
         var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
         var weapon = charCtr.currentWeapon;
-        weapon.CheckHitBullet_Aim(targetInfo, shootNum);
+        weapon.CheckHitBullet(targetInfo, shootNum, false);
         GaugeScalePlacement(weapon);
         aimGauge.value = 0;
     }
@@ -89,7 +89,7 @@ public class AimGauge : MonoBehaviour
             gaugeScale.gameObject.SetActive(false);
         }
 
-        targetValue = weapon.hitValue;
+        targetValue = weapon.GetHitValue();
         aimGauge.value = 0;
         GaugeScalePlacement(weapon);
 

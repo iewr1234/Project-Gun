@@ -32,9 +32,15 @@ MonoBehaviour:
     sight: 5
     aiming: 30
     reaction: 10
-    sModeInfo:
-      indexName: 'PointShot: 50'
+    sModeInfos:
+    - indexName: 'PointShot: 50'
       modeType: 0
+      value: 50
+    - indexName: 'AimShot: 50'
+      modeType: 1
+      value: 50
+    - indexName: 'SightShot: 50'
+      modeType: 2
       value: 50
     RPM: 650
     range: 20
@@ -87,9 +93,15 @@ MonoBehaviour:
     sight: 5
     aiming: 25
     reaction: 10
-    sModeInfo:
-      indexName: 'PointShot: 50'
+    sModeInfos:
+    - indexName: 'PointShot: 50'
       modeType: 0
+      value: 50
+    - indexName: 'AimShot: 50'
+      modeType: 1
+      value: 50
+    - indexName: 'SightShot: 50'
+      modeType: 2
       value: 50
     RPM: 100
     range: 15
@@ -142,9 +154,15 @@ MonoBehaviour:
     sight: 5
     aiming: 25
     reaction: 10
-    sModeInfo:
-      indexName: 'PointShot: 50'
+    sModeInfos:
+    - indexName: 'PointShot: 50'
       modeType: 0
+      value: 50
+    - indexName: 'AimShot: 50'
+      modeType: 1
+      value: 50
+    - indexName: 'SightShot: 50'
+      modeType: 2
       value: 50
     RPM: 100
     range: 15
@@ -197,9 +215,15 @@ MonoBehaviour:
     sight: 5
     aiming: 25
     reaction: 10
-    sModeInfo:
-      indexName: 'PointShot: 50'
+    sModeInfos:
+    - indexName: 'PointShot: 50'
       modeType: 0
+      value: 50
+    - indexName: 'AimShot: 50'
+      modeType: 1
+      value: 50
+    - indexName: 'SightShot: 50'
+      modeType: 2
       value: 50
     RPM: 100
     range: 15
@@ -252,9 +276,15 @@ MonoBehaviour:
     sight: 5
     aiming: 40
     reaction: 10
-    sModeInfo:
-      indexName: 'PointShot: 50'
+    sModeInfos:
+    - indexName: 'PointShot: 50'
       modeType: 0
+      value: 50
+    - indexName: 'AimShot: 50'
+      modeType: 1
+      value: 50
+    - indexName: 'SightShot: 50'
+      modeType: 2
       value: 50
     RPM: 650
     range: 20

@@ -184,17 +184,17 @@ public class CharacterController : MonoBehaviour
     public int shootingMode_point;
     public int shootingMode_aim;
     public int shootingMode_sight;
-    public int RPM;
-    public float range;
-    public int watchAngle;
-    public float MOA;
-    public int stability;
-    public int rebound;
-    public int propellant;
-    public int damage;
-    public int penetrate;
-    public int armorBreak;
-    public int critical;
+    [Tooltip("발사속도")] public int RPM;
+    [Tooltip("사거리")] public float range;
+    [Tooltip("경계각")] public int watchAngle;
+    [Tooltip("정확도")] public float MOA;
+    [Tooltip("안정성")] public int stability;
+    [Tooltip("반동")] public int rebound;
+    [Tooltip("장약")] public int propellant;
+    [Tooltip("피해량")] public int damage;
+    [Tooltip("관통")] public int penetrate;
+    [Tooltip("방어구 손상")] public int armorBreak;
+    [Tooltip("파편화")] public int critical;
     public Ability ability = new Ability();
     public Ability addAbility = new Ability();
 
@@ -435,6 +435,7 @@ public class CharacterController : MonoBehaviour
         addAbility.charCtr = this;
         //ability.ResetShootingModeInfos();
         //addAbility.ResetShootingModeInfos();
+        addAbility.ResetShootingModeInfos();
         ability.SetAbility(enemyData);
 
         aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
@@ -1454,8 +1455,9 @@ public class CharacterController : MonoBehaviour
     /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
+        Debug.Log($"{transform.name}: Aim");
         aimTf = targetInfo.target.transform;
-        if (currentWeapon.CheckHitBullet_Shoot(targetInfo, animator.GetInteger("shootNum")))
+        if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum"), true))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
@@ -1667,44 +1669,9 @@ public class CharacterController : MonoBehaviour
     //}
     #endregion
 
-    ///// <summary>
-    ///// 무기 능력치 설정
-    ///// </summary>
-    ///// <param name="apply"></param>
-    ///// <param name="weaponData"></param>
-    //public void SetWeaponAbility(bool apply, WeaponDataInfo weaponData)
-    //{
-    //    if (ownerType != CharacterOwner.Player) return;
-
-    //    switch (apply)
-    //    {
-    //        case true:
-    //            addAbility.AddAbility(weaponData);
-    //            break;
-    //        case false:
-    //            addAbility.RemoveAbility(weaponData);
-    //            break;
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 총알 능력치 설정
-    ///// </summary>
-    ///// <param name="apply"></param>
-    ///// <param name="bulletData"></param>
-    //public void SetBulletAbility(bool apply, BulletDataInfo bulletData)
-    //{
-    //    switch (apply)
-    //    {
-    //        case true:
-    //            addAbility.AddAbility(bulletData);
-    //            break;
-    //        case false:
-    //            addAbility.RemoveAbility(bulletData);
-    //            break;
-    //    }
-    //}
-
+    /// <summary>
+    /// 능력치 설정
+    /// </summary>
     public void SetAbility()
     {
         addAbility.SetAddAbility();
@@ -1800,6 +1767,12 @@ public class CharacterController : MonoBehaviour
     {
         SetAction(-useAction);
         SetStamina(-useAction * 5);
+    }
+
+    public void PayTheShotCost(int curStamina)
+    {
+        stamina = curStamina;
+        charUI.SetCharacterValue();
     }
 
     public void SetTurnEnd(bool turnEnd)
@@ -2418,7 +2391,7 @@ public class CharacterController : MonoBehaviour
             gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
             gameMgr.uiMgr.aimGauge.components.SetActive(true);
-            gameMgr.uiMgr.SetTargetInfo(targetInfo);
+            gameMgr.uiMgr.SetHitAccuracy(targetInfo.shooter);
             return true;
         }
     }
@@ -2455,7 +2428,7 @@ public class CharacterController : MonoBehaviour
             camState = CameraState.RightAim;
         }
         gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
-        gameMgr.uiMgr.SetTargetInfo(targetInfo);
+        gameMgr.uiMgr.SetHitAccuracy(targetInfo.shooter);
     }
 
     /// <summary>
@@ -3015,15 +2988,13 @@ public class CharacterController : MonoBehaviour
         if (currentWeapon == null)
         {
             weapon.WeaponSwitching("Right");
-            weapon.EquipWeapon();
             currentWeapon = weapon;
+            weapon.EquipWeapon();
         }
         else
         {
             weapon.WeaponSwitching("Holster");
         }
-        //weaponPool.Remove(weapon);
-        SetAbility();
     }
 
     public void RemoveWeapon(string weaponID, EquipSlot equipSlot)
@@ -3040,16 +3011,14 @@ public class CharacterController : MonoBehaviour
             {
                 weapon = weapons[0];
                 weapon.WeaponSwitching("Right");
-                weapon.EquipWeapon();
                 currentWeapon = weapon;
+                weapon.EquipWeapon();
             }
             else
             {
                 currentWeapon = null;
             }
         }
-        //weaponPool.Add(weapon);
-        SetAbility();
     }
 
     public Weapon GetWeapon(string prefabName, EquipType equipType)
@@ -3120,6 +3089,7 @@ public class CharacterController : MonoBehaviour
 
         if (ownerType == CharacterOwner.Player)
         {
+            charUI.components.SetActive(true);
             gameMgr.SetEnemyOutlinableAndUI(true);
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
@@ -3217,7 +3187,6 @@ public class CharacterController : MonoBehaviour
         currentWeapon.WeaponSwitching("Holster");
         //currentWeapon.UnequipWeapon();
         weapons[changeIndex].EquipWeapon();
-        SetAbility();
         currentWeapon.WeaponSwitching("Right");
     }
 
@@ -3229,7 +3198,6 @@ public class CharacterController : MonoBehaviour
         //currentWeapon.UnequipWeapon();
         currentWeapon = weapons[changeIndex];
         currentWeapon.EquipWeapon();
-        SetAbility();
         animator.SetTrigger("change");
         animator.SetTrigger("isCut");
     }
@@ -3352,8 +3320,7 @@ public class CharacterController : MonoBehaviour
 
         public void SetAbility(EnemyDataInfo enemyData)
         {
-            var _sModeInfos = new List<ShootingModeInfo> { enemyData.sModeInfo };
-            sModeInfos = _sModeInfos;
+            sModeInfos = enemyData.sModeInfos;
             RPM = enemyData.RPM;
             range = enemyData.range;
             watchAngle = enemyData.watchAngle;
@@ -3369,6 +3336,8 @@ public class CharacterController : MonoBehaviour
 
         public void SetAddAbility()
         {
+            if (charCtr.ownerType != CharacterOwner.Player) return;
+
             ResetShootingModeInfos();
             RPM = 0;
             range = 0;

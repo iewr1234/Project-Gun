@@ -43,7 +43,7 @@ public class EnemyDataInfo
     public int reaction;
     [Space(5f)]
 
-    public ShootingModeInfo sModeInfo;
+    public List<ShootingModeInfo> sModeInfos;
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;

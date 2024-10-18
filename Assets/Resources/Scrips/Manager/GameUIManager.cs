@@ -202,17 +202,9 @@ public class GameUIManager : MonoBehaviour
 
     public void SetHitAccuracy(CharacterController charCtr)
     {
-        var targetInfo = charCtr.targetList[charCtr.targetIndex];
-        var hitAccuracy = DataUtility.GetHitAccuracy(targetInfo);
-        //if (hitAccuracy > 100)
-        //{
-        //    hitAccuracy = 100;
-        //}
-        //else if (hitAccuracy < DataUtility.minHitAccuracy)
-        //{
-        //    hitAccuracy = DataUtility.minHitAccuracy;
-        //}
-        hitAccuracyText.text = $"{hitAccuracy}%";
+        aimGauge.SetAimGauge(charCtr);
+        var hitAccuracy = charCtr.currentWeapon.hitInfos[0].hitAccuracys[0];
+        hitAccuracyText.text = $"{100 - hitAccuracy}%";
     }
 
     public void SetActiveAmmoIcon(bool value)
@@ -327,7 +319,7 @@ public class GameUIManager : MonoBehaviour
             SetShootNum(charCtr);
             SetShootingModeText(charCtr.sMode);
             SetActionPoint_Aim(charCtr);
-            aimGauge.SetAimGauge(charCtr);
+            //aimGauge.SetAimGauge(charCtr);
         }
         else
         {
@@ -363,7 +355,7 @@ public class GameUIManager : MonoBehaviour
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
-        aimGauge.SetAimGauge(charCtr);
+        //aimGauge.SetAimGauge(charCtr);
     }
 
     public void SetShootingMode(CharacterController charCtr)
@@ -378,28 +370,8 @@ public class GameUIManager : MonoBehaviour
         var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootingModeText(charCtr.sMode);
-        SetHitAccuracy(charCtr);
         SetActionPoint_Aim(charCtr);
-        aimGauge.SetAimGauge(charCtr);
-    }
-
-    public void SetTargetInfo(TargetInfo targetInfo)
-    {
-        SetHitAccuracy(targetInfo.shooter);
-        aimGauge.SetAimGauge(targetInfo.shooter);
-        //armorGauge.gameObject.SetActive(false);
-        //if (targetInfo.target.armor != null)
-        //{
-        //    armorGauge.maxValue = targetInfo.target.armor.maxDurability;
-        //    armorGauge.value = targetInfo.target.armor.durability;
-        //    armorText.text = $"{armorGauge.maxValue} / {armorGauge.value}";
-        //}
-        //healthGauge.maxValue = targetInfo.target.maxHealth;
-        //healthGauge.value = targetInfo.target.health;
-        //staminaGauge.maxValue = targetInfo.target.maxStamina;
-        //staminaGauge.value = targetInfo.target.stamina;
-        //healthText.text = $"{healthGauge.maxValue} / {healthGauge.value}";
-        //staminaText.text = $"{staminaGauge.maxValue} / {staminaGauge.value}";
+        SetHitAccuracy(charCtr);
     }
 
     public void EnterTheStage(StageDataInfo stageData)

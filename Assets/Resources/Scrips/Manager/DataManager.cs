@@ -293,9 +293,9 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
-        AimShot_point,
-        AimShot_aim,
-        AimShot_sight,
+        ShootingMode_point,
+        ShootingMode_aim,
+        ShootingMode_sight,
         RPM,
         Range,
         WatchAngle,
@@ -344,9 +344,9 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)PlayerVariable.Sight]),
                     aiming = int.Parse(data[(int)PlayerVariable.Aiming]),
                     reaction = int.Parse(data[(int)PlayerVariable.Reaction]),
-                    sModeInfos = ReadShootingModesInfo(data[(int)PlayerVariable.AimShot_point],
-                                                       data[(int)PlayerVariable.AimShot_aim],
-                                                       data[(int)PlayerVariable.AimShot_sight]),
+                    sModeInfos = ReadShootingModesInfo(data[(int)PlayerVariable.ShootingMode_point],
+                                                       data[(int)PlayerVariable.ShootingMode_aim],
+                                                       data[(int)PlayerVariable.ShootingMode_sight]),
                     RPM = int.Parse(data[(int)PlayerVariable.RPM]),
                     range = float.Parse(data[(int)PlayerVariable.Range]),
                     watchAngle = int.Parse(data[(int)PlayerVariable.WatchAngle]),
@@ -368,7 +368,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AV";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AX";
     private enum EnemyVariable
     {
         ID,
@@ -389,7 +389,9 @@ public class DataManager : MonoBehaviour
         Sight,
         Aiming,
         Reaction,
-        ShootingModeValue,
+        ShootingMode_point,
+        ShootingMode_aim,
+        ShootingMode_sight,
         RPM,
         Range,
         WatchAngle,
@@ -459,12 +461,9 @@ public class DataManager : MonoBehaviour
                     sight = float.Parse(data[(int)EnemyVariable.Sight]),
                     aiming = int.Parse(data[(int)EnemyVariable.Aiming]),
                     reaction = int.Parse(data[(int)EnemyVariable.Reaction]),
-                    sModeInfo = new ShootingModeInfo()
-                    {
-                        indexName = $"{ShootingMode.PointShot}: {int.Parse(data[(int)EnemyVariable.ShootingModeValue])}",
-                        modeType = ShootingMode.PointShot,
-                        value = int.Parse(data[(int)EnemyVariable.ShootingModeValue]),
-                    },
+                    sModeInfos = ReadShootingModesInfo(data[(int)EnemyVariable.ShootingMode_point],
+                                                       data[(int)EnemyVariable.ShootingMode_aim],
+                                                       data[(int)EnemyVariable.ShootingMode_sight]),
                     RPM = int.Parse(data[(int)EnemyVariable.RPM]),
                     range = float.Parse(data[(int)EnemyVariable.Range]),
                     watchAngle = int.Parse(data[(int)EnemyVariable.WatchAngle]),

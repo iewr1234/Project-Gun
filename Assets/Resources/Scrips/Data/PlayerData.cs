@@ -3,14 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class ShootingModeInfo
-{
-    public string indexName;
-    public ShootingMode modeType;
-    public int value;
-}
-
-[System.Serializable]
 public class PlayerDataInfo
 {
     public string indexName;

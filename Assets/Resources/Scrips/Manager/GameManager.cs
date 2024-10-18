@@ -233,9 +233,9 @@ public class GameManager : MonoBehaviour
             var weapon = charCtr.weapons[i];
             if (charCtr.currentWeapon == null)
             {
+                charCtr.currentWeapon = weapon;
                 weapon.EquipWeapon();
                 weapon.WeaponSwitching("Right");
-                charCtr.currentWeapon = weapon;
             }
             else
             {
@@ -1897,6 +1897,8 @@ public class GameManager : MonoBehaviour
                 }
 
                 var shootNum = DataUtility.GetShootNum(enemy.RPM, enemy.fiarRate);
+                if (shootNum > enemy.currentWeapon.loadedNum) shootNum = enemy.currentWeapon.loadedNum;
+
                 enemy.animator.SetInteger("shootNum", shootNum);
                 enemy.SetAction(-totalCost);
                 //if (targetInfo.shooterCover != null)
