@@ -87,6 +87,7 @@ public class OtherStorage : MonoBehaviour
     public void DeactiveTabButtons()
     {
         ClearStorage();
+        storageInfos.Clear();
         for (int i = 0; i < tabButtonImages.Count; i++)
         {
             tabButtonImages[i].gameObject.SetActive(false);
@@ -120,7 +121,7 @@ public class OtherStorage : MonoBehaviour
         if (item.itemSlots[0].otherStorage == null) return;
 
         var storageInfo = storageInfos[tabIndex];
-        var find = storageInfo.itemList.Find(x => x.slotIndex == item.itemSlots[0].slotIndex);
+        var find = storageInfo.itemList.Find(x => x.itemData == item.itemData && x.slotIndex == item.itemSlots[0].slotIndex);
         if (find != null)
         {
             storageInfo.itemList.Remove(find);
@@ -188,7 +189,7 @@ public class OtherStorage : MonoBehaviour
                 gameMenuMgr.InActiveItem(itemSlot.item);
             }
         }
-        storageInfos.Clear();
+        //storageInfos.Clear();
     }
 
     public void Button_Tab(int index)

@@ -796,11 +796,11 @@ public class GameMenuManager : MonoBehaviour
         item.SetItemInfo(magData);
 
         List<ItemSlot> emptySlots = null;
-        var rigStorages = myStorages.FindAll(x => x.type == MyStorageType.Rig);
-        for (int i = 0; i < rigStorages.Count; i++)
+        var myStorages = this.myStorages.OrderByDescending(x => x.type).ToList();
+        for (int i = 0; i < myStorages.Count; i++)
         {
-            var rigStorage = rigStorages[i];
-            var itemSlots = rigStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
+            var myStorage = myStorages[i];
+            var itemSlots = myStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
             emptySlots = FindEmptySlots(item, itemSlots);
             if (emptySlots == null)
             {
@@ -817,7 +817,18 @@ public class GameMenuManager : MonoBehaviour
             var itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
             emptySlots = FindEmptySlots(item, itemSlots);
         }
-        PutTheItem(item, emptySlots);
+
+        if (emptySlots != null)
+        {
+            onSlots = emptySlots;
+            PutTheItem(item, emptySlots);
+        }
+        else
+        {
+            //Debug.Log("Fail SetItemInStorage");
+            //InActiveItem(item);
+            otherStorage.DropItmeOnTheFloor(item);
+        }
     }
 
     public void SetItemInEquipSlot(InitialItem initialItem)
@@ -1132,7 +1143,7 @@ public class GameMenuManager : MonoBehaviour
             }
             else if (itemSlots[0].otherStorage == null && item.itemSlots.Count > 0)
             {
-                var find = storageInfo.itemList.Find(x => x.slotIndex == item.itemSlots[0].slotIndex);
+                var find = storageInfo.itemList.Find(x => x.itemData == item.itemData && x.slotIndex == item.itemSlots[0].slotIndex);
                 if (find != null)
                 {
                     storageInfo.itemList.Remove(find);
@@ -1167,37 +1178,24 @@ public class GameMenuManager : MonoBehaviour
     {
         if (equipSlot.CheckEquip(putItem) && equipSlot != putItem.equipSlot)
         {
-            otherStorage.CheckBaseStorage(putItem);
-            UnequipItem(putItem);
-            var itemSlots = new List<ItemSlot>(putItem.itemSlots);
-            equipSlot.item = putItem;
-            equipSlot.slotText.enabled = false;
-
-            putItem.countText.enabled = false;
-            putItem.equipSlot = equipSlot;
-            putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
-            putItem.ChangeRectPivot(true);
-            putItem.SetItemRotation(false);
-            putItem.transform.SetParent(equipSlot.transform, false);
-            putItem.transform.localPosition = Vector3.zero;
-            putItem.targetImage.raycastTarget = true;
-            putItem.SetItemScale(true);
-
             switch (putItem.itemData.type)
             {
                 case ItemType.Rig:
+                    EquipProcess();
                     if (equipSlot.myStorage != null && putItem.rigData != null)
                     {
                         equipSlot.myStorage.SetStorageSize(putItem.rigData.storageSize);
                     }
                     break;
                 case ItemType.Backpack:
+                    EquipProcess();
                     if (equipSlot.myStorage != null && putItem.backpackData != null)
                     {
                         equipSlot.myStorage.SetStorageSize(putItem.backpackData.storageSize);
                     }
                     break;
                 case ItemType.MainWeapon:
+                    EquipProcess();
                     equipSlot.SetLoadedBulletCount();
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
@@ -1206,6 +1204,7 @@ public class GameMenuManager : MonoBehaviour
                     }
                     break;
                 case ItemType.SubWeapon:
+                    EquipProcess();
                     equipSlot.SetLoadedBulletCount();
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
@@ -1225,41 +1224,13 @@ public class GameMenuManager : MonoBehaviour
                 //    popUp.item.weaponData.isChamber = true;
                 //    break;
                 case ItemType.Bullet:
-                    if (equipSlot.intMagMax > 0)
-                    {
-                        var equipMag = equipSlot.popUp.item.weaponData.equipMag;
-                        var newTotal = equipMag.loadedBullets.Count + putItem.TotalCount;
-                        if (equipMag.magSize >= newTotal)
-                        {
-                            for (int i = 0; i < newTotal; i++)
-                            {
-                                equipMag.loadedBullets.Add(putItem.bulletData);
-                            }
-                        }
-                        else
-                        {
-                            var num = equipMag.magSize - equipMag.loadedBullets.Count;
-                            for (int i = 0; i < num; i++)
-                            {
-                                equipMag.loadedBullets.Add(putItem.bulletData);
-                            }
-                            SetItemInStorage(putItem.itemData, putItem.TotalCount - num, putItem.itemSlots, false);
-                        }
-                        equipSlot.popUp.item.SetTotalCount(equipMag.loadedBullets.Count);
-                    }
+                    BulletType_PutItem();
                     break;
                 case ItemType.Magazine:
-                    equipSlot.popUp.item.weaponData.equipMag = putItem.magData;
-                    equipSlot.popUp.item.weaponData.isMag = true;
-                    equipSlot.popUp.item.SetLoadedBulletCount();
-                    equipSlot.SetLoadedBulletCount();
-                    if (gameMgr != null && gameMgr.playerList.Count > 0)
-                    {
-                        var player = gameMgr.playerList[0];
-                        player.SetAbility();
-                    }
+                    MagazineType_PutItem();
                     break;
                 default:
+                    EquipProcess();
                     equipSlot.countText.enabled = false;
                     if (putItem.partsData != null && putItem.partsData.type != WeaponPartsType.None)
                     {
@@ -1279,7 +1250,6 @@ public class GameMenuManager : MonoBehaviour
                     }
                     break;
             }
-            putItem.itemSlots.Clear();
 
             if (activePopUp.Contains(equipSlot.popUp))
             {
@@ -1308,6 +1278,75 @@ public class GameMenuManager : MonoBehaviour
 
         holdingItem = null;
         InactiveSampleItem();
+
+        void EquipProcess()
+        {
+            otherStorage.CheckBaseStorage(putItem);
+            UnequipItem(putItem);
+            var itemSlots = new List<ItemSlot>(putItem.itemSlots);
+            equipSlot.item = putItem;
+            equipSlot.slotText.enabled = false;
+
+            putItem.countText.enabled = false;
+            putItem.equipSlot = equipSlot;
+            putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
+            putItem.ChangeRectPivot(true);
+            putItem.SetItemRotation(false);
+            putItem.transform.SetParent(equipSlot.transform, false);
+            putItem.transform.localPosition = Vector3.zero;
+            putItem.targetImage.raycastTarget = true;
+            putItem.SetItemScale(true);
+            putItem.itemSlots.Clear();
+        }
+
+        void BulletType_PutItem()
+        {
+            switch (equipSlot.type)
+            {
+                case EquipType.MainWeapon1:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.MainWeapon2:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.SubWeapon:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void MagazineType_PutItem()
+        {
+            switch (equipSlot.type)
+            {
+                case EquipType.MainWeapon1:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.MainWeapon2:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.SubWeapon:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.Magazine:
+                    EquipProcess();
+                    equipSlot.popUp.item.weaponData.equipMag = putItem.magData;
+                    equipSlot.popUp.item.weaponData.isMag = true;
+                    equipSlot.popUp.item.SetLoadedBulletCount();
+                    equipSlot.SetLoadedBulletCount();
+                    break;
+                default:
+                    break;
+            }
+
+            if (gameMgr != null && gameMgr.playerList.Count > 0)
+            {
+                var player = gameMgr.playerList[0];
+                player.SetAbility();
+            }
+        }
     }
 
     /// <summary>

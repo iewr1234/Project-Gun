@@ -88,49 +88,101 @@ public class EquipSlot : MonoBehaviour
         gameMenuMgr.allEquips.Add(this);
     }
 
-    public bool CheckEquip(ItemHandler item)
+    public bool CheckEquip(ItemHandler putItem)
     {
-        if (this.item != null && this.item != item) return false;
-        if (item == null || item.itemData == null) return false;
+        var noEquip = item != null && item != putItem;
+        //if (this.item != null && this.item != item) return false;
+        if (putItem == null || putItem.itemData == null) return false;
 
         switch (type)
         {
             case EquipType.Head:
-                return item.itemData.type == ItemType.Head;
+                return !noEquip && putItem.itemData.type == ItemType.Head;
             case EquipType.Body:
-                return item.itemData.type == ItemType.Body;
+                return !noEquip && putItem.itemData.type == ItemType.Body;
             case EquipType.Rig:
-                return item.itemData.type == ItemType.Rig;
+                return !noEquip && putItem.itemData.type == ItemType.Rig;
             case EquipType.Backpack:
-                return item.itemData.type == ItemType.Backpack;
+                return !noEquip && putItem.itemData.type == ItemType.Backpack;
             case EquipType.MainWeapon1:
-                return item.itemData.type == ItemType.MainWeapon;
+                return WeaponType();
             case EquipType.MainWeapon2:
-                return item.itemData.type == ItemType.MainWeapon;
+                return WeaponType();
             case EquipType.SubWeapon:
-                return item.itemData.type == ItemType.SubWeapon;
+                return WeaponType();
             //case EquipType.Chamber:
             //    return item.itemData.type == ItemType.Bullet
             //        && item.bulletData != null;
             case EquipType.Magazine:
-                switch (item.itemData.type)
-                {
-                    case ItemType.Bullet:
-                        if (intMagMax == 0) return false;
-                        if (this.item != null && this.item.TotalCount == intMagMax) return false;
-
-                        return item.bulletData != null && item.bulletData.caliber == caliber;
-                    case ItemType.Magazine:
-                        return this.item == null && item.magData != null && popUp != null && item.magData.compatModel.Contains(model);
-                    default:
-                        return false;
-                }
+                return MagazineType();
             case EquipType.Sight:
-                return item.itemData.type == ItemType.Sight
-                    && item.partsData != null
-                    && item.partsData.compatModel.Contains(model);
+                return !noEquip
+                    && putItem.itemData.type == ItemType.Sight
+                    && putItem.partsData != null
+                    && putItem.partsData.compatModel.Contains(model);
             default:
                 return false;
+        }
+
+        bool WeaponType()
+        {
+            switch (putItem.itemData.type)
+            {
+                case ItemType.MainWeapon:
+                    return !noEquip && (type == EquipType.MainWeapon1 || type == EquipType.MainWeapon2);
+                case ItemType.SubWeapon:
+                    return !noEquip && type == EquipType.SubWeapon;
+                case ItemType.Bullet:
+                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                        && item.weaponData.isMag && item.weaponData.equipMag.intMag
+                        && item.weaponData.equipMag.compatCaliber == putItem.bulletData.caliber
+                        && item.weaponData.equipMag.loadedBullets.Count < item.weaponData.equipMag.magSize;
+                case ItemType.Magazine:
+                    if (item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+                    {
+                        if (!item.weaponData.isMag)
+                        {
+                            //무기에 탄창이 없을 경우
+                            return putItem.magData.compatModel.Contains(item.weaponData.model);
+                        }
+                        else
+                        {
+                            if (!item.weaponData.equipMag.intMag)
+                            {
+                                //무기에 탄창이 있는 경우
+
+
+                                return false;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                default:
+                    return false;
+            }
+        }
+
+        bool MagazineType()
+        {
+            switch (putItem.itemData.type)
+            {
+                case ItemType.Bullet:
+                    if (intMagMax == 0) return false;
+                    if (item != null && item.TotalCount == intMagMax) return false;
+
+                    return putItem.bulletData != null && putItem.bulletData.caliber == caliber;
+                case ItemType.Magazine:
+                    return item == null && putItem.magData != null && popUp != null && putItem.magData.compatModel.Contains(model);
+                default:
+                    return false;
+            }
         }
     }
 
