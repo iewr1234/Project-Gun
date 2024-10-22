@@ -1252,6 +1252,7 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < movableNodes.Count; i++)
                 {
                     var movableNode = movableNodes[i];
+                    movableNode.aiScore = 0;
                     movableNode.SetNodeOutline(false);
                 }
                 break;
@@ -1836,7 +1837,7 @@ public class GameManager : MonoBehaviour
                         var node = nodeList.Find(x => x.nodePos == nodePos);
                         if (!node.canMove) continue;
 
-                        node.aiScore = -aggressive - dist;
+                        node.aiScore -= aggressive - dist;
                     }
                 }
             }

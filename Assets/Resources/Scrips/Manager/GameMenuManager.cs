@@ -970,7 +970,8 @@ public class GameMenuManager : MonoBehaviour
     public void PutTheItem(ItemHandler item, List<ItemSlot> itemSlots)
     {
         if (itemSplit && itemSlots.Find(x => x.item != null) == null
-         && item.itemData.type != ItemType.Magazine && item.TotalCount > 1)
+         && item.itemData.type != ItemType.Magazine && item.TotalCount > 1
+         && onSlots.Count > 0)
         {
             ItemSplit();
         }
