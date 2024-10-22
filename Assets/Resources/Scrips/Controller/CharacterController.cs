@@ -3194,7 +3194,6 @@ public class CharacterController : MonoBehaviour
     {
         if (!animator.GetBool("otherType")) return;
 
-        Debug.Log("Event_WeaponChange_OrderType");
         //currentWeapon.UnequipWeapon();
         currentWeapon = weapons[changeIndex];
         currentWeapon.EquipWeapon();
@@ -3217,6 +3216,7 @@ public class CharacterController : MonoBehaviour
 
         commandList.RemoveAt(0);
         changing = false;
+        gameMgr.RecheckTarget();
     }
 
     public void Event_SetGrenade()

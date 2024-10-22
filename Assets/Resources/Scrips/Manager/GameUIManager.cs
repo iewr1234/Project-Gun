@@ -7,6 +7,12 @@ using TMPro;
 
 public class GameUIManager : MonoBehaviour
 {
+    private struct TurnEndUI
+    {
+        public Button button;
+        public Slider slider;
+    }
+
     [Header("---Access Script---")]
     private GameManager gameMgr;
 
@@ -25,7 +31,7 @@ public class GameUIManager : MonoBehaviour
     public ActionButton shootButton;
     public ActionButton reloadButton;
     public ActionButton throwButton;
-    public Button turnEndButton;
+    //public Button turnEndButton;
 
     //[HideInInspector] public GameObject magIcons;
     //[HideInInspector] public List<MagazineIcon> magIconList;
@@ -33,6 +39,10 @@ public class GameUIManager : MonoBehaviour
     //[HideInInspector] public List<GrenadeIcon> grdIconList;
     [HideInInspector] public GameObject ammoIcons;
     [HideInInspector] public List<AmmoIcon> ammoIconList;
+
+    private TurnEndUI turnEndUI;
+    private bool pressSpace;
+    private readonly float turnEndSpeed = 10f;
 
     [Header("[AimUI]")]
     public GameObject aimUI;
@@ -104,6 +114,12 @@ public class GameUIManager : MonoBehaviour
         }
         ammoIcons.SetActive(false);
 
+        turnEndUI = new TurnEndUI()
+        {
+            button = bottomUI.transform.Find("TurnEnd").GetComponent<Button>(),
+            slider = bottomUI.transform.Find("TurnEnd/Slider").GetComponent<Slider>(),
+        };
+
         aimUI = playUI.transform.Find("AimUI").gameObject;
         shootNumText = aimUI.transform.Find("ShootNum").GetComponent<TextMeshProUGUI>();
         hitAccuracyText = aimUI.transform.Find("HitAccuracy").GetComponent<TextMeshProUGUI>();
@@ -145,7 +161,7 @@ public class GameUIManager : MonoBehaviour
                     break;
             }
         }
-        turnEndButton = playUI.transform.Find("TurnEnd").GetComponent<Button>();
+        //turnEndButton = playUI.transform.Find("TurnEnd").GetComponent<Button>();
 
         stageIcons = stageUI.transform.Find("StageIcons").GetComponentsInChildren<StageIcon>().ToList();
         for (int i = 0; i < stageIcons.Count; i++)
@@ -157,6 +173,24 @@ public class GameUIManager : MonoBehaviour
         stageUI.SetActive(false);
 
         resultUI.SetActive(false);
+    }
+
+    private void Update()
+    {
+        TurnEndProcess();
+    }
+
+    private void TurnEndProcess()
+    {
+        if (!pressSpace) return;
+
+        turnEndUI.slider.value += Time.deltaTime * turnEndSpeed;
+        if (turnEndUI.slider.value >= turnEndUI.slider.maxValue)
+        {
+            turnEndUI.slider.value = 0;
+            pressSpace = false;
+            gameMgr.TurnEnd();
+        }
     }
 
     public void SetMagNum(CharacterController charCtr)
@@ -313,7 +347,7 @@ public class GameUIManager : MonoBehaviour
         //playUI.SetActive(value);
         aimUI.SetActive(value);
         bottomUI.SetActive(!value);
-        turnEndButton.gameObject.SetActive(!value);
+        //turnEndButton.gameObject.SetActive(!value);
         if (value)
         {
             SetShootNum(charCtr);
@@ -404,10 +438,30 @@ public class GameUIManager : MonoBehaviour
         gameMgr.camMgr.lockCam = value;
     }
 
+    public void SetTurnEndUI(bool value)
+    {
+        if (!value && !pressSpace) return;
+
+        pressSpace = value;
+        switch (value)
+        {
+            case true:
+                break;
+            case false:
+                turnEndUI.slider.value = 0;
+                break;
+        }
+    }
+
     public void Button_TurnEnd()
     {
         if (gameMgr.currentTurn != CharacterOwner.Player) return;
 
+        if (pressSpace)
+        {
+            turnEndUI.slider.value = 0;
+            pressSpace = false;
+        }
         gameMgr.TurnEnd();
     }
 

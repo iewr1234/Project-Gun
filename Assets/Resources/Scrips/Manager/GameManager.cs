@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum GameState
@@ -195,7 +196,8 @@ public class GameManager : MonoBehaviour
                 {
                     StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, true));
                     gameState = GameState.Base;
-
+                    uiMgr.bottomUI.SetActive(false);
+                    uiMgr.playUI.SetActive(false);
                 }
                 else
                 {
@@ -424,8 +426,11 @@ public class GameManager : MonoBehaviour
     {
         switch (gameState)
         {
+            case GameState.None:
+                TurnEndKey();
+                break;
             case GameState.Move:
-                if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetKeyDown(KeyCode.F) /*|| Input.GetKeyDown(KeyCode.Space)*/)
                 {
                     ShootingAction_Move();
                 }
@@ -469,6 +474,7 @@ public class GameManager : MonoBehaviour
                 {
                     addPass = false;
                 }
+                TurnEndKey();
                 break;
             case GameState.Shoot:
                 if (Input.GetKeyDown(KeyCode.Tab))
@@ -591,10 +597,24 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        if (Input.GetKeyDown(KeyCode.End) && currentTurn == CharacterOwner.Player)
+        void TurnEndKey()
         {
-            TurnEnd();
+            if (currentTurn != CharacterOwner.Player) return;
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                uiMgr.SetTurnEndUI(true);
+            }
+            else if (Input.GetKeyUp(KeyCode.Space))
+            {
+                uiMgr.SetTurnEndUI(false);
+            }
         }
+
+        //if (Input.GetKeyDown(KeyCode.End) && currentTurn == CharacterOwner.Player)
+        //{
+        //    TurnEnd();
+        //}
     }
 
     public void SwitchCharacterUI(bool value)
@@ -958,7 +978,8 @@ public class GameManager : MonoBehaviour
             rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
                                                        && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
                                                         && x.itemData.type == ItemType.Bullet
-                                                        && x.bulletData.caliber == weaponData.caliber).ToList();
+                                                        && x.bulletData.caliber == weaponData.caliber)
+                                             .OrderByDescending(x => x.TotalCount).ToList();
         }
         else
         {
@@ -1565,6 +1586,16 @@ public class GameManager : MonoBehaviour
             enemy.charUI.components.SetActive(value);
             enemy.outlinable.enabled = value;
         }
+    }
+
+    public void RecheckTarget()
+    {
+        if (selectChar == null) return;
+        if (targetNode == null) return;
+
+        selectChar.FindTargets(targetNode, false);
+        ClearLine();
+        DrawAimLine(targetNode);
     }
 
     private void CreatePlayer()
