@@ -127,7 +127,7 @@ public class FieldNode : MonoBehaviour
             {
                 if (i == 0 && j == 0) continue;
 
-                var node = gameMgr.fieldNodes.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
+                var node = gameMgr.nodeList.Find(x => x.nodePos == new Vector2(nodePos.x + i, nodePos.y + j));
                 if (i != 0 && j != 0)
                 {
                     if (node != null)

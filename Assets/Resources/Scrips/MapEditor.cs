@@ -152,7 +152,7 @@ public class MapEditor : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private MapEditorType editType;
-    private Vector2 mapSize;
+    private Vector2Int mapSize;
     private InterfaceType activeType;
     private GameObject activeUI;
 
@@ -518,9 +518,9 @@ public class MapEditor : MonoBehaviour
                     {
                         if (allFloor)
                         {
-                            for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+                            for (int i = 0; i < gameMgr.nodeList.Count; i++)
                             {
-                                var node = gameMgr.fieldNodes[i];
+                                var node = gameMgr.nodeList[i];
                                 node.SetOnFloor(selectItem, floorDirRandom);
                                 selectNodes.Add(node);
                             }
@@ -769,7 +769,7 @@ public class MapEditor : MonoBehaviour
             default:
                 break;
         }
-        var setNodeList = gameMgr.fieldNodes.FindAll(x => x.nodePos.x >= xMin && x.nodePos.x < xMax && x.nodePos.y >= yMin && x.nodePos.y < yMax);
+        var setNodeList = gameMgr.nodeList.FindAll(x => x.nodePos.x >= xMin && x.nodePos.x < xMax && x.nodePos.y >= yMin && x.nodePos.y < yMax);
         if (setNodeList.Count == size && setNodeList.Find(x => x.Mesh.enabled == false) == null)
         {
             selectNodes = setNodeList;
@@ -817,7 +817,7 @@ public class MapEditor : MonoBehaviour
         gameMgr.camMgr.mainCam.cullingMask = newLayer;
     }
 
-    private IEnumerator Coroutine_CreateNodes(float xSize, float ySize)
+    private IEnumerator Coroutine_CreateNodes(int xSize, int ySize)
     {
         Debug.Log("시작");
 
@@ -848,11 +848,11 @@ public class MapEditor : MonoBehaviour
 
     private IEnumerator ClearFieldNodes()
     {
-        if (gameMgr.fieldNodes.Count > 0)
+        if (gameMgr.nodeList.Count > 0)
         {
-            for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+            for (int i = 0; i < gameMgr.nodeList.Count; i++)
             {
-                var node = gameMgr.fieldNodes[i];
+                var node = gameMgr.nodeList[i];
                 for (int j = 0; j < node.outlines.Count; j++)
                 {
                     var outline = node.outlines[j];
@@ -864,7 +864,7 @@ public class MapEditor : MonoBehaviour
 
                 if (i % 50 == 0)
                 {
-                    float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                    float progress = (float)i / gameMgr.nodeList.Count * 100;
                     Debug.Log($"기존 노드 제거 진행률: {progress}%");
                     yield return null;
                 }
@@ -872,15 +872,15 @@ public class MapEditor : MonoBehaviour
         }
         pMarkerNodes.Clear();
         eMarkerNodes.Clear();
-        gameMgr.fieldNodes.Clear();
+        gameMgr.nodeList.Clear();
     }
 
-    private IEnumerator CreateFieldNodes(float xSize, float ySize)
+    private IEnumerator CreateFieldNodes(int xSize, int ySize)
     {
-        mapSize = new Vector2(xSize, ySize);
+        mapSize = new Vector2Int(xSize, ySize);
         var size = DataUtility.nodeSize;
         var interval = DataUtility.nodeInterval;
-        int totalNodes = (int)(mapSize.x * mapSize.y);
+        int totalNodes = mapSize.x * mapSize.y;
         int createdNodes = 0;
         for (int i = 0; i < mapSize.y; i++)
         {
@@ -892,7 +892,7 @@ public class MapEditor : MonoBehaviour
                 fieldNode.transform.position = pos;
                 fieldNode.SetComponents(gameMgr, new Vector2Int(j, i));
                 //fieldNode.NodeColor = Color.gray;
-                gameMgr.fieldNodes.Add(fieldNode);
+                gameMgr.nodeList.Add(fieldNode);
                 createdNodes++;
 
                 if ((i + j) % 50 == 0)
@@ -904,15 +904,15 @@ public class MapEditor : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+        for (int i = 0; i < gameMgr.nodeList.Count; i++)
         {
-            var node = gameMgr.fieldNodes[i];
+            var node = gameMgr.nodeList[i];
             node.AddAdjacentNodes();
             node.AddNodeOutline(nodeOutlineTf);
 
             if (i % 50 == 0)
             {
-                float progress = (float)i / gameMgr.fieldNodes.Count * 100;
+                float progress = (float)i / gameMgr.nodeList.Count * 100;
                 Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
                 yield return null;
             }
@@ -924,7 +924,7 @@ public class MapEditor : MonoBehaviour
         for (int i = 0; i < mapData.nodeDatas.Length; i++)
         {
             var nodeData = mapData.nodeDatas[i];
-            var node = gameMgr.fieldNodes[i];
+            var node = gameMgr.nodeList[i];
 
             // FloorData
             if (nodeData.isMesh)
@@ -1097,7 +1097,7 @@ public class MapEditor : MonoBehaviour
     {
         if (saveInput.text.Length == 0) return;
 
-        gameMgr.dataMgr.SaveMapData(saveInput.text, mapSize, gameMgr.fieldNodes);
+        gameMgr.dataMgr.SaveMapData(saveInput.text, mapSize, gameMgr.nodeList);
         gameMgr.dataMgr.ReadMapLoadIndex(loadDropdown);
         saveInput.text = "";
     }
@@ -1275,9 +1275,9 @@ public class MapEditor : MonoBehaviour
     public void Button_GridSwitch()
     {
         var value = gridSwitchText.text == "그리드 OFF" ? true : false;
-        for (int i = 0; i < gameMgr.fieldNodes.Count; i++)
+        for (int i = 0; i < gameMgr.nodeList.Count; i++)
         {
-            var node = gameMgr.fieldNodes[i];
+            var node = gameMgr.nodeList[i];
             node.SetActiveNodeFrame(value);
         }
         switch (value)

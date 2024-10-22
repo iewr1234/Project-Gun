@@ -49,7 +49,7 @@ public class NodeData
 [System.Serializable]
 public class MapData
 {
-    public Vector2 mapSize;
+    public Vector2Int mapSize;
     public NodeData[] nodeDatas;
 }
 
@@ -112,7 +112,7 @@ public class DataManager : MonoBehaviour
     #endregion
 
     #region MapEditor
-    public void SaveMapData(string saveName, Vector2 _mapSize, List<FieldNode> _fieldNodes)
+    public void SaveMapData(string saveName, Vector2Int _mapSize, List<FieldNode> _fieldNodes)
     {
         var mapData = new MapData();
         mapData.mapSize = _mapSize;
@@ -518,7 +518,7 @@ public class DataManager : MonoBehaviour
 
     #region AI Data
     [HideInInspector] public AIData aiData;
-    private readonly string aiDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=590787557&range=A3:J";
+    private readonly string aiDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=590787557&range=A3:K";
     private enum AIVariable
     {
         ID,
@@ -531,6 +531,7 @@ public class DataManager : MonoBehaviour
         Score_noneShoot,
         Score_halfShoot,
         Score_fullShoot,
+        Score_aggressive,
     }
 
     public void UpdateAIData()
@@ -550,7 +551,7 @@ public class DataManager : MonoBehaviour
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i].Split('\t');
-                var enemyInfo = new AIDataInfo
+                var aiInfo = new AIDataInfo
                 {
                     indexName = $"{data[(int)AIVariable.ID]}: {data[(int)AIVariable.TypeName]}",
                     ID = data[(int)AIVariable.ID],
@@ -563,8 +564,9 @@ public class DataManager : MonoBehaviour
                     score_noneShoot = int.Parse(data[(int)AIVariable.Score_noneShoot]),
                     score_halfShoot = int.Parse(data[(int)AIVariable.Score_halfShoot]),
                     score_fullShoot = int.Parse(data[(int)AIVariable.Score_fullShoot]),
+                    score_aggressive = int.Parse(data[(int)AIVariable.Score_aggressive]),
                 };
-                aiData.aiInfos.Add(enemyInfo);
+                aiData.aiInfos.Add(aiInfo);
             }
             Debug.Log("Update AI Data");
         }

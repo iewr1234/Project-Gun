@@ -28,6 +28,7 @@ public class AIDataInfo
     public int score_noneShoot;
     public int score_halfShoot;
     public int score_fullShoot;
+    public int score_aggressive;
 }
 
 [CreateAssetMenu(fileName = "AIData", menuName = "Scriptable Object/AIData")]

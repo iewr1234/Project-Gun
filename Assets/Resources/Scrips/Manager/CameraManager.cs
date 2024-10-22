@@ -76,7 +76,7 @@ public class CameraManager : MonoBehaviour
     {
         if (gameMgr != null)
         {
-            var canOperation = !lockCam && gameMgr.fieldNodes.Count > 0;
+            var canOperation = !lockCam && gameMgr.nodeList.Count > 0;
             if (!canOperation) return;
 
             //var canMoveCam = gameMgr.gameState == GameState.None

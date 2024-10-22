@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public CharacterOwner currentTurn;
     public GameState gameState;
-    [HideInInspector] public List<FieldNode> fieldNodes = new List<FieldNode>();
+    [HideInInspector] public List<FieldNode> nodeList = new List<FieldNode>();
     [HideInInspector] public bool eventActive;
     [HideInInspector] public bool dontMove;
 
@@ -101,6 +101,8 @@ public class GameManager : MonoBehaviour
 
     [Header("[FieldNode]")]
     [SerializeField] private FieldNode targetNode;
+    private int endPos_x;
+    private int endPos_y;
 
     private DrawRange currentRange;
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
@@ -187,6 +189,8 @@ public class GameManager : MonoBehaviour
             var mapData = dataMgr.LoadMapData(loadName);
             if (mapData != null)
             {
+                endPos_x = mapData.mapSize.x;
+                endPos_y = mapData.mapSize.y;
                 if (loadName == "BASECAMP")
                 {
                     StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, true));
@@ -265,7 +269,7 @@ public class GameManager : MonoBehaviour
             var playerData = dataMgr.playerData.playerInfos.Find(x => x.ID == charID);
             var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{playerData.prefabName}"));
             charCtr.transform.SetParent(characterTf, false);
-            var node = fieldNodes.Find(x => x.nodePos == nodePos);
+            var node = nodeList.Find(x => x.nodePos == nodePos);
             charCtr.transform.position = node.transform.position;
             charCtr.SetComponents(this, ownerType, playerData, node);
 
@@ -290,7 +294,7 @@ public class GameManager : MonoBehaviour
             var enemyData = dataMgr.enemyData.enemyInfos.Find(x => x.ID == charID);
             var charCtr = Instantiate(Resources.Load<CharacterController>($"Prefabs/Character/{enemyData.prefabName}"));
             charCtr.transform.SetParent(characterTf, false);
-            var node = fieldNodes.Find(x => x.nodePos == nodePos);
+            var node = nodeList.Find(x => x.nodePos == nodePos);
             charCtr.transform.position = node.transform.position;
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             charCtr.SetComponents(this, ownerType, enemyData, node);
@@ -1709,10 +1713,11 @@ public class GameManager : MonoBehaviour
     public void EnemyAI_Move(CharacterController enemy)
     {
         FindMovableNodes(enemy, false);
+        ResultAggressive();
         for (int i = 0; i < movableNodes.Count; i++)
         {
             var node = movableNodes[i];
-            node.aiScore = enemy.aiData.score_move - node.moveCost;
+            node.aiScore += enemy.aiData.score_move - node.moveCost;
 
             var coverScore = 99999;
             var shootScore = -99999;
@@ -1810,20 +1815,32 @@ public class GameManager : MonoBehaviour
         }
         enemy.targetList.Clear();
 
-        //if (maxScoreNode.aiScore <= 40)
-        //{
-        //    var canWatchNode = movableNodes.FindAll(x => x.canShoot).OrderByDescending(n => n.aiScore).FirstOrDefault();
-        //    if (canWatchNode != enemy.currentNode)
-        //    {
-        //        ResultNodePass(enemy, canWatchNode);
-        //        CharacterMove(enemy, canWatchNode);
-        //        enemy.state = CharacterState.Watch;
-        //    }
-        //    else
-        //    {
-        //        EnemyAI_Watch(enemy, enemy.currentNode);
-        //    }
-        //}
+        void ResultAggressive()
+        {
+            var aggressive = enemy.aiData.score_aggressive;
+            foreach (var player in playerList)
+            {
+                for (int x = -aggressive; x <= aggressive; x++)
+                {
+                    for (int y = -aggressive; y <= aggressive; y++)
+                    {
+                        var dist = Mathf.Abs(x) + Mathf.Abs(y);
+                        if (dist > aggressive) continue;
+
+                        var nodePos = player.currentNode.nodePos + new Vector2Int(x, y);
+                        if (nodePos.x < 0) continue;
+                        if (nodePos.x >= endPos_x) continue;
+                        if (nodePos.y < 0) continue;
+                        if (nodePos.y >= endPos_y) continue;
+
+                        var node = nodeList.Find(x => x.nodePos == nodePos);
+                        if (!node.canMove) continue;
+
+                        node.aiScore = -aggressive - dist;
+                    }
+                }
+            }
+        }
     }
 
     public void EnemyAI_Watch(CharacterController enemy, FieldNode currentNode)
