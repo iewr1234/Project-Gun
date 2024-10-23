@@ -436,14 +436,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         void WeaponType()
         {
             countText.enabled = true;
-            if (weaponData.isMag)
-            {
-                SetTotalCount(weaponData.equipMag.loadedBullets.Count);
-            }
-            else
-            {
-                SetTotalCount(0);
-            }
+            var count = 0;
+            if (weaponData.isChamber) count++;
+            if (weaponData.isMag) count += weaponData.equipMag.loadedBullets.Count;
+
+            SetTotalCount(count);
         }
 
         void MagazineType()
@@ -497,6 +494,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (itemData.type == ItemType.Backpack) return;
         if (itemData.type == ItemType.MainWeapon) return;
         if (itemData.type == ItemType.SubWeapon) return;
+        if (itemData.type == ItemType.Bullet) return;
 
         switch (value)
         {

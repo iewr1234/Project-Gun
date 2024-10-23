@@ -354,40 +354,14 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
-        //if (!weaponData.isChamber)
-        //{
-        //    if (weaponData.equipMag.loadedBullets.Count == 0)
-        //    {
-        //        Debug.Log($"{charCtr.name}: Magazine empty");
-        //        return;
-        //    }
-
-        //    var bulletData = weaponData.equipMag.loadedBullets[0];
-        //    weaponData.chamberBullet = bulletData;
-        //    weaponData.isChamber = true;
-        //    weaponData.equipMag.loadedBullets.RemoveAt(0);
-        //}
-
-        //BulletDataInfo loadedBullet = null;
-        //switch (charCtr.ownerType)
-        //{
-        //    case CharacterOwner.Player:
-        //        loadedBullet = weaponData.equipMag.loadedBullets[^1];
-        //        break;
-        //    case CharacterOwner.Enemy:
-        //        //loadedBullet = useBullet;
-        //        break;
-        //    default:
-        //        break;
-        //}
-
         var hitInfo = hitInfos[0];
         int count;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
-                var loadedBullet = weaponData.equipMag.loadedBullets[^1];
-                count = loadedBullet.pelletNum == 0 ? 1 : loadedBullet.pelletNum;
+                LoadingChamber();
+                var chamberBullet = weaponData.chamberBullet;
+                count = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
                 for (int i = 0; i < count; i++)
                 {
                     var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
@@ -398,20 +372,13 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
-                    bullet.SetBullet(charCtr, target, loadedBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
-                //charCtr.SetBulletAbility(false, loadedBullet);
-                weaponData.equipMag.loadedBullets.Remove(loadedBullet);
-                if (equipSlot != null)
-                {
-                    equipSlot.SetLoadedBulletCount();
-                }
-                //if (weaponData.equipMag.loadedBullets.Count == 0)
-
-                //var chamberBullet = weaponData.equipMag.loadedBullets[^1];
-                //charCtr.SetBulletAbility(true, chamberBullet);
-                charCtr.SetAbility();
+                weaponData.chamberBullet = null;
+                weaponData.isChamber = false;
+                if (weaponData.type != WeaponType.Revolver) LoadingChamber();
+                if (equipSlot != null) equipSlot.SetLoadedBulletCount();
                 break;
             case CharacterOwner.Enemy:
                 count = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
@@ -434,6 +401,18 @@ public class Weapon : MonoBehaviour
                 break;
         }
 
+        void LoadingChamber()
+        {
+            if (weaponData.isChamber) return;
+            if (weaponData.equipMag.loadedBullets.Count == 0) return;
+
+            var loadedBullet = weaponData.equipMag.loadedBullets[^1];
+            weaponData.chamberBullet = loadedBullet;
+            weaponData.isChamber = true;
+            weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+            charCtr.SetAbility();
+        }
+
         void SetBulletDirection(Bullet bullet, bool noDisparity)
         {
             bullet.gameObject.SetActive(true);
@@ -446,18 +425,6 @@ public class Weapon : MonoBehaviour
             }
             bullet.transform.LookAt(aimPos);
         }
-
-        //if (weaponData.equipMag.loadedBullets.Count > 0)
-        //{
-        //    var bulletData = weaponData.equipMag.loadedBullets[0];
-        //    weaponData.chamberBullet = bulletData;
-        //    weaponData.equipMag.loadedBullets.RemoveAt(0);
-        //}
-        //else
-        //{
-        //    weaponData.chamberBullet = null;
-        //    weaponData.isChamber = false;
-        //}
     }
 
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum, bool resultShoot)
@@ -583,22 +550,51 @@ public class Weapon : MonoBehaviour
                 switch (weapon.charCtr.ownerType)
                 {
                     case CharacterOwner.Player:
-                        if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count > 0)
+                        if (index == 0)
                         {
-                            var bulletIndex = weapon.weaponData.equipMag.loadedBullets.Count - (1 + index);
+                            if (weapon.weaponData.isChamber)
+                            {
+                                ApplyValue(weapon.charCtr.stability,
+                                           weapon.charCtr.rebound,
+                                           weapon.charCtr.propellant,
+                                           weapon.weaponData.chamberBullet.pelletNum,
+                                           weapon.weaponData.chamberBullet.spread);
+                            }
+                            else if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count > 0)
+                            {
+                                var bulletIndex = weapon.weaponData.equipMag.loadedBullets.Count - 1;
+                                var bullet = weapon.weaponData.equipMag.loadedBullets[bulletIndex];
+                                ApplyValue(weapon.charCtr.ability.stability + weapon.weaponData.stability + bullet.stability,
+                                           weapon.charCtr.ability.rebound + weapon.weaponData.rebound + bullet.rebound,
+                                           weapon.charCtr.ability.propellant + weapon.weaponData.propellant + bullet.propellant,
+                                           bullet.pelletNum,
+                                           bullet.spread);
+                            }
+                        }
+                        else if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count > 0)
+                        {
+                            var chamber = weapon.weaponData.isChamber ? index : 1 + index;
+                            var bulletIndex = weapon.weaponData.equipMag.loadedBullets.Count - chamber;
                             var bullet = weapon.weaponData.equipMag.loadedBullets[bulletIndex];
-                            stability = weapon.charCtr.ability.stability + weapon.weaponData.stability + bullet.stability;
-                            rebound = weapon.charCtr.ability.rebound + weapon.weaponData.rebound + bullet.rebound;
-                            propellant = weapon.charCtr.ability.propellant + weapon.weaponData.propellant + bullet.propellant;
-                            pelletNum = bullet.pelletNum;
-                            spread = bullet.spread;
+                            ApplyValue(weapon.charCtr.ability.stability + weapon.weaponData.stability + bullet.stability,
+                                       weapon.charCtr.ability.rebound + weapon.weaponData.rebound + bullet.rebound,
+                                       weapon.charCtr.ability.propellant + weapon.weaponData.propellant + bullet.propellant,
+                                       bullet.pelletNum,
+                                       bullet.spread);
                         }
                         break;
                     default:
-                        stability = weapon.charCtr.stability;
-                        rebound = weapon.charCtr.rebound;
-                        propellant = weapon.charCtr.propellant;
+                        ApplyValue(weapon.charCtr.stability, weapon.charCtr.rebound, weapon.charCtr.propellant, 0, 0);
                         break;
+                }
+
+                void ApplyValue(int _stability, int _rebound, int _propellant, int _pelletNum, int _spread)
+                {
+                    stability = _stability;
+                    rebound = _rebound;
+                    propellant = _propellant;
+                    pelletNum = _pelletNum;
+                    spread = _spread;
                 }
             }
 

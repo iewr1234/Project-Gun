@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 public class ContextMenu : MonoBehaviour
 {
@@ -53,7 +52,7 @@ public class ContextMenu : MonoBehaviour
 
         gameMenuMgr.selectItem = item;
         var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.z);
-        var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, gameMenuMgr.GetCanvasDistance()));
+        var worldPos = gameMenuMgr.gameMenuCam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, gameMenuMgr.GetCanvasDistance() - 10));
         transform.position = worldPos;
         switch (item.itemData.type)
         {
@@ -102,9 +101,11 @@ public class ContextMenu : MonoBehaviour
         switch (onItem.itemData.type)
         {
             case ItemType.MainWeapon:
+                RemoveChamber();
                 magData = onItem.weaponData.equipMag;
                 break;
             case ItemType.SubWeapon:
+                RemoveChamber();
                 magData = onItem.weaponData.equipMag;
                 break;
             case ItemType.Magazine:
@@ -118,13 +119,32 @@ public class ContextMenu : MonoBehaviour
         for (int i = 0; i < magData.loadedBullets.Count; i++)
         {
             var loadedBullet = magData.loadedBullets[i];
+            RemoveBullet(loadedBullet);
+        }
+        magData.loadedBullets.Clear();
+        onItem.SetLoadedBulletCount();
+        CloseTheContextMenu(true);
+
+        void RemoveChamber()
+        {
+            if (!onItem.weaponData.isChamber) return;
+
+            var chamberBullet = onItem.weaponData.chamberBullet;
+            RemoveBullet(chamberBullet);
+            onItem.weaponData.chamberBullet = null;
+            onItem.weaponData.isChamber = false;
+        }
+
+        void RemoveBullet(BulletDataInfo loadedBullet)
+        {
             if (onItem.equipSlot != null)
             {
                 FindEmptyMyStorage(loadedBullet);
             }
             else
             {
-                var sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID && x.TotalCount < x.itemData.maxNesting
+                var sameBullet = gameMenuMgr.activeItem.Find(x => x.itemData.type == ItemType.Bullet && x.bulletData.ID == loadedBullet.ID && x.equipSlot == null
+                                                               && x.TotalCount < x.itemData.maxNesting
                                                               && (x.itemSlots[0].myStorage != null && onItem.itemSlots[0].myStorage != null
                                                                && x.itemSlots[0].myStorage.type == onItem.itemSlots[0].myStorage.type));
                 if (sameBullet != null)
@@ -148,9 +168,6 @@ public class ContextMenu : MonoBehaviour
                 }
             }
         }
-        magData.loadedBullets.Clear();
-        onItem.SetLoadedBulletCount();
-        CloseTheContextMenu(true);
 
         void FindEmptyMyStorage(BulletDataInfo loadedBullet)
         {

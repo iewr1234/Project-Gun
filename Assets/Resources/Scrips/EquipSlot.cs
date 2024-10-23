@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 
 public enum EquipType
 {
@@ -15,7 +14,7 @@ public enum EquipType
     MainWeapon1,
     MainWeapon2,
     SubWeapon,
-    //Chamber,
+    Chamber,
     Magazine,
     Muzzle,
     Sight,
@@ -90,33 +89,34 @@ public class EquipSlot : MonoBehaviour
 
     public bool CheckEquip(ItemHandler putItem)
     {
-        var noEquip = item != null && item != putItem;
+        var itemEquip = item != null && item != putItem;
         //if (this.item != null && this.item != item) return false;
         if (putItem == null || putItem.itemData == null) return false;
 
         switch (type)
         {
             case EquipType.Head:
-                return !noEquip && putItem.itemData.type == ItemType.Head;
+                return !itemEquip && putItem.itemData.type == ItemType.Head;
             case EquipType.Body:
-                return !noEquip && putItem.itemData.type == ItemType.Body;
+                return !itemEquip && putItem.itemData.type == ItemType.Body;
             case EquipType.Rig:
-                return !noEquip && putItem.itemData.type == ItemType.Rig;
+                return !itemEquip && putItem.itemData.type == ItemType.Rig;
             case EquipType.Backpack:
-                return !noEquip && putItem.itemData.type == ItemType.Backpack;
+                return !itemEquip && putItem.itemData.type == ItemType.Backpack;
             case EquipType.MainWeapon1:
                 return WeaponType();
             case EquipType.MainWeapon2:
                 return WeaponType();
             case EquipType.SubWeapon:
                 return WeaponType();
-            //case EquipType.Chamber:
-            //    return item.itemData.type == ItemType.Bullet
-            //        && item.bulletData != null;
+            case EquipType.Chamber:
+                return !itemEquip && putItem.itemData.type == ItemType.Bullet
+                    && popUp != null && popUp.item != null && (popUp.item.itemData.type == ItemType.MainWeapon || popUp.item.itemData.type == ItemType.SubWeapon)
+                    && popUp.item.weaponData.caliber == putItem.bulletData.caliber;
             case EquipType.Magazine:
                 return MagazineType();
             case EquipType.Sight:
-                return !noEquip
+                return !itemEquip
                     && putItem.itemData.type == ItemType.Sight
                     && putItem.partsData != null
                     && putItem.partsData.compatModel.Contains(model);
@@ -129,14 +129,25 @@ public class EquipSlot : MonoBehaviour
             switch (putItem.itemData.type)
             {
                 case ItemType.MainWeapon:
-                    return !noEquip && (type == EquipType.MainWeapon1 || type == EquipType.MainWeapon2);
+                    return !itemEquip && (type == EquipType.MainWeapon1 || type == EquipType.MainWeapon2);
                 case ItemType.SubWeapon:
-                    return !noEquip && type == EquipType.SubWeapon;
+                    return !itemEquip && type == EquipType.SubWeapon;
                 case ItemType.Bullet:
-                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
-                        && item.weaponData.isMag && item.weaponData.equipMag.intMag
-                        && item.weaponData.equipMag.compatCaliber == putItem.bulletData.caliber
-                        && item.weaponData.equipMag.loadedBullets.Count < item.weaponData.equipMag.magSize;
+                    if (item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+                    {
+                        if (!item.weaponData.isChamber)
+                        {
+                            return item.weaponData.caliber == putItem.bulletData.caliber;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 case ItemType.Magazine:
                     if (item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
                     {
@@ -150,7 +161,6 @@ public class EquipSlot : MonoBehaviour
                             if (!item.weaponData.equipMag.intMag)
                             {
                                 //무기에 탄창이 있는 경우
-
 
                                 return false;
                             }
@@ -186,12 +196,12 @@ public class EquipSlot : MonoBehaviour
         }
     }
 
-    //public bool CheckEquip(BulletDataInfo bulletData)
-    //{
-    //    return type == EquipType.Chamber
-    //                && bulletData != null
-    //                && bulletData.caliber == caliber;
-    //}
+    public bool CheckEquip(BulletDataInfo bulletData)
+    {
+        return type == EquipType.Chamber
+                    && bulletData != null
+                    && bulletData.caliber == caliber;
+    }
 
     public bool CheckEquip(MagazineDataInfo magData)
     {
@@ -238,14 +248,12 @@ public class EquipSlot : MonoBehaviour
         void WeaponType()
         {
             countText.enabled = true;
+            var loadedNum = item.weaponData.isChamber ? 1 : 0;
             if (item.weaponData.isMag)
             {
-                countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
+                loadedNum += item.weaponData.equipMag.loadedBullets.Count;
             }
-            else
-            {
-                countText.text = "0";
-            }
+            countText.text = $"{loadedNum}";
         }
 
         void MagazineType()

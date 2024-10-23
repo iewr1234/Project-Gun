@@ -3352,8 +3352,7 @@ public class CharacterController : MonoBehaviour
             critical = 0;
 
             var weaponData = charCtr.currentWeapon != null ? charCtr.currentWeapon.weaponData : null;
-            var bulletData = weaponData != null && weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0
-                           ? weaponData.equipMag.loadedBullets[^1] : null;
+            var bulletData = weaponData != null && weaponData.isChamber ? weaponData.chamberBullet : null;
             ApllyAbilitys(this, weaponData, bulletData);
         }
 

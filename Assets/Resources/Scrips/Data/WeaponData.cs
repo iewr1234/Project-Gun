@@ -42,23 +42,22 @@ public class WeaponDataInfo
     [Tooltip("Àå¾à")] public int propellant;
     [Space(5f)]
 
-    [Tooltip("ÅºÃ¢ »ç¿ë")] public List<WeaponPartsSize> useMagazine;
-    [Tooltip("ÃÑ±¸ »ç¿ë")] public List<WeaponPartsSize> useMuzzle;
-    [Tooltip("Á¶ÁØ°æ »ç¿ë")] public List<WeaponPartsSize> useSight;
-    [Tooltip("ÇÏºÎ »ç¿ë")] public List<WeaponPartsSize> useUnderRail;
-    [Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
-    [Space(5f)]
+    [Tooltip("¾à½Ç ÅºÈ¯")] public BulletDataInfo chamberBullet = null;
+    [HideInInspector] public bool isChamber;
+
+    [Tooltip("ÀåÂøÅºÃ¢")] public MagazineDataInfo equipMag;
+    [HideInInspector] public bool isMag;
+
+    [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList = new List<WeaponPartsDataInfo>();
+
+    [HideInInspector][Tooltip("ÅºÃ¢ »ç¿ë")] public List<WeaponPartsSize> useMagazine;
+    [HideInInspector][Tooltip("ÃÑ±¸ »ç¿ë")] public List<WeaponPartsSize> useMuzzle;
+    [HideInInspector][Tooltip("Á¶ÁØ°æ »ç¿ë")] public List<WeaponPartsSize> useSight;
+    [HideInInspector][Tooltip("ÇÏºÎ »ç¿ë")] public List<WeaponPartsSize> useUnderRail;
+    [HideInInspector][Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
 
     [HideInInspector][Tooltip("ÀåÂøÅºÃ¢ID")] public string equipMagID;
     [HideInInspector][Tooltip("ÀåÂøºÎÇ°IDs")] public List<string> equipPartsIDs;
-
-    //[Tooltip("¾à½Ç ÅºÈ¯")] public BulletDataInfo chamberBullet = null;
-    //[HideInInspector] public bool isChamber;
-
-    [Space(5f)]
-    [Tooltip("ÀåÂøÅºÃ¢")] public MagazineDataInfo equipMag;
-    [HideInInspector] public bool isMag;
-    [Tooltip("ÀåÂøºÎÇ° ¸®½ºÆ®")] public List<WeaponPartsDataInfo> equipPartsList = new List<WeaponPartsDataInfo>();
 
     public WeaponDataInfo CopyData(DataManager dataMgr)
     {

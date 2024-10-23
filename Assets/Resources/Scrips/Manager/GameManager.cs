@@ -525,6 +525,7 @@ public class GameManager : MonoBehaviour
                     if (!intMag) return;
 
                     var reloadMax = weaponData.equipMag.magSize - weaponData.equipMag.loadedBullets.Count;
+                    if (!weaponData.isChamber) reloadMax++;
                     uiMgr.GetAmmoIcon().SetAmmoValue(reloadMax, Input.GetKeyDown(KeyCode.W));
                 }
                 else if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Space))
@@ -892,12 +893,8 @@ public class GameManager : MonoBehaviour
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
         var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isMag)
-        {
-            Debug.Log($"{selectChar.name}: 무기에 탄창이 없음");
-            return;
-        }
-        if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count == 0)
+        if ((!weapon.weaponData.isChamber && !weapon.weaponData.isMag)
+         || (!weapon.weaponData.isChamber && weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count == 0))
         {
             Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
             return;
@@ -1031,13 +1028,13 @@ public class GameManager : MonoBehaviour
         var weaponItem = gameMenuMgr.activeItem.Find(x => x.equipSlot != null && x.equipSlot.type == weapon.equipSlot.type
                                                       && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                        && x.weaponData.ID == weapon.weaponData.ID);
-        var rigMag = rigItems[uiMgr.iconIndex];
+        var rigItem = rigItems[uiMgr.iconIndex];
         if (weapon.weaponData.isMag)
         {
             var equipMag = weapon.weaponData.equipMag;
             if (equipMag.intMag)
             {
-                gameMenuMgr.QuickEquip(weaponItem, rigMag);
+                gameMenuMgr.QuickEquip(weaponItem, rigItem);
                 var reloadNum = uiMgr.GetAmmoIcon().value;
                 selectChar.AddCommand(CommandType.Reload, reloadNum);
             }
@@ -1049,13 +1046,13 @@ public class GameManager : MonoBehaviour
                 //    selectChar.addAbility.RemoveAbility(chamberBullet);
                 //}
                 gameMenuMgr.SetItemInStorage(equipMag);
-                gameMenuMgr.QuickEquip(weaponItem, rigMag);
+                gameMenuMgr.QuickEquip(weaponItem, rigItem);
                 selectChar.AddCommand(CommandType.Reload);
             }
         }
         else
         {
-            gameMenuMgr.QuickEquip(weaponItem, rigMag);
+            gameMenuMgr.QuickEquip(weaponItem, rigItem);
             selectChar.AddCommand(CommandType.Reload);
         }
         selectChar = null;
