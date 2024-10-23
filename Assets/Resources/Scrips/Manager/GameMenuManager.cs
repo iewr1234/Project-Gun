@@ -933,7 +933,7 @@ public class GameMenuManager : MonoBehaviour
                 //    return !onItem.weaponData.isChamber && onItem.weaponData.caliber == putItem.bulletData.caliber;
                 //}
                 /*else */
-                return CheckBullet();
+                return Check_BulletType();
             case ItemType.Magazine:
                 return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
                     && !onItem.weaponData.isMag && putItem.magData.compatModel.Contains(onItem.weaponData.model);
@@ -945,23 +945,39 @@ public class GameMenuManager : MonoBehaviour
                 return false;
         }
 
-        bool CheckBullet()
+        bool Check_BulletType()
         {
             switch (onItem.itemData.type)
             {
                 case ItemType.MainWeapon:
-                    return onItem.weaponData.isMag && onItem.weaponData.equipMag.intMag
-                        && onItem.weaponData.equipMag.loadedBullets.Count < onItem.weaponData.equipMag.magSize
-                        && onItem.weaponData.equipMag.compatCaliber == putItem.bulletData.caliber;
+                    return WeaponType();
                 case ItemType.SubWeapon:
-                    return onItem.weaponData.isMag && onItem.weaponData.equipMag.intMag
-                        && onItem.weaponData.equipMag.loadedBullets.Count < onItem.weaponData.equipMag.magSize
-                        && onItem.weaponData.equipMag.compatCaliber == putItem.bulletData.caliber;
+                    return WeaponType();
                 case ItemType.Magazine:
-                    return onItem.magData.loadedBullets.Count < onItem.magData.magSize
-                        && onItem.magData.compatCaliber == putItem.bulletData.caliber;
+                    return onItem.magData.compatCaliber == putItem.bulletData.caliber
+                        && onItem.magData.loadedBullets.Count < onItem.magData.magSize;
                 default:
                     return false;
+            }
+
+            bool WeaponType()
+            {
+                if (!onItem.weaponData.isChamber)
+                {
+                    return onItem.weaponData.caliber == putItem.bulletData.caliber;
+                }
+                else
+                {
+                    if (onItem.weaponData.isMag)
+                    {
+                        return onItem.weaponData.equipMag.compatCaliber == putItem.bulletData.caliber
+                            && onItem.weaponData.equipMag.loadedBullets.Count < onItem.weaponData.equipMag.magSize;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
             }
         }
     }
@@ -1025,6 +1041,7 @@ public class GameMenuManager : MonoBehaviour
 
         void ItemNesting()
         {
+            UnequipItem(item);
             onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
             var newTotal = onSlot.item.TotalCount + item.TotalCount;
             var maxValue = onSlot.item.itemData.maxNesting;
