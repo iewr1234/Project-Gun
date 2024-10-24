@@ -125,7 +125,7 @@ public class Weapon : MonoBehaviour
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
-        weaponData.type = _eWeapon.type;
+        weaponData.weaponType = _eWeapon.type;
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
@@ -169,7 +169,7 @@ public class Weapon : MonoBehaviour
 
     private void SetWeaponPositionAndRotation()
     {
-        switch (weaponData.type)
+        switch (weaponData.weaponType)
         {
             case WeaponType.Pistol:
                 holsterPos = Vector3.zero;
@@ -254,7 +254,7 @@ public class Weapon : MonoBehaviour
         //    charCtr.SetBulletAbility(true, chamberBullet);
         //}
 
-        switch (weaponData.type)
+        switch (weaponData.weaponType)
         {
             case WeaponType.Pistol:
                 charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
@@ -277,7 +277,7 @@ public class Weapon : MonoBehaviour
         }
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
-        charCtr.SetRig(weaponData.type);
+        charCtr.SetRig(weaponData.weaponType);
         charCtr.SetAbility();
 
         //charCtr.animator.SetBool("isCover", isCover);
@@ -328,7 +328,7 @@ public class Weapon : MonoBehaviour
         switch (switchPos)
         {
             case "Holster":
-                if (weaponData.type == WeaponType.Pistol)
+                if (weaponData.weaponType == WeaponType.Pistol)
                 {
                     transform.SetParent(charCtr.subHolsterTf, false);
                 }
@@ -377,7 +377,7 @@ public class Weapon : MonoBehaviour
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
                 weaponData.isChamber = false;
-                if (weaponData.type != WeaponType.Revolver) LoadingChamber();
+                if (weaponData.weaponType != WeaponType.Revolver) LoadingChamber();
                 if (equipSlot != null) equipSlot.SetLoadedBulletCount();
                 break;
             case CharacterOwner.Enemy:

@@ -281,7 +281,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < weapons.Count; i++)
             {
                 var weaponData = weapons[i].item.weaponData;
-                if (weaponData.type == WeaponType.None) continue;
+                if (weaponData.weaponType == WeaponType.None) continue;
 
                 var equipSlot = weapons[i].item.equipSlot;
                 var weapon = charCtr.GetWeapon(weaponData.prefabName, equipSlot.type);
@@ -521,8 +521,7 @@ public class GameManager : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S))
                 {
                     var weaponData = selectChar.currentWeapon.weaponData;
-                    var intMag = weaponData.isMag && weaponData.equipMag.intMag;
-                    if (!intMag) return;
+                    if (weaponData.magType == MagazineType.Magazine) return;
 
                     var reloadMax = weaponData.equipMag.magSize - weaponData.equipMag.loadedBullets.Count;
                     if (!weaponData.isChamber) reloadMax++;
@@ -967,8 +966,15 @@ public class GameManager : MonoBehaviour
         if (selectChar.currentWeapon == null) return;
 
         var weaponData = selectChar.currentWeapon.weaponData;
-        var intMag = weaponData.isMag && weaponData.equipMag.intMag;
-        if (intMag)
+        if (weaponData.magType == MagazineType.Magazine)
+        {
+            rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                       && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
+                                                        && x.itemData.type == ItemType.Magazine
+                                                        && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
+                                             .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
+        }
+        else
         {
             if (weaponData.equipMag.loadedBullets.Count == weaponData.equipMag.magSize) return;
 
@@ -977,14 +983,6 @@ public class GameManager : MonoBehaviour
                                                         && x.itemData.type == ItemType.Bullet
                                                         && x.bulletData.caliber == weaponData.caliber)
                                              .OrderByDescending(x => x.TotalCount).ToList();
-        }
-        else
-        {
-            rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                       && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
-                                                        && x.itemData.type == ItemType.Magazine
-                                                        && x.magData.compatModel.Contains(selectChar.currentWeapon.weaponData.model))
-                                             .OrderByDescending(x => x.magData.loadedBullets.Count).ToList();
         }
 
         if (rigItems.Count == 0) return;
@@ -1005,13 +1003,13 @@ public class GameManager : MonoBehaviour
         {
             var rigMag = rigItems[i];
             var ammoIcon = uiMgr.ammoIconList[i];
-            if (intMag)
+            if (weaponData.magType == MagazineType.Magazine)
             {
-                ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
+                ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
             }
             else
             {
-                ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
+                ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
             }
 
             if (i == 0) ammoIcon.SetActiveIcon(true);
@@ -1029,31 +1027,31 @@ public class GameManager : MonoBehaviour
                                                       && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                        && x.weaponData.ID == weapon.weaponData.ID);
         var rigItem = rigItems[uiMgr.iconIndex];
-        if (weapon.weaponData.isMag)
+        switch (weapon.weaponData.magType)
         {
-            var equipMag = weapon.weaponData.equipMag;
-            if (equipMag.intMag)
-            {
+            case MagazineType.Magazine:
+                if (weapon.weaponData.isMag)
+                {
+                    gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag);
+                    gameMenuMgr.QuickEquip(weaponItem, rigItem);
+                    selectChar.AddCommand(CommandType.Reload);
+                }
+                else
+                {
+                    gameMenuMgr.QuickEquip(weaponItem, rigItem);
+                    selectChar.AddCommand(CommandType.Reload);
+                }
+                break;
+            case MagazineType.IntMagazine:
                 gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                var reloadNum = uiMgr.GetAmmoIcon().value;
-                selectChar.AddCommand(CommandType.Reload, reloadNum);
-            }
-            else
-            {
-                //if (equipMag.loadedBullets.Count > 0)
-                //{
-                //    var chamberBullet = equipMag.loadedBullets[^1];
-                //    selectChar.addAbility.RemoveAbility(chamberBullet);
-                //}
-                gameMenuMgr.SetItemInStorage(equipMag);
+                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value);
+                break;
+            case MagazineType.Cylinder:
                 gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                selectChar.AddCommand(CommandType.Reload);
-            }
-        }
-        else
-        {
-            gameMenuMgr.QuickEquip(weaponItem, rigItem);
-            selectChar.AddCommand(CommandType.Reload);
+                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value);
+                break;
+            default:
+                break;
         }
         selectChar = null;
         uiMgr.SetActiveAmmoIcon(false);

@@ -11,6 +11,14 @@ public enum WeaponType
     Revolver,
 }
 
+public enum MagazineType
+{
+    None,
+    Magazine,
+    IntMagazine,
+    Cylinder,
+}
+
 [System.Serializable]
 public class WeaponDataInfo
 {
@@ -26,7 +34,8 @@ public class WeaponDataInfo
     [Tooltip("구경")] public float caliber;
     [Tooltip("무게")] public float weight;
     [Tooltip("구분")] public bool isMain;
-    [Tooltip("무기분류")] public WeaponType type;
+    [Tooltip("무기분류")] public WeaponType weaponType;
+    [Tooltip("탄창분류")] public MagazineType magType;
     [Space(5f)]
 
     public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
@@ -73,7 +82,9 @@ public class WeaponDataInfo
             caliber = caliber,
             weight = weight,
             isMain = isMain,
-            type = type,
+            weaponType = weaponType,
+            magType = magType,
+
             sModeInfos = new List<ShootingModeInfo>(sModeInfos),
             RPM = RPM,
             range = range,

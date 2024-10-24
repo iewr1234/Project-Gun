@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class OtherStorage : MonoBehaviour
 {
@@ -86,6 +85,7 @@ public class OtherStorage : MonoBehaviour
 
     public void DeactiveTabButtons()
     {
+        Debug.Log("!");
         ClearStorage();
         storageInfos.Clear();
         for (int i = 0; i < tabButtonImages.Count; i++)
@@ -174,6 +174,19 @@ public class OtherStorage : MonoBehaviour
         }
 
         Debug.Log("no EmptySlot int the FloorStorage");
+    }
+
+    public void UpdateStorageInfo(ItemHandler item)
+    {
+        if (item.itemSlots.Count == 0) return;
+        if (item.itemSlots[0].otherStorage == null) return;
+
+        var storageInfo = storageInfos[tabIndex];
+        var storageItem = storageInfo.itemList.Find(x => x.itemData == item.itemData && x.slotIndex == item.itemSlots[0].slotIndex);
+        if (storageItem != null)
+        {
+            storageItem.totalCount = item.TotalCount;
+        }
     }
 
     public void ClearStorage()

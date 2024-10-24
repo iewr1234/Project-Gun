@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
-using static CharacterController;
-using Unity.VisualScripting;
 
 [System.Serializable]
 public struct ObjectData
@@ -73,8 +71,6 @@ public class DataManager : MonoBehaviour
 
     private void SetComponents()
     {
-        //if (gameData == null) gameData = Resources.Load<GameData>("ScriptableObjects/GameData");
-
         if (playerData == null) playerData = Resources.Load<PlayerData>("ScriptableObjects/PlayerData");
 
         if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
@@ -735,7 +731,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:Z";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AA";
     private enum WeaponVariable
     {
         ID,
@@ -746,6 +742,7 @@ public class DataManager : MonoBehaviour
         Weight,
         IsMain,
         WeaponType,
+        MagazineType,
         AimShot_point,
         AimShot_aim,
         AimShot_sight,
@@ -795,7 +792,8 @@ public class DataManager : MonoBehaviour
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
                     weight = float.Parse(data[(int)WeaponVariable.Weight]),
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
-                    type = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
+                    weaponType = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
+                    magType = (MagazineType)int.Parse(data[(int)WeaponVariable.MagazineType]),
                     sModeInfos = ReadShootingModesInfo(data[(int)WeaponVariable.AimShot_point],
                                                        data[(int)WeaponVariable.AimShot_aim],
                                                        data[(int)WeaponVariable.AimShot_sight]),
@@ -815,7 +813,7 @@ public class DataManager : MonoBehaviour
                     equipMagID = data[(int)WeaponVariable.EquipMagID],
                     equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs])
                 };
-                SetInternalMagazine(ref weaponInfo);
+                SetInternalMagazine(weaponInfo);
                 weaponData.weaponInfos.Add(weaponInfo);
             }
             Debug.Log("Update Weapon Data");
@@ -882,15 +880,14 @@ public class DataManager : MonoBehaviour
                 return partsIDs;
             }
 
-            void SetInternalMagazine(ref WeaponDataInfo weaponInfo)
+            void SetInternalMagazine(WeaponDataInfo weaponInfo)
             {
-                if (intMagMax == 0) return;
+                if (weaponInfo.magType == MagazineType.Magazine) return;
 
                 var intMag = new MagazineDataInfo()
                 {
                     indexName = "InternalMagazine",
                     ID = "None",
-                    intMag = true,
                     loadedBulletID = "None",
                     prefabName = "None",
                     magName = "InternalMagazine",
@@ -1009,7 +1006,6 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)MagazineVariable.ID]}: {data[(int)MagazineVariable.MagazineName]}",
                     ID = data[(int)MagazineVariable.ID],
-                    intMag = false,
                     loadedBulletID = data[(int)MagazineVariable.LoadedBulletID] == "None" ? null : data[(int)MagazineVariable.LoadedBulletID],
                     prefabName = data[(int)MagazineVariable.PrefabName],
                     magName = data[(int)MagazineVariable.MagazineName],

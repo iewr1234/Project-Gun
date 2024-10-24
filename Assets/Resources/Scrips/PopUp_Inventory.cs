@@ -313,28 +313,26 @@ public class PopUp_Inventory : MonoBehaviour
                 var equipSlot = itemInfo.equipSlots[i];
                 equipSlot.model = item.weaponData.model;
                 equipSlot.caliber = item.weaponData.caliber;
-                if (item.weaponData.isMag && item.weaponData.equipMag.intMag)
+                switch (item.weaponData.magType)
                 {
-                    equipSlot.intMagMax = item.weaponData.equipMag.magSize;
+                    case MagazineType.IntMagazine:
+                        equipSlot.intMagMax = item.weaponData.equipMag.magSize;
+                        break;
+                    case MagazineType.Cylinder:
+                        equipSlot.intMagMax = item.weaponData.equipMag.magSize;
+                        break;
+                    default:
+                        break;
                 }
 
                 equipSlot.type = type[i];
                 switch (equipSlot.type)
                 {
                     case EquipType.Chamber:
-                        equipSlot.slotText.text = "¾à½Ç";
-                        equipSlot.gameObject.SetActive(true);
+                        SetChamberSlot(equipSlot, item.weaponData);
                         break;
                     case EquipType.Magazine:
-                        if (item.weaponData.useMagazine.Count > 0)
-                        {
-                            equipSlot.slotText.text = "ÅºÃ¢";
-                            equipSlot.gameObject.SetActive(true);
-                        }
-                        else
-                        {
-                            equipSlot.gameObject.SetActive(false);
-                        }
+                        SetMagazineSlot(equipSlot, item.weaponData);
                         break;
                     case EquipType.Muzzle:
                         SetWeaponPartSlot("ÃÑ±¸", equipSlot, type[i], item.weaponData.useMuzzle);
@@ -354,6 +352,46 @@ public class PopUp_Inventory : MonoBehaviour
                 }
             }
             SetPartsSample();
+
+            void SetChamberSlot(EquipSlot equipSlot, WeaponDataInfo weaponData)
+            {
+                switch (weaponData.magType)
+                {
+                    case MagazineType.Magazine:
+                        equipSlot.slotText.text = "¾à½Ç";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    case MagazineType.IntMagazine:
+                        equipSlot.slotText.text = "¾à½Ç";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    default:
+                        equipSlot.gameObject.SetActive(false);
+                        break;
+                }
+            }
+
+            void SetMagazineSlot(EquipSlot equipSlot, WeaponDataInfo weaponData)
+            {
+                switch (weaponData.magType)
+                {
+                    case MagazineType.Magazine:
+                        equipSlot.slotText.text = "ÅºÃ¢";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    case MagazineType.IntMagazine:
+                        equipSlot.slotText.text = "³»ºÎÅºÃ¢";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    case MagazineType.Cylinder:
+                        equipSlot.slotText.text = "½Ç¸°´õ";
+                        equipSlot.gameObject.SetActive(true);
+                        break;
+                    default:
+                        equipSlot.gameObject.SetActive(false);
+                        break;
+                }
+            }
 
             void SetWeaponPartSlot(string slotText, EquipSlot equipSlot, EquipType type, List<WeaponPartsSize> sizeList)
             {
@@ -499,37 +537,61 @@ public class PopUp_Inventory : MonoBehaviour
                     }
                     break;
                 case EquipType.Magazine:
-                    var magData = item.weaponData.equipMag;
-                    if (item.weaponData.isMag && magData.intMag && magData.loadedBullets.Count > 0)
+                    switch (item.weaponData.magType)
                     {
-                        if (equipSlot.item == null)
-                        {
-                            gameMenuMgr.SetItemInEquipSlot(magData.loadedBullets[0], magData.loadedBullets.Count, equipSlot);
-                        }
+                        case MagazineType.Magazine:
+                            if (item.weaponData.isMag && equipSlot.CheckEquip(item.weaponData.equipMag))
+                            {
+                                if (equipSlot.item == null)
+                                {
+                                    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag, 1, equipSlot);
+                                }
 
-                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
-                        equipSlot.countText.enabled = true;
-                    }
-                    else if (item.weaponData.isMag && !magData.intMag && equipSlot.CheckEquip(magData))
-                    {
-                        if (equipSlot.item == null)
-                        {
-                            gameMenuMgr.SetItemInEquipSlot(magData, 1, equipSlot);
-                        }
+                                var smaples = itemInfo.partsSamples.FindAll(x => x.name == item.weaponData.equipMag.prefabName);
+                                for (int j = 0; j < smaples.Count; j++)
+                                {
+                                    var smaple = smaples[j];
+                                    smaple.SetActive(true);
+                                }
+                                //equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
+                                //equipSlot.countText.enabled = true;
+                            }
+                            //else
+                            //{
+                            //    equipSlot.slotText.enabled = true;
+                            //    equipSlot.countText.enabled = false;
+                            //}
+                            equipSlot.SetLoadedBulletCount(item);
+                            break;
+                        case MagazineType.IntMagazine:
+                            //if (item.weaponData.equipMag.loadedBullets.Count > 0)
+                            //{
+                            //    //if (equipSlot.item == null)
+                            //    //{
+                            //    //    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag.loadedBullets[0], item.weaponData.equipMag.loadedBullets.Count, equipSlot);
+                            //    //}
 
-                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == magData.prefabName);
-                        for (int j = 0; j < smaples.Count; j++)
-                        {
-                            var smaple = smaples[j];
-                            smaple.SetActive(true);
-                        }
-                        equipSlot.countText.text = $"{magData.loadedBullets.Count}";
-                        equipSlot.countText.enabled = true;
-                    }
-                    else
-                    {
-                        equipSlot.slotText.enabled = true;
-                        equipSlot.countText.enabled = false;
+                            //    equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
+                            //    equipSlot.countText.enabled = true;
+                            //}
+                            equipSlot.SetLoadedBulletCount(item);
+                            break;
+                        case MagazineType.Cylinder:
+                            //if (item.weaponData.equipMag.loadedBullets.Count > 0)
+                            //{
+                            //    //if (equipSlot.item == null)
+                            //    //{
+                            //    //    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag.loadedBullets[0], item.weaponData.equipMag.loadedBullets.Count, equipSlot);
+                            //    //}
+
+                            //    equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
+                            //    equipSlot.countText.enabled = true;
+                            //}
+                            equipSlot.SetLoadedBulletCount(item);
+                            break;
+                        default:
+                            equipSlot.SetLoadedBulletCount();
+                            break;
                     }
                     break;
                 default:

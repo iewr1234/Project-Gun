@@ -133,47 +133,22 @@ public class EquipSlot : MonoBehaviour
                 case ItemType.SubWeapon:
                     return !itemEquip && type == EquipType.SubWeapon;
                 case ItemType.Bullet:
-                    if (item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+                    if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
+
+                    if (item.weaponData.isMag)
                     {
-                        if (!item.weaponData.isChamber)
-                        {
-                            return item.weaponData.caliber == putItem.bulletData.caliber;
-                        }
-                        else
-                        {
-                            return false;
-                        }
+                        return item.weaponData.caliber == putItem.bulletData.caliber
+                           && (item.weaponData.equipMag.loadedBullets.Count < item.weaponData.equipMag.magSize || !item.weaponData.isChamber);
                     }
                     else
                     {
-                        return false;
+                        return !item.weaponData.isChamber && item.weaponData.caliber == putItem.bulletData.caliber;
                     }
                 case ItemType.Magazine:
-                    if (item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
-                    {
-                        if (!item.weaponData.isMag)
-                        {
-                            //무기에 탄창이 없을 경우
-                            return putItem.magData.compatModel.Contains(item.weaponData.model);
-                        }
-                        else
-                        {
-                            if (!item.weaponData.equipMag.intMag)
-                            {
-                                //무기에 탄창이 있는 경우
+                    if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
 
-                                return false;
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return item.weaponData.magType == global::MagazineType.Magazine && !item.weaponData.isMag
+                        && putItem.magData.compatModel.Contains(item.weaponData.model);
                 default:
                     return false;
             }
@@ -184,10 +159,27 @@ public class EquipSlot : MonoBehaviour
             switch (putItem.itemData.type)
             {
                 case ItemType.Bullet:
-                    if (intMagMax == 0) return false;
-                    if (item != null && item.TotalCount == intMagMax) return false;
+                    if (popUp.item == null) return false;
 
-                    return putItem.bulletData != null && putItem.bulletData.caliber == caliber;
+                    switch (popUp.item.weaponData.magType)
+                    {
+                        case global::MagazineType.Magazine:
+                            return popUp.item.weaponData.isMag && popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        case global::MagazineType.IntMagazine:
+                            return popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        case global::MagazineType.Cylinder:
+                            return popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        default:
+                            return false;
+                    }
+
+                //if (intMagMax == 0) return false;
+                //if (item != null && item.TotalCount == intMagMax) return false;
+
+                //return putItem.bulletData != null && putItem.bulletData.caliber == caliber;
                 case ItemType.Magazine:
                     return item == null && putItem.magData != null && popUp != null && putItem.magData.compatModel.Contains(model);
                 default:
@@ -227,6 +219,24 @@ public class EquipSlot : MonoBehaviour
 
     public void SetLoadedBulletCount()
     {
+        if (item != null)
+        {
+            SetCountText(item);
+        }
+        else
+        {
+            slotText.enabled = true;
+            countText.enabled = false;
+        }
+    }
+
+    public void SetLoadedBulletCount(ItemHandler item)
+    {
+        SetCountText(item);
+    }
+
+    private void SetCountText(ItemHandler item)
+    {
         if (item == null) return;
 
         switch (item.itemData.type)
@@ -247,19 +257,59 @@ public class EquipSlot : MonoBehaviour
 
         void WeaponType()
         {
-            countText.enabled = true;
-            var loadedNum = item.weaponData.isChamber ? 1 : 0;
-            if (item.weaponData.isMag)
+            if (type == EquipType.Magazine)
             {
-                loadedNum += item.weaponData.equipMag.loadedBullets.Count;
+                if (item.weaponData.magType == global::MagazineType.Magazine)
+                {
+                    if (item.weaponData.isMag)
+                    {
+                        countText.enabled = true;
+                        countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
+                    }
+                    else
+                    {
+                        slotText.enabled = true;
+                        countText.enabled = false;
+                    }
+
+                }
+                else
+                {
+                    slotText.enabled = true;
+                    countText.enabled = true;
+                    countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
+                }
             }
-            countText.text = $"{loadedNum}";
+            else
+            {
+                var loadedNum = 0;
+                var magMax = 0;
+                if (item.weaponData.isChamber) loadedNum++;
+
+                if (item.weaponData.magType == global::MagazineType.Magazine)
+                {
+                    if (item.weaponData.isMag)
+                    {
+                        loadedNum += item.weaponData.equipMag.loadedBullets.Count;
+                        magMax = item.weaponData.equipMag.magSize;
+                    }
+                }
+                else
+                {
+                    loadedNum += item.weaponData.equipMag.loadedBullets.Count;
+                    magMax = item.weaponData.equipMag.magSize;
+
+                }
+                slotText.enabled = false;
+                countText.enabled = true;
+                countText.text = $"{loadedNum}<size=14>/{magMax}</size>";
+            }
         }
 
         void MagazineType()
         {
             countText.enabled = true;
-            countText.text = $"{item.TotalCount}";
+            countText.text = $"{item.TotalCount}/{item.magData.magSize}";
         }
     }
 

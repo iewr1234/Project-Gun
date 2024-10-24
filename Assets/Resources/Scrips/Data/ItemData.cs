@@ -48,6 +48,7 @@ public class ItemDataInfo
     public string indexName;
     [Space(5f)]
 
+    public string serialID;
     public string ID;
     public string dataID;
     public string itemName;
@@ -68,6 +69,7 @@ public class ItemDataInfo
         var itemData = new ItemDataInfo
         {
             indexName = indexName,
+            serialID = System.Guid.NewGuid().ToString(),
             ID = ID,
             dataID = dataID,
             itemName = itemName,

@@ -6,10 +6,8 @@ using UnityEngine;
 public class MagazineDataInfo
 {
     public string indexName;
-    [Space(5f)]
 
     public string ID;
-    public bool intMag;
     public string loadedBulletID;
     public string prefabName;
     public string magName;
@@ -29,7 +27,6 @@ public class MagazineDataInfo
         {
             indexName = indexName,
             ID = ID,
-            intMag = intMag,
             loadedBulletID = loadedBulletID,
             prefabName = prefabName,
             magName = magName,

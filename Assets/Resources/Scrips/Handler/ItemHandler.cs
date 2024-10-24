@@ -94,7 +94,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             sample.SetActive(false);
             samples.Add(sample);
         }
-
     }
 
     public void SetComponents(GameMenuManager _gameMenuMgr, int _index)
@@ -145,15 +144,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             sample.SetActive(false);
             samples.Add(sample);
         }
-
     }
 
     public void SetItemInfo(ItemDataInfo _itemData, int count, bool insertOption)
     {
-        InputData();
+        itemData = _itemData.CopyData();
+        InputItemData();
         InsertItemOption();
         SetItemRotation(false);
-        SetItemCount();
+        SetItemCount(count);
 
         activeSample = samples.Find(x => x.name == itemData.dataID);
         if (activeSample == null)
@@ -166,60 +165,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (!gameMenuMgr.activeItem.Contains(this))
         {
             gameMenuMgr.activeItem.Add(this);
-        }
-
-        void InputData()
-        {
-            itemData = _itemData.CopyData();
-            transform.name = $"Item_{index}_{itemData.itemName}";
-            size = _itemData.size;
-            switch (itemData.type)
-            {
-                case ItemType.Rig:
-                    var _rigData = gameMenuMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
-                    rigData = _rigData.CopyData();
-                    break;
-                case ItemType.Backpack:
-                    var _backpackData = gameMenuMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
-                    backpackData = _backpackData.CopyData();
-                    break;
-                case ItemType.MainWeapon:
-                    var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                    weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
-                    SetPartsSample();
-                    break;
-                case ItemType.SubWeapon:
-                    var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                    weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
-                    SetPartsSample();
-                    break;
-                case ItemType.Bullet:
-                    var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
-                    bulletData = _bulletData.CopyData();
-                    break;
-                case ItemType.Magazine:
-                    var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
-                    magData = _magData.CopyData();
-                    var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
-                    if (loadedBullet != null)
-                    {
-                        for (int i = 0; i < magData.magSize; i++)
-                        {
-                            magData.loadedBullets.Add(loadedBullet);
-                        }
-                    }
-                    break;
-                case ItemType.Sight:
-                    var _partsData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
-                    partsData = _partsData.CopyData();
-                    break;
-                case ItemType.Grenade:
-                    var _grenadeData = gameMenuMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
-                    grenadeData = _grenadeData.CopyData();
-                    break;
-                default:
-                    break;
-            }
         }
 
         void InsertItemOption()
@@ -253,31 +198,32 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 itemData.itemOptions.Add(itemOption);
             }
         }
+    }
 
-        void SetItemCount()
+    public void SetItemInfo(ItemDataInfo _itemData, int count)
+    {
+        itemData = _itemData;
+        InputItemData();
+        SetItemRotation(false);
+        SetItemCount(count);
+
+        activeSample = samples.Find(x => x.name == itemData.dataID);
+        if (activeSample == null)
         {
-            switch (itemData.type)
-            {
-                case ItemType.MainWeapon:
-                    SetLoadedBulletCount();
-                    break;
-                case ItemType.SubWeapon:
-                    SetLoadedBulletCount();
-                    break;
-                case ItemType.Magazine:
-                    SetLoadedBulletCount();
-                    break;
-                default:
-                    countText.enabled = itemData.maxNesting > 1;
-                    SetTotalCount(count);
-                    break;
-            }
+            Debug.LogError("Not found Sample object");
+        }
+        activeSample.SetActive(true);
+        gameObject.SetActive(true);
+
+        if (!gameMenuMgr.activeItem.Contains(this))
+        {
+            gameMenuMgr.activeItem.Add(this);
         }
     }
 
     public void SetItemInfo(MagazineDataInfo _magData)
     {
-        itemData = gameMenuMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _magData.ID);
+        itemData = gameMenuMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _magData.ID).CopyData();
         size = itemData.size;
         magData = _magData.CopyData();
         var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
@@ -302,6 +248,59 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (!gameMenuMgr.activeItem.Contains(this))
         {
             gameMenuMgr.activeItem.Add(this);
+        }
+    }
+
+    private void InputItemData()
+    {
+        transform.name = $"Item_{index}_{itemData.itemName}";
+        size = itemData.size;
+        switch (itemData.type)
+        {
+            case ItemType.Rig:
+                var _rigData = gameMenuMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
+                rigData = _rigData.CopyData();
+                break;
+            case ItemType.Backpack:
+                var _backpackData = gameMenuMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
+                backpackData = _backpackData.CopyData();
+                break;
+            case ItemType.MainWeapon:
+                var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
+                SetPartsSample();
+                break;
+            case ItemType.SubWeapon:
+                var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
+                weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
+                SetPartsSample();
+                break;
+            case ItemType.Bullet:
+                var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
+                bulletData = _bulletData.CopyData();
+                break;
+            case ItemType.Magazine:
+                var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
+                magData = _magData.CopyData();
+                var loadedBullet = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == magData.loadedBulletID);
+                if (loadedBullet != null)
+                {
+                    for (int i = 0; i < magData.magSize; i++)
+                    {
+                        magData.loadedBullets.Add(loadedBullet);
+                    }
+                }
+                break;
+            case ItemType.Sight:
+                var _partsData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                partsData = _partsData.CopyData();
+                break;
+            case ItemType.Grenade:
+                var _grenadeData = gameMenuMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
+                grenadeData = _grenadeData.CopyData();
+                break;
+            default:
+                break;
         }
     }
 
@@ -404,10 +403,42 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetTotalCount(int value)
+    public void SetTotalCount(int newCount)
     {
-        totalCount = value;
+        totalCount = newCount;
         countText.text = $"{totalCount}";
+    }
+
+    public void SetTotalCount(int newCount, int maxValue)
+    {
+        totalCount = newCount;
+        countText.text = $"{totalCount}/{maxValue}";
+    }
+
+    public void ResultTotalCount(int value)
+    {
+        totalCount += value;
+        countText.text = $"{totalCount}";
+    }
+
+    private void SetItemCount(int count)
+    {
+        switch (itemData.type)
+        {
+            case ItemType.MainWeapon:
+                SetLoadedBulletCount();
+                break;
+            case ItemType.SubWeapon:
+                SetLoadedBulletCount();
+                break;
+            case ItemType.Magazine:
+                SetLoadedBulletCount();
+                break;
+            default:
+                countText.enabled = itemData.maxNesting > 1;
+                SetTotalCount(count);
+                break;
+        }
     }
 
     public void SetLoadedBulletCount()
@@ -435,25 +466,24 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         void WeaponType()
         {
-            countText.enabled = true;
-            var count = 0;
-            if (weaponData.isChamber) count++;
-            if (weaponData.isMag) count += weaponData.equipMag.loadedBullets.Count;
+            var bulletNum = 0;
+            var magSize = 0;
+            if (weaponData.isChamber) bulletNum++;
+            if (weaponData.isMag)
+            {
+                bulletNum += weaponData.equipMag.loadedBullets.Count;
+                magSize = weaponData.equipMag.magSize;
+            }
 
-            SetTotalCount(count);
+            countText.enabled = true;
+            SetTotalCount(bulletNum, magSize);
         }
 
         void MagazineType()
         {
             countText.enabled = true;
-            SetTotalCount(magData.loadedBullets.Count);
+            SetTotalCount(magData.loadedBullets.Count, magData.magSize);
         }
-    }
-
-    public void ResultTotalCount(int value)
-    {
-        totalCount += value;
-        countText.text = $"{totalCount}";
     }
 
     public void SetItemRotation(bool _rotation)
@@ -490,11 +520,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemScale(bool value)
     {
         if (size == new Vector2Int(1, 1)) return;
-        if (itemData.type == ItemType.Rig) return;
-        if (itemData.type == ItemType.Backpack) return;
-        if (itemData.type == ItemType.MainWeapon) return;
-        if (itemData.type == ItemType.SubWeapon) return;
-        if (itemData.type == ItemType.Bullet) return;
+        if (itemData != null && itemData.type == ItemType.Rig) return;
+        if (itemData != null && itemData.type == ItemType.Backpack) return;
+        if (itemData != null && itemData.type == ItemType.MainWeapon) return;
+        if (itemData != null && itemData.type == ItemType.SubWeapon) return;
+        if (itemData != null && itemData.type == ItemType.Bullet) return;
 
         switch (value)
         {

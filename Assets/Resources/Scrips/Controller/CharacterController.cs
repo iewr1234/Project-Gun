@@ -1280,7 +1280,7 @@ public class CharacterController : MonoBehaviour
 
         float GetDistance()
         {
-            switch (currentWeapon.weaponData.type)
+            switch (currentWeapon.weaponData.weaponType)
             {
                 case WeaponType.Pistol:
                     return 0.45f;
@@ -1297,7 +1297,7 @@ public class CharacterController : MonoBehaviour
 
         float GetSpeed()
         {
-            switch (currentWeapon.weaponData.type)
+            switch (currentWeapon.weaponData.weaponType)
             {
                 case WeaponType.Pistol:
                     return targetingMoveSpeed_Pistol;
@@ -2791,7 +2791,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(coverAimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData.type);
+                SetRig(currentWeapon.weaponData.weaponType);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2841,7 +2841,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(aimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData.type);
+                SetRig(currentWeapon.weaponData.weaponType);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
