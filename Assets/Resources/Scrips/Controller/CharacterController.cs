@@ -256,7 +256,7 @@ public class CharacterController : MonoBehaviour
     private readonly float targetingMoveSpeed_Rifle = 1f;
 
     private bool reloading;
-    private readonly float reloadTime = 0.5f;
+    private readonly float reloadTime = 0.3f;
 
     private bool changing;
     private int changeIndex;
@@ -1550,8 +1550,8 @@ public class CharacterController : MonoBehaviour
                 return;
             }
 
-            if (command.isReload) animator.SetTrigger("reload");
-            if (command.loadChamber) animator.SetTrigger("loadChamber");
+            animator.SetBool("_reload", command.isReload);
+            animator.SetBool("_loadChamber", command.loadChamber);
             reloading = true;
         }
     }
@@ -3094,6 +3094,8 @@ public class CharacterController : MonoBehaviour
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
         }
+        animator.SetBool("_reload", false);
+        animator.SetBool("_loadChamber", false);
         commandList.RemoveAt(0);
         reloading = false;
     }
@@ -3200,8 +3202,15 @@ public class CharacterController : MonoBehaviour
 
     public void Event_InsertBullet()
     {
-        var reloadNum = animator.GetInteger("reloadNum");
-        animator.SetInteger("reloadNum", reloadNum - 1);
+        var reloadNum = animator.GetInteger("reloadNum") - 1;
+        animator.SetInteger("reloadNum", reloadNum);
+        if (reloadNum > 0) return;
+
+        if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
+        {
+            animator.SetBool("_reload", false);
+            StartCoroutine(Coroutine_ReloadEnd());
+        }
     }
 
     public void Event_UnequipMagazine()
@@ -3212,7 +3221,12 @@ public class CharacterController : MonoBehaviour
     public void Event_EquipMagazine()
     {
         currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
-        if (currentWeapon.weaponData.isChamber) StartCoroutine(Coroutine_ReloadEnd());
+
+        if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
+        {
+            animator.SetBool("_reload", false);
+            StartCoroutine(Coroutine_ReloadEnd());
+        }
     }
 
     /// <summary>

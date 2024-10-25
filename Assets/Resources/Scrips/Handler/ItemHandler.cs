@@ -330,7 +330,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             }
         }
         countText.enabled = true;
-        SetTotalCount(magData.loadedBullets.Count);
+        SetTotalCount(magData.loadedBullets.Count, magData.magSize);
 
         activeSample = samples.Find(x => x.name == itemData.dataID);
         if (activeSample == null)

@@ -1034,13 +1034,20 @@ public class GameManager : MonoBehaviour
                 {
                     selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
                     gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag);
-                    gameMenuMgr.QuickEquip(weaponItem, rigItem);
                 }
                 else
                 {
                     selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
-                    gameMenuMgr.QuickEquip(weaponItem, rigItem);
                 }
+
+                if (!weapon.weaponData.isChamber && rigItem.magData.loadedBullets.Count > 0)
+                {
+                    var chamberBullet = rigItem.magData.loadedBullets[^1];
+                    weapon.weaponData.chamberBullet = chamberBullet;
+                    weapon.weaponData.isChamber = true;
+                    rigItem.magData.loadedBullets.Remove(chamberBullet);
+                }
+                gameMenuMgr.QuickEquip(weaponItem, rigItem);
                 break;
             case MagazineType.IntMagazine:
                 selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value, true, weapon.weaponData.isChamber);
