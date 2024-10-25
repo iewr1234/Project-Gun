@@ -205,7 +205,7 @@ public class PopUp_Inventory : MonoBehaviour
                 var equipSlot = itemInfo.equipSlots[i];
                 if (equipSlot.item == null) continue;
 
-                gameMenuMgr.InActiveItem(equipSlot.item);
+                equipSlot.item.DisableItem();
             }
         }
         else
@@ -681,6 +681,35 @@ public class PopUp_Inventory : MonoBehaviour
         transform.localPosition = pos;
     }
 
+    public void ClosePopUp()
+    {
+        switch (state)
+        {
+            case PopUpState.Split:
+                gameMenuMgr.InactiveSampleItem();
+                for (int i = 0; i < itemSlots.Count; i++)
+                {
+                    var itemSlot = itemSlots[i];
+                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
+                }
+                itemSlots.Clear();
+                break;
+            case PopUpState.ItemInformation:
+                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+                {
+                    var equipSlot = itemInfo.equipSlots[i];
+                    if (equipSlot.item == null) continue;
+
+                    equipSlot.item.DisableItem();
+                }
+                gameMenuMgr.selectItem = null;
+                break;
+            default:
+                break;
+        }
+        gameMenuMgr.RemoveActivePopUp(this);
+    }
+
     public void BeginDrag_PopUp()
     {
         var activePopUps = gameMenuMgr.activePopUp.FindAll(x => x.state == state);
@@ -701,30 +730,6 @@ public class PopUp_Inventory : MonoBehaviour
 
     public void Button_PopUp_Close()
     {
-        switch (state)
-        {
-            case PopUpState.Split:
-                gameMenuMgr.InactiveSampleItem();
-                for (int i = 0; i < itemSlots.Count; i++)
-                {
-                    var itemSlot = itemSlots[i];
-                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
-                }
-                itemSlots.Clear();
-                break;
-            case PopUpState.ItemInformation:
-                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
-                {
-                    var equipSlot = itemInfo.equipSlots[i];
-                    if (equipSlot.item == null) continue;
-
-                    gameMenuMgr.InActiveItem(equipSlot.item);
-                }
-                gameMenuMgr.selectItem = null;
-                break;
-            default:
-                break;
-        }
-        gameMenuMgr.RemoveActivePopUp(this);
+        ClosePopUp();
     }
 }

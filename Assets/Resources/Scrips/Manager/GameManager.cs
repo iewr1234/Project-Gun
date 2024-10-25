@@ -1032,23 +1032,23 @@ public class GameManager : MonoBehaviour
             case MagazineType.Magazine:
                 if (weapon.weaponData.isMag)
                 {
+                    selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
                     gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                    selectChar.AddCommand(CommandType.Reload);
                 }
                 else
                 {
+                    selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                    selectChar.AddCommand(CommandType.Reload);
                 }
                 break;
             case MagazineType.IntMagazine:
+                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value, true, weapon.weaponData.isChamber);
                 gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value);
                 break;
             case MagazineType.Cylinder:
+                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value, true, weapon.weaponData.isChamber);
                 gameMenuMgr.QuickEquip(weaponItem, rigItem);
-                selectChar.AddCommand(CommandType.Reload, uiMgr.GetAmmoIcon().value);
                 break;
             default:
                 break;
@@ -1094,7 +1094,7 @@ public class GameManager : MonoBehaviour
 
     public void ThrowAction_Grenade()
     {
-        gameMenuMgr.InActiveItem(rigItems[uiMgr.iconIndex]);
+        rigItems[uiMgr.iconIndex].DisableItem();
         rigItems.Clear();
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.throwButton.SetActiveButton(false);
@@ -1964,7 +1964,7 @@ public class GameManager : MonoBehaviour
     {
         var weapon = enemy.currentWeapon;
         weapon.loadedNum = weapon.magMax;
-        enemy.AddCommand(CommandType.Reload);
+        enemy.AddCommand(CommandType.Reload, true, true);
     }
     #endregion
 

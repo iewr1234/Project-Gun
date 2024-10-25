@@ -27,7 +27,16 @@ public class StorageItemInfo
     public Vector2Int itemSize;
     public int totalCount;
     public bool rotation;
+    [Space(5f)]
+
     public ItemDataInfo itemData;
+    [HideInInspector] public RigDataInfo rigData;
+    [HideInInspector] public BackpackDataInfo backpackData;
+    [HideInInspector] public WeaponDataInfo weaponData;
+    [HideInInspector] public BulletDataInfo bulletData;
+    [HideInInspector] public MagazineDataInfo magData;
+    [HideInInspector] public WeaponPartsDataInfo partsData;
+    [HideInInspector] public GrenadeDataInfo grenadeData;
 }
 
 [System.Serializable]

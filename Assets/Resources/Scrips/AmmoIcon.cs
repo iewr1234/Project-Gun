@@ -11,6 +11,7 @@ public enum AmmoIconType
     Magazine,
     Grenade,
     Bullet,
+    Chamber,
 }
 
 public class AmmoIcon : MonoBehaviour

@@ -48,7 +48,7 @@ public class GameMenuManager : MonoBehaviour
     private GameObject otherScrollbar;
 
     private ItemHandler sampleItem;
-    private Transform itemPool;
+    [HideInInspector] public Transform itemPool;
 
     [Header("[Right Buttons]")]
     public Button statusButton;
@@ -258,7 +258,7 @@ public class GameMenuManager : MonoBehaviour
                 {
                     if (activePopUp.Count > 0)
                     {
-                        activePopUp[^1].Button_PopUp_Close();
+                        activePopUp[^1].ClosePopUp();
                     }
                     else if (gameMgr.gameState != GameState.Result)
                     {
@@ -464,7 +464,7 @@ public class GameMenuManager : MonoBehaviour
             for (int i = activePopUp.Count - 1; i >= 0; i--)
             {
                 var popUp = activePopUp[i];
-                popUp.Button_PopUp_Close();
+                popUp.ClosePopUp();
             }
         }
     }
@@ -517,7 +517,7 @@ public class GameMenuManager : MonoBehaviour
                 for (int i = activePopUp.Count - 1; i >= 0; i--)
                 {
                     var popUp = activePopUp[i];
-                    popUp.Button_PopUp_Close();
+                    popUp.ClosePopUp();
                 }
                 invenUI.SetActive(false);
                 //InventoryProcess();
@@ -623,6 +623,9 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="item"></param>
     public void TakeTheItem(ItemHandler item)
     {
+        var splitPopUp = activePopUp.Find(x => x.state == PopUpState.Split);
+        if (splitPopUp != null) splitPopUp.ClosePopUp();
+
         if (item.equipSlot == null)
         {
             ActiveSampleItem(item);
@@ -673,7 +676,7 @@ public class GameMenuManager : MonoBehaviour
         if (emptySlots == null)
         {
             Debug.Log("not found ItemSlot");
-            InActiveItem(item);
+            item.DisableItem();
             return false;
         }
         else
@@ -705,7 +708,7 @@ public class GameMenuManager : MonoBehaviour
         if (emptySlots == null)
         {
             Debug.Log("not found ItemSlot");
-            InActiveItem(item);
+            item.DisableItem();
         }
         else
         {
@@ -789,8 +792,16 @@ public class GameMenuManager : MonoBehaviour
     public void SetItemInStorage(ItemDataInfo itemData, int count, bool rotation, List<ItemSlot> itemSlots)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(itemData, count);
+        item.SetItemInfo(itemData, count, false);
         item.SetItemRotation(rotation);
+        PutTheItem(item, itemSlots);
+    }
+
+    public void SetItemInStorage(StorageItemInfo storageItem, List<ItemSlot> itemSlots)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(storageItem);
+        item.SetItemRotation(storageItem.rotation);
         PutTheItem(item, itemSlots);
     }
 
@@ -1048,7 +1059,7 @@ public class GameMenuManager : MonoBehaviour
             if (maxValue >= newTotal)
             {
                 onSlot.item.SetTotalCount(newTotal);
-                InActiveItem(item);
+                item.DisableItem();
             }
             else
             {
@@ -1059,6 +1070,7 @@ public class GameMenuManager : MonoBehaviour
                 onSlot.item.SetTotalCount(maxValue);
             }
             onSlot.item.targetImage.raycastTarget = true;
+            otherStorage.UpdateStorageInfo(onSlot.item);
         }
 
         void ItemSplit()
@@ -1148,16 +1160,7 @@ public class GameMenuManager : MonoBehaviour
             var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
             if (itemSlots[0].otherStorage != null && storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID) == null)
             {
-                var storageItemInfo = new StorageItemInfo()
-                {
-                    indexName = $"{item.itemData.itemName}_{itemSlots[0].slotIndex.x}/{itemSlots[0].slotIndex.y}",
-                    slotIndex = itemSlots[0].slotIndex,
-                    itemSize = item.size,
-                    totalCount = item.TotalCount,
-                    rotation = item.rotation,
-                    itemData = item.itemData,
-                };
-                storageInfo.itemList.Add(storageItemInfo);
+                otherStorage.AddItemInStorageInfo(storageInfo, itemSlots[0].slotIndex, item);
             }
             else if (itemSlots[0].otherStorage == null && item.itemSlots.Count > 0)
             {
@@ -1421,13 +1424,13 @@ public class GameMenuManager : MonoBehaviour
                 onItem.weaponData.equipMag = putItem.magData;
                 onItem.weaponData.isMag = true;
                 onItem.SetLoadedBulletCount();
-                InActiveItem(putItem);
                 onItem.SetPartsSample();
+                putItem.DisableItem();
                 break;
             case ItemType.Sight:
                 onItem.weaponData.equipPartsList.Add(putItem.partsData);
-                InActiveItem(putItem);
                 onItem.SetPartsSample();
+                putItem.DisableItem();
                 break;
             default:
                 break;
@@ -1461,7 +1464,7 @@ public class GameMenuManager : MonoBehaviour
                 {
                     if (putItem.TotalCount == 0)
                     {
-                        InActiveItem(putItem);
+                        putItem.DisableItem();
                     }
                     else
                     {
@@ -1493,7 +1496,7 @@ public class GameMenuManager : MonoBehaviour
                 }
                 else
                 {
-                    InActiveItem(putItem);
+                    putItem.DisableItem();
                 }
                 onItem.SetLoadedBulletCount();
             }
@@ -1537,7 +1540,7 @@ public class GameMenuManager : MonoBehaviour
             {
                 magData.loadedBullets.Add(putItem.bulletData);
             }
-            InActiveItem(putItem);
+            putItem.DisableItem();
         }
         else
         {
@@ -1787,41 +1790,6 @@ public class GameMenuManager : MonoBehaviour
             popUp.index = i;
             popUp.SetPopUpPosition();
         }
-    }
-
-    /// <summary>
-    /// 아이템 비활성화
-    /// </summary>
-    /// <param name="item"></param>
-    public void InActiveItem(ItemHandler item)
-    {
-        Debug.Log($"{item.name}: InActive");
-        item.itemData = null;
-        item.rigData = null;
-        item.backpackData = null;
-        item.weaponData = null;
-        item.bulletData = null;
-        item.magData = null;
-        item.partsData = null;
-        item.grenadeData = null;
-
-        if (item.equipSlot)
-        {
-            item.equipSlot.item = null;
-            item.equipSlot = null;
-        }
-        item.SetItemScale(false);
-        item.SetItemSlots(null, DataUtility.slot_noItemColor);
-        item.itemSlots.Clear();
-        item.transform.SetParent(itemPool, false);
-
-        if (item.activeSample != null)
-        {
-            item.activeSample.SetActive(false);
-            item.activeSample = null;
-        }
-        item.gameObject.SetActive(false);
-        activeItem.Remove(item);
     }
 
     /// <summary>

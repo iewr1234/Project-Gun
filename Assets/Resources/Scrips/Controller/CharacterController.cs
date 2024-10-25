@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
-using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -73,6 +72,10 @@ public class CharacterCommand
 
     [Header("[Shoot]")]
     public TargetInfo targetInfo;
+
+    [Header("[Reload]")]
+    public bool isReload;
+    public bool loadChamber;
 }
 
 [System.Serializable]
@@ -253,6 +256,7 @@ public class CharacterController : MonoBehaviour
     private readonly float targetingMoveSpeed_Rifle = 1f;
 
     private bool reloading;
+    private readonly float reloadTime = 0.5f;
 
     private bool changing;
     private int changeIndex;
@@ -1540,8 +1544,14 @@ public class CharacterController : MonoBehaviour
     {
         if (!reloading/* && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("None")*/)
         {
-            animator.SetTrigger("reload");
-            //currentWeapon.Reload();
+            if (!command.isReload && !command.loadChamber)
+            {
+                commandList.Remove(command);
+                return;
+            }
+
+            if (command.isReload) animator.SetTrigger("reload");
+            if (command.loadChamber) animator.SetTrigger("loadChamber");
             reloading = true;
         }
     }
@@ -2575,6 +2585,44 @@ public class CharacterController : MonoBehaviour
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
+    public void AddCommand(CommandType type)
+    {
+        switch (type)
+        {
+            case CommandType.Aim:
+                var aimCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Aim,
+                    targetInfo = targetList[targetIndex],
+                };
+                commandList.Add(aimCommand);
+                break;
+            case CommandType.Shoot:
+                SetRig(currentWeapon.weaponData.weaponType);
+                var shootCommand = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = CommandType.Shoot,
+                    targetInfo = targetList[targetIndex],
+                };
+                commandList.Add(shootCommand);
+                break;
+            default:
+                var command = new CharacterCommand
+                {
+                    indexName = $"{type}",
+                    type = type,
+                };
+                commandList.Add(command);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
     /// <param name="passList"></param>
     public void AddCommand(CommandType type, float time)
     {
@@ -2805,7 +2853,12 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void AddCommand(CommandType type, int reloadNum)
+    /// <summary>
+    /// 커맨드 추가
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="isCamber"></param>
+    public void AddCommand(CommandType type, bool isReload, bool isCamber)
     {
         switch (type)
         {
@@ -2814,8 +2867,9 @@ public class CharacterController : MonoBehaviour
                 {
                     indexName = $"{type}",
                     type = CommandType.Reload,
+                    isReload = isReload,
+                    loadChamber = !isCamber,
                 };
-                animator.SetInteger("reloadNum", reloadNum);
                 commandList.Add(reloadCommand);
                 break;
             default:
@@ -2827,36 +2881,23 @@ public class CharacterController : MonoBehaviour
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
-    public void AddCommand(CommandType type)
+    /// <param name="reloadNum"></param>
+    public void AddCommand(CommandType type, int reloadNum, bool isReload, bool isCamber)
     {
         switch (type)
         {
-            case CommandType.Aim:
-                var aimCommand = new CharacterCommand
+            case CommandType.Reload:
+                var reloadCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
-                    type = CommandType.Aim,
-                    targetInfo = targetList[targetIndex],
+                    type = CommandType.Reload,
+                    isReload = isReload,
+                    loadChamber = !isCamber,
                 };
-                commandList.Add(aimCommand);
-                break;
-            case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData.weaponType);
-                var shootCommand = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = CommandType.Shoot,
-                    targetInfo = targetList[targetIndex],
-                };
-                commandList.Add(shootCommand);
+                animator.SetInteger("reloadNum", reloadNum);
+                commandList.Add(reloadCommand);
                 break;
             default:
-                var command = new CharacterCommand
-                {
-                    indexName = $"{type}",
-                    type = type,
-                };
-                commandList.Add(command);
                 break;
         }
     }
@@ -3046,6 +3087,17 @@ public class CharacterController : MonoBehaviour
         state = CharacterState.Base;
     }
 
+    private void ReloadEnd()
+    {
+        if (ownerType == CharacterOwner.Player)
+        {
+            gameMgr.camMgr.SetCameraState(CameraState.None);
+            gameMgr.camMgr.lockCam = false;
+        }
+        commandList.RemoveAt(0);
+        reloading = false;
+    }
+
     #region Coroutine
     /// <summary>
     /// (코루틴)조준 해제
@@ -3101,6 +3153,13 @@ public class CharacterController : MonoBehaviour
         }
         commandList.Remove(command);
     }
+
+    private IEnumerator Coroutine_ReloadEnd()
+    {
+        yield return new WaitForSeconds(reloadTime);
+
+        ReloadEnd();
+    }
     #endregion
 
     #region Animation Event
@@ -3153,6 +3212,7 @@ public class CharacterController : MonoBehaviour
     public void Event_EquipMagazine()
     {
         currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
+        if (currentWeapon.weaponData.isChamber) StartCoroutine(Coroutine_ReloadEnd());
     }
 
     /// <summary>
@@ -3171,13 +3231,7 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        if (ownerType == CharacterOwner.Player)
-        {
-            gameMgr.camMgr.SetCameraState(CameraState.None);
-            gameMgr.camMgr.lockCam = false;
-        }
-        commandList.RemoveAt(0);
-        reloading = false;
+        ReloadEnd();
     }
 
     public void Event_WeaponChange()

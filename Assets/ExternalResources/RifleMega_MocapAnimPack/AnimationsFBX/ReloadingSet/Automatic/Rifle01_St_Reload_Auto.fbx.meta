@@ -67,15 +67,8 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.8666667
-        functionName: Event_WeaponSwitching
-        data: Right
-        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.88750005
-        functionName: Event_ReloadEnd
+      - time: 0.2549801
+        functionName: Event_UnequipMagazine
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
         floatParameter: 0
@@ -88,8 +81,22 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.2549801
-        functionName: Event_UnequipMagazine
+      - time: 0.60758865
+        functionName: Event_WeaponSwitching
+        data: Left
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.8666667
+        functionName: Event_WeaponSwitching
+        data: Right
+        objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.88750005
+        functionName: Event_ReloadEnd
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
         floatParameter: 0

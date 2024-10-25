@@ -20,7 +20,7 @@ public class OtherStorage : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public Vector2Int size;
     public List<StorageInfo> storageInfos = new List<StorageInfo>();
-    [HideInInspector] public int tabIndex;
+    public int tabIndex;
 
     private readonly Color activeColor_tab = new Color(0.78f, 0.78f, 0.78f);
     private readonly Color noneActiveColor_tab = new Color(0.52f, 0.52f, 0.52f);
@@ -85,7 +85,6 @@ public class OtherStorage : MonoBehaviour
 
     public void DeactiveTabButtons()
     {
-        Debug.Log("!");
         ClearStorage();
         storageInfos.Clear();
         for (int i = 0; i < tabButtonImages.Count; i++)
@@ -110,7 +109,7 @@ public class OtherStorage : MonoBehaviour
             var setSlot = gameMenuMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
             if (setSlot.Count == storageItem.itemSize.x * storageItem.itemSize.y)
             {
-                gameMenuMgr.SetItemInStorage(storageItem.itemData, storageItem.totalCount, storageItem.rotation, setSlot);
+                gameMenuMgr.SetItemInStorage(storageItem, setSlot);
             }
         }
     }
@@ -158,17 +157,8 @@ public class OtherStorage : MonoBehaviour
             var setSlots = emptySlots.Intersect(itemSlots).ToList();
             if (setSlots.Count == slotCount)
             {
-                var storageItemInfo = new StorageItemInfo()
-                {
-                    indexName = $"{item.itemData.itemName}_{setSlots[0].x}/{setSlots[0].y}",
-                    slotIndex = setSlots[0],
-                    itemSize = item.size,
-                    totalCount = item.TotalCount,
-                    rotation = item.rotation,
-                    itemData = item.itemData,
-                };
-                floor.itemList.Add(storageItemInfo);
-                gameMenuMgr.InActiveItem(item);
+                AddItemInStorageInfo(floor, setSlots[0], item);
+                item.DisableItem();
                 return;
             }
         }
@@ -182,11 +172,67 @@ public class OtherStorage : MonoBehaviour
         if (item.itemSlots[0].otherStorage == null) return;
 
         var storageInfo = storageInfos[tabIndex];
-        var storageItem = storageInfo.itemList.Find(x => x.itemData == item.itemData && x.slotIndex == item.itemSlots[0].slotIndex);
+        var storageItem = storageInfo.itemList.Find(x => x.itemData.ID == item.itemData.ID && x.slotIndex == item.itemSlots[0].slotIndex);
         if (storageItem != null)
         {
             storageItem.totalCount = item.TotalCount;
         }
+    }
+
+    public void AddItemInStorageInfo(StorageInfo storageInfo, Vector2Int slotIndex, ItemHandler item)
+    {
+        var storageItemInfo = new StorageItemInfo()
+        {
+            indexName = $"{item.itemData.itemName}_{slotIndex.x}/{slotIndex.y}",
+            slotIndex = slotIndex,
+            itemSize = item.size,
+            totalCount = item.TotalCount,
+            rotation = item.rotation,
+            itemData = item.itemData,
+        };
+
+        switch (item.itemData.type)
+        {
+            case ItemType.Rig:
+                storageItemInfo.rigData = item.rigData;
+                break;
+            case ItemType.Backpack:
+                storageItemInfo.backpackData = item.backpackData;
+                break;
+            case ItemType.MainWeapon:
+                storageItemInfo.weaponData = item.weaponData;
+                break;
+            case ItemType.SubWeapon:
+                storageItemInfo.weaponData = item.weaponData;
+                break;
+            case ItemType.Bullet:
+                storageItemInfo.bulletData = item.bulletData;
+                break;
+            case ItemType.Magazine:
+                storageItemInfo.magData = item.magData;
+                break;
+            case ItemType.Muzzle:
+                storageItemInfo.partsData = item.partsData;
+                break;
+            case ItemType.Sight:
+                storageItemInfo.partsData = item.partsData;
+                break;
+            case ItemType.FrontHandle:
+                storageItemInfo.partsData = item.partsData;
+                break;
+            case ItemType.Attachment:
+                storageItemInfo.partsData = item.partsData;
+                break;
+            case ItemType.UnderBarrel:
+                storageItemInfo.partsData = item.partsData;
+                break;
+            case ItemType.Grenade:
+                storageItemInfo.grenadeData = item.grenadeData;
+                break;
+            default:
+                break;
+        }
+        storageInfo.itemList.Add(storageItemInfo);
     }
 
     public void ClearStorage()
@@ -199,14 +245,15 @@ public class OtherStorage : MonoBehaviour
             var itemSlot = itemSlots.Find(x => x.slotIndex == slotIndex && x.item != null);
             if (itemSlot != null)
             {
-                gameMenuMgr.InActiveItem(itemSlot.item);
+                itemSlot.item.DisableItem();
             }
         }
-        //storageInfos.Clear();
     }
 
     public void Button_Tab(int index)
     {
+        if (index == tabIndex) return;
+
         ClearStorage();
         GetStorageInfo(index);
     }
