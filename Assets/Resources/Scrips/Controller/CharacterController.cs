@@ -2677,6 +2677,7 @@ public class CharacterController : MonoBehaviour
                 targetNode.charCtr = this;
                 PayTheMoveCost(targetNode.moveCost);
 
+                if (ownerType == CharacterOwner.Player) gameMgr.gameMenuMgr.otherStorage.DeactiveTabButtons();
                 var moveCommand = new CharacterCommand
                 {
                     indexName = $"{type}",

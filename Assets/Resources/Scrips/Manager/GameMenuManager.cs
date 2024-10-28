@@ -162,7 +162,7 @@ public class GameMenuManager : MonoBehaviour
             }
             otherStorage = invenUI.transform.Find("OtherStorage").GetComponent<OtherStorage>();
             otherStorage.SetComponents(this);
-            otherStorage.SetActive(false);
+            otherStorage.components.SetActive(false);
 
             myScrollRect = invenUI.transform.Find("MyStorage/ScrollView").GetComponent<ScrollRect>();
             myScrollbar = invenUI.transform.Find("MyStorage/ScrollView/Scrollbar Vertical").gameObject;
@@ -448,7 +448,7 @@ public class GameMenuManager : MonoBehaviour
         var player = gameMgr.playerList[0];
         invenUI.SetActive(showInven);
         itemSplit = false;
-        if (showInven && otherStorage.storageInfos.Count == 0)
+        if (showInven)
         {
             SetOtherStorage(null);
             SetStorageUI(true);
@@ -716,17 +716,72 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 저장고에 아이템을 옮김
-    /// </summary>
-    /// <param name="item"></param>
-    /// <param name="itemSlots"></param>
-    public void MoveItemInStorage(ItemHandler item, List<ItemSlot> itemSlots)
+    public void SetItemInStorage(ItemDataInfo itemData, int count, bool rotation, List<ItemSlot> itemSlots)
     {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(itemData, count, false);
+        item.SetItemRotation(rotation);
+        PutTheItem(item, itemSlots);
+    }
+
+    public void SetItemInStorage(StorageItemInfo storageItem, List<ItemSlot> itemSlots)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(storageItem);
+        item.SetItemRotation(storageItem.rotation);
+        PutTheItem(item, itemSlots);
+    }
+
+    public void SetItemInStorage(MagazineDataInfo magData, List<ItemSlot> storageSlots)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(magData);
+        if (!CheckSameItmeAndNesting(item, storageSlots)) return;
+
+        List<ItemSlot> emptySlots = null;
+        if (storageSlots != null)
+        {
+            emptySlots = FindEmptySlots(item, storageSlots);
+            if (emptySlots != null)
+            {
+                onSlots = emptySlots;
+                PutTheItem(item, emptySlots);
+                return;
+            }
+        }
+
+        var myStorages = this.myStorages.FindAll(x => (storageSlots == null || (storageSlots != null && x != storageSlots[0].myStorage))
+                                                   && (x.type == MyStorageType.Pocket || x.type == MyStorageType.Rig))
+                                        .OrderByDescending(x => x.type).ToList();
+        for (int i = 0; i < myStorages.Count; i++)
+        {
+            var myStorage = myStorages[i];
+            var itemSlots = myStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
+            if (!CheckSameItmeAndNesting(item, itemSlots)) return;
+
+            emptySlots = FindEmptySlots(item, itemSlots);
+            if (emptySlots != null) break;
+        }
+
+        if (emptySlots != null)
+        {
+            onSlots = emptySlots;
+            PutTheItem(item, emptySlots);
+        }
+        else
+        {
+            MoveItmeInOtherStorage(item);
+        }
+    }
+
+    public void MoveItemInMyStorage(ItemHandler item, List<ItemSlot> itemSlots)
+    {
+        if (!CheckSameItmeAndNesting(item, itemSlots)) return;
+
         var emptySlots = FindEmptySlots(item, itemSlots);
         if (emptySlots == null)
         {
-            otherStorage.DropItmeOnTheFloor(item);
+            MoveItmeInOtherStorage(item);
         }
         else
         {
@@ -737,20 +792,62 @@ public class GameMenuManager : MonoBehaviour
 
     public void MoveMagazineInStorage(ItemHandler item)
     {
-        if (gameMgr != null && gameMgr.playerList.Count > 0)
+        if (item.equipSlot != null && gameMgr != null && gameMgr.playerList.Count > 0)
         {
             var player = gameMgr.playerList[0];
             player.SetAbility();
         }
-        var magData = item.weaponData.equipMag.CopyData();
+        var magData = item.weaponData.equipMag;
         item.weaponData.equipMag = null;
         item.weaponData.isMag = false;
         item.SetPartsSample();
         item.SetLoadedBulletCount();
-        SetItemInStorage(magData);
+        if (item.itemSlots.Count > 0)
+        {
+            if (item.itemSlots[0].myStorage != null)
+            {
+                SetItemInStorage(magData, item.itemSlots[0].myStorage.itemSlots);
+            }
+            else
+            {
+                SetItemInStorage(magData, item.itemSlots[0].otherStorage.itemSlots);
+            }
+        }
+        else
+        {
+            SetItemInStorage(magData, null);
+        }
 
         var popUp = activePopUp.Find(x => x.state == PopUpState.ItemInformation && x.item == item);
         if (popUp != null) popUp.PopUp_ItemInformation(popUp.item);
+    }
+
+    private void MoveItmeInOtherStorage(ItemHandler item)
+    {
+        if (!CheckSameItmeAndNesting(item, otherStorage.itemSlots)) return;
+
+        if (otherStorage.storageInfos.Count == 0)
+        {
+            otherStorage.DropItmeOnTheFloor(item);
+        }
+        else if (otherStorage.tabIndex != otherStorage.storageInfos.Count - 1)
+        {
+            var emptySlots = FindEmptySlots(item, otherStorage.itemSlots);
+            if (emptySlots != null)
+            {
+                onSlots = emptySlots;
+                PutTheItem(item, emptySlots);
+            }
+            else
+            {
+                otherStorage.DropItmeOnTheFloor(item);
+            }
+        }
+        else
+        {
+            onSlots = FindEmptySlots(item, otherStorage.itemSlots);
+            PutTheItem(item, onSlots);
+        }
     }
 
     /// <summary>
@@ -789,60 +886,45 @@ public class GameMenuManager : MonoBehaviour
         return emptySlots;
     }
 
-    public void SetItemInStorage(ItemDataInfo itemData, int count, bool rotation, List<ItemSlot> itemSlots)
+    /// <summary>
+    /// 같은 아이템 검색 후 중첩
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="itemSlots"></param>
+    /// <returns></returns>
+    private bool CheckSameItmeAndNesting(ItemHandler item, List<ItemSlot> itemSlots)
     {
-        var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(itemData, count, false);
-        item.SetItemRotation(rotation);
-        PutTheItem(item, itemSlots);
-    }
+        bool isItem = true;
+        var sameItemSlots = FindSameItemSlots(item, itemSlots);
+        if (sameItemSlots == null) return isItem;
 
-    public void SetItemInStorage(StorageItemInfo storageItem, List<ItemSlot> itemSlots)
-    {
-        var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(storageItem);
-        item.SetItemRotation(storageItem.rotation);
-        PutTheItem(item, itemSlots);
-    }
-
-    public void SetItemInStorage(MagazineDataInfo magData)
-    {
-        var item = items.Find(x => !x.gameObject.activeSelf);
-        item.SetItemInfo(magData);
-
-        List<ItemSlot> emptySlots = null;
-        var myStorages = this.myStorages.OrderByDescending(x => x.type).ToList();
-        for (int i = 0; i < myStorages.Count; i++)
+        for (int i = 0; i < sameItemSlots.Count; i++)
         {
-            var myStorage = myStorages[i];
-            var itemSlots = myStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
-            emptySlots = FindEmptySlots(item, itemSlots);
-            if (emptySlots == null)
+            var sameItem = sameItemSlots[i].item;
+            if (sameItem.itemData.maxNesting < sameItem.TotalCount + item.TotalCount)
             {
-                continue;
+                sameItem.SetTotalCount(sameItem.itemData.maxNesting);
+                var result = sameItem.itemData.maxNesting - sameItem.TotalCount;
+                item.ResultTotalCount(-result);
             }
             else
             {
+                sameItem.ResultTotalCount(item.TotalCount);
+                item.DisableItem();
+                isItem = false;
                 break;
             }
         }
 
-        if (emptySlots == null || emptySlots.Count < item.size.x * item.size.y)
-        {
-            var itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
-            emptySlots = FindEmptySlots(item, itemSlots);
-        }
+        return isItem;
 
-        if (emptySlots != null)
+        List<ItemSlot> FindSameItemSlots(ItemHandler item, List<ItemSlot> itemSlots)
         {
-            onSlots = emptySlots;
-            PutTheItem(item, emptySlots);
-        }
-        else
-        {
-            //Debug.Log("Fail SetItemInStorage");
-            //InActiveItem(item);
-            otherStorage.DropItmeOnTheFloor(item);
+            if (item.itemData.maxNesting == 1) return null;
+
+            var sameItemSlots = itemSlots.FindAll(x => x.item != null && x.item.itemData.ID == item.itemData.ID
+                                                    && x.item.TotalCount < x.item.itemData.maxNesting);
+            return sameItemSlots;
         }
     }
 
@@ -1577,7 +1659,7 @@ public class GameMenuManager : MonoBehaviour
                         var itemSlot = inItemSlots[i];
                         if (itemSlot.item == null) continue;
 
-                        MoveItemInStorage(itemSlot.item, otherStorage.itemSlots);
+                        MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
                     }
                     rigStorage.SetStorageSize(Vector2Int.zero);
                 }
@@ -1592,7 +1674,7 @@ public class GameMenuManager : MonoBehaviour
                         var itemSlot = inItemSlots[i];
                         if (itemSlot.item == null) continue;
 
-                        MoveItemInStorage(itemSlot.item, otherStorage.itemSlots);
+                        MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
                     }
                     backpackStorage.SetStorageSize(Vector2Int.zero);
                 }
@@ -1952,49 +2034,48 @@ public class GameMenuManager : MonoBehaviour
 
     public void SetOtherStorage(FieldNode node)
     {
+        if (otherStorage.components.activeSelf) return;
+
         var baseStorages = dataMgr.gameData.baseStorages;
-        var storageInfos = new List<StorageInfo>();
+        //var storageInfos = new List<StorageInfo>();
         if (node != null)
         {
             var storageInfo = baseStorages.Find(x => x.nodePos == node.nodePos);
-            storageInfos.Add(storageInfo);
+            if (storageInfo != null) otherStorage.storageInfos.Add(storageInfo);
         }
         var currentNode = gameMgr.playerList[0].currentNode;
-        otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= currentNode.nodePos.x + 1 && x.nodePos.x >= currentNode.nodePos.x - 1
-                                                                              && x.nodePos.y <= currentNode.nodePos.y + 1 && x.nodePos.y >= currentNode.nodePos.y - 1)).ToList();
-        var floorStorage = new StorageInfo()
-        {
-            storageName = "지면",
-            nodePos = currentNode.nodePos,
-            slotSize = DataUtility.floorSlotSize,
-        };
-        otherStorage.storageInfos.Add(floorStorage);
-    }
+        //otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= currentNode.nodePos.x + 1 && x.nodePos.x >= currentNode.nodePos.x - 1
+        //                                                                      && x.nodePos.y <= currentNode.nodePos.y + 1 && x.nodePos.y >= currentNode.nodePos.y - 1)).ToList();
 
-    public void SetLootStorage()
-    {
-        var lootStorage = new StorageInfo()
+        for (int i = 0; i < baseStorages.Count; i++)
         {
-            storageName = "전리품",
-            nodePos = Vector2Int.zero,
-            slotSize = DataUtility.floorSlotSize,
-        };
-        otherStorage.storageInfos.Add(lootStorage);
+            var baseStorage = baseStorages[i];
+            if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
+             && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
+             && otherStorage.storageInfos.Find(x => x.nodePos == baseStorage.nodePos) == null)
+            {
+                otherStorage.storageInfos.Add(baseStorage);
+            }
+        }
+        otherStorage.SetFloorStorage(currentNode);
     }
 
     public void SetStorageUI(bool value)
     {
-        //closeButton.gameObject.SetActive(value);
-        otherStorage.SetActive(value);
-        showMenu = value;
         switch (value)
         {
             case true:
+                if (otherStorage.components.activeSelf) return;
+
+                otherStorage.components.SetActive(true);
                 otherStorage.ActiveTabButtons(otherStorage.storageInfos.Count);
                 otherStorage.GetStorageInfo(0);
+                showMenu = true;
                 break;
             case false:
+                otherStorage.components.SetActive(false);
                 otherStorage.DeactiveTabButtons();
+                showMenu = false;
                 break;
         }
     }

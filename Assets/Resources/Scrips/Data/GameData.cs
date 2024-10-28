@@ -46,6 +46,7 @@ public class StorageInfo
     public Vector2Int nodePos;
     public Vector2Int slotSize;
     public List<StorageItemInfo> itemList = new List<StorageItemInfo>();
+    [HideInInspector] public bool isFloor;
 }
 
 [CreateAssetMenu(fileName = "GameData", menuName = "Scriptable Object/GameData")]

@@ -39,6 +39,12 @@ public class AmmoIcon : MonoBehaviour
         public TextMeshProUGUI numText;
     }
 
+    private class Chamber
+    {
+        public RectTransform rect;
+        public Image iconImage;
+    }
+
     [Header("---Access Component---")]
     private RectTransform rect;
     private Image raycastImage;
@@ -46,6 +52,7 @@ public class AmmoIcon : MonoBehaviour
     private Magazine mag;
     private Grenade grd;
     private Bullet bullet;
+    private Chamber chamber;
 
     [Header("--- Assignment Variable---")]
     public AmmoIconType type;
@@ -85,6 +92,13 @@ public class AmmoIcon : MonoBehaviour
         };
         bullet.rect.gameObject.SetActive(false);
 
+        chamber = new Chamber()
+        {
+            rect = transform.Find("Chamber").GetComponent<RectTransform>(),
+            iconImage = transform.Find("Chamber/Image").GetComponent<Image>(),
+        };
+        chamber.rect.gameObject.SetActive(false);
+
         gameObject.SetActive(false);
     }
 
@@ -119,6 +133,9 @@ public class AmmoIcon : MonoBehaviour
                 bullet.numText.enabled = false;
                 bullet.numText.text = $"{value}";
                 break;
+            case AmmoIconType.Chamber:
+                chamber.rect.gameObject.SetActive(true);
+                break;
             default:
                 break;
         }
@@ -132,16 +149,20 @@ public class AmmoIcon : MonoBehaviour
         switch (type)
         {
             case AmmoIconType.Magazine:
-                mag.rect.transform.localScale = Vector3.one;
+                mag.rect.localScale = Vector3.one;
                 mag.rect.gameObject.SetActive(false);
                 break;
             case AmmoIconType.Grenade:
-                grd.rect.transform.localScale = Vector3.one;
+                grd.rect.localScale = Vector3.one;
                 grd.rect.gameObject.SetActive(false);
                 break;
             case AmmoIconType.Bullet:
-                bullet.rect.transform.localScale = Vector3.one;
+                bullet.rect.localScale = Vector3.one;
                 bullet.rect.gameObject.SetActive(false);
+                break;
+            case AmmoIconType.Chamber:
+                chamber.rect.localScale = Vector3.one;
+                chamber.rect.gameObject.SetActive(false);
                 break;
             default:
                 break;
@@ -155,16 +176,19 @@ public class AmmoIcon : MonoBehaviour
         switch (type)
         {
             case AmmoIconType.Magazine:
-                mag.rect.transform.localScale = zoom ? activeScale : Vector3.one;
+                mag.rect.localScale = zoom ? activeScale : Vector3.one;
                 break;
             case AmmoIconType.Grenade:
-                grd.rect.transform.localScale = zoom ? activeScale : Vector3.one;
+                grd.rect.localScale = zoom ? activeScale : Vector3.one;
                 break;
             case AmmoIconType.Bullet:
-                bullet.rect.transform.localScale = zoom ? activeScale : Vector3.one;
+                bullet.rect.localScale = zoom ? activeScale : Vector3.one;
                 bullet.upArrowImage.enabled = zoom;
                 bullet.downArrowImage.enabled = zoom;
                 bullet.numText.enabled = zoom;
+                break;
+            case AmmoIconType.Chamber:
+                chamber.rect.localScale = zoom ? activeScale : Vector3.one;
                 break;
             default:
                 break;
@@ -201,6 +225,8 @@ public class AmmoIcon : MonoBehaviour
             case AmmoIconType.Grenade:
                 break;
             case AmmoIconType.Bullet:
+                break;
+            case AmmoIconType.Chamber:
                 break;
             default:
                 break;

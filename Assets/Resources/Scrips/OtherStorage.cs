@@ -13,7 +13,7 @@ public class OtherStorage : MonoBehaviour
     [Header("---Access Component---")]
     public List<ItemSlot> itemSlots = new List<ItemSlot>();
 
-    private GameObject components;
+    public GameObject components;
     private TextMeshProUGUI nameText;
     private List<Image> tabButtonImages = new List<Image>();
 
@@ -69,11 +69,6 @@ public class OtherStorage : MonoBehaviour
         }
     }
 
-    public void SetActive(bool value)
-    {
-        components.SetActive(value);
-    }
-
     public void ActiveTabButtons(int value)
     {
         for (int i = 0; i < value; i++)
@@ -106,10 +101,12 @@ public class OtherStorage : MonoBehaviour
         for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
         {
             var storageItem = storageInfos[tabIndex].itemList[i];
-            var setSlot = gameMenuMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
-            if (setSlot.Count == storageItem.itemSize.x * storageItem.itemSize.y)
+            var setSlots = gameMenuMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
+            if (setSlots[0].item != null && setSlots[0].item.itemData.serialID == storageItem.itemData.serialID) continue;
+
+            if (setSlots.Count == storageItem.itemSize.x * storageItem.itemSize.y)
             {
-                gameMenuMgr.SetItemInStorage(storageItem, setSlot);
+                gameMenuMgr.SetItemInStorage(storageItem, setSlots);
             }
         }
     }
@@ -120,7 +117,7 @@ public class OtherStorage : MonoBehaviour
         if (item.itemSlots[0].otherStorage == null) return;
 
         var storageInfo = storageInfos[tabIndex];
-        var find = storageInfo.itemList.Find(x => x.itemData == item.itemData && x.slotIndex == item.itemSlots[0].slotIndex);
+        var find = storageInfo.itemList.Find(x => x.itemData.ID == item.itemData.ID && x.slotIndex == item.itemSlots[0].slotIndex);
         if (find != null)
         {
             storageInfo.itemList.Remove(find);
@@ -133,11 +130,34 @@ public class OtherStorage : MonoBehaviour
     /// <param name="item"></param>
     public void DropItmeOnTheFloor(ItemHandler item)
     {
+        if (gameMenuMgr.gameMgr == null) return;
+        if (gameMenuMgr.gameMgr.playerList.Count == 0) return;
+
+        var player = gameMenuMgr.gameMgr.playerList[0];
+        SetFloorStorage(player.currentNode);
         var floor = storageInfos[^1];
+        var sameItmes = floor.itemList.FindAll(x => x.itemData.ID == item.itemData.ID && x.itemData.maxNesting > 1
+                                                 && x.totalCount < x.itemData.maxNesting);
+        for (int i = 0; i < sameItmes.Count; i++)
+        {
+            var sameItem = sameItmes[i];
+            if (sameItem.itemData.maxNesting < sameItem.totalCount + item.TotalCount)
+            {
+                sameItem.totalCount = sameItem.itemData.maxNesting;
+                var result = sameItem.itemData.maxNesting - sameItem.totalCount;
+                item.ResultTotalCount(-result);
+            }
+            else
+            {
+                sameItem.totalCount += item.TotalCount;
+                item.DisableItem();
+                return;
+            }
+        }
+
         var emptySlots = (from y in Enumerable.Range(0, floor.slotSize.y)
                           from x in Enumerable.Range(0, floor.slotSize.x)
                           select new Vector2Int(x, y)).ToList();
-
         for (int i = 0; i < floor.itemList.Count; i++)
         {
             var itemInfo = floor.itemList[i];
@@ -233,6 +253,32 @@ public class OtherStorage : MonoBehaviour
                 break;
         }
         storageInfo.itemList.Add(storageItemInfo);
+    }
+
+    public void SetFloorStorage(FieldNode node)
+    {
+        if (storageInfos.Find(x => x.isFloor) != null) return;
+
+        var floorStorage = new StorageInfo()
+        {
+            storageName = "지면",
+            nodePos = node.nodePos,
+            slotSize = DataUtility.floorSlotSize,
+            isFloor = true,
+        };
+        storageInfos.Add(floorStorage);
+    }
+
+    public void SetLootStorage()
+    {
+        var lootStorage = new StorageInfo()
+        {
+            storageName = "전리품",
+            nodePos = Vector2Int.zero,
+            slotSize = DataUtility.floorSlotSize,
+            isFloor = true,
+        };
+        storageInfos.Add(lootStorage);
     }
 
     public void ClearStorage()
