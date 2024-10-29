@@ -56,6 +56,7 @@ public class AmmoIcon : MonoBehaviour
 
     [Header("--- Assignment Variable---")]
     public AmmoIconType type;
+    public ItemHandler item;
     public int maxValue;
     public int value;
 
@@ -106,19 +107,20 @@ public class AmmoIcon : MonoBehaviour
     {
         Initialize();
         type = _type;
+        item = _item;
         switch (type)
         {
             case AmmoIconType.Magazine:
                 mag.rect.gameObject.SetActive(true);
-                mag.slider.maxValue = _item.magData.magSize;
-                mag.slider.value = _item.magData.loadedBullets.Count;
+                mag.slider.maxValue = item.magData.magSize;
+                mag.slider.value = item.magData.loadedBullets.Count;
                 break;
             case AmmoIconType.Grenade:
                 grd.rect.gameObject.SetActive(true);
                 break;
             case AmmoIconType.Bullet:
                 bullet.rect.gameObject.SetActive(true);
-                if (_item.bulletData.pelletNum == 0)
+                if (item.bulletData.pelletNum == 0)
                 {
                     bullet.iconImage.sprite = Resources.Load<Sprite>("Sprites/Icon_PistolBullet");
                 }
@@ -128,7 +130,7 @@ public class AmmoIcon : MonoBehaviour
                 }
                 bullet.upArrowImage.enabled = false;
                 bullet.downArrowImage.enabled = false;
-                maxValue = _item.TotalCount;
+                maxValue = item.TotalCount;
                 value = 1;
                 bullet.numText.enabled = false;
                 bullet.numText.text = $"{value}";
@@ -168,6 +170,9 @@ public class AmmoIcon : MonoBehaviour
                 break;
         }
         type = AmmoIconType.None;
+        item = null;
+        maxValue = 0;
+        value = 0;
         gameObject.SetActive(false);
     }
 

@@ -346,6 +346,22 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
+    public void SetItemInfo(BulletDataInfo _bulletData, int count)
+    {
+        itemData = gameMenuMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _bulletData.ID).CopyData();
+        transform.name = $"Item_{index}_{itemData.itemName}";
+        size = itemData.size;
+        bulletData = _bulletData.CopyData();
+        countText.enabled = true;
+        SetTotalCount(count);
+        gameObject.SetActive(true);
+
+        if (!gameMenuMgr.activeItem.Contains(this))
+        {
+            gameMenuMgr.activeItem.Add(this);
+        }
+    }
+
     public void SetSampleItemInfo(ItemHandler item)
     {
         itemData = item.itemData;

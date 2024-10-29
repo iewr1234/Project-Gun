@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public enum GameState
@@ -13,6 +12,7 @@ public enum GameState
     Watch,
     Throw,
     GameMenu,
+    Stage,
     Base,
     Result,
 }
@@ -71,7 +71,6 @@ public class GameManager : MonoBehaviour
     public GameState gameState;
     [HideInInspector] public List<FieldNode> nodeList = new List<FieldNode>();
     [HideInInspector] public bool eventActive;
-    [HideInInspector] public bool dontMove;
 
     private List<ItemHandler> rigItems = new List<ItemHandler>();
     private int activeAmmoCount;
@@ -525,7 +524,7 @@ public class GameManager : MonoBehaviour
                     if (weaponData.magType == MagazineType.Magazine) return;
 
                     var reloadMax = weaponData.equipMag.magSize - weaponData.equipMag.loadedBullets.Count;
-                    if (!weaponData.isChamber) reloadMax++;
+                    //if (!weaponData.isChamber) reloadMax++;
                     uiMgr.GetAmmoIcon().SetAmmoValue(reloadMax, Input.GetKeyDown(KeyCode.W));
                 }
                 else if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Space))
@@ -642,131 +641,127 @@ public class GameManager : MonoBehaviour
     private void MouseInput()
     {
         if (uiMgr.onButton) return;
+        if (gameMenuMgr.state != GameMenuState.None) return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+            FieldNode node;
+            switch (gameState)
             {
-                var node = hit.collider.GetComponentInParent<FieldNode>();
-                switch (gameState)
-                {
-                    case GameState.None:
-                        if (node.charCtr != null && selectChar == null)
+                case GameState.None:
+                    node = GetOnPointerNode();
+                    if (node == null) return;
+
+                    if (node.charCtr != null && selectChar == null)
+                    {
+                        if (node.charCtr.ownerType == CharacterOwner.Enemy) return;
+
+                        selectChar = node.charCtr;
+                        if (selectChar.state == CharacterState.Watch)
                         {
-                            if (node.charCtr.ownerType == CharacterOwner.Enemy) return;
-
-                            selectChar = node.charCtr;
-                            if (selectChar.state == CharacterState.Watch)
+                            selectChar.AimOff();
+                            if (selectChar.animator.GetBool("isCover"))
                             {
-                                selectChar.AimOff();
-                                if (selectChar.animator.GetBool("isCover"))
-                                {
-                                    selectChar.AddCommand(CommandType.BackCover);
-                                }
-                                selectChar.watchInfo.drawRang.gameObject.SetActive(false);
-                                selectChar.state = CharacterState.None;
+                                selectChar.AddCommand(CommandType.BackCover);
                             }
-                            FindMovableNodes(selectChar, true);
-                            gameState = GameState.Move;
+                            selectChar.watchInfo.drawRang.gameObject.SetActive(false);
+                            selectChar.state = CharacterState.None;
                         }
-                        break;
-                    case GameState.Move:
-                        if (node.charCtr != null && selectChar != null && node.charCtr != null && node.charCtr == selectChar)
+                        FindMovableNodes(selectChar, true);
+                        gameState = GameState.Move;
+                    }
+                    break;
+                case GameState.Move:
+                    node = GetOnPointerNode();
+                    if (node == null) return;
+
+                    if (node.charCtr != null && selectChar != null && node.charCtr != null && node.charCtr == selectChar)
+                    {
+                        DeselectCharacter();
+                    }
+                    else if (node == targetNode && node.canMove && selectChar != null)
+                    {
+                        if (selectChar.commandList.Count > 0) return;
+
+                        CharacterMove(selectChar, node);
+                        DeselectCharacter();
+                    }
+                    break;
+                case GameState.Watch:
+                    selectChar.SetWatch();
+                    currentRange = null;
+                    selectChar.state = CharacterState.Watch;
+                    selectChar = null;
+                    gameState = GameState.None;
+                    break;
+                case GameState.Throw:
+                    node = GetOnPointerNode();
+                    if (node == null) return;
+
+                    if (selectChar == null) return;
+                    if (node != targetNode) return;
+
+                    ThrowAction_Grenade();
+                    break;
+                case GameState.Base:
+                    node = GetOnPointerNode();
+                    if (node == null) return;
+
+                    if (gameMenuMgr.showMenu) return;
+                    if (playerList.Count == 0) return;
+
+                    var player = playerList[0];
+                    var moveCommand = player.commandList.Find(x => x.type == CommandType.Move);
+                    if (node.markerType == MarkerType.Base)
+                    {
+                        // BaseNode Process
+                        FieldNode enterNode = null;
+                        switch (node.baseType)
                         {
-                            DeselectCharacter();
+                            case BaseCampMarker.Mission_Node:
+                                enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Mission_Enter);
+                                eventActive = true;
+                                break;
+                            case BaseCampMarker.Storage_Node:
+                                enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Storage_Enter);
+                                eventActive = true;
+                                break;
+                            default:
+                                enterNode = node;
+                                break;
                         }
-                        else if (node == targetNode && node.canMove && selectChar != null)
+                        if (enterNode == null) return;
+
+                        if (moveCommand == null)
                         {
-                            if (selectChar.commandList.Count > 0) return;
-
-                            CharacterMove(selectChar, node);
-                            DeselectCharacter();
+                            FindMovableNodes(player);
+                            ResultNodePass(player, enterNode);
+                            CharacterMove(player, node);
                         }
-                        break;
-                    case GameState.Watch:
-                        selectChar.SetWatch();
-                        currentRange = null;
-                        selectChar.state = CharacterState.Watch;
-                        selectChar = null;
-                        gameState = GameState.None;
-                        break;
-                    case GameState.Throw:
-                        if (selectChar == null) return;
-                        if (node != targetNode) return;
-
-                        ThrowAction_Grenade();
-                        break;
-                    case GameState.Base:
-                        if (dontMove) return;
-                        if (gameMenuMgr.showMenu) return;
-                        if (node == null) return;
-                        if (playerList.Count == 0) return;
-
-                        var player = playerList[0];
-                        var moveCommand = player.commandList.Find(x => x.type == CommandType.Move);
-                        if (node.markerType == MarkerType.Base)
+                        else if (moveCommand.targetNode != node)
                         {
-                            // BaseNode Process
-                            FieldNode enterNode = null;
-                            switch (node.baseType)
-                            {
-                                case BaseCampMarker.Mission_Node:
-                                    enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Mission_Enter);
-                                    eventActive = true;
-                                    break;
-                                case BaseCampMarker.Storage_Node:
-                                    enterNode = node.onAxisNodes.Find(x => x != null && x.baseType == BaseCampMarker.Storage_Enter);
-                                    eventActive = true;
-                                    break;
-                                default:
-                                    enterNode = node;
-                                    break;
-                            }
-                            if (enterNode == null) return;
-
-                            if (moveCommand == null)
-                            {
-                                FindMovableNodes(player);
-                                ResultNodePass(player, enterNode);
-                                CharacterMove(player, node);
-                            }
-                            else if (moveCommand.targetNode != node)
-                            {
-                                ChangeMoveDestination(player, enterNode, node);
-                            }
+                            ChangeMoveDestination(player, enterNode, node);
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (!node.canMove) return;
+
+                        eventActive = false;
+                        if (moveCommand == null)
                         {
-                            if (!node.canMove) return;
-
-                            eventActive = false;
-                            if (moveCommand == null)
-                            {
-                                FindMovableNodes(player);
-                                ResultNodePass(player, node);
-                                CharacterMove(player, node);
-                            }
-                            else if (moveCommand.targetNode != node)
-                            {
-                                ChangeMoveDestination(player, node, node);
-                            }
+                            FindMovableNodes(player);
+                            ResultNodePass(player, node);
+                            CharacterMove(player, node);
                         }
-
-                        //else
-                        //{
-                        //    var moveChange = player.commandList.Find(x => x.type == CommandType.MoveChange);
-                        //    if (moveChange != null)
-                        //    {
-                        //        player.commandList.Remove(moveChange);
-                        //    }
-
-                        //    player.AddCommand(CommandType.MoveChange, )
-                        //}
-                        break;
-                    default:
-                        break;
-                }
+                        else if (moveCommand.targetNode != node)
+                        {
+                            ChangeMoveDestination(player, node, node);
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         else if (Input.GetMouseButtonDown(1))
@@ -798,6 +793,19 @@ public class GameManager : MonoBehaviour
                     break;
                 default:
                     break;
+            }
+        }
+
+        FieldNode GetOnPointerNode()
+        {
+            var ray = camMgr.mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, nodeLayer))
+            {
+                return hit.collider.GetComponentInParent<FieldNode>();
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -984,7 +992,7 @@ public class GameManager : MonoBehaviour
                                              .OrderByDescending(x => x.TotalCount).ToList();
         }
 
-        if (weaponData.isChamber && rigItems.Count == 0) return;
+        //if (weaponData.isChamber && rigItems.Count == 0) return;
 
         SetEnemyOutlinable(false);
         gameState = GameState.Reload;
@@ -1024,7 +1032,7 @@ public class GameManager : MonoBehaviour
                 case MagazineType.Cylinder:
                     return 0;
                 default:
-                    if (!weaponData.isChamber && weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
+                    if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
                     {
                         var ammoIcon = uiMgr.ammoIconList[0];
                         ammoIcon.SetAmmoIcon(AmmoIconType.Chamber, null);
@@ -1050,12 +1058,13 @@ public class GameManager : MonoBehaviour
         var ammoIcon = uiMgr.GetAmmoIcon();
         if (ammoIcon.type == AmmoIconType.Chamber)
         {
-            selectChar.AddCommand(CommandType.Reload, false, weapon.weaponData.isChamber);
+            selectChar.AddCommand(CommandType.Reload, false, false);
             LoadChamber(weapon.weaponData.equipMag);
         }
         else
         {
-            var rigItem = rigItems[uiMgr.iconIndex];
+            //var rigItem = rigItems[uiMgr.iconIndex];
+            var rigItem = ammoIcon.item;
             switch (weapon.weaponData.magType)
             {
                 case MagazineType.Magazine:
@@ -1068,7 +1077,7 @@ public class GameManager : MonoBehaviour
                     {
                         selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
                     }
-                    LoadChamber(rigItem.magData);
+                    if (!weapon.weaponData.isChamber) LoadChamber(rigItem.magData);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
                     break;
                 default:
@@ -1086,14 +1095,18 @@ public class GameManager : MonoBehaviour
 
         void LoadChamber(MagazineDataInfo magData)
         {
-            if (weapon.weaponData.isChamber) return;
             if (!weapon.weaponData.isMag) return;
             if (weapon.weaponData.equipMag.loadedBullets.Count == 0) return;
 
+            if (weapon.weaponData.isChamber)
+            {
+                gameMenuMgr.DropChamberBullet(weapon.weaponData.chamberBullet);
+            }
             var chamberBullet = magData.loadedBullets[^1];
             weapon.weaponData.chamberBullet = chamberBullet;
             weapon.weaponData.isChamber = true;
             magData.loadedBullets.Remove(chamberBullet);
+            weaponItem.SetLoadedBulletCount();
         }
     }
 
@@ -1730,9 +1743,7 @@ public class GameManager : MonoBehaviour
                 uiMgr.SetStageUI(true);
                 break;
             case BaseCampMarker.Storage_Node:
-                gameMenuMgr.SetOtherStorage(node);
-                gameMenuMgr.SetStorageUI(true);
-                gameMenuMgr.ShowInventory(true);
+                gameMenuMgr.ShowInventory(true, node);
                 break;
             default:
                 break;

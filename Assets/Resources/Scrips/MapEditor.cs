@@ -990,9 +990,9 @@ public class MapEditor : MonoBehaviour
                                 var baseStorage = new StorageInfo()
                                 {
                                     storageName = $"{node.baseStorage.storageName}",
+                                    type = StorageInfo.StorageType.Storage,
                                     nodePos = node.nodePos,
                                     slotSize = node.baseStorage.slotSize,
-                                    isFloor = false,
                                 };
                                 baseStorages.Add(baseStorage);
                             }

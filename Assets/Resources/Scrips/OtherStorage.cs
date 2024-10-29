@@ -81,6 +81,8 @@ public class OtherStorage : MonoBehaviour
     public void DeactiveTabButtons()
     {
         ClearStorage();
+        var floor = storageInfos.Find(x => x.type == StorageInfo.StorageType.Floor);
+        if (floor != null && floor.itemList.Count == 0) gameMenuMgr.dataMgr.gameData.floorStorages.Remove(floor);
         storageInfos.Clear();
         for (int i = 0; i < tabButtonImages.Count; i++)
         {
@@ -97,12 +99,13 @@ public class OtherStorage : MonoBehaviour
         var storageInfo = storageInfos[tabIndex];
         nameText.text = storageInfo.storageName;
         tabButtonImages[tabIndex].color = activeColor_tab;
+        ClearStorage();
         ItemSlotsPlacement(storageInfo.slotSize);
         for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
         {
             var storageItem = storageInfos[tabIndex].itemList[i];
             var setSlots = gameMenuMgr.FindAllMultiSizeSlots(itemSlots, storageItem.itemSize, storageItem.slotIndex);
-            if (setSlots[0].item != null && setSlots[0].item.itemData.serialID == storageItem.itemData.serialID) continue;
+            //if (setSlots[0].item != null && setSlots[0].item.itemData.serialID == storageItem.itemData.serialID) continue;
 
             if (setSlots.Count == storageItem.itemSize.x * storageItem.itemSize.y)
             {
@@ -257,16 +260,24 @@ public class OtherStorage : MonoBehaviour
 
     public void SetFloorStorage(FieldNode node)
     {
-        if (storageInfos.Find(x => x.isFloor) != null) return;
-
-        var floorStorage = new StorageInfo()
+        var gameData = gameMenuMgr.dataMgr.gameData;
+        var floor = gameData.floorStorages.Find(x => x.nodePos == node.nodePos);
+        if (floor == null)
         {
-            storageName = "지면",
-            nodePos = node.nodePos,
-            slotSize = DataUtility.floorSlotSize,
-            isFloor = true,
-        };
-        storageInfos.Add(floorStorage);
+            var floorStorage = new StorageInfo()
+            {
+                storageName = $"지면({node.nodePos.x}, {node.nodePos.y})",
+                type = StorageInfo.StorageType.Floor,
+                nodePos = node.nodePos,
+                slotSize = DataUtility.floorSlotSize,
+            };
+            gameData.floorStorages.Add(floorStorage);
+            storageInfos.Add(floorStorage);
+        }
+        else
+        {
+            storageInfos.Add(floor);
+        }
     }
 
     public void SetLootStorage()
@@ -274,25 +285,41 @@ public class OtherStorage : MonoBehaviour
         var lootStorage = new StorageInfo()
         {
             storageName = "전리품",
+            type = StorageInfo.StorageType.Reward,
             nodePos = Vector2Int.zero,
             slotSize = DataUtility.floorSlotSize,
-            isFloor = true,
         };
         storageInfos.Add(lootStorage);
     }
 
     public void ClearStorage()
     {
-        if (storageInfos.Count == 0) return;
+        //if (storageInfos.Count == 0) return;
 
-        for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
+        //for (int i = 0; i < storageInfos[tabIndex].itemList.Count; i++)
+        //{
+        //    var slotIndex = storageInfos[tabIndex].itemList[i].slotIndex;
+        //    var itemSlot = itemSlots.Find(x => x.slotIndex == slotIndex && x.item != null);
+        //    if (itemSlot != null)
+        //    {
+        //        var itemSlots = itemSlot.item.itemSlots;
+        //        itemSlot.item.DisableItem();
+        //        for (int j = 0; j < itemSlots.Count; j++)
+        //        {
+        //            var _itemSlot = itemSlot.item.itemSlots[j];
+        //            _itemSlot.item = null;
+        //        }
+        //    }
+        //}
+
+        var onItemSlots = itemSlots.FindAll(x => x.item != null);
+        for (int i = 0; i < onItemSlots.Count; i++)
         {
-            var slotIndex = storageInfos[tabIndex].itemList[i].slotIndex;
-            var itemSlot = itemSlots.Find(x => x.slotIndex == slotIndex && x.item != null);
-            if (itemSlot != null)
-            {
-                itemSlot.item.DisableItem();
-            }
+            var itemSlot = onItemSlots[i];
+            if (itemSlot.item == null) continue;
+
+            if (itemSlot.item.gameObject.activeSelf) itemSlot.item.DisableItem();
+            itemSlot.item = null;
         }
     }
 

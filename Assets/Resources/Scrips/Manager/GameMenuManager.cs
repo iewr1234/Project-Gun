@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
@@ -291,15 +292,17 @@ public class GameMenuManager : MonoBehaviour
         }
         else if (gameMgr.gameState != GameState.Result)
         {
-            if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
-            {
-                ItemMoveCancel(holdingItem, onSlots);
-                popUp_warning.SetWarning(WarningState.DeleteDropItems);
-            }
-            else
-            {
-                ShowStatus(false);
-            }
+            //if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
+            //{
+            //    ItemMoveCancel(holdingItem, onSlots);
+            //    popUp_warning.SetWarning(WarningState.DeleteDropItems);
+            //}
+            //else
+            //{
+            //    ShowStatus(false);
+            //}
+
+            ShowStatus(false);
         }
     }
 
@@ -427,19 +430,31 @@ public class GameMenuManager : MonoBehaviour
         }
         else if (gameMgr.gameState != GameState.Result)
         {
-            if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
-            {
-                ItemMoveCancel(holdingItem, onSlots);
-                popUp_warning.SetWarning(WarningState.DeleteDropItems);
-            }
-            else
-            {
-                ShowInventory(false);
-            }
+            //if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
+            //{
+            //    ItemMoveCancel(holdingItem, onSlots);
+            //    popUp_warning.SetWarning(WarningState.DeleteDropItems);
+            //}
+            //else
+            //{
+            //    ShowInventory(false);
+            //}
+
+            ShowInventory(false);
         }
     }
 
     public void ShowInventory(bool showInven)
+    {
+        SetInventory(showInven, null);
+    }
+
+    public void ShowInventory(bool showInven, FieldNode node)
+    {
+        SetInventory(showInven, node);
+    }
+
+    private void SetInventory(bool showInven, FieldNode node)
     {
         if (gameMgr.gameState == GameState.Shoot) return;
         if (gameMgr.gameState == GameState.Watch) return;
@@ -450,7 +465,7 @@ public class GameMenuManager : MonoBehaviour
         itemSplit = false;
         if (showInven)
         {
-            SetOtherStorage(null);
+            SetOtherStorage(node);
             SetStorageUI(true);
         }
         else
@@ -744,7 +759,7 @@ public class GameMenuManager : MonoBehaviour
             emptySlots = FindEmptySlots(item, storageSlots);
             if (emptySlots != null)
             {
-                onSlots = emptySlots;
+                //onSlots = emptySlots;
                 PutTheItem(item, emptySlots);
                 return;
             }
@@ -765,12 +780,16 @@ public class GameMenuManager : MonoBehaviour
 
         if (emptySlots != null)
         {
-            onSlots = emptySlots;
+            //onSlots = emptySlots;
             PutTheItem(item, emptySlots);
+        }
+        else if (otherStorage.components.activeSelf)
+        {
+            MoveItmeInOtherStorage(item);
         }
         else
         {
-            MoveItmeInOtherStorage(item);
+            otherStorage.DropItmeOnTheFloor(item);
         }
     }
 
@@ -785,7 +804,7 @@ public class GameMenuManager : MonoBehaviour
         }
         else
         {
-            onSlots = emptySlots;
+            //onSlots = emptySlots;
             PutTheItem(item, emptySlots);
         }
     }
@@ -822,20 +841,23 @@ public class GameMenuManager : MonoBehaviour
         if (popUp != null) popUp.PopUp_ItemInformation(popUp.item);
     }
 
+    public void DropChamberBullet(BulletDataInfo bulletData)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(bulletData, 1);
+        otherStorage.DropItmeOnTheFloor(item);
+    }
+
     private void MoveItmeInOtherStorage(ItemHandler item)
     {
         if (!CheckSameItmeAndNesting(item, otherStorage.itemSlots)) return;
 
-        if (otherStorage.storageInfos.Count == 0)
-        {
-            otherStorage.DropItmeOnTheFloor(item);
-        }
-        else if (otherStorage.tabIndex != otherStorage.storageInfos.Count - 1)
+        if (otherStorage.tabIndex != otherStorage.storageInfos.Count - 1)
         {
             var emptySlots = FindEmptySlots(item, otherStorage.itemSlots);
             if (emptySlots != null)
             {
-                onSlots = emptySlots;
+                //onSlots = emptySlots;
                 PutTheItem(item, emptySlots);
             }
             else
@@ -845,8 +867,8 @@ public class GameMenuManager : MonoBehaviour
         }
         else
         {
-            onSlots = FindEmptySlots(item, otherStorage.itemSlots);
-            PutTheItem(item, onSlots);
+            //onSlots = FindEmptySlots(item, otherStorage.itemSlots);
+            PutTheItem(item, FindEmptySlots(item, otherStorage.itemSlots));
         }
     }
 
@@ -1085,7 +1107,7 @@ public class GameMenuManager : MonoBehaviour
         }
         else
         {
-            if (onSlot != null && onSlot.item != null)
+            if (onSlot != null && onSlot.item != null && onSlots.Count > 0)
             {
                 var itemNesting = onSlot.item != item && onSlot.item.itemData.ID == item.itemData.ID
                                && onSlot.item.itemData.maxNesting > 1 && onSlot.item.TotalCount < onSlot.item.itemData.maxNesting;
@@ -1113,8 +1135,8 @@ public class GameMenuManager : MonoBehaviour
                 var itemMove = itemSlots.Find(x => x.item != null && x.item != item) == null
                             && itemSlots.Count == item.size.x * item.size.y;
                 var storageInTheStorage = itemSlots.Count > 0 && itemSlots[0].myStorage != null
-                                       && (itemSlots[0].myStorage.type == MyStorageType.Rig && item.itemData.type == ItemType.Rig
-                                        || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
+                                      && (itemSlots[0].myStorage.type == MyStorageType.Rig && item.itemData.type == ItemType.Rig
+                                       || itemSlots[0].myStorage.type == MyStorageType.Backpack && item.itemData.type == ItemType.Backpack);
                 if (itemMove && !storageInTheStorage)
                 {
                     otherStorage.CheckBaseStorage(item);
@@ -1237,8 +1259,11 @@ public class GameMenuManager : MonoBehaviour
         void ItemRegistration()
         {
             if (itemSlots.Count == 0) return;
-            if (otherStorage.storageInfos.Count == 0) return;
+            if (gameMgr == null) return;
+            if (gameMgr.playerList.Count == 0) return;
+            //if (otherStorage.storageInfos.Count == 0) return;
 
+            otherStorage.SetFloorStorage(gameMgr.playerList[0].currentNode);
             var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
             if (itemSlots[0].otherStorage != null && storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID) == null)
             {
@@ -1257,6 +1282,8 @@ public class GameMenuManager : MonoBehaviour
 
     private void ItemMoveCancel(ItemHandler item, List<ItemSlot> itemSlots)
     {
+        onSlot = null;
+        onSlots.Clear();
         if (holdingItem == null) return;
 
         if (onEquip != null)
@@ -1264,11 +1291,9 @@ public class GameMenuManager : MonoBehaviour
             onEquip.PointerExit_EquipSlot();
             onEquip = null;
         }
-        onSlot = null;
         ItemMove(item, itemSlots, false);
         item.targetImage.color = Color.clear;
         holdingItem = null;
-        onSlots.Clear();
         InactiveSampleItem();
     }
 
@@ -2052,7 +2077,7 @@ public class GameMenuManager : MonoBehaviour
             var baseStorage = baseStorages[i];
             if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
              && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
-             && otherStorage.storageInfos.Find(x => x.nodePos == baseStorage.nodePos) == null)
+             && !otherStorage.storageInfos.Contains(baseStorage))
             {
                 otherStorage.storageInfos.Add(baseStorage);
             }

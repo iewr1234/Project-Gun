@@ -42,11 +42,18 @@ public class StorageItemInfo
 [System.Serializable]
 public class StorageInfo
 {
+    public enum StorageType
+    {
+        Floor,
+        Storage,
+        Reward,
+    }
+
     public string storageName;
+    public StorageType type;
     public Vector2Int nodePos;
     public Vector2Int slotSize;
     public List<StorageItemInfo> itemList = new List<StorageItemInfo>();
-    [HideInInspector] public bool isFloor;
 }
 
 [CreateAssetMenu(fileName = "GameData", menuName = "Scriptable Object/GameData")]
@@ -69,6 +76,7 @@ public class GameData : ScriptableObject
 
     [Header("[BaseCamp]")]
     public List<StorageInfo> baseStorages = new List<StorageInfo>();
+    public List<StorageInfo> floorStorages = new List<StorageInfo>();
 
     public void RandomMapSelection()
     {

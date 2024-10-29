@@ -430,12 +430,7 @@ public class GameUIManager : MonoBehaviour
         //playUI.SetActive(!value);
         stageUI.SetActive(value);
         gameMgr.camMgr.lockCam = value;
-        gameMgr.dontMove = value;
-    }
-
-    public void SetStorageUI(bool value)
-    {
-        gameMgr.camMgr.lockCam = value;
+        gameMgr.gameState = value ? GameState.Stage : GameState.Base;
     }
 
     public void SetTurnEndUI(bool value)
