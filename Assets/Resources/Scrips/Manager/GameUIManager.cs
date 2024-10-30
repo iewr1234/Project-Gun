@@ -66,7 +66,7 @@ public class GameUIManager : MonoBehaviour
     [HideInInspector] public int iconIndex;
 
     private List<StageIcon> stageIcons = new List<StageIcon>();
-    private bool selcetStage;
+    public StageIcon selcetStage;
 
     private readonly string aimUIGaugePath = "Sprites/SightGauge/Gauge_SightAp";
 
@@ -168,7 +168,7 @@ public class GameUIManager : MonoBehaviour
         {
             var stageIcon = stageIcons[i];
             var stageData = gameMgr.dataMgr.stageData.stageInfos.Find(x => x.ID == "S0001");
-            stageIcon.SetComponents(this, stageData);
+            stageIcon.SetComponents(gameMgr, stageData);
         }
         stageUI.SetActive(false);
 
@@ -406,16 +406,6 @@ public class GameUIManager : MonoBehaviour
         SetShootingModeText(charCtr.sMode);
         SetActionPoint_Aim(charCtr);
         SetHitAccuracy(charCtr);
-    }
-
-    public void EnterTheStage(StageDataInfo stageData)
-    {
-        if (selcetStage) return;
-
-        selcetStage = true;
-        gameMgr.dataMgr.gameData.stageData = stageData.CopyData();
-        gameMgr.dataMgr.gameData.RandomMapSelection();
-        gameMgr.sceneHlr.StartLoadScene("SampleScene");
     }
 
     public void SetStageUI(bool value)

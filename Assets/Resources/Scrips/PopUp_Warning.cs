@@ -58,7 +58,7 @@ public class PopUp_Warning : MonoBehaviour
         {
             case WarningState.DeleteDropItems:
                 topText.text = "아이템 분실 경고";
-                explanText.text = "바닥에 놓인 아이템이 분실될 것입니다.\n그래도 나가시겠습니까?";
+                explanText.text = "바닥에 놓인 아이템이 분실될 것입니다.\n그래도 진행하시겠습니까?";
                 SetButton(buttons[0], "확인", "DeleteDropItems_Check");
                 SetButton(buttons[1], "취소", "DeleteDropItems_Cancel");
                 break;
@@ -96,28 +96,52 @@ public class PopUp_Warning : MonoBehaviour
 
     public void Button_PopUp_Close()
     {
+        if (gameMenuMgr.gameMgr.uiMgr.selcetStage != null) gameMenuMgr.gameMgr.uiMgr.selcetStage = null;
+
         CloseWarning();
     }
 
     public void Button_DeleteDropItems_Check()
     {
         CloseWarning();
-        switch (gameMenuMgr.state)
+        var gameMgr = gameMenuMgr.gameMgr;
+        switch (gameMgr.gameState)
         {
-            case GameMenuState.Status:
-                gameMenuMgr.otherStorage.DeactiveTabButtons();
-                gameMenuMgr.ShowStatus(false);
+            case GameState.Stage:
+                gameMgr.EnterTheStage();
                 break;
-            case GameMenuState.Inventory:
-                gameMenuMgr.ShowInventory(false);
+            case GameState.Result:
+                if (gameMgr.dataMgr.gameData.stageData.waveNum >= 0)
+                {
+                    gameMgr.NextMap();
+                }
+                else
+                {
+                    gameMgr.ReturnBase();
+                }
                 break;
             default:
                 break;
         }
+
+        //switch (gameMenuMgr.state)
+        //{
+        //    case GameMenuState.Status:
+        //        gameMenuMgr.otherStorage.DeactiveTabButtons();
+        //        gameMenuMgr.ShowStatus(false);
+        //        break;
+        //    case GameMenuState.Inventory:
+        //        gameMenuMgr.ShowInventory(false);
+        //        break;
+        //    default:
+        //        break;
+        //}
     }
 
     public void Button_DeleteDropItems_Cancel()
     {
+        if (gameMenuMgr.gameMgr.uiMgr.selcetStage != null) gameMenuMgr.gameMgr.uiMgr.selcetStage = null;
+
         CloseWarning();
     }
 }

@@ -13612,18 +13612,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage: 1
-  renderingStrategy: 1
-  renderingMode: 1
-  outlineLayerMask: 1
+  renderingStrategy: 0
+  renderingMode: 0
+  outlineLayerMask: -1
   primaryBufferSizeMode: 0
   primaryRendererScale: 1
   primarySizeReference: 800
   blurShift: 1
   dilateShift: 1
-  dilateIterations: 2
+  dilateIterations: 3
   dilateQuality: 0
-  blurIterations: 2
-  blurType: 4
+  blurIterations: 3
+  blurType: 1
 --- !u!1001 &977102737
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30939,7 +30939,6 @@ MonoBehaviour:
   gameState: 0
   nodeList: []
   eventActive: 0
-  dontMove: 0
   addPass: 0
   movableNodes: []
   openNodes: []

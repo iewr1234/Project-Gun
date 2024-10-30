@@ -60,7 +60,7 @@ public class AmmoIcon : MonoBehaviour
     public int maxValue;
     public int value;
 
-    private readonly Vector3 activeScale = new Vector3(1.3f, 1.3f, 1f);
+    private readonly Vector3 activeScale = new Vector3(1.5f, 1.5f, 1f);
 
     public void SetComponents()
     {

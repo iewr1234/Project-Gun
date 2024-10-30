@@ -28,6 +28,7 @@ public class FieldNode : MonoBehaviour
     private GameObject frame;
     [HideInInspector] public List<NodeOutline> outlines;
     [HideInInspector] public MeshRenderer unableMove;
+    private GameObject itemCase;
 
     private GameObject marker;
     private Image markerImage;
@@ -82,6 +83,8 @@ public class FieldNode : MonoBehaviour
         frame = transform.Find("Frame").gameObject;
         outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
         unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
+        itemCase = transform.Find("ItemCase").gameObject;
+        SetItemCase(false);
 
         marker = transform.Find("Canvas/Marker").gameObject;
         markerImage = marker.transform.Find("Image").GetComponent<Image>();
@@ -475,6 +478,11 @@ public class FieldNode : MonoBehaviour
             onAxisNode.AddAdjacentNodes();
         }
         canMove = true;
+    }
+
+    public void SetItemCase(bool value)
+    {
+        itemCase.SetActive(value);
     }
 
     public void SetOnMarker(bool isActive)

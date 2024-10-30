@@ -7,18 +7,18 @@ using TMPro;
 public class StageIcon : MonoBehaviour
 {
     [Header("---Access Script---")]
-    private GameUIManager uiMgr;
+    private GameManager gameMgr;
 
     [Header("---Access Component---")]
     private Image image;
     private TextMeshProUGUI nameText;
 
     [Header("--- Assignment Variable---")]
-    private StageDataInfo stageData;
+    [HideInInspector] public StageDataInfo stageData;
 
-    public void SetComponents(GameUIManager _uiMgr, StageDataInfo _stageData)
+    public void SetComponents(GameManager _gameMgr, StageDataInfo _stageData)
     {
-        uiMgr = _uiMgr;
+        gameMgr = _gameMgr;
 
         image = transform.Find("Image").GetComponent<Image>();
         nameText = transform.Find("Name").GetComponent<TextMeshProUGUI>();
@@ -29,6 +29,16 @@ public class StageIcon : MonoBehaviour
 
     public void Button_StageIcon()
     {
-        uiMgr.EnterTheStage(stageData);
+        if (gameMgr.uiMgr.selcetStage != null) return;
+
+        gameMgr.uiMgr.selcetStage = this;
+        if (gameMgr.dataMgr.gameData.floorStorages.Count > 0)
+        {
+            gameMgr.gameMenuMgr.popUp_warning.SetWarning(WarningState.DeleteDropItems);
+        }
+        else
+        {
+            gameMgr.EnterTheStage();
+        }
     }
 }

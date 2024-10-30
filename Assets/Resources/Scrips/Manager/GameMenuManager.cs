@@ -793,6 +793,52 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
+    public void SetItemInStorage(BulletDataInfo bulletData, int count, List<ItemSlot> storageSlots)
+    {
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(bulletData, count);
+        if (!CheckSameItmeAndNesting(item, storageSlots)) return;
+
+        List<ItemSlot> emptySlots = null;
+        if (storageSlots != null)
+        {
+            emptySlots = FindEmptySlots(item, storageSlots);
+            if (emptySlots != null)
+            {
+                //onSlots = emptySlots;
+                PutTheItem(item, emptySlots);
+                return;
+            }
+        }
+
+        var myStorages = this.myStorages.FindAll(x => (storageSlots == null || (storageSlots != null && x != storageSlots[0].myStorage))
+                                                   && (x.type == MyStorageType.Pocket || x.type == MyStorageType.Rig))
+                                        .OrderByDescending(x => x.type).ToList();
+        for (int i = 0; i < myStorages.Count; i++)
+        {
+            var myStorage = myStorages[i];
+            var itemSlots = myStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
+            if (!CheckSameItmeAndNesting(item, itemSlots)) return;
+
+            emptySlots = FindEmptySlots(item, itemSlots);
+            if (emptySlots != null) break;
+        }
+
+        if (emptySlots != null)
+        {
+            //onSlots = emptySlots;
+            PutTheItem(item, emptySlots);
+        }
+        else if (otherStorage.components.activeSelf)
+        {
+            MoveItmeInOtherStorage(item);
+        }
+        else
+        {
+            otherStorage.DropItmeOnTheFloor(item);
+        }
+    }
+
     public void MoveItemInMyStorage(ItemHandler item, List<ItemSlot> itemSlots)
     {
         if (!CheckSameItmeAndNesting(item, itemSlots)) return;
@@ -807,38 +853,6 @@ public class GameMenuManager : MonoBehaviour
             //onSlots = emptySlots;
             PutTheItem(item, emptySlots);
         }
-    }
-
-    public void MoveMagazineInStorage(ItemHandler item)
-    {
-        if (item.equipSlot != null && gameMgr != null && gameMgr.playerList.Count > 0)
-        {
-            var player = gameMgr.playerList[0];
-            player.SetAbility();
-        }
-        var magData = item.weaponData.equipMag;
-        item.weaponData.equipMag = null;
-        item.weaponData.isMag = false;
-        item.SetPartsSample();
-        item.SetLoadedBulletCount();
-        if (item.itemSlots.Count > 0)
-        {
-            if (item.itemSlots[0].myStorage != null)
-            {
-                SetItemInStorage(magData, item.itemSlots[0].myStorage.itemSlots);
-            }
-            else
-            {
-                SetItemInStorage(magData, item.itemSlots[0].otherStorage.itemSlots);
-            }
-        }
-        else
-        {
-            SetItemInStorage(magData, null);
-        }
-
-        var popUp = activePopUp.Find(x => x.state == PopUpState.ItemInformation && x.item == item);
-        if (popUp != null) popUp.PopUp_ItemInformation(popUp.item);
     }
 
     public void DropChamberBullet(BulletDataInfo bulletData)
@@ -1986,75 +2000,75 @@ public class GameMenuManager : MonoBehaviour
 
         void SetLootItem(string classType, DropTable dropTable)
         {
-            var itemNum = Random.Range(dropTable.itemMinNum, dropTable.itemMaxNum);
-            for (int j = 0; j < itemNum; j++)
-            {
-                var rarity = GetRarity(dropTable);
-                var itemDatas = dataMgr.itemData.itemInfos.FindAll(x => x.setDropTable && x.rarity == rarity && ItemClassification(classType, x.type));
-                if (itemDatas.Count == 0) break;
+            //var itemNum = Random.Range(dropTable.itemMinNum, dropTable.itemMaxNum);
+            //for (int j = 0; j < itemNum; j++)
+            //{
+            //    var rarity = GetRarity(dropTable);
+            //    var itemDatas = dataMgr.itemData.itemInfos.FindAll(x => x.setDropTable && x.rarity == rarity && ItemClassification(classType, x.type));
+            //    if (itemDatas.Count == 0) break;
 
-                var itemData = itemDatas[Random.Range(0, itemDatas.Count)];
-                SetItemInStorage(itemData, 1, otherStorage.itemSlots, true);
-            }
+            //    var itemData = itemDatas[Random.Range(0, itemDatas.Count)];
+            //    SetItemInStorage(itemData, 1, otherStorage.itemSlots, true);
+            //}
         }
 
-        ItemRarity GetRarity(DropTable dropTable)
-        {
-            var percentage = Random.Range(0, dropTable.TotalPercentage);
-            if (percentage < dropTable.LowGrade)
-            {
-                return ItemRarity.LowGrade;
-            }
-            else if (percentage < dropTable.Nomal)
-            {
-                return ItemRarity.Nomal;
-            }
-            else if (percentage < dropTable.MiddleGrade)
-            {
-                return ItemRarity.MiddleGrade;
-            }
-            else if (percentage < dropTable.HighGrade)
-            {
-                return ItemRarity.HighGrade;
-            }
-            else if (percentage < dropTable.Advanced)
-            {
-                return ItemRarity.Advanced;
-            }
-            else
-            {
-                return ItemRarity.Set;
-            }
-        }
+        //ItemRarity GetRarity(DropTable dropTable)
+        //{
+        //    var percentage = Random.Range(0, dropTable.TotalPercentage);
+        //    if (percentage < dropTable.LowGrade)
+        //    {
+        //        return ItemRarity.LowGrade;
+        //    }
+        //    else if (percentage < dropTable.Nomal)
+        //    {
+        //        return ItemRarity.Nomal;
+        //    }
+        //    else if (percentage < dropTable.MiddleGrade)
+        //    {
+        //        return ItemRarity.MiddleGrade;
+        //    }
+        //    else if (percentage < dropTable.HighGrade)
+        //    {
+        //        return ItemRarity.HighGrade;
+        //    }
+        //    else if (percentage < dropTable.Advanced)
+        //    {
+        //        return ItemRarity.Advanced;
+        //    }
+        //    else
+        //    {
+        //        return ItemRarity.Set;
+        //    }
+        //}
 
-        bool ItemClassification(string classType, ItemType type)
-        {
-            switch (classType)
-            {
-                case "Equipment":
-                    if (type == ItemType.Head) return true;
-                    if (type == ItemType.Body) return true;
-                    if (type == ItemType.Rig) return true;
-                    if (type == ItemType.Backpack) return true;
-                    if (type == ItemType.MainWeapon) return true;
-                    if (type == ItemType.SubWeapon) return true;
-                    if (type == ItemType.Magazine) return true;
-                    if (type == ItemType.Muzzle) return true;
-                    if (type == ItemType.Sight) return true;
-                    if (type == ItemType.FrontHandle) return true;
-                    if (type == ItemType.Attachment) return true;
-                    if (type == ItemType.UnderBarrel) return true;
-                    break;
-                case "Expendable":
-                    break;
-                case "Ingredient":
-                    break;
-                default:
-                    break;
-            }
+        //bool ItemClassification(string classType, ItemType type)
+        //{
+        //    switch (classType)
+        //    {
+        //        case "Equipment":
+        //            if (type == ItemType.Head) return true;
+        //            if (type == ItemType.Body) return true;
+        //            if (type == ItemType.Rig) return true;
+        //            if (type == ItemType.Backpack) return true;
+        //            if (type == ItemType.MainWeapon) return true;
+        //            if (type == ItemType.SubWeapon) return true;
+        //            if (type == ItemType.Magazine) return true;
+        //            if (type == ItemType.Muzzle) return true;
+        //            if (type == ItemType.Sight) return true;
+        //            if (type == ItemType.FrontHandle) return true;
+        //            if (type == ItemType.Attachment) return true;
+        //            if (type == ItemType.UnderBarrel) return true;
+        //            break;
+        //        case "Expendable":
+        //            break;
+        //        case "Ingredient":
+        //            break;
+        //        default:
+        //            break;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
     }
 
     public void SetOtherStorage(FieldNode node)
@@ -2144,38 +2158,26 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Next()
     {
-        nextButton.gameObject.SetActive(false);
-        SetStorageUI(false);
-        switch (state)
+        if (dataMgr.gameData.floorStorages.Count > 0)
         {
-            case GameMenuState.Status:
-                ShowStatus(false);
-                break;
-            case GameMenuState.Inventory:
-                ShowInventory(false);
-                break;
-            default:
-                break;
+            popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }
-        gameMgr.NextMap();
+        else
+        {
+            gameMgr.NextMap();
+        }
     }
 
     public void Button_Result_Return()
     {
-        returnButton.gameObject.SetActive(false);
-        SetStorageUI(false);
-        switch (state)
+        if (dataMgr.gameData.floorStorages.Count > 0)
         {
-            case GameMenuState.Status:
-                ShowStatus(false);
-                break;
-            case GameMenuState.Inventory:
-                ShowInventory(false);
-                break;
-            default:
-                break;
+            popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }
-        gameMgr.ReturnBase();
+        else
+        {
+            gameMgr.ReturnBase();
+        }
     }
 
     public void Button_Storage_Close()

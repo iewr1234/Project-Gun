@@ -590,7 +590,7 @@ public class GameManager : MonoBehaviour
                     selectChar.grenadeHlr.rangeMr.gameObject.SetActive(false);
                     FindMovableNodes(selectChar, true);
                     rigItems.Clear();
-                    gameState = GameState.None;
+                    gameState = GameState.Move;
                 }
                 break;
             default:
@@ -901,10 +901,9 @@ public class GameManager : MonoBehaviour
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
         var weapon = selectChar.currentWeapon;
-        if ((!weapon.weaponData.isChamber && !weapon.weaponData.isMag)
-         || (!weapon.weaponData.isChamber && weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count == 0))
+        if (!weapon.weaponData.isChamber)
         {
-            Debug.Log($"{selectChar.name}: 무기에 장전된 총알이 없음");
+            Debug.Log($"{selectChar.name}: 약실에 탄환이 없음");
             return;
         }
         if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
@@ -1006,11 +1005,10 @@ public class GameManager : MonoBehaviour
         camMgr.lockCam = true;
         uiMgr.iconIndex = 0;
         uiMgr.SetActiveAmmoIcon(true);
-        var loadChamber = CheckChamber();
         for (int i = 0; i < rigItems.Count; i++)
         {
             var rigMag = rigItems[i];
-            var ammoIcon = uiMgr.ammoIconList[i + loadChamber];
+            var ammoIcon = uiMgr.ammoIconList[i];
             if (weaponData.magType == MagazineType.Magazine)
             {
                 ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
@@ -1020,8 +1018,9 @@ public class GameManager : MonoBehaviour
                 ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
             }
 
-            if (loadChamber == 0 && i == 0) ammoIcon.SetActiveIcon(true);
+            if (i == 0) ammoIcon.SetActiveIcon(true);
         }
+        var loadChamber = CheckChamber();
         activeAmmoCount = loadChamber + rigItems.Count;
 
         int CheckChamber()
@@ -1034,9 +1033,9 @@ public class GameManager : MonoBehaviour
                 default:
                     if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
                     {
-                        var ammoIcon = uiMgr.ammoIconList[0];
+                        var ammoIcon = uiMgr.ammoIconList[rigItems.Count];
                         ammoIcon.SetAmmoIcon(AmmoIconType.Chamber, null);
-                        ammoIcon.SetActiveIcon(true);
+                        if (rigItems.Count == 0) ammoIcon.SetActiveIcon(true);
                         return 1;
                     }
                     else
@@ -1751,13 +1750,52 @@ public class GameManager : MonoBehaviour
         eventActive = false;
     }
 
+    public void EnterTheStage()
+    {
+        dataMgr.gameData.floorStorages.Clear();
+        dataMgr.gameData.stageData = uiMgr.selcetStage.stageData.CopyData();
+        dataMgr.gameData.RandomMapSelection();
+        sceneHlr.StartLoadScene("SampleScene");
+    }
+
     public void NextMap()
     {
+        gameMenuMgr.nextButton.gameObject.SetActive(false);
+        gameMenuMgr.SetStorageUI(false);
+        switch (gameMenuMgr.state)
+        {
+            case GameMenuState.Status:
+                gameMenuMgr.ShowStatus(false);
+                break;
+            case GameMenuState.Inventory:
+                gameMenuMgr.ShowInventory(false);
+                break;
+            default:
+                break;
+        }
+        dataMgr.gameData.floorStorages.Clear();
         sceneHlr.StartLoadScene("SampleScene");
     }
 
     public void ReturnBase()
     {
+        gameMenuMgr.returnButton.gameObject.SetActive(false);
+        if (gameMenuMgr.otherStorage.components.activeSelf)
+        {
+            gameMenuMgr.SetStorageUI(false);
+            switch (gameMenuMgr.state)
+            {
+                case GameMenuState.Status:
+                    gameMenuMgr.ShowStatus(false);
+                    break;
+                case GameMenuState.Inventory:
+                    gameMenuMgr.ShowInventory(false);
+                    break;
+                default:
+                    break;
+            }
+        }
+        dataMgr.gameData.floorStorages.Clear();
         dataMgr.gameData.stageData = null;
         dataMgr.gameData.mapName = "BASECAMP";
         dataMgr.gameData.mapLoad = true;

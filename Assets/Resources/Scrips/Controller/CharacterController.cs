@@ -482,14 +482,15 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void SetOutlinable()
     {
+        outlinable.ComplexMaskingMode = ComplexMaskingMode.ObstaclesMode;
         outlinable.RenderStyle = RenderStyle.FrontBack;
-        outlinable.BackParameters.DilateShift = 0f;
+        outlinable.BackParameters.DilateShift = 0.5f;
         outlinable.BackParameters.BlurShift = 0f;
-        outlinable.BackParameters.FillPass.Shader = Resources.Load<Shader>("Shaders/Outline/Fills/Interlaced");
-        outlinable.BackParameters.FillPass.SetColor("_PublicColor", Color.gray);
-        outlinable.BackParameters.FillPass.SetFloat("_PublicSize", 2f);
-        outlinable.BackParameters.FillPass.SetFloat("_PublicSpeed", 0f);
-        outlinable.BackParameters.FillPass.SetFloat("_PublicAngle", 45f);
+        //outlinable.BackParameters.FillPass.Shader = Resources.Load<Shader>("Shaders/Outline/Fills/Interlaced");
+        //outlinable.BackParameters.FillPass.SetColor("_PublicColor", Color.gray);
+        //outlinable.BackParameters.FillPass.SetFloat("_PublicSize", 2f);
+        //outlinable.BackParameters.FillPass.SetFloat("_PublicSpeed", 0f);
+        //outlinable.BackParameters.FillPass.SetFloat("_PublicAngle", 45f);
         switch (ownerType)
         {
             case CharacterOwner.Player:
@@ -537,10 +538,10 @@ public class CharacterController : MonoBehaviour
                     break;
             }
         }
-        var newDilate = value ? 1f : 0f;
-        outlinable.BackParameters.DilateShift = newDilate;
+        //var newDilate = value ? 1f : 0.5f;
+        outlinable.BackParameters.DilateShift = value ? 1f : 0.5f;
         outlinable.FrontParameters.Enabled = value;
-        outlinable.FrontParameters.DilateShift = newDilate;
+        outlinable.FrontParameters.DilateShift = value ? 1f : 0f;
     }
 
     private void OnDrawGizmos()

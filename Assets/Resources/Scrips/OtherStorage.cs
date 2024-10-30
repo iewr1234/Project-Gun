@@ -82,8 +82,14 @@ public class OtherStorage : MonoBehaviour
     {
         ClearStorage();
         var floor = storageInfos.Find(x => x.type == StorageInfo.StorageType.Floor);
-        if (floor != null && floor.itemList.Count == 0) gameMenuMgr.dataMgr.gameData.floorStorages.Remove(floor);
+        if (floor != null && floor.itemList.Count == 0)
+        {
+            var itemNode = gameMenuMgr.gameMgr.nodeList.Find(x => x.nodePos == floor.nodePos);
+            itemNode.SetItemCase(false);
+            gameMenuMgr.dataMgr.gameData.floorStorages.Remove(floor);
+        }
         storageInfos.Clear();
+
         for (int i = 0; i < tabButtonImages.Count; i++)
         {
             tabButtonImages[i].gameObject.SetActive(false);
@@ -273,6 +279,7 @@ public class OtherStorage : MonoBehaviour
             };
             gameData.floorStorages.Add(floorStorage);
             storageInfos.Add(floorStorage);
+            node.SetItemCase(true);
         }
         else
         {
