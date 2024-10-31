@@ -237,7 +237,7 @@ public class GameUIManager : MonoBehaviour
     public void SetHitAccuracy(CharacterController charCtr)
     {
         aimGauge.SetAimGauge(charCtr);
-        var hitAccuracy = charCtr.currentWeapon.hitInfos[0].hitAccuracys[0];
+        var hitAccuracy = charCtr.currentWeapon.hitInfos[0].hitAccuracy;
         hitAccuracyText.text = $"{100 - hitAccuracy}%";
     }
 
@@ -441,6 +441,10 @@ public class GameUIManager : MonoBehaviour
     public void Button_TurnEnd()
     {
         if (gameMgr.currentTurn != CharacterOwner.Player) return;
+        if (gameMgr.playerList.Count == 0) return;
+
+        var player = gameMgr.playerList[0];
+        if (player.commandList.Count > 0) return;
 
         if (pressSpace)
         {

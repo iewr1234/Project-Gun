@@ -167,7 +167,7 @@ public static class DataUtility
     /// <param name="charCtr"></param>
     /// <param name="targetInfo"></param>
     /// <returns></returns>
-    public static int GetHitAccuracy(TargetInfo targetInfo)
+    public static int GetHitAccuracy(TargetInfo targetInfo, float distance)
     {
         var shooter = targetInfo.shooter;
         var target = targetInfo.target;
@@ -197,7 +197,7 @@ public static class DataUtility
                 sModeValue = 0;
                 break;
         }
-        var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
+        var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f - distance * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
         var hitAccuracy = Mathf.FloorToInt(shooterHit);
         if (hitAccuracy > 100)
         {

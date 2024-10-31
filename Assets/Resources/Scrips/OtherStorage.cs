@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class OtherStorage : MonoBehaviour
 {
@@ -145,8 +146,19 @@ public class OtherStorage : MonoBehaviour
         var player = gameMenuMgr.gameMgr.playerList[0];
         SetFloorStorage(player.currentNode);
         var floor = storageInfos[^1];
-        var sameItmes = floor.itemList.FindAll(x => x.itemData.ID == item.itemData.ID && x.itemData.maxNesting > 1
-                                                 && x.totalCount < x.itemData.maxNesting);
+        InputDropItemInStorage(floor, item);
+    }
+
+    public void DropItmeOnTheReword(ItemHandler item)
+    {
+        var reword = storageInfos[^1];
+        InputDropItemInStorage(reword, item);
+    }
+
+    private void InputDropItemInStorage(StorageInfo storage, ItemHandler item)
+    {
+        var sameItmes = storage.itemList.FindAll(x => x.itemData.ID == item.itemData.ID && x.itemData.maxNesting > 1
+                                                   && x.totalCount < x.itemData.maxNesting);
         for (int i = 0; i < sameItmes.Count; i++)
         {
             var sameItem = sameItmes[i];
@@ -164,12 +176,12 @@ public class OtherStorage : MonoBehaviour
             }
         }
 
-        var emptySlots = (from y in Enumerable.Range(0, floor.slotSize.y)
-                          from x in Enumerable.Range(0, floor.slotSize.x)
+        var emptySlots = (from y in Enumerable.Range(0, storage.slotSize.y)
+                          from x in Enumerable.Range(0, storage.slotSize.x)
                           select new Vector2Int(x, y)).ToList();
-        for (int i = 0; i < floor.itemList.Count; i++)
+        for (int i = 0; i < storage.itemList.Count; i++)
         {
-            var itemInfo = floor.itemList[i];
+            var itemInfo = storage.itemList[i];
             var fullSlots = from y in Enumerable.Range(0, itemInfo.itemSize.y)
                             from x in Enumerable.Range(0, itemInfo.itemSize.x)
                             select new Vector2Int(itemInfo.slotIndex.x + x, itemInfo.slotIndex.y + y);
@@ -186,26 +198,13 @@ public class OtherStorage : MonoBehaviour
             var setSlots = emptySlots.Intersect(itemSlots).ToList();
             if (setSlots.Count == slotCount)
             {
-                AddItemInStorageInfo(floor, setSlots[0], item);
+                AddItemInStorageInfo(storage, setSlots[0], item);
                 item.DisableItem();
                 return;
             }
         }
 
         Debug.Log("no EmptySlot int the FloorStorage");
-    }
-
-    public void UpdateStorageInfo(ItemHandler item)
-    {
-        if (item.itemSlots.Count == 0) return;
-        if (item.itemSlots[0].otherStorage == null) return;
-
-        var storageInfo = storageInfos[tabIndex];
-        var storageItem = storageInfo.itemList.Find(x => x.itemData.ID == item.itemData.ID && x.slotIndex == item.itemSlots[0].slotIndex);
-        if (storageItem != null)
-        {
-            storageItem.totalCount = item.TotalCount;
-        }
     }
 
     public void AddItemInStorageInfo(StorageInfo storageInfo, Vector2Int slotIndex, ItemHandler item)
@@ -264,6 +263,19 @@ public class OtherStorage : MonoBehaviour
         storageInfo.itemList.Add(storageItemInfo);
     }
 
+    public void UpdateStorageInfo(ItemHandler item)
+    {
+        if (item.itemSlots.Count == 0) return;
+        if (item.itemSlots[0].otherStorage == null) return;
+
+        var storageInfo = storageInfos[tabIndex];
+        var storageItem = storageInfo.itemList.Find(x => x.itemData.ID == item.itemData.ID && x.slotIndex == item.itemSlots[0].slotIndex);
+        if (storageItem != null)
+        {
+            storageItem.totalCount = item.TotalCount;
+        }
+    }
+
     public void SetFloorStorage(FieldNode node)
     {
         var gameData = gameMenuMgr.dataMgr.gameData;
@@ -285,18 +297,6 @@ public class OtherStorage : MonoBehaviour
         {
             storageInfos.Add(floor);
         }
-    }
-
-    public void SetLootStorage()
-    {
-        var lootStorage = new StorageInfo()
-        {
-            storageName = "Àü¸®Ç°",
-            type = StorageInfo.StorageType.Reward,
-            nodePos = Vector2Int.zero,
-            slotSize = DataUtility.floorSlotSize,
-        };
-        storageInfos.Add(lootStorage);
     }
 
     public void ClearStorage()

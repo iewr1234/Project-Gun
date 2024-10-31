@@ -176,11 +176,7 @@ public class GameManager : MonoBehaviour
             gameMenuMgr = dataMgr.gameData.gameMenuMgr;
             gameMenuMgr.gameMgr = this;
         }
-        if (gameMenuMgr.gameMenuCam.enabled)
-        {
-            gameMenuMgr.ShowInventory(false);
-
-        }
+        if (gameMenuMgr.gameMenuCam.enabled) gameMenuMgr.ShowInventory(false);
         currentTurn = CharacterOwner.Player;
 
         if (dataMgr.gameData.mapLoad)
@@ -600,6 +596,10 @@ public class GameManager : MonoBehaviour
         void TurnEndKey()
         {
             if (currentTurn != CharacterOwner.Player) return;
+            if (playerList.Count == 0) return;
+
+            var player = playerList[0];
+            if (player.commandList.Count > 0) return;
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -655,6 +655,9 @@ public class GameManager : MonoBehaviour
                     if (node.charCtr != null && selectChar == null)
                     {
                         if (node.charCtr.ownerType == CharacterOwner.Enemy) return;
+
+                        var moving = node.charCtr.commandList.Find(x => x.type == CommandType.Move) != null;
+                        if (moving) return;
 
                         selectChar = node.charCtr;
                         if (selectChar.state == CharacterState.Watch)
@@ -901,9 +904,10 @@ public class GameManager : MonoBehaviour
         if (selectChar == null || selectChar.currentWeapon == null) return;
 
         var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isChamber)
+        if ((weapon.weaponData.magType != MagazineType.Cylinder && !weapon.weaponData.isChamber)
+         || (weapon.weaponData.magType == MagazineType.Cylinder && weapon.weaponData.equipMag.loadedBullets.Count == 0))
         {
-            Debug.Log($"{selectChar.name}: 약실에 탄환이 없음");
+            Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
             return;
         }
         if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
@@ -991,7 +995,7 @@ public class GameManager : MonoBehaviour
                                              .OrderByDescending(x => x.TotalCount).ToList();
         }
 
-        //if (weaponData.isChamber && rigItems.Count == 0) return;
+        if (weaponData.magType == MagazineType.Cylinder && rigItems.Count == 0) return;
 
         SetEnemyOutlinable(false);
         gameState = GameState.Reload;
@@ -1005,22 +1009,15 @@ public class GameManager : MonoBehaviour
         camMgr.lockCam = true;
         uiMgr.iconIndex = 0;
         uiMgr.SetActiveAmmoIcon(true);
-        for (int i = 0; i < rigItems.Count; i++)
-        {
-            var rigMag = rigItems[i];
-            var ammoIcon = uiMgr.ammoIconList[i];
-            if (weaponData.magType == MagazineType.Magazine)
-            {
-                ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
-            }
-            else
-            {
-                ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
-            }
-
-            if (i == 0) ammoIcon.SetActiveIcon(true);
-        }
         var loadChamber = CheckChamber();
+        if (weaponData.isChamber)
+        {
+            SetAmmoIcons(0, true);
+        }
+        else
+        {
+            SetAmmoIcons(loadChamber, loadChamber == 0);
+        }
         activeAmmoCount = loadChamber + rigItems.Count;
 
         int CheckChamber()
@@ -1033,15 +1030,35 @@ public class GameManager : MonoBehaviour
                 default:
                     if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
                     {
-                        var ammoIcon = uiMgr.ammoIconList[rigItems.Count];
+                        var index = weaponData.isChamber ? rigItems.Count : 0;
+                        var ammoIcon = uiMgr.ammoIconList[index];
                         ammoIcon.SetAmmoIcon(AmmoIconType.Chamber, null);
-                        if (rigItems.Count == 0) ammoIcon.SetActiveIcon(true);
+                        if (index == 0) ammoIcon.SetActiveIcon(true);
                         return 1;
                     }
                     else
                     {
                         return 0;
                     }
+            }
+        }
+
+        void SetAmmoIcons(int startIndex, bool isChamber)
+        {
+            for (int i = 0; i < rigItems.Count; i++)
+            {
+                var rigMag = rigItems[i];
+                var ammoIcon = uiMgr.ammoIconList[startIndex + i];
+                if (weaponData.magType == MagazineType.Magazine)
+                {
+                    ammoIcon.SetAmmoIcon(AmmoIconType.Magazine, rigMag);
+                }
+                else
+                {
+                    ammoIcon.SetAmmoIcon(AmmoIconType.Bullet, rigMag);
+                }
+
+                if (isChamber && i == 0) ammoIcon.SetActiveIcon(true);
             }
         }
     }
@@ -1094,8 +1111,7 @@ public class GameManager : MonoBehaviour
 
         void LoadChamber(MagazineDataInfo magData)
         {
-            if (!weapon.weaponData.isMag) return;
-            if (weapon.weaponData.equipMag.loadedBullets.Count == 0) return;
+            if (magData.loadedBullets.Count == 0) return;
 
             if (weapon.weaponData.isChamber)
             {
@@ -1815,7 +1831,7 @@ public class GameManager : MonoBehaviour
         else
         {
             dataMgr.gameData.RandomMapSelection();
-            gameMenuMgr.otherStorage.SetLootStorage();
+            gameMenuMgr.SetLootStorage();
             gameMenuMgr.SetResultUI(true);
             gameMenuMgr.ShowInventory(true);
         }

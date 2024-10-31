@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -105,21 +106,33 @@ public class AimGauge : MonoBehaviour
         components.SetActive(true);
     }
 
+    /// <summary>
+    /// 게이지 눈금 배치
+    /// </summary>
+    /// <param name="weapon"></param>
     private void GaugeScalePlacement(Weapon weapon)
     {
         for (int i = 0; i < weapon.hitInfos.Count; i++)
         {
             var hitInfo = weapon.hitInfos[i];
-            if (hitInfo.hitAccuracys[0] >= 100) break;
+            if (hitInfo.hitAccuracy >= 100) break;
 
-            for (int j = 0; j < hitInfo.hitAccuracys.Count; j++)
+            Placement(hitInfo.hitAccuracy, false);
+            for (int j = 0; j < hitInfo.pelletAccuracys.Count; j++)
             {
-                var hitAccuracy = hitInfo.hitAccuracys[j];
-                var gaugeScale = gaugeScales.Find(x => !x.gameObject.activeSelf);
-                var pos = gaugeScale.transform.localPosition;
-                pos.x = gaugeScaleLength * hitAccuracy;
-                gaugeScale.SetGaugeScale(pos, hitAccuracy);
+                var pelletAccuracy = hitInfo.pelletAccuracys[j];
+                if (pelletAccuracy >= 100) break;
+
+                Placement(pelletAccuracy, true);
             }
+        }
+
+        void Placement(int accuracy, bool isPellet)
+        {
+            var gaugeScale = gaugeScales.Find(x => !x.gameObject.activeSelf);
+            var pos = gaugeScale.transform.localPosition;
+            pos.x = gaugeScaleLength * accuracy;
+            gaugeScale.SetGaugeScale(pos, accuracy, isPellet);
         }
     }
 

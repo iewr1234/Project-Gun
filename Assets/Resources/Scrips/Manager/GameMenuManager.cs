@@ -284,24 +284,16 @@ public class GameMenuManager : MonoBehaviour
     private void StatusProcess()
     {
         if (gameMgr == null) return;
+        if (gameMgr.gameState == GameState.Stage) return;
+        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Status)
         {
             TurnOffGameMenuUI();
             ShowStatus(true);
         }
-        else if (gameMgr.gameState != GameState.Result)
+        else
         {
-            //if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
-            //{
-            //    ItemMoveCancel(holdingItem, onSlots);
-            //    popUp_warning.SetWarning(WarningState.DeleteDropItems);
-            //}
-            //else
-            //{
-            //    ShowStatus(false);
-            //}
-
             ShowStatus(false);
         }
     }
@@ -422,24 +414,16 @@ public class GameMenuManager : MonoBehaviour
     private void InventoryProcess()
     {
         if (gameMgr == null) return;
+        if (gameMgr.gameState == GameState.Stage) return;
+        if (gameMgr.gameState == GameState.Result) return;
 
         if (state != GameMenuState.Inventory)
         {
             TurnOffGameMenuUI();
             ShowInventory(true);
         }
-        else if (gameMgr.gameState != GameState.Result)
+        else
         {
-            //if (otherStorage.storageInfos.Count > 0 && otherStorage.storageInfos[^1].itemList.Count > 0)
-            //{
-            //    ItemMoveCancel(holdingItem, onSlots);
-            //    popUp_warning.SetWarning(WarningState.DeleteDropItems);
-            //}
-            //else
-            //{
-            //    ShowInventory(false);
-            //}
-
             ShowInventory(false);
         }
     }
@@ -1193,6 +1177,11 @@ public class GameMenuManager : MonoBehaviour
 
         void ItemSplit()
         {
+            for (int i = activePopUp.Count - 1; i >= 0; i--)
+            {
+                activePopUp[i].ClosePopUp();
+            }
+
             item.SetItemSlots(DataUtility.slot_onItemColor);
             item.transform.SetParent(item.itemSlots[0].transform, false);
             item.transform.localPosition = Vector3.zero;
@@ -1296,19 +1285,36 @@ public class GameMenuManager : MonoBehaviour
 
     private void ItemMoveCancel(ItemHandler item, List<ItemSlot> itemSlots)
     {
-        onSlot = null;
-        onSlots.Clear();
-        if (holdingItem == null) return;
+        var splitPopUp = activePopUp.Find(x => x.state == PopUpState.Split);
+        if (splitPopUp != null) splitPopUp.ClosePopUp();
 
-        if (onEquip != null)
+        onSlot = null;
+        if (holdingItem != null)
         {
-            onEquip.PointerExit_EquipSlot();
-            onEquip = null;
+            for (int i = 0; i < onSlots.Count; i++)
+            {
+                var onSlot = onSlots[i];
+                if (onSlot.item != null)
+                {
+                    onSlot.SetItemSlot(DataUtility.slot_onItemColor);
+                }
+                else
+                {
+                    onSlot.SetItemSlot(DataUtility.slot_noItemColor);
+                }
+            }
+
+            if (onEquip != null)
+            {
+                onEquip.PointerExit_EquipSlot();
+                onEquip = null;
+            }
+            ItemMove(item, itemSlots, false);
+            item.targetImage.color = Color.clear;
+            holdingItem = null;
+            InactiveSampleItem();
         }
-        ItemMove(item, itemSlots, false);
-        item.targetImage.color = Color.clear;
-        holdingItem = null;
-        InactiveSampleItem();
+        onSlots.Clear();
     }
 
     /// <summary>
@@ -1949,6 +1955,33 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
+    public void SetLootStorage()
+    {
+        otherStorage.storageInfos.Clear();
+        var lootStorage = new StorageInfo()
+        {
+            storageName = "전리품",
+            type = StorageInfo.StorageType.Reward,
+            nodePos = Vector2Int.zero,
+            slotSize = DataUtility.floorSlotSize,
+        };
+        otherStorage.storageInfos.Add(lootStorage);
+
+        for (int i = 0; i < dataMgr.gameData.floorStorages.Count; i++)
+        {
+            var floorStorage = dataMgr.gameData.floorStorages[i];
+            for (int j = 0; j < floorStorage.itemList.Count; j++)
+            {
+                var itemData = floorStorage.itemList[j];
+                var item = items.Find(x => !x.gameObject.activeSelf);
+                item.SetItemInfo(itemData);
+                item.SetItemRotation(itemData.rotation);
+                otherStorage.DropItmeOnTheReword(item);
+            }
+        }
+        dataMgr.gameData.floorStorages.Clear();
+    }
+
     /// <summary>
     /// 결과창 UI 설정
     /// </summary>
@@ -1959,29 +1992,29 @@ public class GameMenuManager : MonoBehaviour
         {
             case true:
                 SetStorageUI(true);
-                for (int i = 0; i < gameMgr.enemyList.Count; i++)
-                {
-                    var dropTableData = gameMgr.enemyList[i].dropTableData;
-                    var itemLevel = Random.Range(dropTableData.minItemLevel, dropTableData.maxItemLevel);
+                //for (int i = 0; i < gameMgr.enemyList.Count; i++)
+                //{
+                //    var dropTableData = gameMgr.enemyList[i].dropTableData;
+                //    var itemLevel = Random.Range(dropTableData.minItemLevel, dropTableData.maxItemLevel);
 
-                    // Equipment
-                    if (dropTableData.dropInfo_equipment.itemMaxNum > 0 && dropTableData.dropInfo_equipment.TotalPercentage > 0)
-                    {
-                        SetLootItem("Equipment", dropTableData.dropInfo_equipment);
-                    }
+                //    // Equipment
+                //    if (dropTableData.dropInfo_equipment.itemMaxNum > 0 && dropTableData.dropInfo_equipment.TotalPercentage > 0)
+                //    {
+                //        SetLootItem("Equipment", dropTableData.dropInfo_equipment);
+                //    }
 
-                    // Expendable
-                    if (dropTableData.dropInfo_expendable.itemMaxNum > 0 && dropTableData.dropInfo_expendable.TotalPercentage > 0)
-                    {
-                        //SetLootItem("Expendable", dropTableData.dropInfo_expendable);
-                    }
+                //    // Expendable
+                //    if (dropTableData.dropInfo_expendable.itemMaxNum > 0 && dropTableData.dropInfo_expendable.TotalPercentage > 0)
+                //    {
+                //        //SetLootItem("Expendable", dropTableData.dropInfo_expendable);
+                //    }
 
-                    // Ingredient
-                    if (dropTableData.dropInfo_ingredient.itemMaxNum > 0 && dropTableData.dropInfo_ingredient.TotalPercentage > 0)
-                    {
-                        //SetLootItem("Ingredient", dropTableData.dropInfo_ingredient);
-                    }
-                }
+                //    // Ingredient
+                //    if (dropTableData.dropInfo_ingredient.itemMaxNum > 0 && dropTableData.dropInfo_ingredient.TotalPercentage > 0)
+                //    {
+                //        //SetLootItem("Ingredient", dropTableData.dropInfo_ingredient);
+                //    }
+                //}
 
                 if (gameMgr.dataMgr.gameData.stageData.waveNum >= 0)
                 {
@@ -1998,19 +2031,19 @@ public class GameMenuManager : MonoBehaviour
                 break;
         }
 
-        void SetLootItem(string classType, DropTable dropTable)
-        {
-            //var itemNum = Random.Range(dropTable.itemMinNum, dropTable.itemMaxNum);
-            //for (int j = 0; j < itemNum; j++)
-            //{
-            //    var rarity = GetRarity(dropTable);
-            //    var itemDatas = dataMgr.itemData.itemInfos.FindAll(x => x.setDropTable && x.rarity == rarity && ItemClassification(classType, x.type));
-            //    if (itemDatas.Count == 0) break;
+        //void SetLootItem(string classType, DropTable dropTable)
+        //{
+        //    var itemNum = Random.Range(dropTable.itemMinNum, dropTable.itemMaxNum);
+        //    for (int j = 0; j < itemNum; j++)
+        //    {
+        //        var rarity = GetRarity(dropTable);
+        //        var itemDatas = dataMgr.itemData.itemInfos.FindAll(x => x.setDropTable && x.rarity == rarity && ItemClassification(classType, x.type));
+        //        if (itemDatas.Count == 0) break;
 
-            //    var itemData = itemDatas[Random.Range(0, itemDatas.Count)];
-            //    SetItemInStorage(itemData, 1, otherStorage.itemSlots, true);
-            //}
-        }
+        //        var itemData = itemDatas[Random.Range(0, itemDatas.Count)];
+        //        SetItemInStorage(itemData, 1, otherStorage.itemSlots, true);
+        //    }
+        //}
 
         //ItemRarity GetRarity(DropTable dropTable)
         //{
@@ -2086,17 +2119,20 @@ public class GameMenuManager : MonoBehaviour
         //otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= currentNode.nodePos.x + 1 && x.nodePos.x >= currentNode.nodePos.x - 1
         //                                                                      && x.nodePos.y <= currentNode.nodePos.y + 1 && x.nodePos.y >= currentNode.nodePos.y - 1)).ToList();
 
-        for (int i = 0; i < baseStorages.Count; i++)
+        if (gameMgr.gameState != GameState.Result)
         {
-            var baseStorage = baseStorages[i];
-            if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
-             && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
-             && !otherStorage.storageInfos.Contains(baseStorage))
+            for (int i = 0; i < baseStorages.Count; i++)
             {
-                otherStorage.storageInfos.Add(baseStorage);
+                var baseStorage = baseStorages[i];
+                if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
+                 && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
+                 && !otherStorage.storageInfos.Contains(baseStorage))
+                {
+                    otherStorage.storageInfos.Add(baseStorage);
+                }
             }
+            otherStorage.SetFloorStorage(currentNode);
         }
-        otherStorage.SetFloorStorage(currentNode);
     }
 
     public void SetStorageUI(bool value)
@@ -2158,7 +2194,7 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Next()
     {
-        if (dataMgr.gameData.floorStorages.Count > 0)
+        if (otherStorage.storageInfos[otherStorage.tabIndex].itemList.Count > 0)
         {
             popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }
@@ -2170,7 +2206,7 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Return()
     {
-        if (dataMgr.gameData.floorStorages.Count > 0)
+        if (otherStorage.storageInfos[otherStorage.tabIndex].itemList.Count > 0)
         {
             popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }
