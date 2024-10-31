@@ -197,7 +197,8 @@ public static class DataUtility
                 sModeValue = 0;
                 break;
         }
-        var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f - distance * 0.01f) * (1 / (1 + target.reaction * 0.01f)) * (1 - GetCoverBonus() * 0.01f);
+        var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f))
+                       * (1 - GetCoverBonus() * 0.01f - 30 * ((Mathf.Pow(distance, 2) - 40) / (Mathf.Pow(distance, 2) + 80)) * 0.01f);
         var hitAccuracy = Mathf.FloorToInt(shooterHit);
         if (hitAccuracy > 100)
         {

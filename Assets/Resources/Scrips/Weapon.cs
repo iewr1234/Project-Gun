@@ -31,7 +31,7 @@ public class Weapon : MonoBehaviour
         AutoFire,
     }
 
-    private enum AnumationLayers_CharacterA
+    private enum AnimationLayers_CharacterA
     {
         Base,
         Pistol_A_Base,
@@ -259,20 +259,20 @@ public class Weapon : MonoBehaviour
         switch (weaponData.weaponType)
         {
             case WeaponType.Pistol:
-                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
-                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Pistol_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Pistol_A_Upper;
                 break;
             case WeaponType.Rifle:
-                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Rifle_A_Base;
-                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Rifle_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Rifle_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Rifle_A_Upper;
                 break;
             case WeaponType.Shotgun:
-                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Base;
-                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Shotgun_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Upper;
                 break;
             case WeaponType.Revolver:
-                charCtr.baseIndex = (int)AnumationLayers_CharacterA.Pistol_A_Base;
-                charCtr.upperIndex = (int)AnumationLayers_CharacterA.Revolver_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Revolver_A_Upper;
                 break;
             default:
                 break;
