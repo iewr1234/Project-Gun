@@ -930,16 +930,21 @@ public class GameManager : MonoBehaviour
     public void ShootingAction_Shoot()
     {
         var weapon = selectChar.currentWeapon;
+        if (!weapon.weaponData.isChamber)
+        {
+            Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
+            return;
+        }
+
         var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + (int)selectChar.sMode;
         if (totalCost > selectChar.action)
         {
             Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
             return;
         }
-        var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
-        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
-        //if (weapon.weaponData.isChamber) loadedAmmo++;
 
+        var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
+        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count + 1;
         if (shootNum > loadedAmmo)
         {
             Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");

@@ -221,7 +221,7 @@ public class GameUIManager : MonoBehaviour
         var weapon = charCtr.currentWeapon;
         var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
 
-        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count;
+        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count + 1;
         //if (weapon.weaponData.isChamber) loadedAmmo++;
 
         shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;

@@ -1551,8 +1551,8 @@ public class CharacterController : MonoBehaviour
                 return;
             }
 
-            animator.SetBool("_reload", command.isReload);
-            animator.SetBool("_loadChamber", command.loadChamber);
+            animator.SetBool("reload", command.isReload);
+            animator.SetBool("loadChamber", command.loadChamber);
             reloading = true;
         }
     }
@@ -2791,8 +2791,10 @@ public class CharacterController : MonoBehaviour
             case CommandType.Shoot:
                 //if (currentWeapon.weaponData.chamberBullet == null || currentWeapon.weaponData.chamberBullet.level == 0) return;
                 if (currentWeapon == null) return;
-                if (!currentWeapon.weaponData.isMag) return;
-                if (currentWeapon.weaponData.equipMag.loadedBullets.Count == 0) return;
+                if (currentWeapon.weaponData.magType != MagazineType.Cylinder && !currentWeapon.weaponData.isChamber) return;
+                if (currentWeapon.weaponData.magType == MagazineType.Cylinder && currentWeapon.weaponData.equipMag.loadedBullets.Count == 0) return;
+                //if (!currentWeapon.weaponData.isMag) return;
+                //if (currentWeapon.weaponData.equipMag.loadedBullets.Count == 0) return;
 
                 target.animator.speed = 0f;
                 target.pause = true;
@@ -3096,8 +3098,8 @@ public class CharacterController : MonoBehaviour
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
         }
-        animator.SetBool("_reload", false);
-        animator.SetBool("_loadChamber", false);
+        animator.SetBool("reload", false);
+        animator.SetBool("loadChamber", false);
         commandList.RemoveAt(0);
         reloading = false;
     }
@@ -3210,7 +3212,7 @@ public class CharacterController : MonoBehaviour
 
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
-            animator.SetBool("_reload", false);
+            animator.SetBool("reload", false);
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }
@@ -3226,7 +3228,7 @@ public class CharacterController : MonoBehaviour
 
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
-            animator.SetBool("_reload", false);
+            animator.SetBool("reload", false);
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }

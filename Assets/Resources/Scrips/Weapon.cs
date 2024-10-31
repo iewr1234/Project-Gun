@@ -37,10 +37,8 @@ public class Weapon : MonoBehaviour
         Pistol_A_Base,
         Pistol_A_Upper,
         Revolver_A_Upper,
-        Rifle_A_Base,
-        Rifle_A_Upper,
-        Shotgun_A_Base,
-        Shotgun_A_Upper,
+        Main_A_Base,
+        Main_A_Upper,
     }
 
     [Header("---Access Script---")]
@@ -267,18 +265,20 @@ public class Weapon : MonoBehaviour
                 charCtr.upperIndex = (int)AnimationLayers_CharacterA.Revolver_A_Upper;
                 break;
             case WeaponType.AssaultRifle:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Rifle_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Rifle_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Main_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Main_A_Upper;
                 break;
             case WeaponType.Shotgun:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Upper;
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Main_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Main_A_Upper;
                 break;
             default:
                 break;
         }
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
+        charCtr.animator.SetBool("isMain", weaponData.isMain);
+        charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.SetRig(weaponData.weaponType);
         charCtr.SetAbility();
 
@@ -493,7 +493,7 @@ public class Weapon : MonoBehaviour
             curStamina = weapon.charCtr.stamina;
             for (int i = 0; i < shootNum; i++)
             {
-                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count) break;
+                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count + 1) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
                 ResultHitAccuracys(i);
@@ -520,7 +520,7 @@ public class Weapon : MonoBehaviour
             curStamina = weapon.charCtr.stamina;
             for (int i = 0; i < shootNum; i++)
             {
-                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count) break;
+                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count + 1) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
                 hitNum = 0;
