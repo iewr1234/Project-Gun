@@ -1573,7 +1573,7 @@ public class GameMenuManager : MonoBehaviour
         {
             if (holdingItem != null && holdingItem == putItem)
             {
-                if (!onItem.weaponData.isChamber && onItem.weaponData.weaponType != global::WeaponType.Revolver)
+                if (!onItem.weaponData.isChamber && onItem.weaponData.magType != MagazineType.Cylinder)
                 {
                     onItem.weaponData.chamberBullet = putItem.bulletData;
                     onItem.weaponData.isChamber = true;
@@ -1603,7 +1603,7 @@ public class GameMenuManager : MonoBehaviour
                 var reloadNum = gameMgr.uiMgr.GetAmmoIcon().value;
                 for (int i = 0; i < reloadNum; i++)
                 {
-                    if (!onItem.weaponData.isChamber && onItem.weaponData.weaponType != global::WeaponType.Revolver)
+                    if (!onItem.weaponData.isChamber && onItem.weaponData.magType != MagazineType.Cylinder)
                     {
                         onItem.weaponData.chamberBullet = putItem.bulletData;
                         onItem.weaponData.isChamber = true;

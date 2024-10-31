@@ -6,10 +6,11 @@ public enum WeaponType
 {
     None,
     Pistol,
-    Rifle,
-    Shotgun,
     Revolver,
+    AssaultRifle,
+    Rifle,
     SniperRifle,
+    Shotgun,
 }
 
 public enum MagazineType

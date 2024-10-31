@@ -179,7 +179,13 @@ public class Weapon : MonoBehaviour
                 defaultPos = weaponPos_Pistol;
                 defaultRot = weaponRot_Pistol;
                 break;
-            case WeaponType.Rifle:
+            case WeaponType.Revolver:
+                holsterPos = Vector3.zero;
+                holsterRot = Vector3.zero;
+                defaultPos = weaponPos_Pistol;
+                defaultRot = weaponRot_Pistol;
+                break;
+            case WeaponType.AssaultRifle:
                 if (charCtr.weapons.Count > 1)
                 {
                     holsterPos = weaponPos_Rifle_RightHolster;
@@ -206,12 +212,6 @@ public class Weapon : MonoBehaviour
                 }
                 defaultPos = weaponPos_Shotgun;
                 defaultRot = weaponRot_Shotgun;
-                break;
-            case WeaponType.Revolver:
-                holsterPos = Vector3.zero;
-                holsterRot = Vector3.zero;
-                defaultPos = weaponPos_Pistol;
-                defaultRot = weaponRot_Pistol;
                 break;
             default:
                 break;
@@ -262,17 +262,17 @@ public class Weapon : MonoBehaviour
                 charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
                 charCtr.upperIndex = (int)AnimationLayers_CharacterA.Pistol_A_Upper;
                 break;
-            case WeaponType.Rifle:
+            case WeaponType.Revolver:
+                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
+                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Revolver_A_Upper;
+                break;
+            case WeaponType.AssaultRifle:
                 charCtr.baseIndex = (int)AnimationLayers_CharacterA.Rifle_A_Base;
                 charCtr.upperIndex = (int)AnimationLayers_CharacterA.Rifle_A_Upper;
                 break;
             case WeaponType.Shotgun:
                 charCtr.baseIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Base;
                 charCtr.upperIndex = (int)AnimationLayers_CharacterA.Shotgun_A_Upper;
-                break;
-            case WeaponType.Revolver:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Revolver_A_Upper;
                 break;
             default:
                 break;
@@ -330,13 +330,13 @@ public class Weapon : MonoBehaviour
         switch (switchPos)
         {
             case "Holster":
-                if (weaponData.weaponType == WeaponType.Pistol)
+                if (weaponData.isMain)
                 {
-                    transform.SetParent(charCtr.subHolsterTf, false);
+                    transform.SetParent(charCtr.mainHolsterTf, false);
                 }
                 else
                 {
-                    transform.SetParent(charCtr.mainHolsterTf, false);
+                    transform.SetParent(charCtr.subHolsterTf, false);
                 }
                 transform.localPosition = holsterPos;
                 transform.localRotation = Quaternion.Euler(holsterRot);
@@ -379,7 +379,7 @@ public class Weapon : MonoBehaviour
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
                 weaponData.isChamber = false;
-                if (weaponData.weaponType != WeaponType.Revolver) LoadingChamber();
+                if (weaponData.magType != MagazineType.Cylinder) LoadingChamber();
                 if (equipSlot != null) equipSlot.SetLoadedBulletCount();
                 break;
             case CharacterOwner.Enemy:

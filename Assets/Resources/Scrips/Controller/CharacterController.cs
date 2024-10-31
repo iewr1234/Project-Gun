@@ -463,14 +463,14 @@ public class CharacterController : MonoBehaviour
             case WeaponType.Pistol:
                 chestRig.data.offset = new Vector3(-10f, 0f, 10f);
                 break;
-            case WeaponType.Rifle:
+            case WeaponType.Revolver:
+                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+                break;
+            case WeaponType.AssaultRifle:
                 chestRig.data.offset = new Vector3(-40f, 0f, 0f);
                 break;
             case WeaponType.Shotgun:
                 chestRig.data.offset = new Vector3(-40f, 0f, 0f);
-                break;
-            case WeaponType.Revolver:
-                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
                 break;
             default:
                 break;
@@ -1289,12 +1289,12 @@ public class CharacterController : MonoBehaviour
             {
                 case WeaponType.Pistol:
                     return 0.45f;
-                case WeaponType.Rifle:
+                case WeaponType.Revolver:
+                    return 0.45f;
+                case WeaponType.AssaultRifle:
                     return 0.7f;
                 case WeaponType.Shotgun:
                     return 0.7f;
-                case WeaponType.Revolver:
-                    return 0.45f;
                 default:
                     return 0f;
             }
@@ -1306,12 +1306,12 @@ public class CharacterController : MonoBehaviour
             {
                 case WeaponType.Pistol:
                     return targetingMoveSpeed_Pistol;
-                case WeaponType.Rifle:
+                case WeaponType.Revolver:
+                    return targetingMoveSpeed_Pistol;
+                case WeaponType.AssaultRifle:
                     return targetingMoveSpeed_Rifle;
                 case WeaponType.Shotgun:
                     return targetingMoveSpeed_Rifle;
-                case WeaponType.Revolver:
-                    return targetingMoveSpeed_Pistol;
                 default:
                     return 0f;
             }
