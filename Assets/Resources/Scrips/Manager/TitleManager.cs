@@ -24,11 +24,11 @@ public class TitleManager : MonoBehaviour
         dataMgr.gameData.mapLoad = true;
         dataMgr.gameData.baseStorages.Clear();
         dataMgr.gameData.floorStorages.Clear();
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 
     public void Button_MapEditor()
     {
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 }

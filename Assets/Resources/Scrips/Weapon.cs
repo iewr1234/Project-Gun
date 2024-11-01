@@ -31,12 +31,11 @@ public class Weapon : MonoBehaviour
         AutoFire,
     }
 
-    private enum AnimationLayers_CharacterA
+    private enum AnimationLayers_A
     {
         Base,
-        Pistol_A_Base,
-        Pistol_A_Upper,
-        Revolver_A_Upper,
+        Sub_A_Base,
+        Sub_A_Upper,
         Main_A_Base,
         Main_A_Upper,
     }
@@ -254,27 +253,8 @@ public class Weapon : MonoBehaviour
         //    charCtr.SetBulletAbility(true, chamberBullet);
         //}
 
-        switch (weaponData.weaponType)
-        {
-            case WeaponType.Pistol:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Pistol_A_Upper;
-                break;
-            case WeaponType.Revolver:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Pistol_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Revolver_A_Upper;
-                break;
-            case WeaponType.AssaultRifle:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Main_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Main_A_Upper;
-                break;
-            case WeaponType.Shotgun:
-                charCtr.baseIndex = (int)AnimationLayers_CharacterA.Main_A_Base;
-                charCtr.upperIndex = (int)AnimationLayers_CharacterA.Main_A_Upper;
-                break;
-            default:
-                break;
-        }
+        charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
+        charCtr.upperIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Upper : (int)AnimationLayers_A.Sub_A_Upper;
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
         charCtr.animator.SetBool("isMain", weaponData.isMain);

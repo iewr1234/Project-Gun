@@ -35,6 +35,6 @@ public class StageManager : MonoBehaviour
         selcetStage = true;
         dataMgr.gameData.stageData = stageData.CopyData();
         dataMgr.gameData.RandomMapSelection();
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 }

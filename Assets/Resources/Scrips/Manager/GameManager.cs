@@ -1776,7 +1776,7 @@ public class GameManager : MonoBehaviour
         dataMgr.gameData.floorStorages.Clear();
         dataMgr.gameData.stageData = uiMgr.selcetStage.stageData.CopyData();
         dataMgr.gameData.RandomMapSelection();
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 
     public void NextMap()
@@ -1795,7 +1795,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
         dataMgr.gameData.floorStorages.Clear();
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 
     public void ReturnBase()
@@ -1820,7 +1820,7 @@ public class GameManager : MonoBehaviour
         dataMgr.gameData.stageData = null;
         dataMgr.gameData.mapName = "BASECAMP";
         dataMgr.gameData.mapLoad = true;
-        sceneHlr.StartLoadScene("SampleScene");
+        sceneHlr.StartLoadScene("GameScene");
     }
 
     public IEnumerator Coroutine_GameEnd()
