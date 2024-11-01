@@ -273,7 +273,9 @@ public class CharacterController : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, PlayerDataInfo playerData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
-        grenadeHlr = transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        var grenadePool = Instantiate(Resources.Load<GrenadeHandler>("Prefabs/Weapon/GrenadePool"));
+        grenadePool.transform.SetParent(transform);
+        grenadeHlr = grenadePool.GetComponent<GrenadeHandler>();
         grenadeHlr.SetComponents(this);
 
         animator = GetComponent<Animator>();
@@ -308,7 +310,9 @@ public class CharacterController : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        weaponPoolTf = transform.Find("WeaponPool");
+        var _weaponPool = Instantiate(Resources.Load<GameObject>("Prefabs/Weapon/WeaponPool"));
+        _weaponPool.transform.SetParent(transform);
+        weaponPoolTf = _weaponPool.transform;
         weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
         for (int i = 0; i < weaponPool.Count; i++)
         {
@@ -366,8 +370,11 @@ public class CharacterController : MonoBehaviour
     public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, EnemyDataInfo enemyData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
-        grenadeHlr = transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
+        var grenadePool = Instantiate(Resources.Load<GrenadeHandler>("Prefabs/Weapon/GrenadePool"));
+        grenadePool.transform.SetParent(transform);
+        grenadeHlr = grenadePool.GetComponent<GrenadeHandler>();
         grenadeHlr.SetComponents(this);
+
         if (enemyData.dropTableID != "None")
             dropTableData = gameMgr.dataMgr.dropTableData.dropTableInfo.Find(x => x.ID == enemyData.dropTableID);
         if (enemyData.uniqueItemID != "None")
@@ -405,7 +412,9 @@ public class CharacterController : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        weaponPoolTf = transform.Find("WeaponPool");
+        var _weaponPool = Instantiate(Resources.Load<GameObject>("Prefabs/Weapon/WeaponPool"));
+        _weaponPool.transform.SetParent(transform);
+        weaponPoolTf = _weaponPool.transform;
         weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
         for (int i = 0; i < weaponPool.Count; i++)
         {
@@ -1399,6 +1408,7 @@ public class CharacterController : MonoBehaviour
             }
             else if (animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Aim"))
             {
+                AdjustWeapon();
                 animator.SetBool("isAim", true);
                 chestAim = true;
                 if (transform.position != coverPos)
@@ -1421,6 +1431,7 @@ public class CharacterController : MonoBehaviour
 
         void NoneCoverAim()
         {
+            AdjustWeapon();
             animator.SetBool("isAim", true);
             switch (command.type)
             {
@@ -1450,6 +1461,19 @@ public class CharacterController : MonoBehaviour
             if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy)
             {
                 SetTurnEnd(true);
+            }
+        }
+
+        void AdjustWeapon()
+        {
+            if (animator.GetBool("isAim")) return;
+
+            switch (currentWeapon.weaponData.weaponType)
+            {
+                case WeaponType.SniperRifle:
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -1487,52 +1511,57 @@ public class CharacterController : MonoBehaviour
     private void ShootProcess(CharacterCommand command)
     {
         var shootNum = animator.GetInteger("shootNum");
-        if (shootNum == 0) return;
-
-        timer += Time.deltaTime;
-        if (timer > aimTime && chestRig.weight == 1f
-         && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
+        if (shootNum == 0 && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
-            switch (ownerType)
+            StartCoroutine(Coroutine_AimOff(command));
+        }
+        else
+        {
+            timer += Time.deltaTime;
+            if (timer > aimTime && chestRig.weight == 1f
+             && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
             {
-                case CharacterOwner.Player:
-                    switch (gameMgr.uiMgr.aimGauge.state)
-                    {
-                        case AimGauge.State.None:
-                            gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
-                            return;
-                        case AimGauge.State.Done:
-                            break;
-                        default:
-                            return;
-                    }
-                    break;
-                case CharacterOwner.Enemy:
-                    switch (charUI.aimGauge.state)
-                    {
-                        case AimGauge.State.None:
-                            charUI.aimGauge.SetAimGauge(true, currentWeapon);
-                            return;
-                        case AimGauge.State.Done:
-                            break;
-                        default:
-                            return;
-                    }
-                    break;
-                default:
-                    break;
-            }
+                switch (ownerType)
+                {
+                    case CharacterOwner.Player:
+                        switch (gameMgr.uiMgr.aimGauge.state)
+                        {
+                            case AimGauge.State.None:
+                                gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
+                                return;
+                            case AimGauge.State.Done:
+                                break;
+                            default:
+                                return;
+                        }
+                        break;
+                    case CharacterOwner.Enemy:
+                        switch (charUI.aimGauge.state)
+                        {
+                            case AimGauge.State.None:
+                                charUI.aimGauge.SetAimGauge(true, currentWeapon);
+                                return;
+                            case AimGauge.State.Done:
+                                break;
+                            default:
+                                return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
-            if (!animator.GetBool("fireTrigger"))
-            {
-                animator.SetBool("fireTrigger", true);
-            }
-            //weapon.FireBullet();
-            shootNum--;
-            if (shootNum == 0)
-            {
-                //animator.SetBool("fireTrigger", false);
-                StartCoroutine(Coroutine_AimOff(command));
+                if (!animator.GetBool("fireTrigger"))
+                {
+                    animator.SetBool("fireTrigger", true);
+                }
+                //weapon.FireBullet();
+                //shootNum--;
+                //if (shootNum == 0)
+                //{
+                //    //animator.SetBool("fireTrigger", false);
+                //    StartCoroutine(Coroutine_AimOff(command));
+                //}
             }
         }
     }

@@ -944,8 +944,9 @@ public class GameManager : MonoBehaviour
         }
 
         var shootNum = DataUtility.GetShootNum(selectChar.RPM, selectChar.fiarRate);
-        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count + 1;
-        if (shootNum > loadedAmmo)
+        int loadedBulletNum = 1;
+        if (selectChar.currentWeapon.weaponData.isMag) loadedBulletNum += selectChar.currentWeapon.weaponData.equipMag.loadedBullets.Count;
+        if (shootNum > loadedBulletNum)
         {
             Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");
             return;
@@ -972,7 +973,7 @@ public class GameManager : MonoBehaviour
         //camMgr.SetCameraState(CameraState.None);
         uiMgr.SetActionPoint_Bottom(selectChar);
         uiMgr.SetActiveAimUI(selectChar, false);
-        uiMgr.SetMagNum(selectChar, weapon.weaponData.equipMag.loadedBullets.Count - shootNum);
+        uiMgr.SetMagNum(selectChar, loadedBulletNum - shootNum);
         selectChar = null;
         gameState = GameState.None;
     }
@@ -1081,6 +1082,7 @@ public class GameManager : MonoBehaviour
         {
             selectChar.AddCommand(CommandType.Reload, false, true);
             LoadChamber(weapon.weaponData.equipMag);
+            selectChar.SetAbility();
         }
         else
         {

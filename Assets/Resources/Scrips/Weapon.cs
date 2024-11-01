@@ -15,7 +15,6 @@ public class ShootingModeInfo
 public struct HitInfo
 {
     public string indexName;
-    //public List<int> hitAccuracys;
     public int hitAccuracy;
     public List<int> pelletAccuracys;
     public bool isHit;
@@ -69,17 +68,17 @@ public class Weapon : MonoBehaviour
     private Vector3 defaultPos;
     private Vector3 defaultRot;
 
-    private readonly Vector3 weaponPos_Pistol = new Vector3(0.082f, 0.034f, -0.037f);
-    private readonly Vector3 weaponRot_Pistol = new Vector3(-8.375f, 89f, -90.246f);
+    private readonly Vector3 weaponPos_sub = new Vector3(0.082f, 0.034f, -0.037f);
+    private readonly Vector3 weaponRot_sub = new Vector3(-8.375f, 89f, -90.246f);
 
-    private readonly Vector3 weaponPos_Rifle_RightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
-    private readonly Vector3 weaponPos_Rifle_LeftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
-    private readonly Vector3 weaponRot_Rifle_Holster = new Vector3(0f, 90f, 0f);
-    private readonly Vector3 weaponPos_Rifle = new Vector3(0.1f, 0.05f, 0.015f);
-    private readonly Vector3 weaponRot_Rifle = new Vector3(-5f, 95.5f, -95f);
+    private readonly Vector3 weaponPos_main_rightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
+    private readonly Vector3 weaponPos_main_leftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
+    private readonly Vector3 weaponRot_main_holster = new Vector3(0f, 90f, 0f);
+    private readonly Vector3 weaponPos_main = new Vector3(0.1f, 0.05f, 0.015f);
+    private readonly Vector3 weaponRot_main = new Vector3(-5f, 95.5f, -95f);
 
-    private readonly Vector3 weaponPos_Shotgun = new Vector3(0.048f, 0.052f, -0.035f);
-    private readonly Vector3 weaponRot_Shotgun = new Vector3(-5f, 95.5f, -95f);
+    private readonly Vector3 weaponPos_main_sniperRifle = new Vector3(0.09f, 0.015f, -0.052f);
+    private readonly Vector3 weaponRot_main_sniperRifle = new Vector3(13.4f, 96.19f, -95f);
 
     private readonly float shootDisparity_bullet = 0.15f;
     private readonly float shootDisparity_pellet = 0.3f;
@@ -168,50 +167,37 @@ public class Weapon : MonoBehaviour
 
     private void SetWeaponPositionAndRotation()
     {
-        switch (weaponData.weaponType)
+        if (weaponData.isMain)
         {
-            case WeaponType.Pistol:
-                holsterPos = Vector3.zero;
-                holsterRot = Vector3.zero;
-                defaultPos = weaponPos_Pistol;
-                defaultRot = weaponRot_Pistol;
-                break;
-            case WeaponType.Revolver:
-                holsterPos = Vector3.zero;
-                holsterRot = Vector3.zero;
-                defaultPos = weaponPos_Pistol;
-                defaultRot = weaponRot_Pistol;
-                break;
-            case WeaponType.AssaultRifle:
-                if (charCtr.weapons.Count > 1)
-                {
-                    holsterPos = weaponPos_Rifle_RightHolster;
-                    holsterRot = weaponRot_Rifle_Holster;
-                }
-                else
-                {
-                    holsterPos = weaponPos_Rifle_LeftHolster;
-                    holsterRot = weaponRot_Rifle_Holster;
-                }
-                defaultPos = weaponPos_Rifle;
-                defaultRot = weaponRot_Rifle;
-                break;
-            case WeaponType.Shotgun:
-                if (charCtr.weapons.Count > 1)
-                {
-                    holsterPos = weaponPos_Rifle_RightHolster;
-                    holsterRot = weaponRot_Rifle_Holster;
-                }
-                else
-                {
-                    holsterPos = weaponPos_Rifle_LeftHolster;
-                    holsterRot = weaponRot_Rifle_Holster;
-                }
-                defaultPos = weaponPos_Shotgun;
-                defaultRot = weaponRot_Shotgun;
-                break;
-            default:
-                break;
+            if (charCtr.weapons.Count > 1)
+            {
+                holsterPos = weaponPos_main_rightHolster;
+                holsterRot = weaponRot_main_holster;
+            }
+            else
+            {
+                holsterPos = weaponPos_main_leftHolster;
+                holsterRot = weaponRot_main_holster;
+            }
+
+            switch (weaponData.weaponType)
+            {
+                case WeaponType.SniperRifle:
+                    defaultPos = weaponPos_main_sniperRifle;
+                    defaultRot = weaponRot_main_sniperRifle;
+                    break;
+                default:
+                    defaultPos = weaponPos_main;
+                    defaultRot = weaponRot_main;
+                    break;
+            }
+        }
+        else
+        {
+            holsterPos = Vector3.zero;
+            holsterRot = Vector3.zero;
+            defaultPos = weaponPos_sub;
+            defaultRot = weaponRot_sub;
         }
     }
 
@@ -259,6 +245,7 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
         charCtr.animator.SetBool("isMain", weaponData.isMain);
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
+        charCtr.animator.SetInteger("magType", (int)weaponData.magType);
         charCtr.SetRig(weaponData.weaponType);
         charCtr.SetAbility();
 
@@ -386,6 +373,7 @@ public class Weapon : MonoBehaviour
         void LoadingChamber()
         {
             if (weaponData.isChamber) return;
+            if (!weaponData.isMag) return;
             if (weaponData.equipMag.loadedBullets.Count == 0) return;
 
             var loadedBullet = weaponData.equipMag.loadedBullets[^1];
@@ -471,9 +459,13 @@ public class Weapon : MonoBehaviour
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
             hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance);
             curStamina = weapon.charCtr.stamina;
+
+            int loadedBulletNum = 0;
+            if (weapon.weaponData.isChamber) loadedBulletNum++;
+            if (weapon.weaponData.isMag) loadedBulletNum += weapon.weaponData.equipMag.loadedBullets.Count;
             for (int i = 0; i < shootNum; i++)
             {
-                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count + 1) break;
+                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == loadedBulletNum) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
                 ResultHitAccuracys(i);
@@ -498,9 +490,13 @@ public class Weapon : MonoBehaviour
             hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance);
             isHit = hitAccuracy <= hitValue;
             curStamina = weapon.charCtr.stamina;
+
+            int loadedBulletNum = 0;
+            if (weapon.weaponData.isChamber) loadedBulletNum++;
+            if (weapon.weaponData.isMag) loadedBulletNum += weapon.weaponData.equipMag.loadedBullets.Count;
             for (int i = 0; i < shootNum; i++)
             {
-                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == weapon.weaponData.equipMag.loadedBullets.Count + 1) break;
+                if (weapon.charCtr.ownerType == CharacterOwner.Player && i == loadedBulletNum) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
                 hitNum = 0;

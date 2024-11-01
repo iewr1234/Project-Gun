@@ -30,7 +30,8 @@ public class CameraManager : MonoBehaviour
     public CameraState state;
     public bool lockCam;
 
-    private CinemachineVirtualCamera currrentActionCam;
+    [Space(5f)]
+    [SerializeField] private CinemachineVirtualCamera currrentActionCam;
     private CinemachineTransposer reloadTransposer;
     private CinemachineComposer reloadComposer;
 
@@ -134,10 +135,7 @@ public class CameraManager : MonoBehaviour
         {
             var rotDir = Mathf.Sign(rotDiff);
             var rotStep = rotSpeed * Time.deltaTime;
-            if (Mathf.Abs(rotDiff) < rotStep)
-            {
-                rotStep = Mathf.Abs(rotDiff);
-            }
+            if (Mathf.Abs(rotDiff) < rotStep) rotStep = Mathf.Abs(rotDiff);
             pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
             mainCam.transform.LookAt(pivotPoint);
         }
@@ -167,7 +165,7 @@ public class CameraManager : MonoBehaviour
         switch (_state)
         {
             case CameraState.None:
-                currrentActionCam.enabled = false;
+                if (currrentActionCam != null) currrentActionCam.enabled = false;
                 currrentActionCam = null;
                 mainCam.transform.localPosition = defaultPos;
                 mainCam.transform.LookAt(pivotPoint);
@@ -187,10 +185,7 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
-        if (currrentActionCam != null)
-        {
-            currrentActionCam.enabled = false;
-        }
+        if (currrentActionCam != null) currrentActionCam.enabled = false;
         currrentActionCam = virCams[(int)_state];
         state = _state;
         switch (state)
@@ -232,10 +227,7 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
-        if (currrentActionCam != null)
-        {
-            currrentActionCam.enabled = false;
-        }
+        if (currrentActionCam != null) currrentActionCam.enabled = false;
         currrentActionCam = virCams[(int)_state];
         state = _state;
         switch (state)

@@ -211,9 +211,8 @@ public class GameUIManager : MonoBehaviour
     {
         if (charCtr.ownerType != CharacterOwner.Player) return;
 
-        var weapon = charCtr.currentWeapon;
-        magNumText.enabled = true;
-        magNumText.text = $"{loadedAmmo}/{weapon.weaponData.equipMag.magSize}";
+        var magSize = charCtr.currentWeapon.weaponData.isMag ? charCtr.currentWeapon.weaponData.equipMag.magSize : 0;
+        magNumText.text = $"{loadedAmmo}/{magSize}";
     }
 
     public void SetShootNum(CharacterController charCtr)
@@ -221,10 +220,11 @@ public class GameUIManager : MonoBehaviour
         var weapon = charCtr.currentWeapon;
         var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
 
-        var loadedAmmo = weapon.weaponData.equipMag.loadedBullets.Count + 1;
-        //if (weapon.weaponData.isChamber) loadedAmmo++;
+        int loadedBulletNum = 0;
+        if (weapon.weaponData.isChamber) loadedBulletNum++;
+        if (weapon.weaponData.isMag) loadedBulletNum += weapon.weaponData.equipMag.loadedBullets.Count;
 
-        shootNumText.color = shootNum > loadedAmmo ? Color.red : Color.black;
+        shootNumText.color = shootNum > loadedBulletNum ? Color.red : Color.black;
         shootNumText.text = $"{shootNum}";
         SetHitAccuracy(charCtr);
     }
