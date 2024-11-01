@@ -1079,30 +1079,33 @@ public class GameManager : MonoBehaviour
         var ammoIcon = uiMgr.GetAmmoIcon();
         if (ammoIcon.type == AmmoIconType.Chamber)
         {
-            selectChar.AddCommand(CommandType.Reload, false, false);
+            selectChar.AddCommand(CommandType.Reload, false, true);
             LoadChamber(weapon.weaponData.equipMag);
         }
         else
         {
             //var rigItem = rigItems[uiMgr.iconIndex];
             var rigItem = ammoIcon.item;
+            bool loadChamber;
             switch (weapon.weaponData.magType)
             {
                 case MagazineType.Magazine:
+                    loadChamber = !weapon.weaponData.isChamber && rigItem.magData.loadedBullets.Count > 0;
                     if (weapon.weaponData.isMag)
                     {
-                        selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
+                        selectChar.AddCommand(CommandType.Reload, true, loadChamber);
                         gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag, null);
                     }
                     else
                     {
-                        selectChar.AddCommand(CommandType.Reload, true, weapon.weaponData.isChamber);
+                        selectChar.AddCommand(CommandType.Reload, true, loadChamber);
                     }
                     if (!weapon.weaponData.isChamber) LoadChamber(rigItem.magData);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
                     break;
                 default:
-                    selectChar.AddCommand(CommandType.Reload, ammoIcon.value, true, weapon.weaponData.isChamber);
+                    loadChamber = !weapon.weaponData.isChamber;
+                    selectChar.AddCommand(CommandType.Reload, ammoIcon.value, true, loadChamber);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
                     break;
             }

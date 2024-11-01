@@ -2861,8 +2861,8 @@ public class CharacterController : MonoBehaviour
     /// 커맨드 추가
     /// </summary>
     /// <param name="type"></param>
-    /// <param name="isCamber"></param>
-    public void AddCommand(CommandType type, bool isReload, bool isCamber)
+    /// <param name="loadChamber"></param>
+    public void AddCommand(CommandType type, bool isReload, bool loadChamber)
     {
         switch (type)
         {
@@ -2872,7 +2872,7 @@ public class CharacterController : MonoBehaviour
                     indexName = $"{type}",
                     type = CommandType.Reload,
                     isReload = isReload,
-                    loadChamber = !isCamber,
+                    loadChamber = loadChamber,
                 };
                 commandList.Add(reloadCommand);
                 break;

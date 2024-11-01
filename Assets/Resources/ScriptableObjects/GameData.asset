@@ -38,7 +38,7 @@ MonoBehaviour:
       ID: E0010
       level: 1
   mapName: BASECAMP
-  mapLoad: 1
+  mapLoad: 0
   playerID: P0001
   health: 0
   initialItemIDList:
@@ -90,5 +90,24 @@ MonoBehaviour:
   - ID: M0014
     num: 1
     createPos: 3
-  baseStorages: []
+  - ID: W0003
+    num: 1
+    createPos: 4
+  - ID: M0003
+    num: 1
+    createPos: 4
+  - ID: M0003
+    num: 1
+    createPos: 4
+  baseStorages:
+  - storageName: "\uCC3D\uACE01"
+    type: 1
+    nodePos: {x: 4, y: 0}
+    slotSize: {x: 7, y: 3}
+    itemList: []
+  - storageName: "\uCC3D\uACE02"
+    type: 1
+    nodePos: {x: 5, y: 0}
+    slotSize: {x: 7, y: 5}
+    itemList: []
   floorStorages: []
