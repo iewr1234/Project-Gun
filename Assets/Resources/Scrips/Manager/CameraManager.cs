@@ -162,6 +162,7 @@ public class CameraManager : MonoBehaviour
 
     public void SetCameraState(CameraState _state)
     {
+        Debug.Log($"Set Camera: {_state}");
         switch (_state)
         {
             case CameraState.None:
@@ -184,6 +185,7 @@ public class CameraManager : MonoBehaviour
             Debug.LogError($"invalid call: SetCameraState(CameraState.None), {charCtr}");
             return;
         }
+        Debug.Log($"Set Camera: {_state}");
 
         if (currrentActionCam != null) currrentActionCam.enabled = false;
         currrentActionCam = virCams[(int)_state];
@@ -226,6 +228,7 @@ public class CameraManager : MonoBehaviour
             Debug.LogError($"invalid call: SetCameraState(CameraState.None), {charCtr_follow}, {charCtr_lookAt}");
             return;
         }
+        Debug.Log($"Set Camera: {_state}");
 
         if (currrentActionCam != null) currrentActionCam.enabled = false;
         currrentActionCam = virCams[(int)_state];

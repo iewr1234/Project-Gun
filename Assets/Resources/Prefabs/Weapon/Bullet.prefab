@@ -279,7 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1976d54f8dcb3724dbf2c7a033611217, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 30
+  meshs: []
   propellant: 0
   damage: 0
   penetrate: 0
@@ -288,8 +288,9 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 35840
+  speed: 30
   isHit: 0
-  isMiss: 0
+  hitNum: 0
 --- !u!54 &5750482226894326460
 Rigidbody:
   m_ObjectHideFlags: 0

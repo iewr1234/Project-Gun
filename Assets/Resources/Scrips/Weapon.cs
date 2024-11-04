@@ -214,6 +214,7 @@ public class Weapon : MonoBehaviour
                 defaultRot = weaponRot_main_sniperRifle;
                 transform.localPosition = weaponPos_main_sniperRifle;
                 transform.localRotation = Quaternion.Euler(weaponRot_main_sniperRifle);
+                Debug.Log($"{charCtr.name}: Reset SniperRifle");
                 break;
             default:
                 break;

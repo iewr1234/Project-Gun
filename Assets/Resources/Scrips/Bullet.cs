@@ -107,7 +107,7 @@ public class Bullet : MonoBehaviour
     {
         if (isCheck) return;
 
-        var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0f, targetLayer);
+        var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0.05f, targetLayer);
         for (int i = 0; i < hits.Length; i++)
         {
             var hit = hits[i];

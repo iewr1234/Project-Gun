@@ -263,6 +263,8 @@ public class CharacterController : MonoBehaviour
 
     private bool throwing;
 
+    private Coroutine curCoroutine;
+
     /// <summary>
     /// 구성요소 설정
     /// </summary>
@@ -1319,7 +1321,7 @@ public class CharacterController : MonoBehaviour
         void EndTargeting()
         {
             canTargeting = false;
-            if (!command.targeting) currentWeapon.MoveLocalPosition(false);
+            //if (!command.targeting) currentWeapon.MoveLocalPosition(false);
             commandList.Remove(command);
         }
     }
@@ -1498,7 +1500,7 @@ public class CharacterController : MonoBehaviour
         var shootNum = animator.GetInteger("shootNum");
         if (shootNum == 0 && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
         {
-            StartCoroutine(Coroutine_AimOff(command));
+            if (curCoroutine == null) curCoroutine = StartCoroutine(Coroutine_AimOff(command));
         }
         else
         {
@@ -3159,6 +3161,7 @@ public class CharacterController : MonoBehaviour
                 break;
         }
 
+        currentWeapon.MoveLocalPosition(false);
         if (ownerType == CharacterOwner.Player)
         {
             charUI.components.SetActive(true);
@@ -3172,6 +3175,7 @@ public class CharacterController : MonoBehaviour
             charUI.aimGauge.SetAimGauge(false);
         }
         commandList.Remove(command);
+        curCoroutine = null;
     }
 
     private IEnumerator Coroutine_ReloadEnd()
@@ -3223,6 +3227,7 @@ public class CharacterController : MonoBehaviour
         var reloadNum = animator.GetInteger("reloadNum") - 1;
         animator.SetInteger("reloadNum", reloadNum);
         if (reloadNum > 0) return;
+        if (currentWeapon.weaponData.magType == MagazineType.Cylinder) return;
 
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {

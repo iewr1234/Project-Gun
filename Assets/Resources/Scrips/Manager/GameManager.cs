@@ -930,7 +930,7 @@ public class GameManager : MonoBehaviour
     public void ShootingAction_Shoot()
     {
         var weapon = selectChar.currentWeapon;
-        if (!weapon.weaponData.isChamber)
+        if (weapon.weaponData.magType != MagazineType.Cylinder && !weapon.weaponData.isChamber)
         {
             Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
             return;
@@ -1001,7 +1001,32 @@ public class GameManager : MonoBehaviour
                                              .OrderByDescending(x => x.TotalCount).ToList();
         }
 
-        if (weaponData.magType == MagazineType.Cylinder && rigItems.Count == 0) return;
+        switch (weaponData.magType)
+        {
+            case MagazineType.Magazine:
+                if ((!weaponData.isMag || weaponData.equipMag.loadedBullets.Count == 0) && rigItems.Count == 0)
+                {
+                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    return;
+                }
+                break;
+            case MagazineType.IntMagazine:
+                if (weaponData.equipMag.loadedBullets.Count == 0 && rigItems.Count == 0)
+                {
+                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    return;
+                }
+                break;
+            case MagazineType.Cylinder:
+                if (rigItems.Count == 0)
+                {
+                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    return;
+                }
+                break;
+            default:
+                break;
+        }
 
         SetEnemyOutlinable(false);
         gameState = GameState.Reload;
