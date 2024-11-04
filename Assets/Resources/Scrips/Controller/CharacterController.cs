@@ -252,8 +252,8 @@ public class CharacterController : MonoBehaviour
     private bool canTargeting;
     private bool targetingMove;
     private Vector3 targetingPos;
-    private readonly float targetingMoveSpeed_Pistol = 1.5f;
-    private readonly float targetingMoveSpeed_Rifle = 1f;
+    private readonly float targetingMoveSpeed_main = 1f;
+    private readonly float targetingMoveSpeed_sub = 1.5f;
 
     private bool reloading;
     private readonly float reloadTime = 0.3f;
@@ -1294,41 +1294,32 @@ public class CharacterController : MonoBehaviour
 
         float GetDistance()
         {
-            switch (currentWeapon.weaponData.weaponType)
+            if (currentWeapon.weaponData.isMain)
             {
-                case WeaponType.Pistol:
-                    return 0.45f;
-                case WeaponType.Revolver:
-                    return 0.45f;
-                case WeaponType.AssaultRifle:
-                    return 0.7f;
-                case WeaponType.Shotgun:
-                    return 0.7f;
-                default:
-                    return 0f;
+                return 0.7f;
+            }
+            else
+            {
+                return 0.45f;
             }
         }
 
         float GetSpeed()
         {
-            switch (currentWeapon.weaponData.weaponType)
+            if (currentWeapon.weaponData.isMain)
             {
-                case WeaponType.Pistol:
-                    return targetingMoveSpeed_Pistol;
-                case WeaponType.Revolver:
-                    return targetingMoveSpeed_Pistol;
-                case WeaponType.AssaultRifle:
-                    return targetingMoveSpeed_Rifle;
-                case WeaponType.Shotgun:
-                    return targetingMoveSpeed_Rifle;
-                default:
-                    return 0f;
+                return targetingMoveSpeed_main;
+            }
+            else
+            {
+                return targetingMoveSpeed_sub;
             }
         }
 
         void EndTargeting()
         {
             canTargeting = false;
+            if (!command.targeting) currentWeapon.MoveLocalPosition(false);
             commandList.Remove(command);
         }
     }
@@ -1468,13 +1459,7 @@ public class CharacterController : MonoBehaviour
         {
             if (animator.GetBool("isAim")) return;
 
-            switch (currentWeapon.weaponData.weaponType)
-            {
-                case WeaponType.SniperRifle:
-                    break;
-                default:
-                    break;
-            }
+            currentWeapon.MoveLocalPosition(true);
         }
     }
 

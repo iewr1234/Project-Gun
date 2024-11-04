@@ -286,6 +286,10 @@ MonoBehaviour:
   magMax: 0
   loadedNum: 0
   hitInfos: []
+  isMove: 0
+  targetPos: {x: 0, y: 0, z: 0}
+  targetRot: {x: 0, y: 0, z: 0}
+  moveSpeed: 20
 --- !u!33 &3481752695306390984
 MeshFilter:
   m_ObjectHideFlags: 0

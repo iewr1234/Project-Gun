@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < weaponDatas.Length; i++)
             {
                 var weaponData = weaponDatas[i];
-                if (weaponData.type == WeaponType.None) continue;
+                if (weaponData.weaponType == WeaponType.None) continue;
 
                 var weapon = charCtr.GetWeapon(weaponData.prefabName, EquipType.MainWeapon1 + i);
                 weapon.SetComponets(charCtr, weaponData);

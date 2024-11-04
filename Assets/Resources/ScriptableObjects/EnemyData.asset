@@ -54,22 +54,28 @@ MonoBehaviour:
     armorBreak: 0
     critical: 0
     mainWeapon1:
-      type: 2
       prefabName: Rifle_2
+      isMain: 1
+      weaponType: 3
+      magType: 1
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 30
     mainWeapon2:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      type: 0
       prefabName: None
+      isMain: 0
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
@@ -115,22 +121,28 @@ MonoBehaviour:
     armorBreak: 0
     critical: 0
     mainWeapon1:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     mainWeapon2:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      type: 1
       prefabName: Pistol_1
+      isMain: 0
+      weaponType: 1
+      magType: 1
       meshType: 0
       pelletNum: 0
       spread: 0
@@ -176,22 +188,28 @@ MonoBehaviour:
     armorBreak: 0
     critical: 0
     mainWeapon1:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     mainWeapon2:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      type: 1
       prefabName: Pistol_1
+      isMain: 0
+      weaponType: 1
+      magType: 1
       meshType: 0
       pelletNum: 0
       spread: 0
@@ -237,22 +255,28 @@ MonoBehaviour:
     armorBreak: 0
     critical: 0
     mainWeapon1:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     mainWeapon2:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      type: 1
       prefabName: Pistol_1
+      isMain: 0
+      weaponType: 1
+      magType: 1
       meshType: 0
       pelletNum: 0
       spread: 0
@@ -298,22 +322,28 @@ MonoBehaviour:
     armorBreak: 0
     critical: 0
     mainWeapon1:
-      type: 2
       prefabName: Rifle_2
+      isMain: 1
+      weaponType: 3
+      magType: 1
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 30
     mainWeapon2:
-      type: 0
       prefabName: None
+      isMain: 1
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      type: 0
       prefabName: None
+      isMain: 0
+      weaponType: 0
+      magType: 0
       meshType: 0
       pelletNum: 0
       spread: 0

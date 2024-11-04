@@ -5,8 +5,10 @@ using UnityEngine;
 [System.Serializable]
 public struct EnemyWeapon
 {
-    public WeaponType type;
     public string prefabName;
+    public bool isMain;
+    public WeaponType weaponType;
+    public MagazineType magType;
     public int meshType;
     public int pelletNum;
     public int spread;

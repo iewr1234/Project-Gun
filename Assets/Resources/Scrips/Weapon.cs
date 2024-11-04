@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEditorInternal.ReorderableList;
 
 [System.Serializable]
 public class ShootingModeInfo
@@ -67,6 +68,7 @@ public class Weapon : MonoBehaviour
     private Vector3 holsterRot;
     private Vector3 defaultPos;
     private Vector3 defaultRot;
+    private bool isMove;
 
     private readonly Vector3 weaponPos_sub = new Vector3(0.082f, 0.034f, -0.037f);
     private readonly Vector3 weaponRot_sub = new Vector3(-8.375f, 89f, -90.246f);
@@ -78,7 +80,10 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponRot_main = new Vector3(-5f, 95.5f, -95f);
 
     private readonly Vector3 weaponPos_main_sniperRifle = new Vector3(0.09f, 0.015f, -0.052f);
-    private readonly Vector3 weaponRot_main_sniperRifle = new Vector3(13.4f, 96.19f, -95f);
+    private readonly Vector3 weaponRot_main_sniperRifle = new Vector3(-11.1f, 91.31f, -95f);
+    private readonly Vector3 weaponPos_main_sniperRifle_aim = new Vector3(0.09f, 0.015f, -0.052f);
+    private readonly Vector3 weaponRot_main_sniperRifle_aim = new Vector3(13.4f, 96.19f, -95f);
+
 
     private readonly float shootDisparity_bullet = 0.15f;
     private readonly float shootDisparity_pellet = 0.3f;
@@ -89,12 +94,6 @@ public class Weapon : MonoBehaviour
         charCtr = _charCtr;
         equipSlot = _equipSlot;
         weaponData = _weaponData;
-        //charCtr.SetWeaponAbility(true, weaponData);
-        //if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-        //{
-        //    var chamberBullet = weaponData.equipMag.loadedBullets[0];
-        //    charCtr.SetBulletAbility(true, chamberBullet);
-        //}
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1)
         {
@@ -123,7 +122,9 @@ public class Weapon : MonoBehaviour
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
-        weaponData.weaponType = _eWeapon.type;
+        weaponData.isMain = _eWeapon.isMain;
+        weaponData.weaponType = _eWeapon.weaponType;
+        weaponData.magType = _eWeapon.magType;
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
@@ -201,13 +202,27 @@ public class Weapon : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!isMove) return;
+        if (!charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.upperIndex).IsTag("None")) return;
+
+        switch (weaponData.weaponType)
+        {
+            case WeaponType.SniperRifle:
+                defaultPos = weaponPos_main_sniperRifle;
+                defaultRot = weaponRot_main_sniperRifle;
+                transform.localPosition = weaponPos_main_sniperRifle;
+                transform.localRotation = Quaternion.Euler(weaponRot_main_sniperRifle);
+                break;
+            default:
+                break;
+        }
+        isMove = false;
+    }
+
     public void Initialize()
     {
-        //if (charCtr.currentWeapon == this)
-        //{
-        //    UnequipWeapon();
-        //}
-        //charCtr.weapons.Remove(this);
         charCtr = null;
         equipSlot = null;
         weaponData = null;
@@ -223,22 +238,11 @@ public class Weapon : MonoBehaviour
 
     public void EquipWeapon()
     {
-        //var isCover = charCtr.animator.GetBool("isCover");
-        //var fullCover = charCtr.animator.GetBool("fullCover");
-        //var isRight = charCtr.animator.GetBool("isRight");
         if (charCtr.baseIndex > 0 && charCtr.upperIndex > 0)
         {
             charCtr.animator.SetLayerWeight(charCtr.baseIndex, 0f);
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
-
-        //charCtr.SetWeaponAbility(true, weaponData);
-        //if (weaponData.isMag && weaponData.equipMag.loadedBullets.Count > 0)
-        //{
-        //    var chamberBullet = weaponData.equipMag.loadedBullets[0];
-        //    charCtr.SetBulletAbility(true, chamberBullet);
-        //}
-
         charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
         charCtr.upperIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Upper : (int)AnimationLayers_A.Sub_A_Upper;
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
@@ -248,28 +252,6 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
         charCtr.SetRig(weaponData.weaponType);
         charCtr.SetAbility();
-
-        //charCtr.animator.SetBool("isCover", isCover);
-        //charCtr.animator.SetBool("fullCover", fullCover);
-        //charCtr.animator.SetBool("isRight", isRight);
-        //if (isCover)
-        //{
-        //    if (fullCover)
-        //    {
-        //        if (isRight)
-        //        {
-        //            charCtr.animator.Play("Base Layer.Cover.FullCover.CoverRight");
-        //        }
-        //        else
-        //        {
-        //            charCtr.animator.Play("Base Layer.Cover.FullCover.CoverLeft");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        charCtr.animator.Play("Base Layer.Cover.HalfCover.CoverIdle");
-        //    }
-        //}
     }
 
     public void SetParts(string partsName, bool value)
@@ -417,11 +399,32 @@ public class Weapon : MonoBehaviour
         return hitAccuracy.hitValue;
     }
 
+    public void MoveLocalPosition(bool value)
+    {
+        switch (weaponData.weaponType)
+        {
+            case WeaponType.SniperRifle:
+                if (value)
+                {
+                    defaultPos = weaponPos_main_sniperRifle_aim;
+                    defaultRot = weaponRot_main_sniperRifle_aim;
+                    transform.localPosition = weaponPos_main_sniperRifle_aim;
+                    transform.localRotation = Quaternion.Euler(weaponRot_main_sniperRifle_aim);
+                }
+                else
+                {
+                    isMove = true;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     private class HitAccuracy
     {
         private Weapon weapon;
 
-        //[Tooltip("명중값 리스트")] public List<int> hitAccuracys;
         [Tooltip("명중값")] public int hitAccuracy;
         [Tooltip("팰릿명중값 리스트")] public List<int> pelletAccuracys;
         [Tooltip("무작위값")] public int hitValue;

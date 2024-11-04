@@ -364,7 +364,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AX";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:BA";
     private enum EnemyVariable
     {
         ID,
@@ -399,20 +399,23 @@ public class DataManager : MonoBehaviour
         Penetrate,
         ArmorBreak,
         Critical,
-        MainWeapon1_type,
         MainWeapon1_prefabName,
+        MainWeapon1_weaponType,
+        MainWeapon1_magType,
         MainWeapon1_meshType,
         MainWeapon1_pelletNum,
         MainWeapon1_spread,
         MainWeapon1_magMax,
-        MainWeapon2_type,
         MainWeapon2_prefabName,
+        MainWeapon2_weaponType,
+        MainWeapon2_magType,
         MainWeapon2_meshType,
         MainWeapon2_pelletNum,
         MainWeapon2_spread,
         MainWeapon2_magMax,
-        SubWeapon_type,
         SubWeapon_prefabName,
+        SubWeapon_weaponType,
+        SubWeapon_magType,
         SubWeapon_meshType,
         SubWeapon_pelletNum,
         SubWeapon_spread,
@@ -471,20 +474,26 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)EnemyVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)EnemyVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)EnemyVariable.Critical]),
-                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_type],
-                                                  data[(int)EnemyVariable.MainWeapon1_prefabName],
+                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_prefabName],
+                                                  true,
+                                                  data[(int)EnemyVariable.MainWeapon1_weaponType],
+                                                  data[(int)EnemyVariable.MainWeapon1_magType],
                                                   data[(int)EnemyVariable.MainWeapon1_meshType],
                                                   data[(int)EnemyVariable.MainWeapon1_pelletNum],
                                                   data[(int)EnemyVariable.MainWeapon1_spread],
                                                   data[(int)EnemyVariable.MainWeapon1_magMax]),
-                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_type],
-                                                  data[(int)EnemyVariable.MainWeapon2_prefabName],
+                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_prefabName],
+                                                  true,
+                                                  data[(int)EnemyVariable.MainWeapon2_weaponType],
+                                                  data[(int)EnemyVariable.MainWeapon2_magType],
                                                   data[(int)EnemyVariable.MainWeapon2_meshType],
                                                   data[(int)EnemyVariable.MainWeapon2_pelletNum],
                                                   data[(int)EnemyVariable.MainWeapon2_spread],
                                                   data[(int)EnemyVariable.MainWeapon2_magMax]),
-                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_type],
-                                                data[(int)EnemyVariable.SubWeapon_prefabName],
+                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_prefabName],
+                                                false,
+                                                data[(int)EnemyVariable.SubWeapon_weaponType],
+                                                data[(int)EnemyVariable.SubWeapon_magType],
                                                 data[(int)EnemyVariable.SubWeapon_meshType],
                                                 data[(int)EnemyVariable.SubWeapon_pelletNum],
                                                 data[(int)EnemyVariable.SubWeapon_spread],
@@ -495,12 +504,14 @@ public class DataManager : MonoBehaviour
             Debug.Log("Update Enemy Data");
         }
 
-        EnemyWeapon ReadEnemyWeapon(string typeData, string prefabNameData, string meshType, string pelletNum, string spread, string magMaxData)
+        EnemyWeapon ReadEnemyWeapon(string prefabNameData, bool isMain, string weaponTypeData, string magTypeData, string meshType, string pelletNum, string spread, string magMaxData)
         {
             var enemyWeapon = new EnemyWeapon()
             {
-                type = (WeaponType)int.Parse(typeData),
                 prefabName = prefabNameData,
+                isMain = isMain,
+                weaponType = (WeaponType)int.Parse(weaponTypeData),
+                magType = (MagazineType)int.Parse(magTypeData),
                 meshType = int.Parse(meshType),
                 pelletNum = int.Parse(pelletNum),
                 spread = int.Parse(spread),
