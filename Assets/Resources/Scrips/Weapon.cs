@@ -308,6 +308,7 @@ public class Weapon : MonoBehaviour
     {
         var hitInfo = hitInfos[0];
         int count;
+        float hitTime;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
@@ -323,8 +324,8 @@ public class Weapon : MonoBehaviour
                         return;
                     }
 
-                    SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
-                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    SetBulletDirection(bullet);
+                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, SetBulletDirection(bullet), i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
@@ -343,8 +344,8 @@ public class Weapon : MonoBehaviour
                         return;
                     }
 
-                    SetBulletDirection(bullet, i == 0 && hitInfo.isHit);
-                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+
+                    bullet.SetBullet(charCtr, target, meshType, SetBulletDirection(bullet), i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
                 loadedNum--;
@@ -366,18 +367,17 @@ public class Weapon : MonoBehaviour
             charCtr.SetAbility();
         }
 
-        void SetBulletDirection(Bullet bullet, bool noDisparity)
+        Vector3 SetBulletDirection(Bullet bullet)
         {
             bullet.gameObject.SetActive(true);
             bullet.transform.position = bulletTf.position;
+            var disparity = count == 1 ? shootDisparity_bullet : shootDisparity_pellet;
             var aimPos = charCtr.aimPoint.position;
             aimPos.y = bulletTf.position.y;
-            if (!noDisparity)
-            {
-                var disparity = count == 1 ? shootDisparity_bullet : shootDisparity_pellet;
-                aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
-            }
+            aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
             bullet.transform.LookAt(aimPos);
+
+            return aimPos;
         }
     }
 

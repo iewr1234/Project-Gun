@@ -25,16 +25,19 @@ public class Bullet : MonoBehaviour
 
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private float speed = 30f;
+    [SerializeField] private float radius = 0.03f;
     [SerializeField] private bool isHit;
     [SerializeField] private int hitNum;
     private bool isMiss;
     private bool isCheck;
     private float timer;
     private float destroyTime;
+    private Vector3 lastPosition;
 
     private readonly float startWidth = 0.01f;
     private readonly float destroyTime_bullet = 1f;
     private readonly float destroyTime_pellet = 0.3f;
+    private const int MAX_HITS = 10; // 최대 충돌 감지 수 제한
 
     public void SetComponents()
     {
@@ -61,7 +64,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit, bool _isMiss, int _hitNum)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, Vector3 aimPos, bool _isHit, bool _isMiss, int _hitNum)
     {
         shooter = _shooter;
         target = _target;
@@ -70,7 +73,7 @@ public class Bullet : MonoBehaviour
         bulletCd.enabled = true;
         bulletRb.constraints = RigidbodyConstraints.None;
         bulletRb.isKinematic = false;
-        bulletRb.velocity = transform.forward * speed;
+        //bulletRb.velocity = transform.forward * speed;
         meshs[_meshType].SetActive(true);
 
         propellant = shooter.propellant;
@@ -101,38 +104,127 @@ public class Bullet : MonoBehaviour
             destroyTime = destroyTime_pellet;
         }
         timer = 0f;
+        lastPosition = transform.position;
     }
 
-    void FixedUpdate()
+    //void FixedUpdate()
+    //{
+    //    if (isCheck) return;
+
+    //    var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0.05f, targetLayer);
+    //    for (int i = 0; i < hits.Length; i++)
+    //    {
+    //        var hit = hits[i];
+    //        var charCtr = hit.collider.GetComponentInParent<CharacterController>();
+    //        if (charCtr != null && charCtr == target && isHit)
+    //        {
+    //            charCtr.OnHit(transform.forward, this, hitNum);
+    //            isHit = false;
+    //            Debug.Log($"{charCtr.name}: Hit");
+    //        }
+    //        HitBullet();
+    //    }
+
+    //    if (!isHit && isMiss)
+    //    {
+    //        var dist = DataUtility.GetDistance(target.transform.position, transform.position);
+    //        if (dist < 1.5f)
+    //        {
+    //            target.GameMgr.SetFloatText(target.transform.position + new Vector3(0f, 2f, 0f), "Miss", Color.red);
+    //            isMiss = false;
+    //        }
+    //    }
+    //}
+
+    private void Update()
+    {
+        HitProcess();
+        DelayDestroy();
+    }
+
+    private void HitProcess()
     {
         if (isCheck) return;
 
-        var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0.05f, targetLayer);
-        for (int i = 0; i < hits.Length; i++)
+        Vector3 currentPosition = transform.position;
+        CheckCollision(lastPosition, currentPosition);
+
+        if (isCheck) return;
+        // 총알 이동
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        lastPosition = currentPosition;
+    }
+
+    private void CheckCollision(Vector3 fromPos, Vector3 toPos)
+    {
+        float moveDistance = Vector3.Distance(fromPos, toPos);
+        if (moveDistance < Mathf.Epsilon) return;
+
+        Vector3 moveDirection = (toPos - fromPos).normalized;
+        RaycastHit[] hitBuffer = new RaycastHit[MAX_HITS];
+        int hitCount = Physics.SphereCastNonAlloc(
+            fromPos,
+            radius,
+            moveDirection,
+            hitBuffer,
+            moveDistance,
+            targetLayer
+        );
+
+        // 가장 가까운 충돌 찾기
+        float closestDistance = float.MaxValue;
+        RaycastHit? closestHit = null;
+
+        for (int i = 0; i < hitCount; i++)
         {
-            var hit = hits[i];
-            var charCtr = hit.collider.GetComponentInParent<CharacterController>();
-            if (charCtr != null && charCtr == target && isHit)
+            float distance = hitBuffer[i].distance;
+            if (distance < closestDistance)
             {
-                charCtr.OnHit(transform.forward, this, hitNum);
-                isHit = false;
-                Debug.Log($"{charCtr.name}: Hit");
+                var charCtr = hitBuffer[i].collider.GetComponentInParent<CharacterController>();
+
+                // CharacterController가 있는 경우
+                if (charCtr != null)
+                {
+                    // 특정 타겟이 지정되어 있고, 이 타겟이 아닌 경우 스킵
+                    if (target != null && charCtr != target) continue;
+
+                    closestDistance = distance;
+                    closestHit = hitBuffer[i];
+                }
+                // CharacterController가 없는 경우도 충돌 처리
+                else
+                {
+                    closestDistance = distance;
+                    closestHit = hitBuffer[i];
+                }
             }
-            HitBullet();
         }
 
-        if (!isHit && isMiss)
+        // 충돌 처리
+        if (closestHit.HasValue)
         {
-            var dist = DataUtility.GetDistance(target.transform.position, transform.position);
-            if (dist < 1.5f)
+            var hit = closestHit.Value;
+            var charCtr = hit.collider.GetComponentInParent<CharacterController>();
+
+            // CharacterController가 있는 경우
+            if (charCtr != null && charCtr == target && isHit)
             {
-                target.GameMgr.SetFloatText(target.transform.position + new Vector3(0f, 2f, 0f), "Miss", Color.red);
-                isMiss = false;
+                charCtr.OnHit(moveDirection, this, hitNum);
+                Debug.Log($"{charCtr.name}: Character Hit");
             }
+            // 일반 오브젝트인 경우
+            else
+            {
+                //HandleNormalCollision(hit, moveDirection);
+                Debug.Log($"{hit.collider.name}: Object Hit");
+            }
+
+            isHit = false;
+            HitBullet();
         }
     }
 
-    private void Update()
+    private void DelayDestroy()
     {
         timer += Time.deltaTime;
         if (timer > destroyTime)
