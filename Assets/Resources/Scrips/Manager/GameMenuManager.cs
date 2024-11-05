@@ -2105,6 +2105,7 @@ public class GameMenuManager : MonoBehaviour
     {
         if (otherStorage.components.activeSelf) return;
 
+        otherStorage.storageInfos.Clear();
         var baseStorages = dataMgr.gameData.baseStorages;
         //var storageInfos = new List<StorageInfo>();
         if (node != null)

@@ -293,7 +293,7 @@ public class OtherStorage : MonoBehaviour
             storageInfos.Add(floorStorage);
             node.SetItemCase(true);
         }
-        else
+        else if (!storageInfos.Contains(floor))
         {
             storageInfos.Add(floor);
         }

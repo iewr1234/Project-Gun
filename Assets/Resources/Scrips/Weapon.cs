@@ -371,6 +371,7 @@ public class Weapon : MonoBehaviour
             bullet.gameObject.SetActive(true);
             bullet.transform.position = bulletTf.position;
             var aimPos = charCtr.aimPoint.position;
+            aimPos.y = bulletTf.position.y;
             if (!noDisparity)
             {
                 var disparity = count == 1 ? shootDisparity_bullet : shootDisparity_pellet;
