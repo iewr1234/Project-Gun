@@ -1471,7 +1471,6 @@ public class CharacterController : MonoBehaviour
     /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
-        Debug.Log($"{transform.name}: Aim");
         aimTf = targetInfo.target.transform;
         if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum"), true))
         {
@@ -2925,7 +2924,7 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(Vector3 dir, Bullet bullet, int hitNum)
+    public void OnHit(CharacterController shooter, Vector3 dir, Bullet bullet, int hitNum)
     {
         if (state == CharacterState.Dead) return;
 
@@ -2958,6 +2957,7 @@ public class CharacterController : MonoBehaviour
         if (isPenetrate)
         {
             SetHealth(-damage);
+            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피해량 = {damage}, 체력 = {health}/{maxHealth}");
             gameMgr.SetFloatText(charUI.transform.position, $"{damage}", Color.white);
         }
         else

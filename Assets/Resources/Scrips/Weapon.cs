@@ -520,8 +520,9 @@ public class Weapon : MonoBehaviour
                     impact = impact,
                 };
                 weapon.hitInfos.Add(hitInfo);
-                Debug.Log($"{weapon.charCtr.name}: {i + 1}번째 탄: {hitText}");
+                //Debug.Log($"{weapon.charCtr.name}: {i + 1}번째 탄: {hitText}");
             }
+            Debug.Log($"{weapon.charCtr.name}: 발사수 = {weapon.hitInfos.Count}, 명중수 = {weapon.hitInfos.FindAll(x => x.isHit).Count}");
             var useStamina = weapon.charCtr.stamina - curStamina;
             weapon.charCtr.SetStamina(useStamina);
 

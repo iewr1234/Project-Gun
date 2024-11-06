@@ -107,35 +107,6 @@ public class Bullet : MonoBehaviour
         lastPosition = transform.position;
     }
 
-    //void FixedUpdate()
-    //{
-    //    if (isCheck) return;
-
-    //    var hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, 0.05f, targetLayer);
-    //    for (int i = 0; i < hits.Length; i++)
-    //    {
-    //        var hit = hits[i];
-    //        var charCtr = hit.collider.GetComponentInParent<CharacterController>();
-    //        if (charCtr != null && charCtr == target && isHit)
-    //        {
-    //            charCtr.OnHit(transform.forward, this, hitNum);
-    //            isHit = false;
-    //            Debug.Log($"{charCtr.name}: Hit");
-    //        }
-    //        HitBullet();
-    //    }
-
-    //    if (!isHit && isMiss)
-    //    {
-    //        var dist = DataUtility.GetDistance(target.transform.position, transform.position);
-    //        if (dist < 1.5f)
-    //        {
-    //            target.GameMgr.SetFloatText(target.transform.position + new Vector3(0f, 2f, 0f), "Miss", Color.red);
-    //            isMiss = false;
-    //        }
-    //    }
-    //}
-
     private void Update()
     {
         HitProcess();
@@ -147,18 +118,18 @@ public class Bullet : MonoBehaviour
         if (isCheck) return;
 
         Vector3 currentPosition = transform.position;
-        CheckCollision(lastPosition, currentPosition);
-
-        if (isCheck) return;
-        // 총알 이동
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
-        lastPosition = currentPosition;
+        if (!CheckCollision(lastPosition, currentPosition))
+        {
+            // 총알 이동
+            transform.Translate(Vector3.forward * speed * Time.deltaTime);
+            lastPosition = currentPosition;
+        }
     }
 
-    private void CheckCollision(Vector3 fromPos, Vector3 toPos)
+    private bool CheckCollision(Vector3 fromPos, Vector3 toPos)
     {
         float moveDistance = Vector3.Distance(fromPos, toPos);
-        if (moveDistance < Mathf.Epsilon) return;
+        if (moveDistance < Mathf.Epsilon) return false;
 
         Vector3 moveDirection = (toPos - fromPos).normalized;
         RaycastHit[] hitBuffer = new RaycastHit[MAX_HITS];
@@ -209,19 +180,21 @@ public class Bullet : MonoBehaviour
             // CharacterController가 있는 경우
             if (charCtr != null && charCtr == target && isHit)
             {
-                charCtr.OnHit(moveDirection, this, hitNum);
-                Debug.Log($"{charCtr.name}: Character Hit");
+                charCtr.OnHit(shooter, moveDirection, this, hitNum);
+                //Debug.Log($"{charCtr.name}: Character Hit");
             }
             // 일반 오브젝트인 경우
             else
             {
                 //HandleNormalCollision(hit, moveDirection);
-                Debug.Log($"{hit.collider.name}: Object Hit");
+                //Debug.Log($"{hit.collider.name}: Object Hit");
             }
 
             isHit = false;
             HitBullet();
         }
+
+        return isCheck;
     }
 
     private void DelayDestroy()

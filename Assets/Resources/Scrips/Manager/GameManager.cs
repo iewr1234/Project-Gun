@@ -2185,6 +2185,7 @@ public class GameManager : MonoBehaviour
             {
                 targetInfo.shooter.AddCommand(CommandType.BackCover);
             }
+            timer = 0f;
             scheduleState = ScheduleState.End;
         }
 
@@ -2193,20 +2194,36 @@ public class GameManager : MonoBehaviour
             timer += Time.deltaTime;
             if (timer > scheduleWaitTime)
             {
-                var target = scheduleList[0].targetInfo.target;
-                scheduleList.RemoveAt(0);
-                scheduleState = scheduleList.Count > 0 ? ScheduleState.Check : ScheduleState.None;
-                if (scheduleList.Count > 0)
+                var curSchedule = scheduleList[0];
+                if (scheduleList.Count > 1)
                 {
-                    scheduleState = ScheduleState.Check;
+                    var nextSchedule = scheduleList[1];
+                    if (curSchedule.type == nextSchedule.type)
+                    {
+                        scheduleList.RemoveAt(0);
+                        scheduleState = ScheduleState.Check;
+                    }
+                    else
+                    {
+                        var shooter = curSchedule.targetInfo.shooter;
+                        if (shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("None"))
+                        {
+                            scheduleList.RemoveAt(0);
+                            scheduleState = ScheduleState.Check;
+                        }
+                    }
                 }
                 else
                 {
-                    target.AddCommand(CommandType.Targeting, false, target.transform);
-                    scheduleState = ScheduleState.None;
-                    TurnEnd();
+                    var shooter = curSchedule.targetInfo.shooter;
+                    if (shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("None"))
+                    {
+                        curSchedule.targetInfo.target.AddCommand(CommandType.Targeting, false, curSchedule.targetInfo.target.transform);
+                        scheduleList.RemoveAt(0);
+                        scheduleState = ScheduleState.None;
+                        TurnEnd();
+                    }
                 }
-                timer = 0f;
             }
         }
     }
