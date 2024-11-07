@@ -252,7 +252,7 @@ public class CharacterController : MonoBehaviour
     private bool canTargeting;
     private bool targetingMove;
     private Vector3 targetingPos;
-    private readonly float targetingMoveSpeed_main = 1f;
+    private readonly float targetingMoveSpeed_main = 1.5f;
     private readonly float targetingMoveSpeed_sub = 1.5f;
 
     private bool reloading;
@@ -1414,10 +1414,7 @@ public class CharacterController : MonoBehaviour
                     commandList.Remove(command);
                     covering = false;
 
-                    if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy)
-                    {
-                        SetTurnEnd(true);
-                    }
+                    if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy) SetTurnEnd(true);
                 }
             }
         }
@@ -1451,10 +1448,7 @@ public class CharacterController : MonoBehaviour
             chestRig.weight = 1f;
             commandList.Remove(command);
 
-            if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy)
-            {
-                SetTurnEnd(true);
-            }
+            if (command.type == CommandType.Aim && ownerType == CharacterOwner.Enemy) SetTurnEnd(true);
         }
 
         void AdjustWeapon()
@@ -1803,14 +1797,13 @@ public class CharacterController : MonoBehaviour
 
     public void SetTurnEnd(bool turnEnd)
     {
+        if (this.turnEnd == turnEnd) return;
+
         this.turnEnd = turnEnd;
         switch (turnEnd)
         {
             case true:
-                if (ownerType == CharacterOwner.Enemy)
-                {
-                    gameMgr.SetPositionOfAI(ownerType);
-                }
+                if (ownerType == CharacterOwner.Enemy) gameMgr.SetPositionOfAI(ownerType);
                 break;
             case false:
                 var newStamina = 30 + (action * 10);

@@ -97,8 +97,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CoverState targetState;
     private float timer;
 
-    //private readonly float waitSignalTime = 0.6f;
-    private readonly float scheduleWaitTime = 0.5f;
+    private readonly float scheduleWaitTime = 1f;
 
     [Header("[FieldNode]")]
     [SerializeField] private FieldNode targetNode;
@@ -1757,6 +1756,7 @@ public class GameManager : MonoBehaviour
                     if (enemy.currentWeapon.loadedNum == 0)
                     {
                         EnemyAI_Reload(enemy);
+                        enemy.SetTurnEnd(true);
                     }
                     EnemyAI_Move(enemy);
                 }
@@ -2118,7 +2118,26 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            scheduleList = scheduleList.OrderByDescending(x => (int)x.type).ToList();
+            var player = playerList[0];
+            CoverState playerState;
+            if (player.currentCover != null)
+            {
+                if (player.currentCover.coverType == CoverType.Full)
+                {
+                    playerState = player.animator.GetBool("isRight") ? CoverState.FullRight : CoverState.FullLeft;
+                }
+                else
+                {
+                    playerState = CoverState.Half;
+                }
+            }
+            else
+            {
+                playerState = CoverState.None;
+            }
+            scheduleList = scheduleList.OrderByDescending(x => x.type == playerState)
+                          .ThenByDescending(x => (int)x.type)
+                          .ToList();
             scheduleState = ScheduleState.Check;
             targetState = CoverState.None;
             scheduleSignal = 0;
@@ -2151,6 +2170,15 @@ public class GameManager : MonoBehaviour
         void Check()
         {
             var schedule = scheduleList[0];
+            var shooter = schedule.targetInfo.shooter;
+            if (scheduleList.Count > 1 && shooter.commandList.Find(x => x.type == CommandType.Reload) != null)
+            {
+                scheduleList.RemoveAt(0);
+                scheduleList.Add(schedule);
+                return;
+            }
+            if (!shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("Aim")) return;
+
             if (targetState != schedule.type)
             {
                 var targetInfo = schedule.targetInfo;
