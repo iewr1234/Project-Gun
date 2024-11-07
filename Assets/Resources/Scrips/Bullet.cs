@@ -64,7 +64,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, Vector3 aimPos, bool _isHit, bool _isMiss, int _hitNum)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit, bool _isMiss, int _hitNum)
     {
         shooter = _shooter;
         target = _target;

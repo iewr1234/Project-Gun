@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditorInternal.ReorderableList;
 
 [System.Serializable]
 public class ShootingModeInfo
@@ -84,9 +83,9 @@ public class Weapon : MonoBehaviour
     private readonly Vector3 weaponPos_main_sniperRifle_aim = new Vector3(0.09f, 0.015f, -0.052f);
     private readonly Vector3 weaponRot_main_sniperRifle_aim = new Vector3(13.4f, 96.19f, -95f);
 
-
-    private readonly float shootDisparity_bullet = 0.15f;
+    private readonly float shootDisparity_bullet = 0.05f;
     private readonly float shootDisparity_pellet = 0.3f;
+    private readonly float shootDisparity_spread = 0.15f;
 
     public void SetComponets(CharacterController _charCtr, EquipSlot _equipSlot, WeaponDataInfo _weaponData)
     {
@@ -308,7 +307,6 @@ public class Weapon : MonoBehaviour
     {
         var hitInfo = hitInfos[0];
         int count;
-        float hitTime;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
@@ -325,7 +323,7 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, SetBulletDirection(bullet), i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
@@ -343,9 +341,8 @@ public class Weapon : MonoBehaviour
                         Debug.LogError("There are no bullet in the bulletPool");
                         return;
                     }
-
-
-                    bullet.SetBullet(charCtr, target, meshType, SetBulletDirection(bullet), i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    SetBulletDirection(bullet);
+                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
                 }
                 hitInfos.RemoveAt(0);
                 loadedNum--;
@@ -367,17 +364,24 @@ public class Weapon : MonoBehaviour
             charCtr.SetAbility();
         }
 
-        Vector3 SetBulletDirection(Bullet bullet)
+        void SetBulletDirection(Bullet bullet)
         {
             bullet.gameObject.SetActive(true);
             bullet.transform.position = bulletTf.position;
-            var disparity = count == 1 ? shootDisparity_bullet : shootDisparity_pellet;
+            float disparity;
+            if (count == 1)
+            {
+                disparity = shootDisparity_bullet;
+                if (!hitInfo.isHit) disparity += shootDisparity_spread;
+            }
+            else
+            {
+                disparity = shootDisparity_pellet;
+            }
             var aimPos = charCtr.aimPoint.position;
-            aimPos.y = bulletTf.position.y;
+            aimPos.y += 0.3f;
             aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
             bullet.transform.LookAt(aimPos);
-
-            return aimPos;
         }
     }
 
@@ -522,11 +526,12 @@ public class Weapon : MonoBehaviour
                 weapon.hitInfos.Add(hitInfo);
                 //Debug.Log($"{weapon.charCtr.name}: {i + 1}번째 탄: {hitText}");
             }
-            Debug.Log($"{weapon.charCtr.name}: 발사수 = {weapon.hitInfos.Count}, 명중수 = {weapon.hitInfos.FindAll(x => x.isHit).Count}");
+            var hitCount = weapon.hitInfos.FindAll(x => x.isHit).Count;
+            Debug.Log($"{weapon.charCtr.name}: 발사수 = {weapon.hitInfos.Count}, 명중수 = {hitCount}");
             var useStamina = weapon.charCtr.stamina - curStamina;
             weapon.charCtr.SetStamina(useStamina);
 
-            return weapon.hitInfos.FindAll(x => x.isHit) == null;
+            return hitCount == 0;
         }
 
         private void ResultHitAccuracys(int index)
