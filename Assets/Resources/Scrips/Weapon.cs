@@ -432,6 +432,7 @@ public class Weapon : MonoBehaviour
         private Weapon weapon;
 
         [Tooltip("명중값")] public int hitAccuracy;
+        [Tooltip("확산명중치")] private int spreadAccuracy;
         [Tooltip("팰릿명중값 리스트")] public List<int> pelletAccuracys;
         [Tooltip("무작위값")] public int hitValue;
         [Tooltip("명중여부")] public bool isHit;
@@ -449,7 +450,6 @@ public class Weapon : MonoBehaviour
         public HitAccuracy(Weapon _weapon)
         {
             weapon = _weapon;
-            //hitAccuracys = new List<int>();
             pelletAccuracys = new List<int>();
         }
 
@@ -458,7 +458,6 @@ public class Weapon : MonoBehaviour
             weapon = _weapon;
             pelletNum = _eWeapon.pelletNum;
             spread = _eWeapon.spread;
-            //hitAccuracys = new List<int>();
             pelletAccuracys = new List<int>();
         }
 
@@ -466,7 +465,7 @@ public class Weapon : MonoBehaviour
         {
             weapon.hitInfos.Clear();
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
-            hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance);
+            hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
             curStamina = weapon.charCtr.stamina;
 
             int loadedBulletNum = 0;
@@ -482,8 +481,7 @@ public class Weapon : MonoBehaviour
                 var hitInfo = new HitInfo()
                 {
                     indexName = $"거리 = {distance}, 충격량 = {impact}, 반동 = {rebound}, 장약 = {propellant}, 명중값 = {hitAccuracyText}",
-                    //hitAccuracys = new List<int>(hitAccuracys),
-                    hitAccuracy = hitAccuracy,
+                    hitAccuracy = hitAccuracy - spreadAccuracy,
                     pelletAccuracys = new List<int>(pelletAccuracys),
                     impact = impact,
                 };
@@ -496,7 +494,7 @@ public class Weapon : MonoBehaviour
             weapon.hitInfos.Clear();
             hitValue = Random.Range(1, 101);
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
-            hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance);
+            hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
             isHit = hitAccuracy <= hitValue;
             curStamina = weapon.charCtr.stamina;
 
@@ -516,15 +514,13 @@ public class Weapon : MonoBehaviour
                 var hitInfo = new HitInfo()
                 {
                     indexName = $"무작위값 = {hitValue}, 명중값 = {hitAccuracyText}, {hitText}",
-                    //hitAccuracys = new List<int>(hitAccuracys),
-                    hitAccuracy = hitAccuracy,
+                    hitAccuracy = hitAccuracy - spreadAccuracy,
                     pelletAccuracys = new List<int>(pelletAccuracys),
                     isHit = isHit,
                     hitNum = hitNum,
                     impact = impact,
                 };
                 weapon.hitInfos.Add(hitInfo);
-                //Debug.Log($"{weapon.charCtr.name}: {i + 1}번째 탄: {hitText}");
             }
             var hitCount = weapon.hitInfos.FindAll(x => x.isHit).Count;
             Debug.Log($"{weapon.charCtr.name}: 발사수 = {weapon.hitInfos.Count}, 명중수 = {hitCount}");
@@ -536,10 +532,10 @@ public class Weapon : MonoBehaviour
 
         private void ResultHitAccuracys(int index)
         {
-            //hitAccuracys.Clear();
             pelletAccuracys.Clear();
             SetUseValue(index);
             CheckStabilityStamina(index);
+            GetSpreadAccuracy();
             ResultHitNum();
 
             void SetUseValue(int index)
@@ -597,8 +593,13 @@ public class Weapon : MonoBehaviour
 
             void CheckStabilityStamina(int index)
             {
+                // 충격량
                 impact = Mathf.CeilToInt(propellant * 0.1f * 3 / (1 + stability * 0.02f));
+
+                // 현재 스테미너 - 충격량
                 curStamina -= impact;
+
+                // 스테미너 체크
                 bool burnout;
                 if (curStamina < 0)
                 {
@@ -611,19 +612,16 @@ public class Weapon : MonoBehaviour
                 }
                 if (index == 0 && !burnout) return;
 
+                // 추가 명중치
+                var addAccuracy = Mathf.CeilToInt(distance * 0.01f * (rebound * propellant * 0.01f));
+                if (addAccuracy < 1) addAccuracy = 1;
+
                 if (index == 0)
                 {
-                    var addAccuracy = Mathf.CeilToInt(distance * 0.01f * (rebound * propellant * 0.01f));
-                    if (addAccuracy < 1) addAccuracy = 1;
-
                     hitAccuracy += addAccuracy * 2;
                 }
                 else
                 {
-                    //추가 명중치
-                    var addAccuracy = Mathf.CeilToInt(distance * 0.01f * (rebound * propellant * 0.01f));
-                    if (addAccuracy < 1) addAccuracy = 1;
-
                     if (!burnout)
                     {
                         hitAccuracy += addAccuracy;
@@ -635,34 +633,44 @@ public class Weapon : MonoBehaviour
                 }
             }
 
+            void GetSpreadAccuracy()
+            {
+                if (pelletNum == 0)
+                {
+                    spreadAccuracy = 0;
+                }
+                else
+                {
+                    // 확산 명중 보정
+                    spreadAccuracy = Mathf.FloorToInt(distance * 0.01f * spread) * 2;
+                    if (spreadAccuracy > pelletNum * 2) spreadAccuracy = pelletNum * 2;
+                }
+            }
+
             void ResultHitNum()
             {
-                isHit = hitAccuracy <= hitValue;
+                isHit = hitAccuracy - spreadAccuracy <= hitValue;
                 hitNum = isHit ? 1 : 0;
-                //hitAccuracys.Add(hitAccuracy);
                 if (pelletNum == 0) return;
+
+                var tempAccuracy = hitAccuracy - spreadAccuracy;
+                var pelletSpread = Mathf.FloorToInt(distance * 0.01f * spread);
+                //if (pelletSpread < 1) pelletSpread = 1;
 
                 if (isHit)
                 {
-                    var tempAccuracy = hitAccuracy;
                     for (int i = 1; i < pelletNum; i++)
                     {
-                        var pelletSpread = Mathf.FloorToInt(distance * 0.01f * spread);
-                        if (pelletSpread < 1) pelletSpread = 1;
-
                         tempAccuracy += pelletSpread;
                         if (tempAccuracy <= hitValue) hitNum++;
+
                         pelletAccuracys.Add(tempAccuracy);
                     }
                 }
                 else
                 {
-                    var tempAccuracy = hitAccuracy;
                     for (int i = 1; i < pelletNum; i++)
                     {
-                        var pelletSpread = Mathf.FloorToInt(distance * 0.01f * spread);
-                        if (pelletSpread < 1) pelletSpread = 1;
-
                         tempAccuracy += pelletSpread;
                         pelletAccuracys.Add(tempAccuracy);
                     }

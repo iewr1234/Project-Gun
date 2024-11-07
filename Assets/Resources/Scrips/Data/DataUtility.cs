@@ -167,20 +167,10 @@ public static class DataUtility
     /// <param name="charCtr"></param>
     /// <param name="targetInfo"></param>
     /// <returns></returns>
-    public static int GetHitAccuracy(TargetInfo targetInfo, float distance)
+    public static int GetHitAccuracy(TargetInfo targetInfo, float distance, int shootNum)
     {
         var shooter = targetInfo.shooter;
         var target = targetInfo.target;
-        //var pos = targetInfo.shooterNode.transform.position;
-        //var targetPos = targetInfo.targetNode.transform.position;
-        //var dist = GetDistance(pos, targetPos);
-        //var weapon = shooter.currentWeapon;
-        //var reboundCheck = 0;
-        //if (shooter.stamina == 0)
-        //{
-        //    reboundCheck++;
-        //}
-
         int sModeValue;
         switch (targetInfo.shooter.sMode)
         {
@@ -197,9 +187,16 @@ public static class DataUtility
                 sModeValue = 0;
                 break;
         }
+
+        // 사격자 명중률 계산
         var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f))
                        * (1 - GetCoverBonus() * 0.01f - 30 * ((Mathf.Pow(distance, 2) - 40) / (Mathf.Pow(distance, 2) + 80)) * 0.01f);
         var hitAccuracy = Mathf.FloorToInt(shooterHit);
+
+        // 연사 명중 보정
+        hitAccuracy += Mathf.RoundToInt(30 * (shootNum - 1) / (shootNum - 1 + 25));
+
+        // 최소, 최대값 보정
         if (hitAccuracy > 100)
         {
             hitAccuracy = 100;
@@ -210,22 +207,6 @@ public static class DataUtility
         }
 
         return hitAccuracy;
-
-        ////var value = Random.Range(0, 100);
-        //var shootNum = GetShootNum(weapon.weaponData.RPM, shooter.fiarRate);
-        //var extraAccuracy = shooter.aiming * ((0.1f * shooter.sightRate) / shootNum);
-        //var shooterHit = (shooter.aiming + extraAccuracy) - (shooter.MOA * dist) + (15 / (dist / 3)) - (shooter.Rebound * reboundCheck);
-        ////if (shooterHit < 0f)
-        ////{
-        ////    shooterHit = 0f;
-        ////}
-        //var coverBonus = GetCoverBonus();
-        //var reactionBonus = GetReactionBonus();
-        //var targetEvasion = coverBonus + (targetInfo.target.reaction * reactionBonus);
-
-        //var hitAccuracy = Mathf.Floor(shooterHit - targetEvasion);
-
-        //return Mathf.Floor(hitAccuracy * 100f) / 100f;
 
         int GetCoverBonus()
         {
@@ -238,18 +219,6 @@ public static class DataUtility
                 return targetInfo.targetCover.coverType == CoverType.Full ? 40 : 20;
             }
         }
-
-        //float GetReactionBonus()
-        //{
-        //    if (targetInfo.targetCover == null)
-        //    {
-        //        return 0.1f;
-        //    }
-        //    else
-        //    {
-        //        return targetInfo.targetCover.coverType == CoverType.Full ? 0.4f : 0.2f;
-        //    }
-        //}
     }
 
     /// <summary>
