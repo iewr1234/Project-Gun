@@ -58,7 +58,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         partsData = null;
 
         rect = GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
         frameImage = transform.Find("Frame").GetComponent<Image>();
+        frameImage.enabled = false;
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
 
@@ -108,7 +110,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         partsData = null;
 
         rect = GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
         frameImage = transform.Find("Frame").GetComponent<Image>();
+        frameImage.enabled = false;
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
 

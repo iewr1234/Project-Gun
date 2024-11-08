@@ -6,4 +6,5 @@ public class BaseStorage : MonoBehaviour
 {
     public string storageName;
     public Vector2Int slotSize;
+    public List<string> createItmes;
 }

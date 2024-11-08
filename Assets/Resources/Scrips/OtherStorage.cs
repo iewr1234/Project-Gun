@@ -149,6 +149,11 @@ public class OtherStorage : MonoBehaviour
         InputDropItemInStorage(floor, item);
     }
 
+    public void PutInItemOfStorage(StorageInfo storage, ItemHandler item)
+    {
+        InputDropItemInStorage(storage, item);
+    }
+
     public void DropItmeOnTheReword(ItemHandler item)
     {
         var reword = storageInfos[^1];

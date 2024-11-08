@@ -995,6 +995,9 @@ public class MapEditor : MonoBehaviour
                                     slotSize = node.baseStorage.slotSize,
                                 };
                                 baseStorages.Add(baseStorage);
+
+                                if (node.baseStorage.createItmes.Count > 0) 
+                                    gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.createItmes);
                             }
                         }
                         break;

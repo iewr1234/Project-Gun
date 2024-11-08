@@ -1952,6 +1952,19 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
+    public void CreateStorageItems(StorageInfo storage, List<string> itemList)
+    {
+        for (int i = 0; i < itemList.Count; i++)
+        {
+            var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemList[i]);
+            if (itemData == null) continue;
+
+            var item = items.Find(x => !x.gameObject.activeSelf);
+            item.SetItemInfo(itemData, 1, itemData.addOption);
+            otherStorage.PutInItemOfStorage(storage, item);
+        }
+    }
+
     public void SetLootStorage()
     {
         otherStorage.storageInfos.Clear();
