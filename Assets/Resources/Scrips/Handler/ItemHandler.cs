@@ -411,10 +411,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (weaponData.isMag)
         {
             var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.prefabName);
-            if (smaple)
-            {
-                smaple.SetActive(true);
-            }
+            if (smaple != null) smaple.SetActive(true);
         }
 
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)

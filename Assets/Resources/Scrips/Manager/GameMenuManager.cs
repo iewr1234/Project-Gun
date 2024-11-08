@@ -1374,12 +1374,9 @@ public class GameMenuManager : MonoBehaviour
                         }
                         if (gameMgr != null && gameMgr.playerList.Count > 0)
                         {
-                            var playerCtr = gameMgr.playerList[0];
-                            var weapon = playerCtr.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
-                            if (weapon != null)
-                            {
-                                weapon.SetParts(putItem.partsData.partsName, true);
-                            }
+                            var player = gameMgr.playerList[0];
+                            var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
+                            if (weapon != null) weapon.SetParts();
                         }
                     }
                     break;
@@ -1506,6 +1503,8 @@ public class GameMenuManager : MonoBehaviour
                     {
                         var player = gameMgr.playerList[0];
                         player.SetAbility();
+                        var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
+                        if (weapon != null) weapon.SetParts();
                     }
                     break;
                 default:
@@ -1567,6 +1566,8 @@ public class GameMenuManager : MonoBehaviour
         {
             var player = gameMgr.playerList[0];
             player.SetAbility();
+            var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
+            if (weapon != null) weapon.SetParts();
         }
 
         void WeaponType()
@@ -1754,16 +1755,17 @@ public class GameMenuManager : MonoBehaviour
                 item.equipSlot.popUp.item.SetLoadedBulletCount();
                 break;
             case ItemType.Magazine:
-                //item.SetLoadedBulletCount();
+                onItem = item.equipSlot.popUp.item;
+                onItem.weaponData.equipMag = null;
+                onItem.weaponData.isMag = false;
+                onItem.SetLoadedBulletCount();
                 if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
                     var player = gameMgr.playerList[0];
                     player.SetAbility();
+                    var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
+                    if (weapon != null) weapon.SetParts();
                 }
-                item.equipSlot.popUp.item.weaponData.equipMag = null;
-                item.equipSlot.popUp.item.weaponData.isMag = false;
-                item.equipSlot.popUp.item.SetLoadedBulletCount();
-                //item.equipSlot.SetLoadedBulletCount();
                 break;
             default:
                 if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
@@ -1772,12 +1774,10 @@ public class GameMenuManager : MonoBehaviour
                     item.equipSlot.popUp.item.weaponData.equipPartsList.Remove(find);
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
-                        var playerCtr = gameMgr.playerList[0];
-                        var weapon = playerCtr.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
-                        if (weapon != null)
-                        {
-                            weapon.SetParts(item.partsData.partsName, true);
-                        }
+                        var player = gameMgr.playerList[0];
+                        player.SetAbility();
+                        var weapon = player.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
+                        if (weapon != null) weapon.SetParts();
                     }
                 }
                 break;

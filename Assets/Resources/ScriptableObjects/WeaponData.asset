@@ -39,7 +39,7 @@ MonoBehaviour:
     actionCost: 4
     MOA: 3
     stability: 100
-    rebound: -150
+    rebound: 150
     propellant: 80
     chamberBullet:
       indexName: 
@@ -80,6 +80,8 @@ MonoBehaviour:
     useRail: 
     equipMagID: M0001
     equipPartsIDs: []
+    defaultPos: {x: 0.1, y: 0.05, z: 0.015}
+    defaultRot: {x: -5, y: 95.5, z: -95}
   - indexName: 'W0002: Rifle_2'
     ID: W0002
     prefabName: Rifle_2
@@ -147,6 +149,8 @@ MonoBehaviour:
     useRail: 
     equipMagID: M0002
     equipPartsIDs: []
+    defaultPos: {x: 0.1, y: 0.05, z: 0.015}
+    defaultRot: {x: -5, y: 95.5, z: -95}
   - indexName: 'W0003: Pistol_1'
     ID: W0003
     prefabName: Pistol_1
@@ -214,6 +218,8 @@ MonoBehaviour:
     useRail: 
     equipMagID: M0003
     equipPartsIDs: []
+    defaultPos: {x: 0.082, y: 0.034, z: 0.037}
+    defaultRot: {x: -8.375, y: 89, z: -90.246}
   - indexName: 'W0004: Shotgun_1'
     ID: W0004
     prefabName: Shotgun_1
@@ -281,6 +287,8 @@ MonoBehaviour:
     useRail: 
     equipMagID: None
     equipPartsIDs: []
+    defaultPos: {x: 0.1, y: 0.05, z: 0.015}
+    defaultRot: {x: -5, y: 95.5, z: -95}
   - indexName: 'W0005: Revolver_1'
     ID: W0005
     prefabName: Revolver_1
@@ -348,6 +356,8 @@ MonoBehaviour:
     useRail: 
     equipMagID: None
     equipPartsIDs: []
+    defaultPos: {x: 0.082, y: 0.034, z: 0.037}
+    defaultRot: {x: -8.375, y: 89, z: -90.246}
   - indexName: 'W0006: SniperRifle_1'
     ID: W0006
     prefabName: SniperRifle_1
@@ -415,3 +425,74 @@ MonoBehaviour:
     useRail: 
     equipMagID: None
     equipPartsIDs: []
+    defaultPos: {x: 0.09, y: 0.015, z: -0.052}
+    defaultRot: {x: -11.1, y: 91.31, z: -95}
+  - indexName: 'W0007: AssaultRifle'
+    ID: W0007
+    prefabName: AR_1
+    weaponName: AssaultRifle
+    model: 1
+    caliber: 5.56
+    weight: 3
+    isMain: 1
+    weaponType: 3
+    magType: 1
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
+    RPM: 650
+    range: 20
+    watchAngle: 30
+    actionCost: 4
+    MOA: 3
+    stability: 100
+    rebound: 150
+    propellant: 80
+    chamberBullet:
+      indexName: 
+      ID: 
+      bulletName: 
+      meshType: 0
+      level: 0
+      caliber: 0
+      pelletNum: 0
+      spread: 0
+      weight: 0
+      MOA: 0
+      stability: 0
+      rebound: 0
+      propellant: 0
+      damage: 0
+      penetrate: 0
+      armorBreak: 0
+      critical: 0
+    isChamber: 0
+    equipMag:
+      indexName: 
+      ID: 
+      loadedBulletID: 
+      prefabName: 
+      magName: 
+      compatModel: 
+      compatCaliber: 0
+      weight: 0
+      magSize: 0
+      loadedBullets: []
+    isMag: 0
+    equipPartsList: []
+    useMagazine: 01000000
+    useMuzzle: 
+    useSight: 
+    useUnderRail: 
+    useRail: 
+    equipMagID: None
+    equipPartsIDs: []
+    defaultPos: {x: 0.095, y: 0.043, z: -0.03}
+    defaultRot: {x: -5, y: 97, z: -100}

@@ -70,6 +70,9 @@ public class WeaponDataInfo
     [HideInInspector][Tooltip("¿Â¬¯≈∫√¢ID")] public string equipMagID;
     [HideInInspector][Tooltip("¿Â¬¯∫Œ«∞IDs")] public List<string> equipPartsIDs;
 
+    public Vector3 defaultPos;
+    public Vector3 defaultRot;
+
     public WeaponDataInfo CopyData(DataManager dataMgr)
     {
         var weaponData = new WeaponDataInfo()
@@ -106,8 +109,8 @@ public class WeaponDataInfo
             equipMagID = equipMagID,
             equipPartsIDs = new List<string>(equipPartsIDs),
 
-            //chamberBullet = chamberBullet,
-            //isChamber = isChamber,
+            defaultPos = defaultPos,
+            defaultRot = defaultRot,
         };
 
         if (isMag)

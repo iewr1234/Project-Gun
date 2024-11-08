@@ -69,17 +69,10 @@ public class Weapon : MonoBehaviour
     private Vector3 defaultRot;
     private bool isMove;
 
-    private readonly Vector3 weaponPos_sub = new Vector3(0.082f, 0.034f, -0.037f);
-    private readonly Vector3 weaponRot_sub = new Vector3(-8.375f, 89f, -90.246f);
-
     private readonly Vector3 weaponPos_main_rightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
     private readonly Vector3 weaponPos_main_leftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
     private readonly Vector3 weaponRot_main_holster = new Vector3(0f, 90f, 0f);
-    private readonly Vector3 weaponPos_main = new Vector3(0.1f, 0.05f, 0.015f);
-    private readonly Vector3 weaponRot_main = new Vector3(-5f, 95.5f, -95f);
 
-    private readonly Vector3 weaponPos_main_sniperRifle = new Vector3(0.09f, 0.015f, -0.052f);
-    private readonly Vector3 weaponRot_main_sniperRifle = new Vector3(-11.1f, 91.31f, -95f);
     private readonly Vector3 weaponPos_main_sniperRifle_aim = new Vector3(0.09f, 0.015f, -0.052f);
     private readonly Vector3 weaponRot_main_sniperRifle_aim = new Vector3(13.4f, 96.19f, -95f);
 
@@ -167,6 +160,8 @@ public class Weapon : MonoBehaviour
 
     private void SetWeaponPositionAndRotation()
     {
+        defaultPos = weaponData.defaultPos;
+        defaultRot = weaponData.defaultRot;
         if (weaponData.isMain)
         {
             if (charCtr.weapons.Count > 1)
@@ -180,24 +175,22 @@ public class Weapon : MonoBehaviour
                 holsterRot = weaponRot_main_holster;
             }
 
-            switch (weaponData.weaponType)
-            {
-                case WeaponType.SniperRifle:
-                    defaultPos = weaponPos_main_sniperRifle;
-                    defaultRot = weaponRot_main_sniperRifle;
-                    break;
-                default:
-                    defaultPos = weaponPos_main;
-                    defaultRot = weaponRot_main;
-                    break;
-            }
+            //switch (weaponData.weaponType)
+            //{
+            //    case WeaponType.SniperRifle:
+            //        defaultPos = weaponPos_main_sniperRifle;
+            //        defaultRot = weaponRot_main_sniperRifle;
+            //        break;
+            //    default:
+            //        defaultPos = weaponPos_main;
+            //        defaultRot = weaponRot_main;
+            //        break;
+            //}
         }
         else
         {
             holsterPos = Vector3.zero;
             holsterRot = Vector3.zero;
-            defaultPos = weaponPos_sub;
-            defaultRot = weaponRot_sub;
         }
     }
 
@@ -209,10 +202,10 @@ public class Weapon : MonoBehaviour
         switch (weaponData.weaponType)
         {
             case WeaponType.SniperRifle:
-                defaultPos = weaponPos_main_sniperRifle;
-                defaultRot = weaponRot_main_sniperRifle;
-                transform.localPosition = weaponPos_main_sniperRifle;
-                transform.localRotation = Quaternion.Euler(weaponRot_main_sniperRifle);
+                defaultPos = weaponData.defaultPos;
+                defaultRot = weaponData.defaultRot;
+                transform.localPosition = defaultPos;
+                transform.localRotation = Quaternion.Euler(defaultRot);
                 Debug.Log($"{charCtr.name}: Reset SniperRifle");
                 break;
             default:
@@ -227,11 +220,11 @@ public class Weapon : MonoBehaviour
         equipSlot = null;
         weaponData = null;
 
-        var activeParts = partsObjects.FindAll(x => x.gameObject.activeSelf);
+        var activeParts = partsObjects.FindAll(x => x.activeSelf);
         for (int i = 0; i < activeParts.Count; i++)
         {
             var parts = activeParts[i];
-            parts.gameObject.SetActive(false);
+            parts.SetActive(false);
         }
         gameObject.SetActive(false);
     }
@@ -254,13 +247,34 @@ public class Weapon : MonoBehaviour
         charCtr.SetAbility();
     }
 
+    public void SetParts()
+    {
+        var activeParts = partsObjects.FindAll(x => x.activeSelf);
+        for (int i = 0; i < activeParts.Count; i++)
+        {
+            var activePart = activeParts[i];
+            activePart.SetActive(false);
+        }
+
+        if (weaponData.isMag)
+        {
+            var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.magName);
+            if (magParts != null) magParts.SetActive(true);
+        }
+        for (int i = 0; i < weaponData.equipPartsList.Count; i++)
+        {
+            var equipParts = partsObjects.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
+            if (equipParts != null) equipParts.SetActive(true);
+        }
+    }
+
     public void SetParts(string partsName, bool value)
     {
         var partsList = partsObjects.FindAll(x => x.name == partsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
-            parts.gameObject.SetActive(value);
+            parts.SetActive(value);
         }
     }
 
@@ -270,7 +284,7 @@ public class Weapon : MonoBehaviour
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
-            parts.gameObject.SetActive(value);
+            parts.SetActive(value);
         }
     }
 
@@ -414,8 +428,8 @@ public class Weapon : MonoBehaviour
                 {
                     defaultPos = weaponPos_main_sniperRifle_aim;
                     defaultRot = weaponRot_main_sniperRifle_aim;
-                    transform.localPosition = weaponPos_main_sniperRifle_aim;
-                    transform.localRotation = Quaternion.Euler(weaponRot_main_sniperRifle_aim);
+                    transform.localPosition = defaultPos;
+                    transform.localRotation = Quaternion.Euler(defaultRot);
                 }
                 else
                 {
@@ -464,6 +478,8 @@ public class Weapon : MonoBehaviour
         public void CheckHitBullet_Aim(TargetInfo targetInfo, int shootNum)
         {
             weapon.hitInfos.Clear();
+
+            // 사격자 명중률 계산
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
             hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
             curStamina = weapon.charCtr.stamina;
@@ -492,10 +508,13 @@ public class Weapon : MonoBehaviour
         public bool CheckHitBullet_Shoot(TargetInfo targetInfo, int shootNum)
         {
             weapon.hitInfos.Clear();
+
+            // 랜덤값
             hitValue = Random.Range(1, 101);
+
+            // 사격자 명중률 계산
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
             hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
-            isHit = hitAccuracy <= hitValue;
             curStamina = weapon.charCtr.stamina;
 
             int loadedBulletNum = 0;
@@ -533,9 +552,17 @@ public class Weapon : MonoBehaviour
         private void ResultHitAccuracys(int index)
         {
             pelletAccuracys.Clear();
+
+            // 사격자 스텟을 가져옴
             SetUseValue(index);
+
+            // 스테미너 체크
             CheckStabilityStamina(index);
+
+            // 추가 확산 명중치
             GetSpreadAccuracy();
+
+            // 명중하는 총알수 체크
             ResultHitNum();
 
             void SetUseValue(int index)
@@ -622,14 +649,7 @@ public class Weapon : MonoBehaviour
                 }
                 else
                 {
-                    if (!burnout)
-                    {
-                        hitAccuracy += addAccuracy;
-                    }
-                    else
-                    {
-                        hitAccuracy += addAccuracy * 2;
-                    }
+                    hitAccuracy = !burnout ? hitAccuracy + addAccuracy : hitAccuracy + (addAccuracy * 2);
                 }
             }
 
@@ -655,7 +675,7 @@ public class Weapon : MonoBehaviour
 
                 var tempAccuracy = hitAccuracy - spreadAccuracy;
                 var pelletSpread = Mathf.FloorToInt(distance * 0.01f * spread);
-                //if (pelletSpread < 1) pelletSpread = 1;
+                if (pelletSpread < 1) pelletSpread = 1;
 
                 if (isHit)
                 {

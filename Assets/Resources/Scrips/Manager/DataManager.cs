@@ -742,7 +742,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AA";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AC";
     private enum WeaponVariable
     {
         ID,
@@ -772,6 +772,8 @@ public class DataManager : MonoBehaviour
         UseUnderBarrel,
         EquipMagID,
         EquipPartsIDs,
+        WeaponPosition,
+        WeaponRotation,
     }
 
     public void UpdateWeaponData()
@@ -822,7 +824,9 @@ public class DataManager : MonoBehaviour
                     useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
                     useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                     equipMagID = data[(int)WeaponVariable.EquipMagID],
-                    equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs])
+                    equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs]),
+                    defaultPos = ReadDataVector(data[(int)WeaponVariable.WeaponPosition]),
+                    defaultRot = ReadDataVector(data[(int)WeaponVariable.WeaponRotation]),
                 };
                 SetInternalMagazine(weaponInfo);
                 weaponData.weaponInfos.Add(weaponInfo);
@@ -889,6 +893,17 @@ public class DataManager : MonoBehaviour
                 }
 
                 return partsIDs;
+            }
+
+            Vector3 ReadDataVector(string vectorData)
+            {
+                var vectorInfos = vectorData.Split('/');
+                var x = float.Parse(vectorInfos[0]);
+                var y = float.Parse(vectorInfos[1]);
+                var z = float.Parse(vectorInfos[2]);
+                var vector = new Vector3(x, y, z);
+
+                return vector;
             }
 
             void SetInternalMagazine(WeaponDataInfo weaponInfo)

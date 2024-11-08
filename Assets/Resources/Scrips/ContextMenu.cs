@@ -148,6 +148,8 @@ public class ContextMenu : MonoBehaviour
         {
             var player = gameMenuMgr.gameMgr.playerList[0];
             player.SetAbility();
+            var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
+            if (weapon != null) weapon.SetParts();
         }
     }
 
