@@ -146,6 +146,7 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Transform subHolsterTf;
     [HideInInspector] public Transform rightHandTf;
     [HideInInspector] public Transform leftHandTf;
+    [HideInInspector] public Transform weaponPivot;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
@@ -294,6 +295,7 @@ public class CharacterController : MonoBehaviour
         subHolsterTf = transform.Find("Root/Hips/UpperLeg_R/Holster");
         rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+        weaponPivot = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/WeaponPivot");
 
         ownerType = _ownerType;
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
@@ -560,6 +562,7 @@ public class CharacterController : MonoBehaviour
         if (state == CharacterState.Dead) return;
 
         //DrawShootingPath();
+        DrawFireRay();
         DrawWeaponRange();
     }
 
@@ -611,6 +614,15 @@ public class CharacterController : MonoBehaviour
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
+    }
+
+    private void DrawFireRay()
+    {
+        if (currentWeapon == null) return;
+
+        var endRayPos = currentWeapon.bulletTf.position + (currentWeapon.bulletTf.forward * currentWeapon.weaponData.range);
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(currentWeapon.bulletTf.position, endRayPos);
     }
 
     private void Update()

@@ -45,7 +45,7 @@ public class Weapon : MonoBehaviour
 
     [Header("---Access Component---")]
     [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
-    private Transform bulletTf;
+    [HideInInspector] public Transform bulletTf;
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
