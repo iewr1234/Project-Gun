@@ -21,6 +21,15 @@ public enum MagazineType
     Cylinder,
 }
 
+public enum WeaponGripType
+{
+    None,
+    AssaultRifle,
+    SniperRifle,
+    Shotgun_Magazine,
+    Shotgun_IntMagazine,
+}
+
 [System.Serializable]
 public class WeaponDataInfo
 {
@@ -38,6 +47,7 @@ public class WeaponDataInfo
     [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType weaponType;
     [Tooltip("탄창분류")] public MagazineType magType;
+    [Tooltip("그립유형")] public WeaponGripType gripType;
     [Space(5f)]
 
     public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
@@ -70,9 +80,6 @@ public class WeaponDataInfo
     [HideInInspector][Tooltip("장착탄창ID")] public string equipMagID;
     [HideInInspector][Tooltip("장착부품IDs")] public List<string> equipPartsIDs;
 
-    public Vector3 defaultPos;
-    public Vector3 defaultRot;
-
     public WeaponDataInfo CopyData(DataManager dataMgr)
     {
         var weaponData = new WeaponDataInfo()
@@ -89,6 +96,7 @@ public class WeaponDataInfo
             isMain = isMain,
             weaponType = weaponType,
             magType = magType,
+            gripType = gripType,
 
             sModeInfos = new List<ShootingModeInfo>(sModeInfos),
             RPM = RPM,
@@ -108,9 +116,6 @@ public class WeaponDataInfo
             useRail = new List<WeaponPartsSize>(useRail),
             equipMagID = equipMagID,
             equipPartsIDs = new List<string>(equipPartsIDs),
-
-            defaultPos = defaultPos,
-            defaultRot = defaultRot,
         };
 
         if (isMag)

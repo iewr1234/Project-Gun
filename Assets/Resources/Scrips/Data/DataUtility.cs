@@ -11,6 +11,14 @@ public enum TargetDirection
     Right,
 }
 
+public struct WeaponGripInfo
+{
+    public Vector3 pivotPos;
+    public Quaternion pivotRot;
+    public Vector3 gripPos;
+    public Quaternion gripRot;
+}
+
 public static class DataUtility
 {
     public static readonly string mapDataPath = "/MapData/";
@@ -53,6 +61,12 @@ public static class DataUtility
     public static readonly int sModeMax = 2;
 
     public static readonly Vector2Int floorSlotSize = new Vector2Int(7, 17);
+
+    public static readonly Vector3 weaponPivot_pos_1 = new Vector3(0.113f, 0.033f, -0.05f);
+    public static readonly Quaternion weaponPivot_rot_1 = Quaternion.Euler(0f, 96.4f, -97f);
+    public static readonly Vector3 weaponGrip_pos_1 = new Vector3(0.402f, 0.139f, -0.083f);
+    public static readonly Vector3 weaponGrip_pos_2 = new Vector3(0.555f, 0.13f, -0.05f);
+    public static readonly Quaternion weaponGrip_rot_1 = Quaternion.Euler(0f, 96.4f, -270.33f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
@@ -289,5 +303,36 @@ public static class DataUtility
         }
 
         return scriptText;
+    }
+
+    public static WeaponGripInfo GetWeaponGripInfo(WeaponGripType type)
+    {
+        WeaponGripInfo gripInfo;
+        switch (type)
+        {
+            case WeaponGripType.AssaultRifle:
+                gripInfo = new WeaponGripInfo()
+                {
+                    pivotPos = weaponPivot_pos_1,
+                    pivotRot = weaponPivot_rot_1,
+                    gripPos = weaponGrip_pos_1,
+                    gripRot = weaponGrip_rot_1,
+                };
+                break;
+            case WeaponGripType.Shotgun_IntMagazine:
+                gripInfo = new WeaponGripInfo()
+                {
+                    pivotPos = weaponPivot_pos_1,
+                    pivotRot = weaponPivot_rot_1,
+                    gripPos = weaponGrip_pos_2,
+                    gripRot = weaponGrip_rot_1,
+                };
+                break;
+            default:
+                gripInfo = new WeaponGripInfo();
+                break;
+        }
+
+        return gripInfo;
     }
 }

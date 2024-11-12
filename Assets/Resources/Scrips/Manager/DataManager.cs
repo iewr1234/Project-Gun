@@ -742,7 +742,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AC";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AB";
     private enum WeaponVariable
     {
         ID,
@@ -754,6 +754,7 @@ public class DataManager : MonoBehaviour
         IsMain,
         WeaponType,
         MagazineType,
+        GripType,
         AimShot_point,
         AimShot_aim,
         AimShot_sight,
@@ -772,8 +773,6 @@ public class DataManager : MonoBehaviour
         UseUnderBarrel,
         EquipMagID,
         EquipPartsIDs,
-        WeaponPosition,
-        WeaponRotation,
     }
 
     public void UpdateWeaponData()
@@ -807,6 +806,7 @@ public class DataManager : MonoBehaviour
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     weaponType = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     magType = (MagazineType)int.Parse(data[(int)WeaponVariable.MagazineType]),
+                    gripType = (WeaponGripType)int.Parse(data[(int)WeaponVariable.GripType]),
                     sModeInfos = ReadShootingModesInfo(data[(int)WeaponVariable.AimShot_point],
                                                        data[(int)WeaponVariable.AimShot_aim],
                                                        data[(int)WeaponVariable.AimShot_sight]),
@@ -825,8 +825,6 @@ public class DataManager : MonoBehaviour
                     useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                     equipMagID = data[(int)WeaponVariable.EquipMagID],
                     equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs]),
-                    defaultPos = ReadDataVector(data[(int)WeaponVariable.WeaponPosition]),
-                    defaultRot = ReadDataVector(data[(int)WeaponVariable.WeaponRotation]),
                 };
                 SetInternalMagazine(weaponInfo);
                 weaponData.weaponInfos.Add(weaponInfo);

@@ -138,15 +138,18 @@ public class CharacterController : MonoBehaviour
     public Outlinable outlinable;
     [SerializeField] private Collider cd;
 
+    [SerializeField] private RigBuilder rigBdr;
     [SerializeField] private MultiAimConstraint headRig;
     [SerializeField] private MultiAimConstraint chestRig;
+    [SerializeField] private ChainIKConstraint chainIK;
+    private bool weightCheck;
     [HideInInspector] public Transform aimPoint;
 
-    [HideInInspector] public Transform mainHolsterTf;
-    [HideInInspector] public Transform subHolsterTf;
-    [HideInInspector] public Transform rightHandTf;
-    [HideInInspector] public Transform leftHandTf;
-    [HideInInspector] public Transform weaponPivot;
+    [HideInInspector] public Transform mainHolsterPivot;
+    [HideInInspector] public Transform subHolsterPivot;
+    [HideInInspector] public Transform rightHandPivot;
+    [HideInInspector] public Transform leftHandPivot;
+    [HideInInspector] public Transform gripPivot;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
@@ -271,195 +274,159 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="_gameMgr"></param>
     /// <param name="_ownerType"></param>
-    /// <param name="playerData"></param>
+    /// <param name="charData"></param>
     /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, PlayerDataInfo playerData, FieldNode _currentNode)
+    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, object charData, FieldNode _currentNode)
     {
         gameMgr = _gameMgr;
+
+        // Grenade Pool 설정
         var grenadePool = Instantiate(Resources.Load<GrenadeHandler>("Prefabs/Weapon/GrenadePool"));
         grenadePool.transform.SetParent(transform);
         grenadeHlr = grenadePool.GetComponent<GrenadeHandler>();
         grenadeHlr.SetComponents(this);
 
+        // Animator, Outlinable, Collider 설정
         animator = GetComponent<Animator>();
         outlinable = this.AddComponent<Outlinable>();
         cd = GetComponent<Collider>();
 
+        // Aim과 IK 설정
         aimPoint = transform.Find("AimPoint");
+        rigBdr = GetComponent<RigBuilder>();
         headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
         headRig.weight = 0f;
         chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
         chestRig.weight = 0f;
+        chainIK = transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
 
-        mainHolsterTf = transform.Find("Root/Hips/Spine_01/Spine_02");
-        subHolsterTf = transform.Find("Root/Hips/UpperLeg_R/Holster");
-        rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
-        leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
-        weaponPivot = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/WeaponPivot");
+        mainHolsterPivot = transform.Find("Root/Hips/Spine_01/Spine_02");
+        subHolsterPivot = transform.Find("Root/Hips/UpperLeg_R/Holster");
+
+        var weaponPivot = new GameObject("WeaponPivot");
+        var rightHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+        weaponPivot.transform.SetParent(rightHand, false);
+        //weaponPivot.transform.localPosition = new Vector3(0.113f, 0.033f, -0.05f);
+        //weaponPivot.transform.localRotation = Quaternion.Euler(0f, 96.4f, -97f);
+        rightHandPivot = weaponPivot.transform;
+
+        weaponPivot = new GameObject("WeaponPivot");
+        var leftHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+        weaponPivot.transform.SetParent(leftHand, false);
+        //weaponPivot.transform.localPosition = new Vector3(-0.113f, -0.033f, 0.05f);
+        //weaponPivot.transform.localRotation = Quaternion.Euler(0f, 96.4f, -97f);
+        leftHandPivot = weaponPivot.transform;
+
+        gripPivot = new GameObject("GripPivot").transform;
+        gripPivot.transform.SetParent(rightHand, false);
+        chainIK.data.target = gripPivot;
+        rigBdr.Build();
 
         ownerType = _ownerType;
+
+        // Mesh와 Ragdoll 설정
         meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
         sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
         ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
-        for (int i = 0; i < ragdollCds.Count; i++)
+        foreach (var cd in ragdollCds)
         {
-            var cd = ragdollCds[i];
             cd.gameObject.layer = LayerMask.NameToLayer("BodyParts");
             cd.isTrigger = true;
         }
         ragdollRbs = transform.Find("Root").GetComponentsInChildren<Rigidbody>().ToList();
-        for (int i = 0; i < ragdollRbs.Count; i++)
+        foreach (var rb in ragdollRbs)
         {
-            var rb = ragdollRbs[i];
             rb.isKinematic = true;
         }
 
+        // Weapon Pool 설정
         var _weaponPool = Instantiate(Resources.Load<GameObject>("Prefabs/Weapon/WeaponPool"));
         _weaponPool.transform.SetParent(transform);
         weaponPoolTf = _weaponPool.transform;
         weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
-        for (int i = 0; i < weaponPool.Count; i++)
+        foreach (var weapon in weaponPool)
         {
-            var weapon = weaponPool[i];
             weapon.gameObject.SetActive(false);
         }
 
+        // 이름 설정
         var name = transform.name.Split(' ', '(', ')')[0];
-        transform.name = $"{name}_{gameMgr.playerList.Count}";
-        gameMgr.playerList.Add(this);
+        if (_ownerType == CharacterOwner.Player)
+        {
+            transform.name = $"{name}_{gameMgr.playerList.Count}";
+            gameMgr.playerList.Add(this);
+        }
+        else
+        {
+            transform.name = $"{name}_{gameMgr.enemyList.Count}";
+            gameMgr.enemyList.Add(this);
+        }
 
-        strength = playerData.strength;
-        vitality = playerData.vitality;
-        intellect = playerData.intellect;
-        wisdom = playerData.wisdom;
-        agility = playerData.agility;
-        dexterity = playerData.dexterity;
-        mobility = Mobility;
+        // 데이터 설정
+        if (charData is PlayerDataInfo playerData)
+        {
+            // PlayerDataInfo 속성 설정
+            strength = playerData.strength;
+            vitality = playerData.vitality;
+            intellect = playerData.intellect;
+            wisdom = playerData.wisdom;
+            agility = playerData.agility;
+            dexterity = playerData.dexterity;
+            mobility = Mobility;
 
-        maxAction = playerData.maxAction;
-        action = maxAction;
-        maxHealth = playerData.maxHealth;
-        health = maxHealth;
-        maxStamina = playerData.maxStamina;
-        stamina = maxStamina;
-        sight = playerData.sight;
-        aiming = playerData.aiming;
-        reaction = playerData.reaction;
+            maxAction = playerData.maxAction;
+            action = maxAction;
+            maxHealth = playerData.maxHealth;
+            health = maxHealth;
+            maxStamina = playerData.maxStamina;
+            stamina = maxStamina;
+            sight = playerData.sight;
+            aiming = playerData.aiming;
+            reaction = playerData.reaction;
 
-        ability.charCtr = this;
-        addAbility.charCtr = this;
-        //ability.ResetShootingModeInfos();
-        //addAbility.ResetShootingModeInfos();
-        ability.SetAbility(playerData);
+            ability.charCtr = this;
+            addAbility.charCtr = this;
+            ability.SetAbility(playerData);
+        }
+        else if (charData is EnemyDataInfo enemyData)
+        {
+            // EnemyDataInfo 속성 설정
+            strength = enemyData.strength;
+            vitality = enemyData.vitality;
+            intellect = enemyData.intellect;
+            wisdom = enemyData.wisdom;
+            agility = enemyData.agility;
+            dexterity = enemyData.dexterity;
+            mobility = Mobility;
+
+            maxAction = enemyData.maxAction;
+            action = maxAction;
+            maxHealth = enemyData.maxHealth;
+            health = maxHealth;
+            maxStamina = enemyData.maxStamina;
+            stamina = maxStamina;
+            sight = enemyData.sight;
+            aiming = enemyData.aiming;
+            reaction = enemyData.reaction;
+
+            ability.charCtr = this;
+            addAbility.charCtr = this;
+            addAbility.ResetShootingModeInfos();
+            ability.SetAbility(enemyData);
+
+            // 적 전용 속성 설정
+            if (enemyData.dropTableID != "None")
+                dropTableData = gameMgr.dataMgr.dropTableData.dropTableInfo.Find(x => x.ID == enemyData.dropTableID);
+            if (enemyData.uniqueItemID != "None")
+                uniqueItemData = gameMgr.dataMgr.itemData.itemInfos.Find(x => x.ID == enemyData.uniqueItemID);
+
+            aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
+        }
 
         baseIndex = 1;
         upperIndex = 2;
 
-        fiarRate = 0;
-        sMode = ShootingMode.PointShot;
-
-        currentNode = _currentNode;
-        currentNode.charCtr = this;
-        currentNode.canMove = false;
-        //ShowVisibleNodes(sight, currentNode);
-    }
-
-    /// <summary>
-    /// 구성요소 설정
-    /// </summary>
-    /// <param name="_gameMgr"></param>
-    /// <param name="_ownerType"></param>
-    /// <param name="enemyData"></param>
-    /// <param name="_currentNode"></param>
-    public void SetComponents(GameManager _gameMgr, CharacterOwner _ownerType, EnemyDataInfo enemyData, FieldNode _currentNode)
-    {
-        gameMgr = _gameMgr;
-        var grenadePool = Instantiate(Resources.Load<GrenadeHandler>("Prefabs/Weapon/GrenadePool"));
-        grenadePool.transform.SetParent(transform);
-        grenadeHlr = grenadePool.GetComponent<GrenadeHandler>();
-        grenadeHlr.SetComponents(this);
-
-        if (enemyData.dropTableID != "None")
-            dropTableData = gameMgr.dataMgr.dropTableData.dropTableInfo.Find(x => x.ID == enemyData.dropTableID);
-        if (enemyData.uniqueItemID != "None")
-            uniqueItemData = gameMgr.dataMgr.itemData.itemInfos.Find(x => x.ID == enemyData.uniqueItemID);
-
-        animator = GetComponent<Animator>();
-        outlinable = this.AddComponent<Outlinable>();
-        cd = GetComponent<Collider>();
-
-        aimPoint = transform.Find("AimPoint");
-        headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
-        headRig.weight = 0f;
-        chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
-        chestRig.weight = 0f;
-
-        mainHolsterTf = transform.Find("Root/Hips/Spine_01/Spine_02");
-        subHolsterTf = transform.Find("Root/Hips/UpperLeg_R/Holster");
-        rightHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
-        leftHandTf = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
-
-        ownerType = _ownerType;
-        meshs = transform.GetComponentsInChildren<MeshRenderer>().ToList();
-        sMeshs = transform.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
-        ragdollCds = transform.Find("Root").GetComponentsInChildren<Collider>().ToList();
-        for (int i = 0; i < ragdollCds.Count; i++)
-        {
-            var cd = ragdollCds[i];
-            cd.gameObject.layer = LayerMask.NameToLayer("BodyParts");
-            cd.isTrigger = true;
-        }
-        ragdollRbs = transform.Find("Root").GetComponentsInChildren<Rigidbody>().ToList();
-        for (int i = 0; i < ragdollRbs.Count; i++)
-        {
-            var rb = ragdollRbs[i];
-            rb.isKinematic = true;
-        }
-
-        var _weaponPool = Instantiate(Resources.Load<GameObject>("Prefabs/Weapon/WeaponPool"));
-        _weaponPool.transform.SetParent(transform);
-        weaponPoolTf = _weaponPool.transform;
-        weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
-        for (int i = 0; i < weaponPool.Count; i++)
-        {
-            var weapon = weaponPool[i];
-            weapon.gameObject.SetActive(false);
-        }
-
-        var name = transform.name.Split(' ', '(', ')')[0];
-        transform.name = $"{name}_{gameMgr.enemyList.Count}";
-        gameMgr.enemyList.Add(this);
-
-        strength = enemyData.strength;
-        vitality = enemyData.vitality;
-        intellect = enemyData.intellect;
-        wisdom = enemyData.wisdom;
-        agility = enemyData.agility;
-        dexterity = enemyData.dexterity;
-        mobility = Mobility;
-
-        maxAction = enemyData.maxAction;
-        action = maxAction;
-        maxHealth = enemyData.maxHealth;
-        health = maxHealth;
-        maxStamina = enemyData.maxStamina;
-        stamina = maxStamina;
-        sight = enemyData.sight;
-        aiming = enemyData.aiming;
-        reaction = enemyData.reaction;
-
-        ability.charCtr = this;
-        addAbility.charCtr = this;
-        //ability.ResetShootingModeInfos();
-        //addAbility.ResetShootingModeInfos();
-        addAbility.ResetShootingModeInfos();
-        ability.SetAbility(enemyData);
-
-        aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
-
-        baseIndex = 1;
-        upperIndex = 2;
-
+        // FieldNode 설정
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;
@@ -469,25 +436,30 @@ public class CharacterController : MonoBehaviour
     /// Rig 설정
     /// </summary>
     /// <param name="type"></param>
-    public void SetRig(WeaponType type)
+    public void SetRig(WeaponDataInfo weaponData)
     {
-        switch (type)
+        if (weaponData.isMain)
         {
-            case WeaponType.Pistol:
-                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
-                break;
-            case WeaponType.Revolver:
-                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
-                break;
-            case WeaponType.AssaultRifle:
-                chestRig.data.offset = new Vector3(-40f, 0f, 0f);
-                break;
-            case WeaponType.Shotgun:
-                chestRig.data.offset = new Vector3(-40f, 0f, 0f);
-                break;
-            default:
-                break;
+            chestRig.data.offset = new Vector3(-34f, 0f, 0f);
+            SetChainWeight(1f);
         }
+        else
+        {
+            chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+        }
+    }
+
+    public void SetWeaponPivot(WeaponDataInfo weaponData)
+    {
+        WeaponGripInfo gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
+        rightHandPivot.SetLocalPositionAndRotation(gripInfo.pivotPos, gripInfo.pivotRot);
+        leftHandPivot.SetLocalPositionAndRotation(-gripInfo.pivotPos, gripInfo.pivotRot);
+        gripPivot.SetLocalPositionAndRotation(gripInfo.gripPos, gripInfo.gripRot);
+    }
+
+    public void SetChainWeight(float weight)
+    {
+        chainIK.weight = weight;
     }
 
     /// <summary>
@@ -594,6 +566,21 @@ public class CharacterController : MonoBehaviour
     //}
 
     /// <summary>
+    /// 사선 표시
+    /// </summary>
+    private void DrawFireRay()
+    {
+        if (currentWeapon == null) return;
+
+        var endRayPos = currentWeapon.bulletTf.position + (currentWeapon.bulletTf.forward * range);
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(currentWeapon.bulletTf.position, endRayPos);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(aimPoint.position, 0.1f);
+    }
+
+    /// <summary>
     /// 무기 사거리 범위 표시
     /// </summary>
     private void DrawWeaponRange()
@@ -616,15 +603,6 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    private void DrawFireRay()
-    {
-        if (currentWeapon == null) return;
-
-        var endRayPos = currentWeapon.bulletTf.position + (currentWeapon.bulletTf.forward * currentWeapon.weaponData.range);
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(currentWeapon.bulletTf.position, endRayPos);
-    }
-
     private void Update()
     {
         if (state == CharacterState.Dead) return;
@@ -632,10 +610,10 @@ public class CharacterController : MonoBehaviour
         AimProcess();
         CommandApplication();
 
-        if (Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            animator.Play("Idle");
-        }
+        //if (Input.GetKeyDown(KeyCode.LeftAlt))
+        //{
+        //    chainIK.weight = 1f;
+        //}
     }
 
     /// <summary>
@@ -1574,6 +1552,7 @@ public class CharacterController : MonoBehaviour
 
             animator.SetBool("reload", command.isReload);
             animator.SetBool("loadChamber", command.loadChamber);
+            SetChainWeight(0f);
             reloading = true;
         }
     }
@@ -1588,21 +1567,11 @@ public class CharacterController : MonoBehaviour
         {
             changeIndex = weapons.IndexOf(currentWeapon);
             changeIndex++;
-            if (changeIndex == weapons.Count)
-            {
-                changeIndex = 0;
-            }
-            //var nextWeapon = weapons[changeIndex];
-            //if (currentWeapon.weaponData.type != nextWeapon.weaponData.type)
-            //{
-            //    animator.SetBool("otherType", true);
-            //}
-            //else
-            //{
-            //    animator.SetBool("otherType", false);
-            //}
+            if (changeIndex == weapons.Count) changeIndex = 0;
+
             animator.SetBool("otherType", true);
             animator.SetTrigger("change");
+            SetChainWeight(0f);
             changing = true;
         }
     }
@@ -1614,6 +1583,15 @@ public class CharacterController : MonoBehaviour
             animator.SetTrigger("throw");
             throwing = true;
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (!weightCheck) return;
+        if (chainIK.weight == 1f) return;
+
+        chainIK.weight = 1f;
+        weightCheck = false;
     }
 
     #region 시야 코드
@@ -2620,7 +2598,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(aimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData.weaponType);
+                SetRig(currentWeapon.weaponData);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2863,7 +2841,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(coverAimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData.weaponType);
+                SetRig(currentWeapon.weaponData);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -3121,6 +3099,8 @@ public class CharacterController : MonoBehaviour
         }
         animator.SetBool("reload", false);
         animator.SetBool("loadChamber", false);
+        SetChainWeight(1f);
+        currentWeapon.WeaponSwitching("Right");
         commandList.RemoveAt(0);
         reloading = false;
     }
@@ -3253,6 +3233,7 @@ public class CharacterController : MonoBehaviour
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
             animator.SetBool("reload", false);
+            SetChainWeight(1f);
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }
@@ -3310,14 +3291,15 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        commandList.RemoveAt(0);
+        if (currentWeapon.weaponData.isMain) weightCheck = true;
         changing = false;
+        commandList.RemoveAt(0);
         gameMgr.RecheckTarget();
     }
 
     public void Event_SetGrenade()
     {
-        grenadeHlr.curGrenade.transform.SetParent(leftHandTf, false);
+        grenadeHlr.curGrenade.transform.SetParent(leftHandPivot, false);
         var pos = new Vector3(-0.047f, -0.051f, 0f);
         var rot = new Vector3(-15.6f, 90f, 90f);
         grenadeHlr.curGrenade.transform.SetLocalPositionAndRotation(pos, Quaternion.Euler(rot));
@@ -3355,9 +3337,10 @@ public class CharacterController : MonoBehaviour
     }
     #endregion
 
+    [System.Serializable]
     public class Ability
     {
-        public CharacterController charCtr;
+        [HideInInspector] public CharacterController charCtr;
 
         public List<ShootingModeInfo> sModeInfos = new List<ShootingModeInfo>();
         [Tooltip("발사속도")] public int RPM;

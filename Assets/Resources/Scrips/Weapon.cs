@@ -160,8 +160,8 @@ public class Weapon : MonoBehaviour
 
     private void SetWeaponPositionAndRotation()
     {
-        defaultPos = weaponData.defaultPos;
-        defaultRot = weaponData.defaultRot;
+        //defaultPos = weaponData.defaultPos;
+        //defaultRot = weaponData.defaultRot;
         if (weaponData.isMain)
         {
             if (charCtr.weapons.Count > 1)
@@ -194,25 +194,25 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (!isMove) return;
-        if (!charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.upperIndex).IsTag("None")) return;
+    //private void Update()
+    //{
+    //    if (!isMove) return;
+    //    if (!charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.upperIndex).IsTag("None")) return;
 
-        switch (weaponData.weaponType)
-        {
-            case WeaponType.SniperRifle:
-                defaultPos = weaponData.defaultPos;
-                defaultRot = weaponData.defaultRot;
-                transform.localPosition = defaultPos;
-                transform.localRotation = Quaternion.Euler(defaultRot);
-                Debug.Log($"{charCtr.name}: Reset SniperRifle");
-                break;
-            default:
-                break;
-        }
-        isMove = false;
-    }
+    //    switch (weaponData.weaponType)
+    //    {
+    //        case WeaponType.SniperRifle:
+    //            defaultPos = weaponData.defaultPos;
+    //            defaultRot = weaponData.defaultRot;
+    //            transform.localPosition = defaultPos;
+    //            transform.localRotation = Quaternion.Euler(defaultRot);
+    //            Debug.Log($"{charCtr.name}: Reset SniperRifle");
+    //            break;
+    //        default:
+    //            break;
+    //    }
+    //    isMove = false;
+    //}
 
     public void Initialize()
     {
@@ -243,7 +243,8 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetBool("isMain", weaponData.isMain);
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
-        charCtr.SetRig(weaponData.weaponType);
+        charCtr.SetRig(weaponData);
+        charCtr.SetWeaponPivot(weaponData);
         charCtr.SetAbility();
     }
 
@@ -295,22 +296,22 @@ public class Weapon : MonoBehaviour
             case "Holster":
                 if (weaponData.isMain)
                 {
-                    transform.SetParent(charCtr.mainHolsterTf, false);
+                    transform.SetParent(charCtr.mainHolsterPivot, false);
                 }
                 else
                 {
-                    transform.SetParent(charCtr.subHolsterTf, false);
+                    transform.SetParent(charCtr.subHolsterPivot, false);
                 }
                 transform.localPosition = holsterPos;
                 transform.localRotation = Quaternion.Euler(holsterRot);
                 break;
             case "Right":
-                transform.SetParent(charCtr.rightHandTf);
-                transform.localPosition = defaultPos;
-                transform.localRotation = Quaternion.Euler(defaultRot);
+                transform.SetParent(charCtr.rightHandPivot);
+                transform.localPosition = Vector3.zero;
+                transform.localRotation = Quaternion.identity;
                 break;
             case "Left":
-                transform.SetParent(charCtr.leftHandTf);
+                transform.SetParent(charCtr.leftHandPivot);
                 break;
             default:
                 break;
