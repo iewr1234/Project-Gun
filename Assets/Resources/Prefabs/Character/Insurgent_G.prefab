@@ -7800,13 +7800,16 @@ MonoBehaviour:
   animator: {fileID: 0}
   outlinable: {fileID: 0}
   cd: {fileID: 0}
+  rigBdr: {fileID: 0}
   headRig: {fileID: 0}
   chestRig: {fileID: 0}
+  chainIK: {fileID: 0}
   aimPoint: {fileID: 0}
-  mainHolsterTf: {fileID: 0}
-  subHolsterTf: {fileID: 0}
-  rightHandTf: {fileID: 0}
-  leftHandTf: {fileID: 0}
+  mainHolsterPivot: {fileID: 0}
+  subHolsterPivot: {fileID: 0}
+  rightHandPivot: {fileID: 0}
+  leftHandPivot: {fileID: 0}
+  gripPivot: {fileID: 0}
   meshs: []
   sMeshs: []
   ownerType: 0
@@ -7844,6 +7847,34 @@ MonoBehaviour:
   penetrate: 0
   armorBreak: 0
   critical: 0
+  ability:
+    charCtr: {fileID: 0}
+    sModeInfos: []
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    propellant: 0
+    damage: 0
+    penetrate: 0
+    armorBreak: 0
+    critical: 0
+  addAbility:
+    charCtr: {fileID: 0}
+    sModeInfos: []
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    propellant: 0
+    damage: 0
+    penetrate: 0
+    armorBreak: 0
+    critical: 0
   baseIndex: 0
   upperIndex: 0
   currentWeapon: {fileID: 0}
@@ -8016,6 +8047,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8510965843527658750, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
+      propertyPath: m_Data.m_Tip
+      value: 
+      objectReference: {fileID: 5055975504908490184}
+    - target: {fileID: 8510965843527658750, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
+      propertyPath: m_Data.m_Root
+      value: 
+      objectReference: {fileID: 5058806264883681206}
     - target: {fileID: 9076251966953780421, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
       propertyPath: m_Data.m_ConstrainedObject
       value: 

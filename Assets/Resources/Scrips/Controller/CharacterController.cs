@@ -282,7 +282,7 @@ public class CharacterController : MonoBehaviour
 
         // Grenade Pool ¼³Á¤
         var grenadePool = Instantiate(Resources.Load<GrenadeHandler>("Prefabs/Weapon/GrenadePool"));
-        grenadePool.transform.SetParent(transform);
+        grenadePool.transform.SetParent(transform, false);
         grenadeHlr = grenadePool.GetComponent<GrenadeHandler>();
         grenadeHlr.SetComponents(this);
 
@@ -306,15 +306,11 @@ public class CharacterController : MonoBehaviour
         var weaponPivot = new GameObject("WeaponPivot");
         var rightHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
         weaponPivot.transform.SetParent(rightHand, false);
-        //weaponPivot.transform.localPosition = new Vector3(0.113f, 0.033f, -0.05f);
-        //weaponPivot.transform.localRotation = Quaternion.Euler(0f, 96.4f, -97f);
         rightHandPivot = weaponPivot.transform;
 
         weaponPivot = new GameObject("WeaponPivot");
         var leftHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
         weaponPivot.transform.SetParent(leftHand, false);
-        //weaponPivot.transform.localPosition = new Vector3(-0.113f, -0.033f, 0.05f);
-        //weaponPivot.transform.localRotation = Quaternion.Euler(0f, 96.4f, -97f);
         leftHandPivot = weaponPivot.transform;
 
         gripPivot = new GameObject("GripPivot").transform;
@@ -420,7 +416,7 @@ public class CharacterController : MonoBehaviour
             if (enemyData.uniqueItemID != "None")
                 uniqueItemData = gameMgr.dataMgr.itemData.itemInfos.Find(x => x.ID == enemyData.uniqueItemID);
 
-            aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.aiID);
+            aiData = gameMgr.dataMgr.aiData.aiInfos.Find(x => x.ID == enemyData.AI_ID);
         }
 
         baseIndex = 1;

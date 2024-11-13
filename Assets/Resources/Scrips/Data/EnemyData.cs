@@ -3,19 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public struct EnemyWeapon
-{
-    public string prefabName;
-    public bool isMain;
-    public WeaponType weaponType;
-    public MagazineType magType;
-    public int meshType;
-    public int pelletNum;
-    public int spread;
-    public int magMax;
-}
-
-[System.Serializable]
 public class EnemyDataInfo
 {
     public string indexName;
@@ -24,7 +11,8 @@ public class EnemyDataInfo
     public string ID;
     public string prefabName;
     public string charName;
-    public string aiID;
+    public string gearID;
+    public string AI_ID;
     public string dropTableID;
     public string uniqueItemID;
     [Space(5f)]
@@ -57,11 +45,6 @@ public class EnemyDataInfo
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
-    [Space(5f)]
-
-    public EnemyWeapon mainWeapon1;
-    public EnemyWeapon mainWeapon2;
-    public EnemyWeapon subWeapon;
 }
 
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Object/EnemyData")]

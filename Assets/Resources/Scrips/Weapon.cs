@@ -109,23 +109,24 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void SetComponets(CharacterController _charCtr, EnemyWeapon _eWeapon)
+    public void SetComponets(CharacterController _charCtr, EnemyGearDataInfo.WeaponInfo _weaponInfo)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
-        weaponData.isMain = _eWeapon.isMain;
-        weaponData.weaponType = _eWeapon.weaponType;
-        weaponData.magType = _eWeapon.magType;
+        weaponData.isMain = _weaponInfo.isMain;
+        weaponData.weaponType = _weaponInfo.weaponType;
+        weaponData.magType = _weaponInfo.magType;
+        weaponData.gripType = _weaponInfo.gripType;
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
         SetWeaponPositionAndRotation();
 
-        meshType = _eWeapon.meshType;
-        magMax = _eWeapon.magMax;
+        meshType = _weaponInfo.meshType;
+        magMax = _weaponInfo.magMax;
         loadedNum = magMax;
-        hitAccuracy = new HitAccuracy(this, _eWeapon);
+        hitAccuracy = new HitAccuracy(this, _weaponInfo);
         gameObject.SetActive(true);
     }
 
@@ -468,11 +469,11 @@ public class Weapon : MonoBehaviour
             pelletAccuracys = new List<int>();
         }
 
-        public HitAccuracy(Weapon _weapon, EnemyWeapon _eWeapon)
+        public HitAccuracy(Weapon _weapon, EnemyGearDataInfo.WeaponInfo _weaponInfo)
         {
             weapon = _weapon;
-            pelletNum = _eWeapon.pelletNum;
-            spread = _eWeapon.spread;
+            pelletNum = _weaponInfo.pelletNum;
+            spread = _weaponInfo.spread;
             pelletAccuracys = new List<int>();
         }
 

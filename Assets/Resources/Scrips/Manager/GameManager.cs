@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum GameState
@@ -296,14 +297,15 @@ public class GameManager : MonoBehaviour
             charCtr.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             charCtr.SetComponents(this, ownerType, enemyData, node);
 
-            var weaponDatas = new EnemyWeapon[3] { enemyData.mainWeapon1, enemyData.mainWeapon2, enemyData.subWeapon };
-            for (int i = 0; i < weaponDatas.Length; i++)
+            var gearData = dataMgr.enemyGearData.enemyGearInfo.Find(x => x.ID == enemyData.gearID);
+            var weaponInfos = new EnemyGearDataInfo.WeaponInfo[3] { gearData.mainWeapon1, gearData.mainWeapon2, gearData.subWeapon };
+            for (int i = 0; i < weaponInfos.Length; i++)
             {
-                var weaponData = weaponDatas[i];
-                if (weaponData.weaponType == WeaponType.None) continue;
+                var weaponInfo = weaponInfos[i];
+                if (weaponInfo.weaponType == WeaponType.None) continue;
 
-                var weapon = charCtr.GetWeapon(weaponData.prefabName, EquipType.MainWeapon1 + i);
-                weapon.SetComponets(charCtr, weaponData);
+                var weapon = charCtr.GetWeapon(weaponInfo.prefabName, EquipType.MainWeapon1 + i);
+                weapon.SetComponets(charCtr, weaponInfo);
             }
 
             return charCtr;

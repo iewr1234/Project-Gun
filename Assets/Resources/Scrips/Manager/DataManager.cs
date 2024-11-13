@@ -75,6 +75,8 @@ public class DataManager : MonoBehaviour
 
         if (enemyData == null) enemyData = Resources.Load<EnemyData>("ScriptableObjects/EnemyData");
 
+        if (enemyGearData == null) enemyGearData = Resources.Load<EnemyGearData>("ScriptableObjects/EnemyGearData");
+
         if (aiData == null) aiData = Resources.Load<AIData>("ScriptableObjects/AIData");
 
         if (stageData == null) stageData = Resources.Load<StageData>("ScriptableObjects/StageData");
@@ -364,12 +366,13 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:BA";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A3:AG";
     private enum EnemyVariable
     {
         ID,
         PrefabName,
         EnemyName,
+        GearID,
         AI_ID,
         DropTableID,
         UniqueItemID,
@@ -399,27 +402,6 @@ public class DataManager : MonoBehaviour
         Penetrate,
         ArmorBreak,
         Critical,
-        MainWeapon1_prefabName,
-        MainWeapon1_weaponType,
-        MainWeapon1_magType,
-        MainWeapon1_meshType,
-        MainWeapon1_pelletNum,
-        MainWeapon1_spread,
-        MainWeapon1_magMax,
-        MainWeapon2_prefabName,
-        MainWeapon2_weaponType,
-        MainWeapon2_magType,
-        MainWeapon2_meshType,
-        MainWeapon2_pelletNum,
-        MainWeapon2_spread,
-        MainWeapon2_magMax,
-        SubWeapon_prefabName,
-        SubWeapon_weaponType,
-        SubWeapon_magType,
-        SubWeapon_meshType,
-        SubWeapon_pelletNum,
-        SubWeapon_spread,
-        SubWeapon_magMax,
     }
 
     public void UpdateEnemyData()
@@ -445,7 +427,8 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)EnemyVariable.ID],
                     prefabName = data[(int)EnemyVariable.PrefabName],
                     charName = data[(int)EnemyVariable.EnemyName],
-                    aiID = data[(int)EnemyVariable.AI_ID],
+                    gearID = data[(int)EnemyVariable.GearID],
+                    AI_ID = data[(int)EnemyVariable.AI_ID],
                     dropTableID = data[(int)EnemyVariable.DropTableID],
                     uniqueItemID = data[(int)EnemyVariable.UniqueItemID],
                     strength = int.Parse(data[(int)EnemyVariable.Strength]),
@@ -474,51 +457,75 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)EnemyVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)EnemyVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)EnemyVariable.Critical]),
-                    mainWeapon1 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon1_prefabName],
-                                                  true,
-                                                  data[(int)EnemyVariable.MainWeapon1_weaponType],
-                                                  data[(int)EnemyVariable.MainWeapon1_magType],
-                                                  data[(int)EnemyVariable.MainWeapon1_meshType],
-                                                  data[(int)EnemyVariable.MainWeapon1_pelletNum],
-                                                  data[(int)EnemyVariable.MainWeapon1_spread],
-                                                  data[(int)EnemyVariable.MainWeapon1_magMax]),
-                    mainWeapon2 = ReadEnemyWeapon(data[(int)EnemyVariable.MainWeapon2_prefabName],
-                                                  true,
-                                                  data[(int)EnemyVariable.MainWeapon2_weaponType],
-                                                  data[(int)EnemyVariable.MainWeapon2_magType],
-                                                  data[(int)EnemyVariable.MainWeapon2_meshType],
-                                                  data[(int)EnemyVariable.MainWeapon2_pelletNum],
-                                                  data[(int)EnemyVariable.MainWeapon2_spread],
-                                                  data[(int)EnemyVariable.MainWeapon2_magMax]),
-                    subWeapon = ReadEnemyWeapon(data[(int)EnemyVariable.SubWeapon_prefabName],
-                                                false,
-                                                data[(int)EnemyVariable.SubWeapon_weaponType],
-                                                data[(int)EnemyVariable.SubWeapon_magType],
-                                                data[(int)EnemyVariable.SubWeapon_meshType],
-                                                data[(int)EnemyVariable.SubWeapon_pelletNum],
-                                                data[(int)EnemyVariable.SubWeapon_spread],
-                                                data[(int)EnemyVariable.SubWeapon_magMax]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
             }
             Debug.Log("Update Enemy Data");
         }
+    }
+    #endregion
 
-        EnemyWeapon ReadEnemyWeapon(string prefabNameData, bool isMain, string weaponTypeData, string magTypeData, string meshType, string pelletNum, string spread, string magMaxData)
+    #region EnemyGear Data
+    [HideInInspector] public EnemyGearData enemyGearData;
+    private readonly string enemyGearDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1212322922&range=A3:Z";
+    private enum EnemyGearVariable
+    {
+        ID,
+        GearName,
+        MainWeapon1,
+        MainWeapon2 = 10,
+        SubWeapon = 18,
+    }
+
+    public void UpdateEnemyGearData()
+    {
+        if (enemyGearData == null) enemyGearData = Resources.Load<EnemyGearData>("ScriptableObjects/EnemyGearData");
+        if (enemyGearData.enemyGearInfo.Count > 0) enemyGearData.enemyGearInfo.Clear();
+
+        StartCoroutine(ReadEnemyGearData());
+
+        IEnumerator ReadEnemyGearData()
         {
-            var enemyWeapon = new EnemyWeapon()
+            UnityWebRequest www = UnityWebRequest.Get(enemyGearDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
             {
-                prefabName = prefabNameData,
+                var data = datas[i].Split('\t');
+                var enemyGearInfo = new EnemyGearDataInfo()
+                {
+                    indexName = $"{data[(int)EnemyGearVariable.ID]}: {data[(int)EnemyGearVariable.GearName]}",
+                    ID = data[(int)EnemyGearVariable.ID],
+                    gearName = data[(int)EnemyGearVariable.GearName],
+                    mainWeapon1 = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.MainWeapon1, true),
+                    mainWeapon2 = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.MainWeapon2, true),
+                    subWeapon = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.SubWeapon, false),
+                };
+                enemyGearData.enemyGearInfo.Add(enemyGearInfo);
+            }
+            Debug.Log("Update EnemyGear Data");
+        }
+
+        EnemyGearDataInfo.WeaponInfo ReadEnemyWeaponInfo(string[] gearData, int startIndex, bool isMain)
+        {
+            if (gearData[startIndex] == "None") return new EnemyGearDataInfo.WeaponInfo();
+
+            var weaponInfo = new EnemyGearDataInfo.WeaponInfo()
+            {
+                prefabName = gearData[startIndex],
                 isMain = isMain,
-                weaponType = (WeaponType)int.Parse(weaponTypeData),
-                magType = (MagazineType)int.Parse(magTypeData),
-                meshType = int.Parse(meshType),
-                pelletNum = int.Parse(pelletNum),
-                spread = int.Parse(spread),
-                magMax = int.Parse(magMaxData),
+                weaponType = (WeaponType)int.Parse(gearData[startIndex + 1]),
+                magType = (MagazineType)int.Parse(gearData[startIndex + 2]),
+                gripType = (WeaponGripType)int.Parse(gearData[startIndex + 3]),
+                meshType = int.Parse(gearData[startIndex + 4]),
+                pelletNum = int.Parse(gearData[startIndex + 5]),
+                spread = int.Parse(gearData[startIndex + 6]),
+                magMax = int.Parse(gearData[startIndex + 7]),
             };
 
-            return enemyWeapon;
+            return weaponInfo;
         }
     }
     #endregion
@@ -1625,6 +1632,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateEnemyData();
                 EditorUtility.SetDirty(dataMgr.enemyData);
             }
+            if (GUILayout.Button("Update the EnemyGear Database"))
+            {
+                dataMgr.UpdateEnemyGearData();
+                EditorUtility.SetDirty(dataMgr.enemyGearData);
+            }
             if (GUILayout.Button("Update the AI Database"))
             {
                 dataMgr.UpdateAIData();
@@ -1702,6 +1714,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.playerData);
                 dataMgr.UpdateEnemyData();
                 EditorUtility.SetDirty(dataMgr.enemyData);
+                dataMgr.UpdateEnemyGearData();
+                EditorUtility.SetDirty(dataMgr.enemyGearData);
                 dataMgr.UpdateAIData();
                 EditorUtility.SetDirty(dataMgr.aiData);
                 dataMgr.UpdateStageData();
