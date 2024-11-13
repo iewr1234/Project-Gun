@@ -900,17 +900,6 @@ public class DataManager : MonoBehaviour
                 return partsIDs;
             }
 
-            Vector3 ReadDataVector(string vectorData)
-            {
-                var vectorInfos = vectorData.Split('/');
-                var x = float.Parse(vectorInfos[0]);
-                var y = float.Parse(vectorInfos[1]);
-                var z = float.Parse(vectorInfos[2]);
-                var vector = new Vector3(x, y, z);
-
-                return vector;
-            }
-
             void SetInternalMagazine(WeaponDataInfo weaponInfo)
             {
                 if (weaponInfo.magType == MagazineType.Magazine) return;

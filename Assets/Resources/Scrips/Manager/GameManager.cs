@@ -236,7 +236,7 @@ public class GameManager : MonoBehaviour
             if (charCtr.currentWeapon == null)
             {
                 charCtr.currentWeapon = weapon;
-                weapon.EquipWeapon();
+                weapon.EquipWeapon(true);
                 weapon.WeaponSwitching("Right");
             }
             else
@@ -412,8 +412,8 @@ public class GameManager : MonoBehaviour
             default:
                 break;
         }
-        CreatePlayer();
-        CreateEnemy();
+        //CreatePlayer();
+        //CreateEnemy();
     }
 
     /// <summary>

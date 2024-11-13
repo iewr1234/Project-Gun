@@ -67,18 +67,18 @@ public static class DataUtility
 
     public static readonly Vector3 weaponPivot_pos_AR = new Vector3(0.113f, 0.033f, -0.05f);
     public static readonly Quaternion weaponPivot_rot_AR = Quaternion.Euler(0f, 96.4f, -97f);
-    public static readonly Vector3 weaponGrip_pos_AR = new Vector3(0.402f, 0.139f, -0.083f);
-    public static readonly Quaternion weaponGrip_rot_AR = Quaternion.Euler(0f, 96.4f, -270.33f);
+    public static readonly Vector3 weaponGrip_pos_AR = new Vector3(-0.105f, -0.012f, 0.29f);
+    public static readonly Quaternion weaponGrip_rot_AR = Quaternion.Euler(0f, 0f, -173.33f);
 
-    public static readonly Vector3 weaponPivot_pos_SR = new Vector3(0.402f, 0.139f, -0.083f);
-    public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(0f, 96.4f, -270.33f);
-    public static readonly Vector3 weaponGrip_pos_SR = new Vector3(0.468f, 0.112f, -0.029f);
-    public static readonly Quaternion weaponGrip_rot_SR = Quaternion.Euler(11.9f, 96.4f, -254.68f);
+    public static readonly Vector3 weaponPivot_pos_SR = new Vector3(0.092f, 0.024f, -0.048f);
+    public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(-2.4f, 95.4f, -89.67f);
+    public static readonly Vector3 weaponGrip_pos_SR = new Vector3(-0.072f, -0.053f, 0.375f);
+    public static readonly Quaternion weaponGrip_rot_SR = Quaternion.Euler(-1.04f, -16.297f, -164.676f);
 
     public static readonly Vector3 weaponPivot_pos_SG_intMag = new Vector3(0.113f, 0.033f, -0.05f);
     public static readonly Quaternion weaponPivot_rot_SG_intMag = Quaternion.Euler(0f, 96.4f, -97f);
-    public static readonly Vector3 weaponGrip_pos_SG_intMag = new Vector3(0.555f, 0.13f, -0.05f);
-    public static readonly Quaternion weaponGrip_rot_SG_intMag = Quaternion.Euler(0f, 96.4f, -270.33f);
+    public static readonly Vector3 weaponGrip_pos_SG_intMag = new Vector3(-0.09f, -0.06f, 0.439f);
+    public static readonly Quaternion weaponGrip_rot_SG_intMag = Quaternion.Euler(0f, 0f, -173.33f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {

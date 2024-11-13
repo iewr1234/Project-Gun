@@ -138,11 +138,11 @@ public class CharacterController : MonoBehaviour
     public Outlinable outlinable;
     [SerializeField] private Collider cd;
 
-    [SerializeField] private RigBuilder rigBdr;
+    public RigBuilder rigBdr;
     [SerializeField] private MultiAimConstraint headRig;
     [SerializeField] private MultiAimConstraint chestRig;
     [SerializeField] private ChainIKConstraint chainIK;
-    private bool weightCheck;
+
     [HideInInspector] public Transform aimPoint;
 
     [HideInInspector] public Transform mainHolsterPivot;
@@ -269,6 +269,10 @@ public class CharacterController : MonoBehaviour
 
     private Coroutine curCoroutine;
 
+    //private bool weightCheck;
+    private bool runInstantly;
+    private float targetWeight;
+
     /// <summary>
     /// 备己夸家 汲沥
     /// </summary>
@@ -314,7 +318,7 @@ public class CharacterController : MonoBehaviour
         leftHandPivot = weaponPivot.transform;
 
         gripPivot = new GameObject("GripPivot").transform;
-        gripPivot.transform.SetParent(rightHand, false);
+        gripPivot.transform.SetParent(rightHandPivot, false);
         chainIK.data.target = gripPivot;
         rigBdr.Build();
 
@@ -436,8 +440,16 @@ public class CharacterController : MonoBehaviour
     {
         if (weaponData.isMain)
         {
-            chestRig.data.offset = new Vector3(-34f, 0f, 0f);
-            SetChainWeight(1f);
+            switch (weaponData.weaponType)
+            {
+                case WeaponType.SniperRifle:
+                    chestRig.data.offset = new Vector3(-56.5f, 0f, 0f);
+                    break;
+                default:
+                    chestRig.data.offset = new Vector3(-34f, 0f, 0f);
+                    break;
+            }
+            //SetChainWeight(1f);
         }
         else
         {
@@ -445,17 +457,18 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void SetWeaponPivot(WeaponDataInfo weaponData)
+    public void SetWeaponPivot(WeaponGripInfo gripInfo)
     {
-        WeaponGripInfo gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
         rightHandPivot.SetLocalPositionAndRotation(gripInfo.pivotPos, gripInfo.pivotRot);
         leftHandPivot.SetLocalPositionAndRotation(-gripInfo.pivotPos, gripInfo.pivotRot);
         gripPivot.SetLocalPositionAndRotation(gripInfo.gripPos, gripInfo.gripRot);
     }
 
-    public void SetChainWeight(float weight)
+    public void SetChainWeight(bool runInstantly, float weight)
     {
-        chainIK.weight = weight;
+        this.runInstantly = runInstantly;
+        targetWeight = weight;
+        //chainIK.weight = weight;
     }
 
     /// <summary>
@@ -606,10 +619,10 @@ public class CharacterController : MonoBehaviour
         AimProcess();
         CommandApplication();
 
-        //if (Input.GetKeyDown(KeyCode.LeftAlt))
-        //{
-        //    chainIK.weight = 1f;
-        //}
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            rigBdr.Build();
+        }
     }
 
     /// <summary>
@@ -1441,7 +1454,6 @@ public class CharacterController : MonoBehaviour
         {
             if (animator.GetBool("isAim")) return;
 
-            currentWeapon.MoveLocalPosition(true);
         }
     }
 
@@ -1548,7 +1560,7 @@ public class CharacterController : MonoBehaviour
 
             animator.SetBool("reload", command.isReload);
             animator.SetBool("loadChamber", command.loadChamber);
-            SetChainWeight(0f);
+            SetChainWeight(true, 0f);
             reloading = true;
         }
     }
@@ -1567,7 +1579,7 @@ public class CharacterController : MonoBehaviour
 
             animator.SetBool("otherType", true);
             animator.SetTrigger("change");
-            SetChainWeight(0f);
+            SetChainWeight(true, 0f);
             changing = true;
         }
     }
@@ -1583,11 +1595,16 @@ public class CharacterController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!weightCheck) return;
-        if (chainIK.weight == 1f) return;
+        if (chainIK.weight == targetWeight) return;
 
-        chainIK.weight = 1f;
-        weightCheck = false;
+        if (runInstantly)
+        {
+            chainIK.weight = targetWeight;
+        }
+        else
+        {
+
+        }
     }
 
     #region 矫具 内靛
@@ -3029,7 +3046,7 @@ public class CharacterController : MonoBehaviour
         {
             weapon.WeaponSwitching("Right");
             currentWeapon = weapon;
-            weapon.EquipWeapon();
+            weapon.EquipWeapon(true);
         }
         else
         {
@@ -3052,7 +3069,7 @@ public class CharacterController : MonoBehaviour
                 weapon = weapons[0];
                 weapon.WeaponSwitching("Right");
                 currentWeapon = weapon;
-                weapon.EquipWeapon();
+                weapon.EquipWeapon(true);
             }
             else
             {
@@ -3095,7 +3112,7 @@ public class CharacterController : MonoBehaviour
         }
         animator.SetBool("reload", false);
         animator.SetBool("loadChamber", false);
-        SetChainWeight(1f);
+        SetChainWeight(true, 1f);
         currentWeapon.WeaponSwitching("Right");
         commandList.RemoveAt(0);
         reloading = false;
@@ -3142,7 +3159,6 @@ public class CharacterController : MonoBehaviour
                 break;
         }
 
-        currentWeapon.MoveLocalPosition(false);
         if (ownerType == CharacterOwner.Player)
         {
             charUI.components.SetActive(true);
@@ -3229,7 +3245,7 @@ public class CharacterController : MonoBehaviour
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
             animator.SetBool("reload", false);
-            SetChainWeight(1f);
+            SetChainWeight(true, 1f);
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }
@@ -3259,7 +3275,7 @@ public class CharacterController : MonoBehaviour
         //SetWeaponAbility(false, currentWeapon.weaponData);
         currentWeapon.WeaponSwitching("Holster");
         //currentWeapon.UnequipWeapon();
-        weapons[changeIndex].EquipWeapon();
+        weapons[changeIndex].EquipWeapon(false);
         currentWeapon.WeaponSwitching("Right");
     }
 
@@ -3269,7 +3285,7 @@ public class CharacterController : MonoBehaviour
 
         //currentWeapon.UnequipWeapon();
         currentWeapon = weapons[changeIndex];
-        currentWeapon.EquipWeapon();
+        currentWeapon.EquipWeapon(false);
         animator.SetTrigger("change");
         animator.SetTrigger("isCut");
     }
@@ -3287,7 +3303,6 @@ public class CharacterController : MonoBehaviour
             return;
         }
 
-        if (currentWeapon.weaponData.isMain) weightCheck = true;
         changing = false;
         commandList.RemoveAt(0);
         gameMgr.RecheckTarget();

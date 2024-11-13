@@ -50,6 +50,7 @@ public class Weapon : MonoBehaviour
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
     public WeaponDataInfo weaponData;
+    public WeaponGripInfo gripInfo;
     [Space(5f)]
 
     [Tooltip("사격타입")] public FireModeType fireMode;
@@ -67,7 +68,6 @@ public class Weapon : MonoBehaviour
     private Vector3 holsterRot;
     private Vector3 defaultPos;
     private Vector3 defaultRot;
-    private bool isMove;
 
     private readonly Vector3 weaponPos_main_rightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
     private readonly Vector3 weaponPos_main_leftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
@@ -86,6 +86,7 @@ public class Weapon : MonoBehaviour
         charCtr = _charCtr;
         equipSlot = _equipSlot;
         weaponData = _weaponData;
+        gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1)
         {
@@ -94,7 +95,7 @@ public class Weapon : MonoBehaviour
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
-        SetWeaponPositionAndRotation();
+        SetHolsterPositionAndRotation();
 
         if (weaponData.isMag)
         {
@@ -118,10 +119,11 @@ public class Weapon : MonoBehaviour
         weaponData.weaponType = _weaponInfo.weaponType;
         weaponData.magType = _weaponInfo.magType;
         weaponData.gripType = _weaponInfo.gripType;
+        gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
 
         bulletTf = transform.Find("BulletTransform");
         AddWeaponPartsObjects();
-        SetWeaponPositionAndRotation();
+        SetHolsterPositionAndRotation();
 
         meshType = _weaponInfo.meshType;
         magMax = _weaponInfo.magMax;
@@ -159,10 +161,8 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    private void SetWeaponPositionAndRotation()
+    private void SetHolsterPositionAndRotation()
     {
-        //defaultPos = weaponData.defaultPos;
-        //defaultRot = weaponData.defaultRot;
         if (weaponData.isMain)
         {
             if (charCtr.weapons.Count > 1)
@@ -175,18 +175,6 @@ public class Weapon : MonoBehaviour
                 holsterPos = weaponPos_main_leftHolster;
                 holsterRot = weaponRot_main_holster;
             }
-
-            //switch (weaponData.weaponType)
-            //{
-            //    case WeaponType.SniperRifle:
-            //        defaultPos = weaponPos_main_sniperRifle;
-            //        defaultRot = weaponRot_main_sniperRifle;
-            //        break;
-            //    default:
-            //        defaultPos = weaponPos_main;
-            //        defaultRot = weaponRot_main;
-            //        break;
-            //}
         }
         else
         {
@@ -194,26 +182,6 @@ public class Weapon : MonoBehaviour
             holsterRot = Vector3.zero;
         }
     }
-
-    //private void Update()
-    //{
-    //    if (!isMove) return;
-    //    if (!charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.upperIndex).IsTag("None")) return;
-
-    //    switch (weaponData.weaponType)
-    //    {
-    //        case WeaponType.SniperRifle:
-    //            defaultPos = weaponData.defaultPos;
-    //            defaultRot = weaponData.defaultRot;
-    //            transform.localPosition = defaultPos;
-    //            transform.localRotation = Quaternion.Euler(defaultRot);
-    //            Debug.Log($"{charCtr.name}: Reset SniperRifle");
-    //            break;
-    //        default:
-    //            break;
-    //    }
-    //    isMove = false;
-    //}
 
     public void Initialize()
     {
@@ -230,7 +198,7 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void EquipWeapon()
+    public void EquipWeapon(bool quick)
     {
         if (charCtr.baseIndex > 0 && charCtr.upperIndex > 0)
         {
@@ -245,7 +213,8 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
         charCtr.SetRig(weaponData);
-        charCtr.SetWeaponPivot(weaponData);
+        if (quick && weaponData.isMain) charCtr.SetChainWeight(true, 1f);
+        charCtr.SetWeaponPivot(gripInfo);
         charCtr.SetAbility();
     }
 
@@ -295,14 +264,7 @@ public class Weapon : MonoBehaviour
         switch (switchPos)
         {
             case "Holster":
-                if (weaponData.isMain)
-                {
-                    transform.SetParent(charCtr.mainHolsterPivot, false);
-                }
-                else
-                {
-                    transform.SetParent(charCtr.subHolsterPivot, false);
-                }
+                transform.SetParent(weaponData.isMain ? charCtr.mainHolsterPivot : charCtr.subHolsterPivot, false);
                 transform.localPosition = holsterPos;
                 transform.localRotation = Quaternion.Euler(holsterRot);
                 break;
@@ -310,9 +272,19 @@ public class Weapon : MonoBehaviour
                 transform.SetParent(charCtr.rightHandPivot);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
+                if (weaponData.isMain)
+                {
+                    charCtr.gripPivot.transform.SetParent(charCtr.rightHandPivot);
+                    charCtr.gripPivot.SetLocalPositionAndRotation(gripInfo.gripPos, gripInfo.gripRot);
+                    charCtr.SetChainWeight(true, 1f);
+                }
+                charCtr.rigBdr.Build();
                 break;
             case "Left":
                 transform.SetParent(charCtr.leftHandPivot);
+                charCtr.gripPivot.transform.SetParent(charCtr.leftHandPivot);
+                //charCtr.SetChainWeight(true, 0f);
+                charCtr.rigBdr.Build();
                 break;
             default:
                 break;
@@ -419,28 +391,6 @@ public class Weapon : MonoBehaviour
     public int GetHitValue()
     {
         return hitAccuracy.hitValue;
-    }
-
-    public void MoveLocalPosition(bool value)
-    {
-        switch (weaponData.weaponType)
-        {
-            case WeaponType.SniperRifle:
-                if (value)
-                {
-                    defaultPos = weaponPos_main_sniperRifle_aim;
-                    defaultRot = weaponRot_main_sniperRifle_aim;
-                    transform.localPosition = defaultPos;
-                    transform.localRotation = Quaternion.Euler(defaultRot);
-                }
-                else
-                {
-                    isMove = true;
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     private class HitAccuracy
