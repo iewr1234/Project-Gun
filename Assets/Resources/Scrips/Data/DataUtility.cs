@@ -15,8 +15,8 @@ public struct WeaponGripInfo
 {
     public Vector3 pivotPos;
     public Quaternion pivotRot;
-    public Vector3 gripPos;
-    public Quaternion gripRot;
+    //public Vector3 gripPos;
+    //public Quaternion gripRot;
 }
 
 public static class DataUtility
@@ -66,19 +66,19 @@ public static class DataUtility
     public static readonly Quaternion weaponPivot_rot_HG = Quaternion.Euler(-8.375f, 89f, -90.246f);
 
     public static readonly Vector3 weaponPivot_pos_AR = new Vector3(0.113f, 0.033f, -0.05f);
-    public static readonly Quaternion weaponPivot_rot_AR = Quaternion.Euler(0f, 96.4f, -97f);
-    public static readonly Vector3 weaponGrip_pos_AR = new Vector3(-0.105f, -0.012f, 0.29f);
-    public static readonly Quaternion weaponGrip_rot_AR = Quaternion.Euler(0f, 0f, -173.33f);
+    public static readonly Quaternion weaponPivot_rot_AR = Quaternion.Euler(-12.9f, 98.92f, -97f);
+    //public static readonly Vector3 weaponGrip_pos_AR = new Vector3(-0.105f, -0.012f, 0.29f);
+    //public static readonly Quaternion weaponGrip_rot_AR = Quaternion.Euler(0f, 0f, -173.33f);
 
     public static readonly Vector3 weaponPivot_pos_SR = new Vector3(0.092f, 0.024f, -0.048f);
-    public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(-2.4f, 95.4f, -89.67f);
-    public static readonly Vector3 weaponGrip_pos_SR = new Vector3(-0.072f, -0.053f, 0.375f);
-    public static readonly Quaternion weaponGrip_rot_SR = Quaternion.Euler(-1.04f, -16.297f, -164.676f);
+    public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(5.1f, 95.7f, -89.67f);
+    //public static readonly Vector3 weaponGrip_pos_SR = new Vector3(-0.072f, -0.053f, 0.375f);
+    //public static readonly Quaternion weaponGrip_rot_SR = Quaternion.Euler(-1.04f, -16.297f, -164.676f);
 
-    public static readonly Vector3 weaponPivot_pos_SG_intMag = new Vector3(0.113f, 0.033f, -0.05f);
-    public static readonly Quaternion weaponPivot_rot_SG_intMag = Quaternion.Euler(0f, 96.4f, -97f);
-    public static readonly Vector3 weaponGrip_pos_SG_intMag = new Vector3(-0.09f, -0.06f, 0.439f);
-    public static readonly Quaternion weaponGrip_rot_SG_intMag = Quaternion.Euler(0f, 0f, -173.33f);
+    public static readonly Vector3 weaponPivot_pos_SG_intMag = new Vector3(0.05f, 0.033f, -0.045f);
+    public static readonly Quaternion weaponPivot_rot_SG_intMag = Quaternion.Euler(-10.7f, 99f, -97f);
+    //public static readonly Vector3 weaponGrip_pos_SG_intMag = new Vector3(-0.09f, -0.06f, 0.439f);
+    //public static readonly Quaternion weaponGrip_rot_SG_intMag = Quaternion.Euler(0f, 0f, -173.33f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
@@ -327,8 +327,8 @@ public static class DataUtility
                 {
                     pivotPos = weaponPivot_pos_HG,
                     pivotRot = weaponPivot_rot_HG,
-                    gripPos = Vector3.zero,
-                    gripRot = Quaternion.identity,
+                    //gripPos = Vector3.zero,
+                    //gripRot = Quaternion.identity,
                 };
                 break;
             case WeaponGripType.AssaultRifle:
@@ -336,8 +336,8 @@ public static class DataUtility
                 {
                     pivotPos = weaponPivot_pos_AR,
                     pivotRot = weaponPivot_rot_AR,
-                    gripPos = weaponGrip_pos_AR,
-                    gripRot = weaponGrip_rot_AR,
+                    //gripPos = weaponGrip_pos_AR,
+                    //gripRot = weaponGrip_rot_AR,
                 };
                 break;
             case WeaponGripType.SniperRifle:
@@ -345,8 +345,8 @@ public static class DataUtility
                 {
                     pivotPos = weaponPivot_pos_SR,
                     pivotRot = weaponPivot_rot_SR,
-                    gripPos = weaponGrip_pos_SR,
-                    gripRot = weaponGrip_rot_SR,
+                    //gripPos = weaponGrip_pos_SR,
+                    //gripRot = weaponGrip_rot_SR,
                 };
                 break;
             case WeaponGripType.Shotgun_IntMagazine:
@@ -354,8 +354,8 @@ public static class DataUtility
                 {
                     pivotPos = weaponPivot_pos_SG_intMag,
                     pivotRot = weaponPivot_rot_SG_intMag,
-                    gripPos = weaponGrip_pos_SG_intMag,
-                    gripRot = weaponGrip_rot_SG_intMag,
+                    //gripPos = weaponGrip_pos_SG_intMag,
+                    //gripRot = weaponGrip_rot_SG_intMag,
                 };
                 break;
             default:

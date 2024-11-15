@@ -46,6 +46,7 @@ public class Weapon : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
     [HideInInspector] public Transform bulletTf;
+    [HideInInspector] public Transform gripTf;
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -66,15 +67,10 @@ public class Weapon : MonoBehaviour
 
     private Vector3 holsterPos;
     private Vector3 holsterRot;
-    private Vector3 defaultPos;
-    private Vector3 defaultRot;
 
     private readonly Vector3 weaponPos_main_rightHolster = new Vector3(-0.19f, -0.21f, -0.2f);
     private readonly Vector3 weaponPos_main_leftHolster = new Vector3(-0.19f, -0.21f, 0.2f);
     private readonly Vector3 weaponRot_main_holster = new Vector3(0f, 90f, 0f);
-
-    private readonly Vector3 weaponPos_main_sniperRifle_aim = new Vector3(0.09f, 0.015f, -0.052f);
-    private readonly Vector3 weaponRot_main_sniperRifle_aim = new Vector3(13.4f, 96.19f, -95f);
 
     private readonly float shootDisparity_bullet = 0.05f;
     private readonly float shootDisparity_pellet = 0.3f;
@@ -94,6 +90,7 @@ public class Weapon : MonoBehaviour
         }
 
         bulletTf = transform.Find("BulletTransform");
+        gripTf = transform.Find("GripTransform");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
@@ -198,22 +195,24 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void EquipWeapon(bool quick)
+    public void EquipWeapon()
     {
         if (charCtr.baseIndex > 0 && charCtr.upperIndex > 0)
         {
             charCtr.animator.SetLayerWeight(charCtr.baseIndex, 0f);
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
+
+        // NeedWork_Top: 애니매이션 레이어 변경
         charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
         charCtr.upperIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Upper : (int)AnimationLayers_A.Sub_A_Upper;
+
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
         charCtr.animator.SetBool("isMain", weaponData.isMain);
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
         charCtr.SetRig(weaponData);
-        if (quick && weaponData.isMain) charCtr.SetChainWeight(true, 1f);
         charCtr.SetWeaponPivot(gripInfo);
         charCtr.SetAbility();
     }
@@ -272,19 +271,19 @@ public class Weapon : MonoBehaviour
                 transform.SetParent(charCtr.rightHandPivot);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
-                if (weaponData.isMain)
-                {
-                    charCtr.gripPivot.transform.SetParent(charCtr.rightHandPivot);
-                    charCtr.gripPivot.SetLocalPositionAndRotation(gripInfo.gripPos, gripInfo.gripRot);
-                    charCtr.SetChainWeight(true, 1f);
-                }
-                charCtr.rigBdr.Build();
+                //if (weaponData.isMain)
+                //{
+                //    charCtr.gripPivot.transform.SetParent(charCtr.rightHandPivot);
+                //    charCtr.gripPivot.SetLocalPositionAndRotation(gripInfo.gripPos, gripInfo.gripRot);
+                //    charCtr.rigBdr.Build();
+                //    charCtr.SetChainWeight(true, 1f);
+                //}
                 break;
             case "Left":
                 transform.SetParent(charCtr.leftHandPivot);
-                charCtr.gripPivot.transform.SetParent(charCtr.leftHandPivot);
+                //charCtr.gripPivot.transform.SetParent(charCtr.leftHandPivot);
                 //charCtr.SetChainWeight(true, 0f);
-                charCtr.rigBdr.Build();
+                //charCtr.rigBdr.Build();
                 break;
             default:
                 break;

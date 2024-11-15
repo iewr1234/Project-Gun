@@ -181,19 +181,19 @@ public class GameMenuManager : MonoBehaviour
                     switch (initialItem.createPos)
                     {
                         case CreatePos.Equip:
-                            SetItemInEquipSlot(initialItem);
+                            SetInitialItemInEquipSlot(initialItem);
                             break;
                         case CreatePos.Pocket:
                             var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
-                            SetItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
+                            SetInitialItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
                             break;
                         case CreatePos.Backpack:
                             var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
-                            SetItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
+                            SetInitialItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
                             break;
                         case CreatePos.Rig:
                             var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
-                            SetItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
+                            SetInitialItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
                             break;
                         default:
                             break;
@@ -945,10 +945,10 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    public void SetItemInEquipSlot(InitialItem initialItem)
+    public void SetInitialItemInEquipSlot(InitialItem initialItem)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
-        var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == initialItem.ID);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == initialItem.ID);
         item.SetItemInfo(itemData, initialItem.num, true);
 
         var equipSlot = allEquips.Find(x => x.CheckEquip(item) == true);
@@ -978,6 +978,32 @@ public class GameMenuManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    public bool SetInitialItemInStorage(string itemDataID, int count, List<ItemSlot> itemSlots, bool insertOption)
+    {
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemDataID);
+        if (itemData == null)
+        {
+            Debug.Log("Not found item");
+            return false;
+        }
+
+        var item = items.Find(x => !x.gameObject.activeSelf);
+        item.SetItemInfo(itemData, count, insertOption);
+
+        var emptySlots = FindEmptySlots(item, itemSlots);
+        if (emptySlots == null)
+        {
+            Debug.Log("not found ItemSlot");
+            item.DisableItem();
+            return false;
+        }
+        else
+        {
+            PutTheItem(item, emptySlots);
+            return true;
         }
     }
 

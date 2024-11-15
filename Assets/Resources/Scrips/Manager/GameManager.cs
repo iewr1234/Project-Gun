@@ -236,7 +236,7 @@ public class GameManager : MonoBehaviour
             if (charCtr.currentWeapon == null)
             {
                 charCtr.currentWeapon = weapon;
-                weapon.EquipWeapon(true);
+                weapon.EquipWeapon();
                 weapon.WeaponSwitching("Right");
             }
             else

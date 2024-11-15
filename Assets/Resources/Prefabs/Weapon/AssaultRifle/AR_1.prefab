@@ -977,6 +977,37 @@ Transform:
   m_Father: {fileID: 8419281916813318366}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8082547118954201357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8416474685132707908}
+  m_Layer: 0
+  m_Name: GripTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8416474685132707908
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8082547118954201357}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0.027, z: 0.352}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8419281916813318366}
+  m_RootOrder: 12
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8423572762029381171
 GameObject:
   m_ObjectHideFlags: 0
@@ -1033,9 +1064,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9195397056497664612}
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: -0.094}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1848468151491362327}
@@ -1050,9 +1081,10 @@ Transform:
   - {fileID: 2311968642048395039}
   - {fileID: 3882254539963432263}
   - {fileID: 357450767681435767}
+  - {fileID: 8416474685132707908}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4535633015736851005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1068,6 +1100,8 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   partsObjects: []
+  bulletTf: {fileID: 0}
+  gripTf: {fileID: 0}
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -1080,6 +1114,7 @@ MonoBehaviour:
     isMain: 0
     weaponType: 0
     magType: 0
+    gripType: 0
     sModeInfos: []
     RPM: 0
     range: 0

@@ -184,11 +184,15 @@ public class GameUIManager : MonoBehaviour
     {
         if (!pressSpace) return;
 
+        var player = gameMgr.playerList[0];
+        if (player == null) return;
+
         turnEndUI.slider.value += Time.deltaTime * turnEndSpeed;
         if (turnEndUI.slider.value >= turnEndUI.slider.maxValue)
         {
             turnEndUI.slider.value = 0;
             pressSpace = false;
+            player.SetTurnEnd(true);
             gameMgr.TurnEnd();
         }
     }
@@ -454,6 +458,7 @@ public class GameUIManager : MonoBehaviour
             turnEndUI.slider.value = 0;
             pressSpace = false;
         }
+        player.SetTurnEnd(true);
         gameMgr.TurnEnd();
     }
 

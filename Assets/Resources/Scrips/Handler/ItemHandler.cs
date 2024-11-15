@@ -153,15 +153,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemInfo(ItemDataInfo _itemData, int count, bool insertOption)
     {
         itemData = _itemData.CopyData();
-        InputItemData();
+        string sampleName = InputItemData();
         InsertItemOption();
         SetItemRotation(false);
         SetItemCount(count);
 
-        activeSample = samples.Find(x => x.name == itemData.dataID);
+        activeSample = samples.Find(x => x.name == sampleName);
         if (activeSample == null)
         {
-            Debug.LogError("Not found Sample object");
+            Debug.LogError($"Not found Sample object: {sampleName}");
         }
         activeSample.SetActive(true);
         gameObject.SetActive(true);
@@ -171,7 +171,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             gameMenuMgr.activeItem.Add(this);
         }
 
-        void InputItemData()
+        string InputItemData()
         {
             transform.name = $"Item_{index}_{itemData.itemName}";
             size = itemData.size;
@@ -180,25 +180,25 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 case ItemType.Rig:
                     var _rigData = gameMenuMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
                     rigData = _rigData.CopyData();
-                    break;
+                    return rigData.rigName;
                 case ItemType.Backpack:
                     var _backpackData = gameMenuMgr.dataMgr.backpackData.backpackInfos.Find(x => x.ID == itemData.dataID);
                     backpackData = _backpackData.CopyData();
-                    break;
+                    return backpackData.backpackName;
                 case ItemType.MainWeapon:
                     var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                     weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
                     SetPartsSample();
-                    break;
+                    return weaponData.prefabName;
                 case ItemType.SubWeapon:
                     var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                     weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
                     SetPartsSample();
-                    break;
+                    return weaponData.prefabName;
                 case ItemType.Bullet:
                     var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
                     bulletData = _bulletData.CopyData();
-                    break;
+                    return bulletData.bulletName;
                 case ItemType.Magazine:
                     var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
                     magData = _magData.CopyData();
@@ -210,17 +210,17 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                             magData.loadedBullets.Add(loadedBullet);
                         }
                     }
-                    break;
+                    return magData.prefabName;
                 case ItemType.Sight:
                     var _partsData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
                     partsData = _partsData.CopyData();
-                    break;
+                    return partsData.prefabName;
                 case ItemType.Grenade:
                     var _grenadeData = gameMenuMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
                     grenadeData = _grenadeData.CopyData();
-                    break;
+                    return grenadeData.grenadeName;
                 default:
-                    break;
+                    return null;
             }
         }
 

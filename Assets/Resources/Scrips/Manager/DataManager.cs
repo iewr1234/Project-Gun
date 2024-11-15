@@ -1730,6 +1730,152 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateDropTableData();
                 EditorUtility.SetDirty(dataMgr.dropTableData);
             }
+
+            GUILayout.Label('\n' + "---Update Prefab---");
+            if (GUILayout.Button("Update ItemSample"))
+            {
+                UpdateItemSample();
+            }
+            if (GUILayout.Button("Update WeaponPool"))
+            {
+                UpdateWeaponPool();
+            }
+        }
+
+        private void UpdateItemSample()
+        {
+            // 수정할 프리팹의 경로 (예: Assets/Prefabs/MyPrefab.prefab)
+            string prefabPath = "Assets/Resources/Prefabs/";
+
+            // 부모 프리팹 경로 설정
+            string parentPath = prefabPath + "Inventory/ItemSample.prefab";
+
+            // 부모 프리팹 내용을 에디터 내에서 직접 로드하여 수정 가능하게 함
+            GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
+            if (parentPrefabContents == null)
+            {
+                Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
+                return;
+            }
+
+            // 자식 프리팹 추가
+            ReadPrefabFolder("Rig");
+            ReadPrefabFolder("Backpack");
+            ReadPrefabFolder("Weapon/Handgun");
+            ReadPrefabFolder("Weapon/AssaultRifle");
+            ReadPrefabFolder("Weapon/SniperRifle");
+            ReadPrefabFolder("Weapon/Shotgun");
+            ReadPrefabFolder("Weapon/Bullet_item");
+            ReadPrefabFolder("Weapon/Parts/Magazine");
+            ReadPrefabFolder("Weapon/Grenade");
+
+            // 수정 사항을 프리팹에 저장하고 프리팹 로드를 닫기
+            PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
+            PrefabUtility.UnloadPrefabContents(parentPrefabContents);
+
+            Debug.Log("프리팹 수정 완료: " + parentPath);
+
+            void ReadPrefabFolder(string folderPath)
+            {
+                // 지정된 폴더에서 모든 프리팹 파일 검색
+                string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
+
+                // 자식 프리팹들을 부모의 자식으로 추가
+                foreach (string prefabFile in prefabFiles)
+                {
+                    GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+                    if (childPrefab != null)
+                    {
+                        // 자식 프리팹의 이름을 사용해 기존에 같은 이름을 가진 자식이 있는지 확인
+                        Transform existingChild = parentPrefabContents.transform.Find(childPrefab.name);
+                        if (existingChild != null)
+                        {
+                            // 같은 이름의 자식이 이미 존재하면 삭제
+                            DestroyImmediate(existingChild.gameObject);
+                        }
+
+                        // 새로운 자식 프리팹 인스턴스화 및 부모에 추가
+                        GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
+                        childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
+                        childInstance.gameObject.SetActive(false);
+                        childInstance.transform.SetParent(parentPrefabContents.transform, false);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+                    }
+                }
+            }
+        }
+
+        private void UpdateWeaponPool()
+        {
+            string prefabPath = "Assets/Resources/Prefabs/Weapon/";
+            string parentPath = prefabPath + "WeaponPool.prefab";
+            GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
+            if (parentPrefabContents == null)
+            {
+                Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
+                return;
+            }
+
+            ReadPrefabFolder("Handgun", false);
+            ReadPrefabFolder("AssaultRifle", true);
+            ReadPrefabFolder("SniperRifle", true);
+            ReadPrefabFolder("Shotgun", true);
+
+            PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
+            PrefabUtility.UnloadPrefabContents(parentPrefabContents);
+
+            Debug.Log("프리팹 수정 완료: " + parentPath);
+
+            void ReadPrefabFolder(string folderPath, bool isMain)
+            {
+                string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
+                foreach (string prefabFile in prefabFiles)
+                {
+                    if (isMain)
+                    {
+                        for (int i = 0; i < 2; i++)
+                        {
+                            GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+                            if (childPrefab != null)
+                            {
+                                string prefabName = childPrefab.name + $"_{(char)('A' + i)}";
+                                AddPrefab(childPrefab, prefabName);
+                            }
+                            else
+                            {
+                                Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+                        if (childPrefab != null)
+                        {
+                            AddPrefab(childPrefab, childPrefab.name);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+                        }
+                    }
+                }
+
+                void AddPrefab(GameObject childPrefab, string name)
+                {
+                    Transform existingChild = parentPrefabContents.transform.Find(name);
+                    if (existingChild != null) DestroyImmediate(existingChild.gameObject);
+
+                    GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
+                    childInstance.name = name;
+                    childInstance.transform.SetParent(parentPrefabContents.transform, false);
+                    childInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                    childInstance.transform.localScale = Vector3.one;
+                }
+            }
         }
     }
     #endregion

@@ -419,9 +419,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3109328724741166710}
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0.018, z: -0.12}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6125942843977191485}
@@ -436,7 +436,7 @@ Transform:
   - {fileID: 5077160581017494592}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-6458102165378380411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,6 +452,8 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   partsObjects: []
+  bulletTf: {fileID: 0}
+  gripTf: {fileID: 0}
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -464,6 +466,7 @@ MonoBehaviour:
     isMain: 0
     weaponType: 0
     magType: 0
+    gripType: 0
     sModeInfos: []
     RPM: 0
     range: 0
@@ -512,8 +515,6 @@ MonoBehaviour:
     useRail: 
     equipMagID: 
     equipPartsIDs: []
-    defaultPos: {x: 0, y: 0, z: 0}
-    defaultRot: {x: 0, y: 0, z: 0}
   fireMode: 0
   autoFireNum: 0
   meshType: 0
