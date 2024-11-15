@@ -1762,6 +1762,7 @@ public class DataManager : MonoBehaviour
             ReadPrefabFolder("Rig");
             ReadPrefabFolder("Backpack");
             ReadPrefabFolder("Weapon/Handgun");
+            ReadPrefabFolder("Weapon/SubMachineGun");
             ReadPrefabFolder("Weapon/AssaultRifle");
             ReadPrefabFolder("Weapon/SniperRifle");
             ReadPrefabFolder("Weapon/Shotgun");
@@ -1820,6 +1821,7 @@ public class DataManager : MonoBehaviour
             }
 
             ReadPrefabFolder("Handgun", false);
+            ReadPrefabFolder("SubMachineGun", true);
             ReadPrefabFolder("AssaultRifle", true);
             ReadPrefabFolder("SniperRifle", true);
             ReadPrefabFolder("Shotgun", true);
