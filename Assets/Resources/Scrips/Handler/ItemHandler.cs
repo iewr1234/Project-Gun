@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -305,7 +306,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         SetItemRotation(false);
         SetItemCount(storageItem.totalCount);
 
-        activeSample = samples.Find(x => x.name == itemData.dataID);
+        string sampleName = GetSampleName();
+        activeSample = samples.Find(x => x.name == sampleName);
         if (activeSample == null)
         {
             Debug.LogError("Not found Sample object");
@@ -336,7 +338,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         countText.enabled = true;
         SetTotalCount(magData.loadedBullets.Count, magData.magSize);
 
-        activeSample = samples.Find(x => x.name == itemData.dataID);
+        string sampleName = GetSampleName();
+        activeSample = samples.Find(x => x.name == sampleName);
         if (activeSample == null)
         {
             Debug.LogError("Not found Sample object");
@@ -391,7 +394,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             activeSample.SetActive(false);
         }
-        activeSample = samples.Find(x => x.name == itemData.dataID);
+
+        string sampleName = item.GetSampleName();
+        activeSample = samples.Find(x => x.name == sampleName);
         if (activeSample == null)
         {
             Debug.LogError("Not found Sample object");
@@ -399,6 +404,39 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         SetPartsSample(item.weaponData);
         activeSample.SetActive(true);
         gameObject.SetActive(true);
+    }
+
+    public string GetSampleName()
+    {
+        switch (itemData.type)
+        {
+            case ItemType.Rig:
+                return rigData.rigName;
+            case ItemType.Backpack:
+                return backpackData.backpackName;
+            case ItemType.MainWeapon:
+                return weaponData.prefabName;
+            case ItemType.SubWeapon:
+                return weaponData.prefabName;
+            case ItemType.Bullet:
+                return bulletData.bulletName;
+            case ItemType.Magazine:
+                return magData.prefabName;
+            case ItemType.Muzzle:
+                return partsData.prefabName;
+            case ItemType.Sight:
+                return partsData.prefabName;
+            case ItemType.FrontHandle:
+                return partsData.prefabName;
+            case ItemType.Attachment:
+                return partsData.prefabName;
+            case ItemType.UnderBarrel:
+                return partsData.prefabName;
+            case ItemType.Grenade:
+                return grenadeData.grenadeName;
+            default:
+                return null;
+        }
     }
 
     public void SetPartsSample()

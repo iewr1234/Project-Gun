@@ -7,6 +7,7 @@ public enum WeaponType
     None,
     Pistol,
     Revolver,
+    SubMachineGun,
     AssaultRifle,
     Rifle,
     SniperRifle,
@@ -25,6 +26,8 @@ public enum WeaponGripType
 {
     None,
     Handgun,
+    SubMachineGun_noStock,
+    SubMachineGun,
     AssaultRifle,
     SniperRifle,
     Shotgun_Magazine,

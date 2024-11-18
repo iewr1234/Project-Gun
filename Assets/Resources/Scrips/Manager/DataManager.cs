@@ -1797,9 +1797,14 @@ public class DataManager : MonoBehaviour
 
                         // 새로운 자식 프리팹 인스턴스화 및 부모에 추가
                         GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
-                        childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
-                        childInstance.gameObject.SetActive(false);
                         childInstance.transform.SetParent(parentPrefabContents.transform, false);
+                        childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
+                        Transform[] childTfs = childInstance.GetComponentsInChildren<Transform>();
+                        foreach (Transform childTf in childTfs)
+                        {
+                            childTf.gameObject.layer = LayerMask.NameToLayer("UI"); // 레이어 설정
+                        }
+                        childInstance.SetActive(false);
                     }
                     else
                     {

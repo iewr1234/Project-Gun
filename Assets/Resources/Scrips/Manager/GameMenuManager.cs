@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public enum GameMenuState
 {
@@ -175,9 +176,9 @@ public class GameMenuManager : MonoBehaviour
 
             if (dataMgr != null)
             {
-                for (int i = 0; i < dataMgr.gameData.initialItemIDList.Count; i++)
+                for (int i = 0; i < dataMgr.gameData.startingItemID_List.Count; i++)
                 {
-                    var initialItem = dataMgr.gameData.initialItemIDList[i];
+                    var initialItem = dataMgr.gameData.startingItemID_List[i];
                     switch (initialItem.createPos)
                     {
                         case CreatePos.Equip:
@@ -945,7 +946,7 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    public void SetInitialItemInEquipSlot(InitialItem initialItem)
+    public void SetInitialItemInEquipSlot(StartingItem_Inventory initialItem)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == initialItem.ID);
@@ -1246,7 +1247,24 @@ public class GameMenuManager : MonoBehaviour
                 if (item.equipSlot != null)
                 {
                     item.equipSlot.slotText.enabled = false;
-                    if (item.equipSlot.type != EquipType.Chamber) item.equipSlot.countText.enabled = true;
+                    switch (item.equipSlot.type)
+                    {
+                        case EquipType.MainWeapon1:
+                            item.equipSlot.countText.enabled = true;
+                            break;
+                        case EquipType.MainWeapon2:
+                            item.equipSlot.countText.enabled = true;
+                            break;
+                        case EquipType.SubWeapon:
+                            item.equipSlot.countText.enabled = true;
+                            break;
+                        case EquipType.Magazine:
+                            item.equipSlot.countText.enabled = true;
+                            break;
+                        default:
+                            item.equipSlot.countText.enabled = false;
+                            break;
+                    }
                     item.SetItemRotation(false);
                     item.SetItemScale(true);
                     item.ChangeRectPivot(true);
@@ -1417,7 +1435,24 @@ public class GameMenuManager : MonoBehaviour
         else if (putItem.equipSlot != null)
         {
             putItem.equipSlot.slotText.enabled = false;
-            if (putItem.equipSlot.type != EquipType.Chamber) putItem.equipSlot.countText.enabled = true;
+            switch (putItem.equipSlot.type)
+            {
+                case EquipType.MainWeapon1:
+                    putItem.equipSlot.countText.enabled = true;
+                    break;
+                case EquipType.MainWeapon2:
+                    putItem.equipSlot.countText.enabled = true;
+                    break;
+                case EquipType.SubWeapon:
+                    putItem.equipSlot.countText.enabled = true;
+                    break;
+                case EquipType.Magazine:
+                    putItem.equipSlot.countText.enabled = true;
+                    break;
+                default:
+                    putItem.equipSlot.countText.enabled = false;
+                    break;
+            }
             putItem.SetItemScale(true);
             putItem.ChangeRectPivot(true);
             putItem.transform.SetParent(putItem.equipSlot.transform, false);

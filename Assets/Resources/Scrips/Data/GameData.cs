@@ -12,11 +12,19 @@ public enum CreatePos
 }
 
 [System.Serializable]
-public struct InitialItem
+public struct StartingItem_Inventory
 {
     public string ID;
     public int num;
     public CreatePos createPos;
+}
+
+[System.Serializable]
+public struct StartingItem_Storage
+{
+    public string storageName;
+    public string ID;
+    public int num;
 }
 
 [System.Serializable]
@@ -70,13 +78,13 @@ public class GameData : ScriptableObject
     [Header("[Player]")]
     public string playerID;
     public int health;
-    [Space(5f)]
-
-    public List<InitialItem> initialItemIDList = new List<InitialItem>();
 
     [Header("[BaseCamp]")]
     public List<StorageInfo> baseStorages = new List<StorageInfo>();
     public List<StorageInfo> floorStorages = new List<StorageInfo>();
+    [Space(10f)]
+
+    public List<StartingItem_Inventory> startingItemID_List = new List<StartingItem_Inventory>();
 
     public void RandomMapSelection()
     {

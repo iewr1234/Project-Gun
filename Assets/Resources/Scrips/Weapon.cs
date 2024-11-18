@@ -204,8 +204,10 @@ public class Weapon : MonoBehaviour
         }
 
         // NeedWork_Top: 애니매이션 레이어 변경
-        charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
-        charCtr.upperIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Upper : (int)AnimationLayers_A.Sub_A_Upper;
+        charCtr.baseIndex = weaponData.isMain ? (weaponData.gripType == WeaponGripType.SubMachineGun_noStock
+                                              ? (int)AnimationLayers_A.Sub_A_Base : (int)AnimationLayers_A.Main_A_Base)
+                                              : (int)AnimationLayers_A.Sub_A_Base;
+        charCtr.upperIndex = charCtr.baseIndex + 1;
 
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);

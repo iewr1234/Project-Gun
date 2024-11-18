@@ -233,7 +233,9 @@ public class PopUp_Inventory : MonoBehaviour
         {
             itemInfo.activeSample.SetActive(false);
         }
-        itemInfo.activeSample = itemInfo.samples.Find(x => x.name == item.itemData.dataID);
+
+        string sampleName = item.GetSampleName();
+        itemInfo.activeSample = itemInfo.samples.Find(x => x.name == sampleName);
         itemInfo.activeSample.SetActive(true);
         for (int i = 0; i < itemInfo.infoTexts.Count; i++)
         {

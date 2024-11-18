@@ -983,6 +983,7 @@ public class MapEditor : MonoBehaviour
                         node.SetOnMarker(allLoad, nodeData.baseType);
                         if (node.baseType == BaseCampMarker.Storage_Node)
                         {
+                            // 베이스 창고 검색 후 추가
                             var baseStorages = gameMgr.dataMgr.gameData.baseStorages;
                             var find = baseStorages.Find(x => x.nodePos == node.nodePos);
                             if (find == null)
