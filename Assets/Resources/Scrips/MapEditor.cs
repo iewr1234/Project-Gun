@@ -997,8 +997,8 @@ public class MapEditor : MonoBehaviour
                                 };
                                 baseStorages.Add(baseStorage);
 
-                                if (node.baseStorage.createItmes.Count > 0) 
-                                    gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.createItmes);
+                                if (node.baseStorage.startingItmes.Count > 0) 
+                                    gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.startingItmes);
                             }
                         }
                         break;

@@ -25,6 +25,7 @@ public enum WeaponPartsSize
 public class WeaponPartsDataInfo
 {
     public string indexName;
+    [Space(5f)]
 
     public string ID;
     public string prefabName;

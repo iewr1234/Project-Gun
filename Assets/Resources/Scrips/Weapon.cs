@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using UnityEngine;
 
 [System.Serializable]
@@ -46,7 +47,7 @@ public class Weapon : MonoBehaviour
     [Header("---Access Component---")]
     [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
     [HideInInspector] public Transform bulletTf;
-    [HideInInspector] public Transform gripTf;
+    public Transform gripTf;
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -134,8 +135,18 @@ public class Weapon : MonoBehaviour
         var parts = new List<GameObject>();
         var partsTf = transform.Find("PartsTransform");
 
+        var muzzleTf = partsTf.Find("Muzzle");
+        AddParts(muzzleTf);
+
         var magTf = partsTf.Find("Magazine");
         AddParts(magTf);
+
+        var attachmentTf = partsTf.Find("Attachment");
+        if (attachmentTf != null)
+        {
+            AddParts(attachmentTf.Find("Left"));
+            AddParts(attachmentTf.Find("Right"));
+        }
 
         var sightTf = partsTf.Find("Sight");
         AddParts(sightTf);
@@ -204,9 +215,7 @@ public class Weapon : MonoBehaviour
         }
 
         // NeedWork_Top: 애니매이션 레이어 변경
-        charCtr.baseIndex = weaponData.isMain ? (weaponData.gripType == WeaponGripType.SubMachineGun_noStock
-                                              ? (int)AnimationLayers_A.Sub_A_Base : (int)AnimationLayers_A.Main_A_Base)
-                                              : (int)AnimationLayers_A.Sub_A_Base;
+        charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
         charCtr.upperIndex = charCtr.baseIndex + 1;
 
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
@@ -214,7 +223,7 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetBool("isMain", weaponData.isMain);
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
-        charCtr.SetRig(weaponData);
+        charCtr.SetRig(this);
         charCtr.SetWeaponPivot(gripInfo);
         charCtr.SetAbility();
     }

@@ -142,7 +142,7 @@ public class CharacterController : MonoBehaviour
     private Rig rig;
     [SerializeField] private MultiAimConstraint headRig;
     [SerializeField] private MultiAimConstraint chestRig;
-    //[SerializeField] private ChainIKConstraint chainIK;
+    [SerializeField] private ChainIKConstraint chainIK;
 
     [HideInInspector] public Transform aimPoint;
 
@@ -150,7 +150,7 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Transform subHolsterPivot;
     [HideInInspector] public Transform rightHandPivot;
     [HideInInspector] public Transform leftHandPivot;
-    //[HideInInspector] public Transform gripPivot;
+    [HideInInspector] public Transform gripPivot;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
@@ -304,7 +304,7 @@ public class CharacterController : MonoBehaviour
         headRig.weight = 0f;
         chestRig = transform.Find("Rig/ChestAim").GetComponent<MultiAimConstraint>();
         chestRig.weight = 0f;
-        //chainIK = transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
+        chainIK = transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
 
         mainHolsterPivot = transform.Find("Root/Hips/Spine_01/Spine_02");
         subHolsterPivot = transform.Find("Root/Hips/UpperLeg_R/Holster");
@@ -319,10 +319,10 @@ public class CharacterController : MonoBehaviour
         weaponPivot.transform.SetParent(leftHand, false);
         leftHandPivot = weaponPivot.transform;
 
-        //gripPivot = new GameObject("GripPivot").transform;
-        //gripPivot.transform.SetParent(transform, false);
-        //chainIK.data.target = gripPivot;
-        //rigBdr.Build();
+        gripPivot = new GameObject("GripPivot").transform;
+        gripPivot.transform.SetParent(transform, false);
+        chainIK.data.target = gripPivot;
+        rigBdr.Build();
 
         ownerType = _ownerType;
 
@@ -438,15 +438,18 @@ public class CharacterController : MonoBehaviour
     /// Rig ¼³Á¤
     /// </summary>
     /// <param name="type"></param>
-    public void SetRig(WeaponDataInfo weaponData)
+    public void SetRig(Weapon weapon)
     {
-        switch (weaponData.weaponType)
+        switch (weapon.weaponData.weaponType)
         {
             case WeaponType.Pistol:
                 chestRig.data.offset = new Vector3(-10f, 0f, 10f);
                 break;
             case WeaponType.Revolver:
                 chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+                break;
+            case WeaponType.SubMachineGun:
+                chestRig.data.offset = new Vector3(-40.8f, 0f, 0f);
                 break;
             case WeaponType.AssaultRifle:
                 chestRig.data.offset = new Vector3(-46.7f, 0f, 0f);
@@ -460,6 +463,10 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
+
+        //gripPivot.SetParent(weapon.gripTf, false);
+        //gripPivot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        //chainIK.data.target = weapon.gripTf;
     }
 
     public void SetWeaponPivot(WeaponGripInfo gripInfo)
@@ -608,6 +615,13 @@ public class CharacterController : MonoBehaviour
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
+    }
+
+    private void FixedUpdate()
+    {
+        if (currentWeapon == null) return;
+
+        gripPivot.SetPositionAndRotation(currentWeapon.gripTf.position, currentWeapon.gripTf.rotation);
     }
 
     private void Update()
@@ -2621,7 +2635,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(aimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData);
+                SetRig(currentWeapon);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2864,7 +2878,7 @@ public class CharacterController : MonoBehaviour
                 commandList.Add(coverAimCommand);
                 break;
             case CommandType.Shoot:
-                SetRig(currentWeapon.weaponData);
+                SetRig(currentWeapon);
                 var shootCommand = new CharacterCommand
                 {
                     indexName = $"{type}",

@@ -22,7 +22,6 @@ public struct StartingItem_Inventory
 [System.Serializable]
 public struct StartingItem_Storage
 {
-    public string storageName;
     public string ID;
     public int num;
 }

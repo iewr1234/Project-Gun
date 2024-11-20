@@ -84,7 +84,7 @@ public class FieldNode : MonoBehaviour
         outlines = new List<NodeOutline>(new NodeOutline[4].ToList());
         unableMove = transform.Find("UnableMove").GetComponent<MeshRenderer>();
         itemCase = transform.Find("ItemCase").gameObject;
-        SetItemCase(false);
+        //SetItemCase(false);
 
         marker = transform.Find("Canvas/Marker").gameObject;
         markerImage = marker.transform.Find("Image").GetComponent<Image>();

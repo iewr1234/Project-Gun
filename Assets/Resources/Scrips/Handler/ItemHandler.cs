@@ -81,7 +81,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 }
             }
 
-            if (sample.name[0] == 'W')
+            if (sample.GetComponent<Weapon>() != null)
             {
                 var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
                 for (int j = 0; j < partsSamples.Length; j++)
@@ -133,7 +133,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 }
             }
 
-            if (sample.name[0] == 'W')
+            if (sample.GetComponent<Weapon>() != null)
             {
                 var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
                 for (int j = 0; j < partsSamples.Length; j++)

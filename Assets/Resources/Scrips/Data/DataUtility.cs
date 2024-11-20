@@ -15,8 +15,8 @@ public struct WeaponGripInfo
 {
     public Vector3 pivotPos;
     public Quaternion pivotRot;
-    //public Vector3 gripPos;
-    //public Quaternion gripRot;
+    public Vector3 gripPos;
+    public Quaternion gripRot;
 }
 
 public static class DataUtility
@@ -66,8 +66,8 @@ public static class DataUtility
     public static readonly Quaternion weaponPivot_rot_HG = Quaternion.Euler(-8.375f, 89f, -90.246f);
     public static readonly Vector3 weaponPivot_pos_SMG_ns = new Vector3(0.082f, 0.034f, -0.037f);
     public static readonly Quaternion weaponPivot_rot_SMG_ns = Quaternion.Euler(-8.375f, 89f, -90.246f);
-    public static readonly Vector3 weaponPivot_pos_SMG = new Vector3(0.113f, 0.033f, -0.05f);
-    public static readonly Quaternion weaponPivot_rot_SMG = Quaternion.Euler(-12.9f, 98.92f, -97f);
+    public static readonly Vector3 weaponPivot_pos_SMG = new Vector3(0.113f, 0.033f, -0.04f);
+    public static readonly Quaternion weaponPivot_rot_SMG = Quaternion.Euler(-8f, 98.92f, -97f);
     public static readonly Vector3 weaponPivot_pos_AR = new Vector3(0.113f, 0.033f, -0.05f);
     public static readonly Quaternion weaponPivot_rot_AR = Quaternion.Euler(-12.9f, 98.92f, -97f);
     public static readonly Vector3 weaponPivot_pos_SR = new Vector3(0.092f, 0.024f, -0.048f);
@@ -327,8 +327,8 @@ public static class DataUtility
             case WeaponGripType.SubMachineGun_noStock:
                 gripInfo = new WeaponGripInfo()
                 {
-                    pivotPos = weaponPivot_pos_SMG_ns,
-                    pivotRot = weaponPivot_rot_SMG_ns,
+                    pivotPos = weaponPivot_pos_SMG,
+                    pivotRot = weaponPivot_rot_SMG,
                 };
                 break;
             case WeaponGripType.SubMachineGun:

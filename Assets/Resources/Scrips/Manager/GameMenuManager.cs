@@ -70,7 +70,7 @@ public class GameMenuManager : MonoBehaviour
     private float clickTime;
 
     private List<ItemHandler> items = new List<ItemHandler>();
-    private readonly int itemPoolMax = 100;
+    private readonly int itemPoolMax = 30;
 
     [Space(5f)]
     public List<ItemHandler> activeItem = new List<ItemHandler>();
@@ -2013,15 +2013,16 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    public void CreateStorageItems(StorageInfo storage, List<string> itemList)
+    public void CreateStorageItems(StorageInfo storage, List<StartingItem_Storage> itemList)
     {
         for (int i = 0; i < itemList.Count; i++)
         {
-            var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemList[i]);
+            var itemInfo = itemList[i];
+            var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemInfo.ID);
             if (itemData == null) continue;
 
             var item = items.Find(x => !x.gameObject.activeSelf);
-            item.SetItemInfo(itemData, 1, itemData.addOption);
+            item.SetItemInfo(itemData, itemInfo.num, itemData.addOption);
             otherStorage.PutInItemOfStorage(storage, item);
         }
     }
