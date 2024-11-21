@@ -262,6 +262,7 @@ public class FieldNode : MonoBehaviour
 
     public void AddNodeOutline(Transform nodeOutlineTf)
     {
+        NodeOutline outlinePrefab = Resources.Load<NodeOutline>("Prefabs/NodeOutline");
         for (int i = 0; i < onAxisNodes.Count; i++)
         {
             var onAxisNode = onAxisNodes[i];
@@ -301,7 +302,7 @@ public class FieldNode : MonoBehaviour
 
         NodeOutline CreateNodeOutline(int index)
         {
-            var outline = Instantiate(Resources.Load<NodeOutline>("Prefabs/NodeOutline"));
+            var outline = Instantiate(outlinePrefab);
             outline.transform.SetParent(nodeOutlineTf, false);
             outline.SetComponents(index, this);
             return outline;

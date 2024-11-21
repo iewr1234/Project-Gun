@@ -289,12 +289,14 @@ public class Weapon : MonoBehaviour
                 //    charCtr.rigBdr.Build();
                 //    charCtr.SetChainWeight(true, 1f);
                 //}
+                charCtr.moveGripPivot = true;
                 break;
             case "Left":
-                transform.SetParent(charCtr.leftHandPivot);
+                transform.SetParent(charCtr.leftHandPivot, true);
                 //charCtr.gripPivot.transform.SetParent(charCtr.leftHandPivot);
                 //charCtr.SetChainWeight(true, 0f);
                 //charCtr.rigBdr.Build();
+                charCtr.moveGripPivot = false;
                 break;
             default:
                 break;

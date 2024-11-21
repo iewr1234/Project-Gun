@@ -37,7 +37,7 @@ MonoBehaviour:
     bossEnemy:
       ID: E0010
       level: 1
-  mapName: M0001
+  mapName: BASECAMP
   mapLoad: 0
   playerID: P0001
   health: 0
@@ -45,8 +45,1971 @@ MonoBehaviour:
   - storageName: "\uCC3D\uACE01"
     type: 1
     nodePos: {x: 4, y: 0}
-    slotSize: {x: 7, y: 3}
-    itemList: []
+    slotSize: {x: 7, y: 15}
+    itemList:
+    - indexName: SMG_1_0/0
+      slotIndex: {x: 0, y: 0}
+      itemSize: {x: 2, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T0101: SMG_1'
+        serialID: 1f2c1a1d-2aaf-465d-ade9-4c606befcfec
+        ID: T0101
+        dataID: W0022
+        itemName: SMG_1
+        type: 10
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 2, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions:
+        - indexName: 'Critical: 12'
+          type: 4
+          value: 12
+          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +12%\r"
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 'W0022: SMG_1'
+        ID: W0022
+        prefabName: SMG_1
+        weaponName: SMG_1
+        model: 1
+        caliber: 9
+        weight: 3
+        isMain: 1
+        weaponType: 3
+        magType: 1
+        gripType: 2
+        sModeInfos:
+        - indexName: 'PointShot: 60'
+          modeType: 0
+          value: 60
+        - indexName: 'AimShot: 70'
+          modeType: 1
+          value: 70
+        - indexName: 'SightShot: 80'
+          modeType: 2
+          value: 80
+        RPM: 50
+        range: 10
+        watchAngle: 30
+        actionCost: 4
+        MOA: 3
+        stability: 100
+        rebound: 150
+        propellant: 100
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 01000000
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: None
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: SMG_2_2/0
+      slotIndex: {x: 2, y: 0}
+      itemSize: {x: 3, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T0102: SMG_2'
+        serialID: ac73edb2-73de-4bc8-a68b-ded4c33bb9c4
+        ID: T0102
+        dataID: W0023
+        itemName: SMG_2
+        type: 10
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 3, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions:
+        - indexName: 'Damage: 4'
+          type: 3
+          value: 4
+          scriptText: "\uD53C\uD574\uB7C9 +4\r"
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 'W0023: SMG_2'
+        ID: W0023
+        prefabName: SMG_2
+        weaponName: SMG_2
+        model: 1
+        caliber: 9
+        weight: 3
+        isMain: 1
+        weaponType: 3
+        magType: 1
+        gripType: 3
+        sModeInfos:
+        - indexName: 'PointShot: 60'
+          modeType: 0
+          value: 60
+        - indexName: 'AimShot: 70'
+          modeType: 1
+          value: 70
+        - indexName: 'SightShot: 80'
+          modeType: 2
+          value: 80
+        RPM: 50
+        range: 10
+        watchAngle: 30
+        actionCost: 4
+        MOA: 3
+        stability: 100
+        rebound: 150
+        propellant: 100
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 01000000
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: None
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: SMG_3_0/2
+      slotIndex: {x: 0, y: 2}
+      itemSize: {x: 3, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T0103: SMG_3'
+        serialID: b8a45393-1ada-46cf-994d-2e63d01723c2
+        ID: T0103
+        dataID: W0024
+        itemName: SMG_3
+        type: 10
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 3, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions:
+        - indexName: 'Health: 23'
+          type: 1
+          value: 23
+          scriptText: "\uCCB4\uB825 +23\r"
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 'W0024: SMG_3'
+        ID: W0024
+        prefabName: SMG_3
+        weaponName: SMG_3
+        model: 1
+        caliber: 9
+        weight: 3
+        isMain: 1
+        weaponType: 3
+        magType: 1
+        gripType: 3
+        sModeInfos:
+        - indexName: 'PointShot: 60'
+          modeType: 0
+          value: 60
+        - indexName: 'AimShot: 70'
+          modeType: 1
+          value: 70
+        - indexName: 'SightShot: 80'
+          modeType: 2
+          value: 80
+        RPM: 50
+        range: 10
+        watchAngle: 30
+        actionCost: 4
+        MOA: 3
+        stability: 100
+        rebound: 150
+        propellant: 100
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 01000000
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: None
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: SMG_4_5/0
+      slotIndex: {x: 5, y: 0}
+      itemSize: {x: 2, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T0104: SMG_4'
+        serialID: 594d12a4-4680-442e-95f8-ad82ef390e34
+        ID: T0104
+        dataID: W0025
+        itemName: SMG_4
+        type: 10
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 2, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions:
+        - indexName: 'Critical: 5'
+          type: 4
+          value: 5
+          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +5%\r"
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 'W0025: SMG_4'
+        ID: W0025
+        prefabName: SMG_4
+        weaponName: SMG_4
+        model: 1
+        caliber: 9
+        weight: 3
+        isMain: 1
+        weaponType: 3
+        magType: 1
+        gripType: 2
+        sModeInfos:
+        - indexName: 'PointShot: 60'
+          modeType: 0
+          value: 60
+        - indexName: 'AimShot: 70'
+          modeType: 1
+          value: 70
+        - indexName: 'SightShot: 80'
+          modeType: 2
+          value: 80
+        RPM: 50
+        range: 10
+        watchAngle: 30
+        actionCost: 4
+        MOA: 3
+        stability: 100
+        rebound: 150
+        propellant: 100
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 01000000
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: None
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: SMG_5_3/2
+      slotIndex: {x: 3, y: 2}
+      itemSize: {x: 3, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T0105: SMG_5'
+        serialID: fe7b1ba7-2422-4418-9f77-f95ed4d5136a
+        ID: T0105
+        dataID: W0026
+        itemName: SMG_5
+        type: 10
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 700
+        size: {x: 3, y: 2}
+        addOption: 1
+        setDropTable: 0
+        itemOptions:
+        - indexName: 'Health: 44'
+          type: 1
+          value: 44
+          scriptText: "\uCCB4\uB825 +44\r"
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 'W0026: SMG_5'
+        ID: W0026
+        prefabName: SMG_5
+        weaponName: SMG_5
+        model: 1
+        caliber: 9
+        weight: 3
+        isMain: 1
+        weaponType: 3
+        magType: 1
+        gripType: 3
+        sModeInfos:
+        - indexName: 'PointShot: 60'
+          modeType: 0
+          value: 60
+        - indexName: 'AimShot: 70'
+          modeType: 1
+          value: 70
+        - indexName: 'SightShot: 80'
+          modeType: 2
+          value: 80
+        RPM: 50
+        range: 10
+        watchAngle: 30
+        actionCost: 4
+        MOA: 3
+        stability: 100
+        rebound: 150
+        propellant: 100
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 01000000
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: None
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Magazine_27_6/2
+      slotIndex: {x: 6, y: 2}
+      itemSize: {x: 1, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T1509: Magazine_27'
+        serialID: e2c25cbc-5a93-45de-a5d0-a3d46321b8b9
+        ID: T1509
+        dataID: M0027
+        itemName: Magazine_27
+        type: 21
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 150
+        size: {x: 1, y: 2}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 'M0027: SMG_1_mag'
+        ID: M0027
+        loadedBulletID: 
+        prefabName: Magazine_27
+        magName: SMG_1_mag
+        compatModel: 01000000
+        compatCaliber: 9
+        weight: 0.2
+        magSize: 30
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Magazine_28_0/4
+      slotIndex: {x: 0, y: 4}
+      itemSize: {x: 1, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T1510: Magazine_28'
+        serialID: 5ea0c162-7829-4419-a4d8-67df614bd8b3
+        ID: T1510
+        dataID: M0028
+        itemName: Magazine_28
+        type: 21
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 150
+        size: {x: 1, y: 2}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 'M0028: SMG_2_mag'
+        ID: M0028
+        loadedBulletID: 
+        prefabName: Magazine_28
+        magName: SMG_2_mag
+        compatModel: 01000000
+        compatCaliber: 9
+        weight: 0.2
+        magSize: 30
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Magazine_29_1/4
+      slotIndex: {x: 1, y: 4}
+      itemSize: {x: 1, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T1511: Magazine_29'
+        serialID: 0d0c1252-d997-4d54-a2cb-a2601f1dcc57
+        ID: T1511
+        dataID: M0029
+        itemName: Magazine_29
+        type: 21
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 150
+        size: {x: 1, y: 2}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 'M0029: SMG_3_mag'
+        ID: M0029
+        loadedBulletID: 
+        prefabName: Magazine_29
+        magName: SMG_3_mag
+        compatModel: 01000000
+        compatCaliber: 9
+        weight: 0.2
+        magSize: 30
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Magazine_30_2/4
+      slotIndex: {x: 2, y: 4}
+      itemSize: {x: 1, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T1512: Magazine_30'
+        serialID: a188a48a-9dc3-42ab-9c9c-fe5d5dcd9159
+        ID: T1512
+        dataID: M0030
+        itemName: Magazine_30
+        type: 21
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 150
+        size: {x: 1, y: 2}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 'M0030: SMG_4_mag'
+        ID: M0030
+        loadedBulletID: 
+        prefabName: Magazine_30
+        magName: SMG_4_mag
+        compatModel: 01000000
+        compatCaliber: 9
+        weight: 0.2
+        magSize: 30
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Magazine_31_3/4
+      slotIndex: {x: 3, y: 4}
+      itemSize: {x: 1, y: 2}
+      totalCount: 0
+      rotation: 0
+      itemData:
+        indexName: 'T1513: Magazine_31'
+        serialID: 27272663-34b7-45ea-9004-059ecb4158ea
+        ID: T1513
+        dataID: M0031
+        itemName: Magazine_31
+        type: 21
+        level: 1
+        rarity: 1
+        maxNesting: 1
+        price: 150
+        size: {x: 1, y: 2}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 
+        ID: 
+        bulletName: 
+        meshType: 0
+        level: 0
+        caliber: 0
+        pelletNum: 0
+        spread: 0
+        weight: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        damage: 0
+        penetrate: 0
+        armorBreak: 0
+        critical: 0
+      magData:
+        indexName: 'M0031: SMG_5_mag'
+        ID: M0031
+        loadedBulletID: 
+        prefabName: Magazine_31
+        magName: SMG_5_mag
+        compatModel: 01000000
+        compatCaliber: 9
+        weight: 0.2
+        magSize: 30
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Bullet_3_4/4
+      slotIndex: {x: 4, y: 4}
+      itemSize: {x: 1, y: 1}
+      totalCount: 300
+      rotation: 0
+      itemData:
+        indexName: 'T1002: Bullet_3'
+        serialID: 7abca807-455d-40f1-b858-8ab56855b325
+        ID: T1002
+        dataID: B0003
+        itemName: Bullet_3
+        type: 20
+        level: 1
+        rarity: 1
+        maxNesting: 300
+        price: 50
+        size: {x: 1, y: 1}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 'B0003: Bullet_3'
+        ID: B0003
+        bulletName: Bullet_3
+        meshType: 0
+        level: 1
+        caliber: 9
+        pelletNum: 0
+        spread: 0
+        weight: 0.1
+        MOA: 5
+        stability: 5
+        rebound: 5
+        propellant: -5
+        damage: 3
+        penetrate: 5
+        armorBreak: 5
+        critical: 3
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Bullet_3_5/4
+      slotIndex: {x: 5, y: 4}
+      itemSize: {x: 1, y: 1}
+      totalCount: 300
+      rotation: 0
+      itemData:
+        indexName: 'T1002: Bullet_3'
+        serialID: eff46c86-3fa7-4521-a119-582fcbb83754
+        ID: T1002
+        dataID: B0003
+        itemName: Bullet_3
+        type: 20
+        level: 1
+        rarity: 1
+        maxNesting: 300
+        price: 50
+        size: {x: 1, y: 1}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 'B0003: Bullet_3'
+        ID: B0003
+        bulletName: Bullet_3
+        meshType: 0
+        level: 1
+        caliber: 9
+        pelletNum: 0
+        spread: 0
+        weight: 0.1
+        MOA: 5
+        stability: 5
+        rebound: 5
+        propellant: -5
+        damage: 3
+        penetrate: 5
+        armorBreak: 5
+        critical: 3
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
+    - indexName: Bullet_3_6/4
+      slotIndex: {x: 6, y: 4}
+      itemSize: {x: 1, y: 1}
+      totalCount: 300
+      rotation: 0
+      itemData:
+        indexName: 'T1002: Bullet_3'
+        serialID: 61573ed5-25d4-4548-8cb6-6ed1ad0285c4
+        ID: T1002
+        dataID: B0003
+        itemName: Bullet_3
+        type: 20
+        level: 1
+        rarity: 1
+        maxNesting: 300
+        price: 50
+        size: {x: 1, y: 1}
+        addOption: 0
+        setDropTable: 0
+        itemOptions: []
+      rigData:
+        indexName: 
+        ID: 
+        rigName: 
+        storageSize: {x: 0, y: 0}
+      backpackData:
+        indexName: 
+        ID: 
+        backpackName: 
+        storageSize: {x: 0, y: 0}
+      weaponData:
+        indexName: 
+        ID: 
+        prefabName: 
+        weaponName: 
+        model: 0
+        caliber: 0
+        weight: 0
+        isMain: 0
+        weaponType: 0
+        magType: 0
+        gripType: 0
+        sModeInfos: []
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        actionCost: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        propellant: 0
+        chamberBullet:
+          indexName: 
+          ID: 
+          bulletName: 
+          meshType: 0
+          level: 0
+          caliber: 0
+          pelletNum: 0
+          spread: 0
+          weight: 0
+          MOA: 0
+          stability: 0
+          rebound: 0
+          propellant: 0
+          damage: 0
+          penetrate: 0
+          armorBreak: 0
+          critical: 0
+        isChamber: 0
+        equipMag:
+          indexName: 
+          ID: 
+          loadedBulletID: 
+          prefabName: 
+          magName: 
+          compatModel: 
+          compatCaliber: 0
+          weight: 0
+          magSize: 0
+          loadedBullets: []
+        isMag: 0
+        equipPartsList: []
+        useMagazine: 
+        useMuzzle: 
+        useSight: 
+        useUnderRail: 
+        useRail: 
+        equipMagID: 
+        equipPartsIDs: []
+      bulletData:
+        indexName: 'B0003: Bullet_3'
+        ID: B0003
+        bulletName: Bullet_3
+        meshType: 0
+        level: 1
+        caliber: 9
+        pelletNum: 0
+        spread: 0
+        weight: 0.1
+        MOA: 5
+        stability: 5
+        rebound: 5
+        propellant: -5
+        damage: 3
+        penetrate: 5
+        armorBreak: 5
+        critical: 3
+      magData:
+        indexName: 
+        ID: 
+        loadedBulletID: 
+        prefabName: 
+        magName: 
+        compatModel: 
+        compatCaliber: 0
+        weight: 0
+        magSize: 0
+        loadedBullets: []
+      partsData:
+        indexName: 
+        ID: 
+        prefabName: 
+        partsName: 
+        compatModel: 
+        weight: 0
+        type: 0
+        size: 0
+        RPM: 0
+        range: 0
+        watchAngle: 0
+        MOA: 0
+        stability: 0
+        rebound: 0
+        ergonomy: 0
+        headShot: 0
+        actionCost: 0
+      grenadeData:
+        indexName: 
+        ID: 
+        grenadeName: 
+        FX_name: 
+        throwRange: 0
+        blastRange: 0
+        weight: 0
+        damage: 0
   - storageName: "\uCC3D\uACE02"
     type: 1
     nodePos: {x: 5, y: 0}
@@ -60,9 +2023,21 @@ MonoBehaviour:
   - ID: T6001
     num: 1
     createPos: 1
-  - ID: T0003
+  - ID: T0502
     num: 1
     createPos: 1
-  - ID: T0500
+  - ID: T1504
     num: 1
-    createPos: 1
+    createPos: 3
+  - ID: T1504
+    num: 1
+    createPos: 3
+  - ID: T1000
+    num: 300
+    createPos: 2
+  - ID: T0201
+    num: 1
+    createPos: 4
+  - ID: T1003
+    num: 300
+    createPos: 2

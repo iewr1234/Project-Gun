@@ -168,6 +168,8 @@ public class MapEditor : MonoBehaviour
     private Vector3 sidePos_On;
     private Vector3 sidePos_Off;
 
+    private readonly int LOG_INTERVAL = 100;
+
     public void SetComponents(GameManager _gameMgr)
     {
         gameMgr = _gameMgr;
@@ -882,11 +884,12 @@ public class MapEditor : MonoBehaviour
         var interval = DataUtility.nodeInterval;
         int totalNodes = mapSize.x * mapSize.y;
         int createdNodes = 0;
+        FieldNode nodePrefab = Resources.Load<FieldNode>("Prefabs/FieldNode");
         for (int i = 0; i < mapSize.y; i++)
         {
             for (int j = 0; j < mapSize.x; j++)
             {
-                var fieldNode = Instantiate(Resources.Load<FieldNode>("Prefabs/FieldNode"));
+                var fieldNode = Instantiate(nodePrefab);
                 fieldNode.transform.SetParent(fieldNodeTf, false);
                 var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
                 fieldNode.transform.position = pos;
@@ -895,7 +898,7 @@ public class MapEditor : MonoBehaviour
                 gameMgr.nodeList.Add(fieldNode);
                 createdNodes++;
 
-                if ((i + j) % 50 == 0)
+                if ((i + j) % LOG_INTERVAL == 0)
                 {
                     float progress = (float)createdNodes / totalNodes * 100;
                     Debug.Log($"노드 생성 진행률: {progress}%");

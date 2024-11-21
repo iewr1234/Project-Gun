@@ -142,7 +142,7 @@ public class CharacterController : MonoBehaviour
     private Rig rig;
     [SerializeField] private MultiAimConstraint headRig;
     [SerializeField] private MultiAimConstraint chestRig;
-    [SerializeField] private ChainIKConstraint chainIK;
+    [HideInInspector] public ChainIKConstraint chainIK;
 
     [HideInInspector] public Transform aimPoint;
 
@@ -272,7 +272,8 @@ public class CharacterController : MonoBehaviour
 
     //private bool weightCheck;
     //private bool runInstantly;
-    //private float targetWeight;
+    [HideInInspector] public bool moveGripPivot;
+    [HideInInspector] public float targetWeight;
 
     /// <summary>
     /// 구성요소 설정
@@ -463,10 +464,8 @@ public class CharacterController : MonoBehaviour
             default:
                 break;
         }
-
-        //gripPivot.SetParent(weapon.gripTf, false);
-        //gripPivot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-        //chainIK.data.target = weapon.gripTf;
+        moveGripPivot = true;
+        targetWeight = 1f;
     }
 
     public void SetWeaponPivot(WeaponGripInfo gripInfo)
@@ -619,9 +618,24 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        MoveGripPivot();
+        SetWeightOfChainIK();
+    }
+
+    private void MoveGripPivot()
+    {
+        if (!moveGripPivot) return;
         if (currentWeapon == null) return;
+        if (currentWeapon.gripTf == null) return;
 
         gripPivot.SetPositionAndRotation(currentWeapon.gripTf.position, currentWeapon.gripTf.rotation);
+    }
+
+    private void SetWeightOfChainIK()
+    {
+        if (chainIK.weight == targetWeight) return;
+
+        chainIK.weight = targetWeight;
     }
 
     private void Update()
@@ -3136,7 +3150,7 @@ public class CharacterController : MonoBehaviour
         }
         animator.SetBool("reload", false);
         animator.SetBool("loadChamber", false);
-        currentWeapon.WeaponSwitching("Right");
+        //currentWeapon.WeaponSwitching("Right");
         commandList.RemoveAt(0);
         reloading = false;
     }
@@ -3252,6 +3266,7 @@ public class CharacterController : MonoBehaviour
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
             animator.SetBool("reload", false);
+            currentWeapon.WeaponSwitching("Right");
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }
@@ -3263,11 +3278,15 @@ public class CharacterController : MonoBehaviour
 
     public void Event_EquipMagazine()
     {
-        currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
+        if (currentWeapon.weaponData.equipMag != null)
+        {
+            currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
+        }
 
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
         {
             animator.SetBool("reload", false);
+            currentWeapon.WeaponSwitching("Right");
             StartCoroutine(Coroutine_ReloadEnd());
         }
     }
@@ -3277,16 +3296,8 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void Event_ReloadEnd()
     {
-        if (commandList.Count == 0)
-        {
-            Debug.LogError("No Command in the CommanderList");
-            return;
-        }
-        else if (commandList[0].type != CommandType.Reload)
-        {
-            Debug.LogError("CommandType is not Reload");
-            return;
-        }
+        if (commandList.Count == 0) return;
+        if (commandList[0].type != CommandType.Reload) return;
 
         ReloadEnd();
     }
