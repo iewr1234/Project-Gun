@@ -25,7 +25,8 @@ public enum MagazineType
 public enum WeaponGripType
 {
     None,
-    Handgun,
+    Handgun_1,
+    Handgun_2,
     SubMachineGun_noStock,
     SubMachineGun,
     AssaultRifle,

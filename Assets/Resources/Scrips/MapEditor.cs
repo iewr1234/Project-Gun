@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -168,7 +169,8 @@ public class MapEditor : MonoBehaviour
     private Vector3 sidePos_On;
     private Vector3 sidePos_Off;
 
-    private readonly int LOG_INTERVAL = 100;
+    private const int NODES_PER_FRAME = 10; // 한 프레임당 처리할 최대 작업량 설정
+    private const float UPDATE_INTERVAL = 0.1f; // 진행률 업데이트 간격 (0.1초)
 
     public void SetComponents(GameManager _gameMgr)
     {
@@ -819,26 +821,26 @@ public class MapEditor : MonoBehaviour
         gameMgr.camMgr.mainCam.cullingMask = newLayer;
     }
 
-    private IEnumerator Coroutine_CreateNodes(int xSize, int ySize)
+    private async Task Async_CreateNodes(int xSize, int ySize)
     {
         Debug.Log("시작");
 
-        yield return ClearFieldNodes();
+        await ClearFieldNodes();
 
-        yield return CreateFieldNodes(xSize, ySize);
+        await CreateFieldNodes(xSize, ySize);
 
         Debug.Log("완료");
     }
 
-    public IEnumerator Coroutine_MapLoad(MapData mapData, bool allLoad, bool isBase)
+    public async Task Async_MapLoad(MapData mapData, bool allLoad, bool isBase)
     {
         Debug.Log("Map load start");
 
-        yield return ClearFieldNodes();
+        await ClearFieldNodes();
 
-        yield return CreateFieldNodes(mapData.mapSize.x, mapData.mapSize.y);
+        await CreateFieldNodes(mapData.mapSize.x, mapData.mapSize.y);
 
-        yield return ReadMapData(mapData, allLoad, isBase);
+        await ReadMapData(mapData, allLoad, isBase);
 
         Debug.Log("Map load complete");
         if (gameMgr.playerList.Count > 0)
@@ -848,234 +850,349 @@ public class MapEditor : MonoBehaviour
         gameMgr.sceneHlr.EndLoadScene();
     }
 
-    private IEnumerator ClearFieldNodes()
+    private async Task ClearFieldNodes()
     {
         if (gameMgr.nodeList.Count > 0)
         {
-            for (int i = 0; i < gameMgr.nodeList.Count; i++)
+            float lastUpdateTime = Time.time;
+            int totalNodes = gameMgr.nodeList.Count;
+            int processedNodes = 0;
+
+            while (processedNodes < totalNodes)
             {
-                var node = gameMgr.nodeList[i];
-                for (int j = 0; j < node.outlines.Count; j++)
-                {
-                    var outline = node.outlines[j];
-                    if (outline == null) continue;
+                int endIndex = Mathf.Min(processedNodes + NODES_PER_FRAME, totalNodes);
 
-                    Destroy(outline.gameObject);
-                }
-                Destroy(node.gameObject);
-
-                if (i % 50 == 0)
+                for (int i = processedNodes; i < endIndex; i++)
                 {
-                    float progress = (float)i / gameMgr.nodeList.Count * 100;
-                    Debug.Log($"기존 노드 제거 진행률: {progress}%");
-                    yield return null;
+                    var node = gameMgr.nodeList[i];
+                    if (node != null)
+                    {
+                        for (int j = 0; j < node.outlines.Count; j++)
+                        {
+                            var outline = node.outlines[j];
+                            if (outline == null) continue;
+                            Destroy(outline.gameObject);
+                        }
+                        Destroy(node.gameObject);
+                    }
                 }
+
+                processedNodes = endIndex;
+
+                // 진행률 업데이트
+                if (Time.time - lastUpdateTime >= UPDATE_INTERVAL)
+                {
+                    float progress = (float)processedNodes / totalNodes * 100;
+                    Debug.Log($"기존 노드 제거 진행률: {progress:F1}%");
+                    lastUpdateTime = Time.time;
+                }
+
+                await Task.Yield(); // 매 청크 처리 후 다음 프레임까지 대기
             }
         }
+
         pMarkerNodes.Clear();
         eMarkerNodes.Clear();
         gameMgr.nodeList.Clear();
     }
 
-    private IEnumerator CreateFieldNodes(int xSize, int ySize)
+    private async Task CreateFieldNodes(int xSize, int ySize)
     {
         mapSize = new Vector2Int(xSize, ySize);
         var size = DataUtility.nodeSize;
         var interval = DataUtility.nodeInterval;
         int totalNodes = mapSize.x * mapSize.y;
         int createdNodes = 0;
+        float lastUpdateTime = Time.time;
+
         FieldNode nodePrefab = Resources.Load<FieldNode>("Prefabs/FieldNode");
+        List<Vector2Int> positions = new List<Vector2Int>();
+
+        // 모든 위치 미리 계산
         for (int i = 0; i < mapSize.y; i++)
         {
             for (int j = 0; j < mapSize.x; j++)
             {
-                var fieldNode = Instantiate(nodePrefab);
-                fieldNode.transform.SetParent(fieldNodeTf, false);
-                var pos = new Vector3((j * size) + (j * interval), 0f, (i * size) + (i * interval));
-                fieldNode.transform.position = pos;
-                fieldNode.SetComponents(gameMgr, new Vector2Int(j, i));
-                //fieldNode.NodeColor = Color.gray;
-                gameMgr.nodeList.Add(fieldNode);
-                createdNodes++;
-
-                if ((i + j) % LOG_INTERVAL == 0)
-                {
-                    float progress = (float)createdNodes / totalNodes * 100;
-                    Debug.Log($"노드 생성 진행률: {progress}%");
-                    yield return null;
-                }
+                positions.Add(new Vector2Int(j, i));
             }
         }
 
-        for (int i = 0; i < gameMgr.nodeList.Count; i++)
+        // 청크 단위로 노드 생성
+        for (int index = 0; index < positions.Count; index += NODES_PER_FRAME)
         {
-            var node = gameMgr.nodeList[i];
-            node.AddAdjacentNodes();
-            node.AddNodeOutline(nodeOutlineTf);
+            int endIndex = Mathf.Min(index + NODES_PER_FRAME, positions.Count);
 
-            if (i % 50 == 0)
+            for (int i = index; i < endIndex; i++)
             {
-                float progress = (float)i / gameMgr.nodeList.Count * 100;
-                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress}%");
-                yield return null;
+                var pos2D = positions[i];
+                var fieldNode = Instantiate(nodePrefab);
+                fieldNode.transform.SetParent(fieldNodeTf, false);
+                var pos = new Vector3(
+                    (pos2D.x * size) + (pos2D.x * interval),
+                    0f,
+                    (pos2D.y * size) + (pos2D.y * interval)
+                );
+                fieldNode.transform.position = pos;
+                fieldNode.SetComponents(gameMgr, pos2D);
+                gameMgr.nodeList.Add(fieldNode);
+                createdNodes++;
             }
+
+            // 진행률 업데이트
+            if (Time.time - lastUpdateTime >= UPDATE_INTERVAL)
+            {
+                float progress = (float)createdNodes / totalNodes * 100;
+                Debug.Log($"노드 생성 진행률: {progress:F1}%");
+                lastUpdateTime = Time.time;
+            }
+
+            await Task.Yield();
+        }
+
+        // 인접 노드 및 아웃라인 추가
+        lastUpdateTime = Time.time;
+        int processedNodes = 0;
+
+        while (processedNodes < gameMgr.nodeList.Count)
+        {
+            int endIndex = Mathf.Min(processedNodes + NODES_PER_FRAME, gameMgr.nodeList.Count);
+
+            for (int i = processedNodes; i < endIndex; i++)
+            {
+                var node = gameMgr.nodeList[i];
+                node.AddAdjacentNodes();
+                node.AddNodeOutline(nodeOutlineTf);
+            }
+
+            processedNodes = endIndex;
+
+            if (Time.time - lastUpdateTime >= UPDATE_INTERVAL)
+            {
+                float progress = (float)processedNodes / gameMgr.nodeList.Count * 100;
+                Debug.Log($"인접 노드 및 아웃라인 추가 진행률: {progress:F1}%");
+                lastUpdateTime = Time.time;
+            }
+
+            await Task.Yield();
         }
     }
 
-    private IEnumerator ReadMapData(MapData mapData, bool allLoad, bool isBase)
+    private async Task ReadMapData(MapData mapData, bool allLoad, bool isBase)
     {
-        for (int i = 0; i < mapData.nodeDatas.Length; i++)
+        float lastUpdateTime = Time.time;
+        int totalNodes = mapData.nodeDatas.Length;
+        int processedNodes = 0;
+
+        while (processedNodes < totalNodes)
         {
-            var nodeData = mapData.nodeDatas[i];
-            var node = gameMgr.nodeList[i];
+            int endIndex = Mathf.Min(processedNodes + NODES_PER_FRAME, totalNodes);
 
-            // FloorData
-            if (nodeData.isMesh)
+            for (int i = processedNodes; i < endIndex; i++)
             {
-                var floorItem = mapItems.Find(x => x.name == $"{nodeData.floorItemName}");
-                node.SetOnFloor(floorItem, nodeData.floorRot);
-            }
+                var nodeData = mapData.nodeDatas[i];
+                var node = gameMgr.nodeList[i];
 
-            // NodeCover Data
-            if (nodeData.isNodeCover)
-            {
-                node.SetOnArea(nodeData.nCoverType, allLoad);
-            }
-
-            // LineCover Data
-            if (nodeData.isLineCover)
-            {
-                for (int j = 0; j < nodeData.lCoverTypes.Length; j++)
+                // FloorData
+                if (nodeData.isMesh)
                 {
-                    var setDirection = nodeData.lCoverDirs[j];
-                    var coverType = nodeData.lCoverTypes[j];
-                    if (setDirection != TargetDirection.None && coverType != FindNodeType.None)
-                    {
-                        node.SetOnArea(setDirection, coverType, allLoad);
-                    }
+                    var floorItem = mapItems.Find(x => x.name == $"{nodeData.floorItemName}");
+                    node.SetOnFloor(floorItem, nodeData.floorRot);
+                }
+
+                // NodeCover Data
+                if (nodeData.isNodeCover)
+                {
+                    node.SetOnArea(nodeData.nCoverType, allLoad);
+                }
+
+                // LineCover Data
+                if (nodeData.isLineCover)
+                {
+                    await ProcessLineCoverData(nodeData, node, allLoad);
+                }
+
+                // ObjectData
+                if (nodeData.isObject)
+                {
+                    await ProcessObjectData(nodeData, node);
+                }
+
+                // MarkerData
+                if (nodeData.isMarker)
+                {
+                    await HandleMarkerDataAsync(node, nodeData, allLoad);
                 }
             }
 
-            // ObjectData
-            if (nodeData.isObject)
+            processedNodes = endIndex;
+
+            if (Time.time - lastUpdateTime >= UPDATE_INTERVAL)
             {
-                for (int j = 0; j < nodeData.objectDatas.Length; j++)
-                {
-                    var objectData = nodeData.objectDatas[j];
-                    var objectUI = GetObjectUI(objectData.objectType);
-                    var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
-                    node.SetOnObject(objectItem, objectData.setDir);
-                }
+                float progress = (float)processedNodes / totalNodes * 100;
+                Debug.Log($"맵 데이터 로드 진행률: {progress:F1}%");
+                lastUpdateTime = Time.time;
             }
 
-            // MarkerData
-            if (nodeData.isMarker)
-            {
-                switch (nodeData.markerType)
-                {
-                    case MarkerType.Player:
-                        pMarkerNodes.Add(node);
-                        node.SetOnMarker(allLoad);
-                        break;
-                    case MarkerType.Enemy:
-                        eMarkerNodes.Add(node);
-                        node.SetOnMarker(allLoad, nodeData.enemyType);
-                        break;
-                    case MarkerType.Base:
-                        eventMarkerNodes.Add(node);
-                        node.SetOnMarker(allLoad, nodeData.baseType);
-                        if (node.baseType == BaseCampMarker.Storage_Node)
-                        {
-                            // 베이스 창고 검색 후 추가
-                            var baseStorages = gameMgr.dataMgr.gameData.baseStorages;
-                            var find = baseStorages.Find(x => x.nodePos == node.nodePos);
-                            if (find == null)
-                            {
-                                var baseStorage = new StorageInfo()
-                                {
-                                    storageName = $"{node.baseStorage.storageName}",
-                                    type = StorageInfo.StorageType.Storage,
-                                    nodePos = node.nodePos,
-                                    slotSize = node.baseStorage.slotSize,
-                                };
-                                baseStorages.Add(baseStorage);
-
-                                if (node.baseStorage.startingItmes.Count > 0) 
-                                    gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.startingItmes);
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+            await Task.Yield();
         }
 
         if (!allLoad)
         {
-            var playerNode = pMarkerNodes[0];
-            gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
-            if (isBase)
+            await SpawnCharactersAsync(isBase);
+        }
+    }
+
+    private async Task ProcessLineCoverData(NodeData nodeData, FieldNode node, bool allLoad)
+    {
+        for (int j = 0; j < nodeData.lCoverTypes.Length; j++)
+        {
+            var setDirection = nodeData.lCoverDirs[j];
+            var coverType = nodeData.lCoverTypes[j];
+            if (setDirection != TargetDirection.None && coverType != FindNodeType.None)
             {
-                gameMgr.playerList[0].EnterTheBase();
-                yield return null;
+                node.SetOnArea(setDirection, coverType, allLoad);
             }
-            else
+
+            if (j % NODES_PER_FRAME == 0)
             {
-                var stageData = gameMgr.dataMgr.gameData.stageData;
-                for (int i = 0; i < eMarkerNodes.Count; i++)
-                {
-                    var markerNode = eMarkerNodes[i];
-                    SpawnEnemyInfo enemyInfo;
-                    switch (markerNode.enemyType)
-                    {
-                        case EnemyMarker.ShortRange:
-                            if (stageData.shortRangeEnemys.Count == 0) continue;
-
-                            enemyInfo = stageData.shortRangeEnemys[Random.Range(0, stageData.shortRangeEnemys.Count)];
-                            break;
-                        case EnemyMarker.MiddleRange:
-                            if (stageData.middleRangeEnemys.Count == 0) continue;
-
-                            enemyInfo = stageData.middleRangeEnemys[Random.Range(0, stageData.middleRangeEnemys.Count)];
-                            break;
-                        case EnemyMarker.LongRange:
-                            if (stageData.longRangeEnemys.Count == 0) continue;
-
-                            enemyInfo = stageData.longRangeEnemys[Random.Range(0, stageData.longRangeEnemys.Count)];
-                            break;
-                        case EnemyMarker.Elite:
-                            if (stageData.eliteEnemys.Count == 0) continue;
-
-                            enemyInfo = stageData.eliteEnemys[Random.Range(0, stageData.eliteEnemys.Count)];
-                            break;
-                        case EnemyMarker.Boss:
-                            enemyInfo = stageData.bossEnemy;
-                            break;
-                        default:
-                            continue;
-                    }
-                    gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, enemyInfo.ID);
-                    yield return null;
-                }
+                await Task.Yield();
             }
         }
+    }
 
-        GameObject GetObjectUI(MapEditorType type)
+    private async Task ProcessObjectData(NodeData nodeData, FieldNode node)
+    {
+        for (int j = 0; j < nodeData.objectDatas.Length; j++)
         {
-            switch (type)
+            var objectData = nodeData.objectDatas[j];
+            var objectUI = GetObjectUI(objectData.objectType);
+            var objectItem = mapItems.Find(x => x.name == $"{objectData.itemName}");
+            node.SetOnObject(objectItem, objectData.setDir);
+
+            if (j % NODES_PER_FRAME == 0)
             {
-                case MapEditorType.FloorObject:
-                    return floorObjectUI;
-                case MapEditorType.HalfCover:
-                    return halfCoverUI;
-                case MapEditorType.FullCover:
-                    return fullCoverUI;
-                case MapEditorType.SideObject:
-                    return sideObjectUI;
-                default:
-                    return null;
+                await Task.Yield();
             }
+        }
+    }
+
+    private async Task HandleMarkerDataAsync(FieldNode node, NodeData nodeData, bool allLoad)
+    {
+        switch (nodeData.markerType)
+        {
+            case MarkerType.Player:
+                pMarkerNodes.Add(node);
+                node.SetOnMarker(allLoad);
+                break;
+            case MarkerType.Enemy:
+                eMarkerNodes.Add(node);
+                node.SetOnMarker(allLoad, nodeData.enemyType);
+                break;
+            case MarkerType.Base:
+                eventMarkerNodes.Add(node);
+                node.SetOnMarker(allLoad, nodeData.baseType);
+                if (node.baseType == BaseCampMarker.Storage_Node)
+                {
+                    await HandleBaseStorageAsync(node);
+                }
+                break;
+        }
+    }
+
+    private async Task HandleBaseStorageAsync(FieldNode node)
+    {
+        var baseStorages = gameMgr.dataMgr.gameData.baseStorages;
+        var find = baseStorages.Find(x => x.nodePos == node.nodePos);
+        if (find == null)
+        {
+            var baseStorage = new StorageInfo()
+            {
+                storageName = $"{node.baseStorage.storageName}",
+                type = StorageInfo.StorageType.Storage,
+                nodePos = node.nodePos,
+                slotSize = node.baseStorage.slotSize,
+            };
+            baseStorages.Add(baseStorage);
+
+            if (node.baseStorage.startingItmes.Count > 0)
+                gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.startingItmes);
+        }
+        await Task.Yield();
+    }
+
+    private async Task SpawnCharactersAsync(bool isBase)
+    {
+        var playerNode = pMarkerNodes[0];
+        gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
+
+        if (isBase)
+        {
+            gameMgr.playerList[0].EnterTheBase();
+            await Task.Yield();
+        }
+        else
+        {
+            await SpawnEnemiesAsync();
+        }
+    }
+
+    private async Task SpawnEnemiesAsync()
+    {
+        var stageData = gameMgr.dataMgr.gameData.stageData;
+        for (int i = 0; i < eMarkerNodes.Count; i++)
+        {
+            var markerNode = eMarkerNodes[i];
+            SpawnEnemyInfo enemyInfo = GetEnemyInfo(markerNode.enemyType, stageData);
+
+            if (enemyInfo.ID.Length > 0)
+            {
+                gameMgr.CreateCharacter(CharacterOwner.Enemy, markerNode.nodePos, enemyInfo.ID);
+                await Task.Yield();
+            }
+        }
+    }
+
+    private SpawnEnemyInfo GetEnemyInfo(EnemyMarker enemyType, StageDataInfo stageData)
+    {
+        switch (enemyType)
+        {
+            case EnemyMarker.ShortRange:
+                return stageData.shortRangeEnemys.Count > 0
+                    ? stageData.shortRangeEnemys[UnityEngine.Random.Range(0, stageData.shortRangeEnemys.Count)]
+                    : new SpawnEnemyInfo();
+            case EnemyMarker.MiddleRange:
+                return stageData.middleRangeEnemys.Count > 0
+                    ? stageData.middleRangeEnemys[UnityEngine.Random.Range(0, stageData.middleRangeEnemys.Count)]
+                    : new SpawnEnemyInfo();
+            case EnemyMarker.LongRange:
+                return stageData.longRangeEnemys.Count > 0
+                    ? stageData.longRangeEnemys[UnityEngine.Random.Range(0, stageData.longRangeEnemys.Count)]
+                    : new SpawnEnemyInfo();
+            case EnemyMarker.Elite:
+                return stageData.eliteEnemys.Count > 0
+                    ? stageData.eliteEnemys[UnityEngine.Random.Range(0, stageData.eliteEnemys.Count)]
+                    : new SpawnEnemyInfo();
+            case EnemyMarker.Boss:
+                return stageData.bossEnemy;
+            default:
+                return new SpawnEnemyInfo();
+        }
+    }
+
+    private GameObject GetObjectUI(MapEditorType type)
+    {
+        switch (type)
+        {
+            case MapEditorType.FloorObject:
+                return floorObjectUI;
+            case MapEditorType.HalfCover:
+                return halfCoverUI;
+            case MapEditorType.FullCover:
+                return fullCoverUI;
+            case MapEditorType.SideObject:
+                return sideObjectUI;
+            default:
+                return null;
         }
     }
 
@@ -1110,7 +1227,7 @@ public class MapEditor : MonoBehaviour
         saveInput.text = "";
     }
 
-    public void Button_Data_Load()
+    public async void Button_Data_Load()
     {
         if (loadDropdown.options.Count == 0 || saveInput.text.Length > 0) return;
 
@@ -1118,7 +1235,7 @@ public class MapEditor : MonoBehaviour
         var mapData = gameMgr.dataMgr.LoadMapData(loadName);
         if (mapData != null)
         {
-            StartCoroutine(Coroutine_MapLoad(mapData, true, false));
+            await Async_MapLoad(mapData, true, false);
         }
     }
 
@@ -1127,11 +1244,11 @@ public class MapEditor : MonoBehaviour
         OnInterface(InterfaceType.Top, MapEditorType.CreateNode, createNodeUI);
     }
 
-    public void Button_CreateNode_Create()
+    public async void Button_CreateNode_Create()
     {
         if (xSizeInput.text.Length == 0 || ySizeInput.text.Length == 0) return;
 
-        StartCoroutine(Coroutine_CreateNodes(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text)));
+        await Async_CreateNodes(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
         //CreateNodes(int.Parse(xSizeInput.text), int.Parse(ySizeInput.text));
         activeUI.gameObject.SetActive(false);
         editType = MapEditorType.None;

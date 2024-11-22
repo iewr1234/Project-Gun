@@ -123,7 +123,7 @@ public class GameManager : MonoBehaviour
     private readonly int passPointPoolMax = 30;
     private readonly int floatTextPoolMax = 150;
 
-    public void Start()
+    public async void Start()
     {
         dataMgr = FindAnyObjectByType<DataManager>();
         sceneHlr = FindAnyObjectByType<SceneHandler>();
@@ -189,14 +189,14 @@ public class GameManager : MonoBehaviour
                 endPos_y = mapData.mapSize.y;
                 if (loadName == "BASECAMP")
                 {
-                    StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, true));
+                    await mapEdt.Async_MapLoad(mapData, false, true);
                     gameState = GameState.Base;
                     uiMgr.bottomUI.SetActive(false);
                     uiMgr.playUI.SetActive(false);
                 }
                 else
                 {
-                    StartCoroutine(mapEdt.Coroutine_MapLoad(mapData, false, false));
+                    await mapEdt.Async_MapLoad(mapData, false, false);
                     uiMgr.bottomUI.SetActive(true);
                     uiMgr.playUI.SetActive(true);
                 }

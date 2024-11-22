@@ -140,9 +140,9 @@ public class CharacterController : MonoBehaviour
 
     private RigBuilder rigBdr;
     private Rig rig;
-    [SerializeField] private MultiAimConstraint headRig;
-    [SerializeField] private MultiAimConstraint chestRig;
-    [HideInInspector] public ChainIKConstraint chainIK;
+    private MultiAimConstraint headRig;
+    private MultiAimConstraint chestRig;
+    private ChainIKConstraint chainIK;
 
     [HideInInspector] public Transform aimPoint;
 

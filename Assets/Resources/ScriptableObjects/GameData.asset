@@ -37,7 +37,7 @@ MonoBehaviour:
     bossEnemy:
       ID: E0010
       level: 1
-  mapName: BASECAMP
+  mapName: M0001
   mapLoad: 0
   playerID: P0001
   health: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T0101: SMG_1'
-        serialID: 1f2c1a1d-2aaf-465d-ade9-4c606befcfec
+        serialID: 13094bcf-f36a-4b67-af22-61ba7aa2f20e
         ID: T0101
         dataID: W0022
         itemName: SMG_1
@@ -67,10 +67,10 @@ MonoBehaviour:
         addOption: 1
         setDropTable: 0
         itemOptions:
-        - indexName: 'Critical: 12'
+        - indexName: 'Critical: 7'
           type: 4
-          value: 12
-          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +12%\r"
+          value: 7
+          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +7%\r"
       rigData:
         indexName: 
         ID: 
@@ -92,7 +92,7 @@ MonoBehaviour:
         isMain: 1
         weaponType: 3
         magType: 1
-        gripType: 2
+        gripType: 4
         sModeInfos:
         - indexName: 'PointShot: 60'
           modeType: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
         - indexName: 'SightShot: 80'
           modeType: 2
           value: 80
-        RPM: 50
+        RPM: 650
         range: 10
         watchAngle: 30
         actionCost: 4
@@ -213,7 +213,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T0102: SMG_2'
-        serialID: ac73edb2-73de-4bc8-a68b-ded4c33bb9c4
+        serialID: c074e5ef-0d09-484a-a653-9fc181cfe860
         ID: T0102
         dataID: W0023
         itemName: SMG_2
@@ -226,10 +226,10 @@ MonoBehaviour:
         addOption: 1
         setDropTable: 0
         itemOptions:
-        - indexName: 'Damage: 4'
+        - indexName: 'Damage: 1'
           type: 3
-          value: 4
-          scriptText: "\uD53C\uD574\uB7C9 +4\r"
+          value: 1
+          scriptText: "\uD53C\uD574\uB7C9 +1\r"
       rigData:
         indexName: 
         ID: 
@@ -251,7 +251,7 @@ MonoBehaviour:
         isMain: 1
         weaponType: 3
         magType: 1
-        gripType: 3
+        gripType: 4
         sModeInfos:
         - indexName: 'PointShot: 60'
           modeType: 0
@@ -262,7 +262,7 @@ MonoBehaviour:
         - indexName: 'SightShot: 80'
           modeType: 2
           value: 80
-        RPM: 50
+        RPM: 650
         range: 10
         watchAngle: 30
         actionCost: 4
@@ -372,7 +372,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T0103: SMG_3'
-        serialID: b8a45393-1ada-46cf-994d-2e63d01723c2
+        serialID: 84038167-6893-4e54-9412-b0eb8b0d9ef2
         ID: T0103
         dataID: W0024
         itemName: SMG_3
@@ -385,10 +385,10 @@ MonoBehaviour:
         addOption: 1
         setDropTable: 0
         itemOptions:
-        - indexName: 'Health: 23'
-          type: 1
-          value: 23
-          scriptText: "\uCCB4\uB825 +23\r"
+        - indexName: 'Critical: 6'
+          type: 4
+          value: 6
+          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +6%\r"
       rigData:
         indexName: 
         ID: 
@@ -410,7 +410,7 @@ MonoBehaviour:
         isMain: 1
         weaponType: 3
         magType: 1
-        gripType: 3
+        gripType: 4
         sModeInfos:
         - indexName: 'PointShot: 60'
           modeType: 0
@@ -421,7 +421,7 @@ MonoBehaviour:
         - indexName: 'SightShot: 80'
           modeType: 2
           value: 80
-        RPM: 50
+        RPM: 650
         range: 10
         watchAngle: 30
         actionCost: 4
@@ -531,7 +531,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T0104: SMG_4'
-        serialID: 594d12a4-4680-442e-95f8-ad82ef390e34
+        serialID: bbd5bb74-8a72-4266-ba60-13d876040dca
         ID: T0104
         dataID: W0025
         itemName: SMG_4
@@ -544,10 +544,10 @@ MonoBehaviour:
         addOption: 1
         setDropTable: 0
         itemOptions:
-        - indexName: 'Critical: 5'
-          type: 4
-          value: 5
-          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +5%\r"
+        - indexName: 'Defense: 15'
+          type: 2
+          value: 15
+          scriptText: "\uBC29\uC5B4\uB825 +15\r"
       rigData:
         indexName: 
         ID: 
@@ -569,7 +569,7 @@ MonoBehaviour:
         isMain: 1
         weaponType: 3
         magType: 1
-        gripType: 2
+        gripType: 4
         sModeInfos:
         - indexName: 'PointShot: 60'
           modeType: 0
@@ -580,7 +580,7 @@ MonoBehaviour:
         - indexName: 'SightShot: 80'
           modeType: 2
           value: 80
-        RPM: 50
+        RPM: 650
         range: 10
         watchAngle: 30
         actionCost: 4
@@ -690,7 +690,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T0105: SMG_5'
-        serialID: fe7b1ba7-2422-4418-9f77-f95ed4d5136a
+        serialID: af0d4744-f733-40b4-91df-9b6f43c42eb8
         ID: T0105
         dataID: W0026
         itemName: SMG_5
@@ -703,10 +703,10 @@ MonoBehaviour:
         addOption: 1
         setDropTable: 0
         itemOptions:
-        - indexName: 'Health: 44'
-          type: 1
-          value: 44
-          scriptText: "\uCCB4\uB825 +44\r"
+        - indexName: 'Critical: 11'
+          type: 4
+          value: 11
+          scriptText: "\uCE58\uBA85\uD0C0 \uD655\uB960 +11%\r"
       rigData:
         indexName: 
         ID: 
@@ -728,7 +728,7 @@ MonoBehaviour:
         isMain: 1
         weaponType: 3
         magType: 1
-        gripType: 3
+        gripType: 4
         sModeInfos:
         - indexName: 'PointShot: 60'
           modeType: 0
@@ -739,7 +739,7 @@ MonoBehaviour:
         - indexName: 'SightShot: 80'
           modeType: 2
           value: 80
-        RPM: 50
+        RPM: 650
         range: 10
         watchAngle: 30
         actionCost: 4
@@ -849,7 +849,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1509: Magazine_27'
-        serialID: e2c25cbc-5a93-45de-a5d0-a3d46321b8b9
+        serialID: 2f2f1365-0e6c-4d2e-b654-4c75c320d822
         ID: T1509
         dataID: M0027
         itemName: Magazine_27
@@ -995,7 +995,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1510: Magazine_28'
-        serialID: 5ea0c162-7829-4419-a4d8-67df614bd8b3
+        serialID: 2569b5d5-3033-427a-b670-4788afe10c9d
         ID: T1510
         dataID: M0028
         itemName: Magazine_28
@@ -1141,7 +1141,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1511: Magazine_29'
-        serialID: 0d0c1252-d997-4d54-a2cb-a2601f1dcc57
+        serialID: 1bc0bd0a-3f3c-45db-a4ee-64a9abb78ab7
         ID: T1511
         dataID: M0029
         itemName: Magazine_29
@@ -1287,7 +1287,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1512: Magazine_30'
-        serialID: a188a48a-9dc3-42ab-9c9c-fe5d5dcd9159
+        serialID: 8dc54eb6-4709-477b-83a6-dfad0241b656
         ID: T1512
         dataID: M0030
         itemName: Magazine_30
@@ -1433,7 +1433,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1513: Magazine_31'
-        serialID: 27272663-34b7-45ea-9004-059ecb4158ea
+        serialID: c87330d1-197c-4011-a72b-2a8cc94a282b
         ID: T1513
         dataID: M0031
         itemName: Magazine_31
@@ -1579,7 +1579,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1002: Bullet_3'
-        serialID: 7abca807-455d-40f1-b858-8ab56855b325
+        serialID: 2397bb73-f25c-4f45-aec8-ea5ba2d75ff8
         ID: T1002
         dataID: B0003
         itemName: Bullet_3
@@ -1725,7 +1725,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1002: Bullet_3'
-        serialID: eff46c86-3fa7-4521-a119-582fcbb83754
+        serialID: 70340eda-b03f-455d-8e56-8e19672a5d51
         ID: T1002
         dataID: B0003
         itemName: Bullet_3
@@ -1871,7 +1871,7 @@ MonoBehaviour:
       rotation: 0
       itemData:
         indexName: 'T1002: Bullet_3'
-        serialID: 61573ed5-25d4-4548-8cb6-6ed1ad0285c4
+        serialID: 977ea6bf-d372-49c7-bc40-71cd3211f87d
         ID: T1002
         dataID: B0003
         itemName: Bullet_3
@@ -2023,7 +2023,7 @@ MonoBehaviour:
   - ID: T6001
     num: 1
     createPos: 1
-  - ID: T0502
+  - ID: T0301
     num: 1
     createPos: 1
   - ID: T1504
@@ -2032,6 +2032,12 @@ MonoBehaviour:
   - ID: T1504
     num: 1
     createPos: 3
+  - ID: T1503
+    num: 300
+    createPos: 3
+  - ID: T1503
+    num: 300
+    createPos: 3
   - ID: T1000
     num: 300
     createPos: 2
@@ -2039,5 +2045,8 @@ MonoBehaviour:
     num: 1
     createPos: 4
   - ID: T1003
+    num: 300
+    createPos: 2
+  - ID: T1004
     num: 300
     createPos: 2

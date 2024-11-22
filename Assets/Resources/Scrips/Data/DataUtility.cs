@@ -62,8 +62,10 @@ public static class DataUtility
 
     public static readonly Vector2Int floorSlotSize = new Vector2Int(7, 17);
 
-    public static readonly Vector3 weaponPivot_pos_HG = new Vector3(0.082f, 0.034f, -0.037f);
-    public static readonly Quaternion weaponPivot_rot_HG = Quaternion.Euler(-8.375f, 89f, -90.246f);
+    public static readonly Vector3 weaponPivot_pos_HG_1 = new Vector3(0.14f, 0.034f, -0.045f);
+    public static readonly Quaternion weaponPivot_rot_HG_1 = Quaternion.Euler(-8.375f, 89f, -90.246f);
+    public static readonly Vector3 weaponPivot_pos_HG_2 = new Vector3(0.1f, 0.034f, -0.037f);
+    public static readonly Quaternion weaponPivot_rot_HG_2 = Quaternion.Euler(-8.375f, 89f, -90.246f);
     public static readonly Vector3 weaponPivot_pos_SMG_ns = new Vector3(0.082f, 0.034f, -0.037f);
     public static readonly Quaternion weaponPivot_rot_SMG_ns = Quaternion.Euler(-8.375f, 89f, -90.246f);
     public static readonly Vector3 weaponPivot_pos_SMG = new Vector3(0.113f, 0.033f, -0.04f);
@@ -317,11 +319,18 @@ public static class DataUtility
         WeaponGripInfo gripInfo;
         switch (type)
         {
-            case WeaponGripType.Handgun:
+            case WeaponGripType.Handgun_1:
                 gripInfo = new WeaponGripInfo()
                 {
-                    pivotPos = weaponPivot_pos_HG,
-                    pivotRot = weaponPivot_rot_HG,
+                    pivotPos = weaponPivot_pos_HG_1,
+                    pivotRot = weaponPivot_rot_HG_1,
+                };
+                break;
+            case WeaponGripType.Handgun_2:
+                gripInfo = new WeaponGripInfo()
+                {
+                    pivotPos = weaponPivot_pos_HG_2,
+                    pivotRot = weaponPivot_rot_HG_2,
                 };
                 break;
             case WeaponGripType.SubMachineGun_noStock:

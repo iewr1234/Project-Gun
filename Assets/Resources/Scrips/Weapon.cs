@@ -85,20 +85,14 @@ public class Weapon : MonoBehaviour
         weaponData = _weaponData;
         gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
         charCtr.weapons.Add(this);
-        if (charCtr.weapons.Count > 1)
-        {
-            charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
-        }
+        if (charCtr.weapons.Count > 1) charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
 
         bulletTf = transform.Find("BulletTransform");
         gripTf = transform.Find("GripTransform");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
-        if (weaponData.isMag)
-        {
-            SetParts(weaponData.equipMag.magName, true);
-        }
+        if (weaponData.isMag) SetParts(weaponData.equipMag.magName, true);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
@@ -214,10 +208,8 @@ public class Weapon : MonoBehaviour
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
 
-        // NeedWork_Top: 애니매이션 레이어 변경
         charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
         charCtr.upperIndex = charCtr.baseIndex + 1;
-
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);
         charCtr.animator.SetBool("isMain", weaponData.isMain);
