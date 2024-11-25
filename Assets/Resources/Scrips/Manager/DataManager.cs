@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
+using UnityEngine.Animations.Rigging;
 
 [System.Serializable]
 public struct ObjectData
@@ -1740,6 +1742,12 @@ public class DataManager : MonoBehaviour
             {
                 UpdateWeaponPool();
             }
+
+            GUILayout.Label('\n' + "---Setting Prefab---");
+            if (GUILayout.Button("Setting CharacterPrefab"))
+            {
+                SettingCharacterPrefab();
+            }
         }
 
         private void UpdateItemSample()
@@ -1884,6 +1892,110 @@ public class DataManager : MonoBehaviour
                 }
             }
         }
+
+        private void SettingCharacterPrefab()
+        {
+            // 프로젝트 내의 상대 경로
+            string prefabPath = "Assets/Resources/Prefabs/Character";
+
+            // 프리팹 파일들 찾기
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabPath });
+
+            foreach (string guid in prefabGuids)
+            {
+                // GUID를 에셋 경로로 변환
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+                // 프리팹 콘텐츠 로드 (수정 가능한 인스턴스)
+                GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
+                if (prefabInstance == null)
+                {
+                    Debug.LogError($"프리팹을 로드할 수 없습니다: {assetPath}");
+                    continue;
+                }
+
+                CharacterController charCtr = prefabInstance.GetComponent<CharacterController>();
+                if (charCtr == null)
+                {
+                    Debug.LogError($"프리팹에 CharacterController가 존재하지 않습니다: {assetPath}");
+                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+                    continue;
+                }
+
+                // Character Prefab 수정
+                if (charCtr.rightHandPivot == null)
+                {
+                    // 오른손 무기위치 추가
+                    Transform rightHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+                    if (rightHand == null)
+                    {
+                        Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
+                        PrefabUtility.UnloadPrefabContents(prefabInstance);
+                        continue;
+                    }
+
+                    GameObject weaponPivot = new GameObject("WeaponPivot_R");
+                    weaponPivot.transform.SetParent(rightHand, false);
+                    charCtr.rightHandPivot = weaponPivot.transform;
+                }
+
+                if (charCtr.leftHandPivot == null)
+                {
+                    // 왼손 무기위치 추가
+                    Transform leftHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+                    if (leftHand == null)
+                    {
+                        Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
+                        PrefabUtility.UnloadPrefabContents(prefabInstance);
+                        continue;
+                    }
+
+                    GameObject weaponPivot = new GameObject("WeaponPivot_L");
+                    weaponPivot.transform.SetParent(leftHand, false);
+                    charCtr.leftHandPivot = weaponPivot.transform;
+                }
+
+                if (charCtr.chainIK == null) charCtr.chainIK = charCtr.transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
+                if (charCtr.chainIK.data.target == null)
+                {
+                    // ChainIK 타겟 설정
+                    Transform gripPivot = charCtr.transform.Find("GripPivot");
+                    if (gripPivot == null)
+                    {
+                        gripPivot = new GameObject("GripPivot").transform;
+                        gripPivot.transform.SetParent(prefabInstance.transform, false);
+                    }
+                    charCtr.chainIK.data.target = gripPivot;
+                }
+
+                //if (charCtr.weaponPoolTf == null)
+                //{
+                //    // WeaponPool 추가
+                //    GameObject weaponPool = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/Weapon/WeaponPool.prefab");
+                //    if (weaponPool == null)
+                //    {
+                //        Debug.LogError($"WeaponPool을 찾을 수 없습니다");
+                //        continue;
+                //    }
+
+                //    GameObject weaponPoolInstance = (GameObject)PrefabUtility.InstantiatePrefab(weaponPool);
+                //    weaponPoolInstance.transform.SetParent(prefabInstance.transform, false);
+                //    charCtr.weaponPoolTf = weaponPoolInstance.transform;
+                //    charCtr.weaponPool = new List<Weapon>(weaponPoolInstance.GetComponentsInChildren<Weapon>(true));
+                //    for (int i = 0; i < charCtr.weaponPool.Count; i++)
+                //    {
+                //        Weapon weapon = charCtr.weaponPool[i];
+                //        weapon.gameObject.SetActive(false);
+                //    }
+                //}
+
+                // 수정된 프리팹 저장
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+                PrefabUtility.UnloadPrefabContents(prefabInstance);
+            }
+
+            Debug.Log("캐릭터 프리팹 수정완료");
+        }
+        #endregion
     }
-    #endregion
 }

@@ -142,23 +142,23 @@ public class CharacterController : MonoBehaviour
     private Rig rig;
     private MultiAimConstraint headRig;
     private MultiAimConstraint chestRig;
-    private ChainIKConstraint chainIK;
+    [HideInInspector] public ChainIKConstraint chainIK;
 
     [HideInInspector] public Transform aimPoint;
 
     [HideInInspector] public Transform mainHolsterPivot;
     [HideInInspector] public Transform subHolsterPivot;
-    [HideInInspector] public Transform rightHandPivot;
-    [HideInInspector] public Transform leftHandPivot;
-    [HideInInspector] public Transform gripPivot;
+    [Space(5f)] public Transform rightHandPivot;
+    public Transform leftHandPivot;
+    //public Transform gripPivot;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
     private List<Collider> ragdollCds = new List<Collider>();
     private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
 
-    private Transform weaponPoolTf;
-    private List<Weapon> weaponPool = new List<Weapon>();
+    //[Space(5f)] public Transform weaponPoolTf;
+    //public List<Weapon> weaponPool = new List<Weapon>();
 
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
@@ -310,21 +310,6 @@ public class CharacterController : MonoBehaviour
         mainHolsterPivot = transform.Find("Root/Hips/Spine_01/Spine_02");
         subHolsterPivot = transform.Find("Root/Hips/UpperLeg_R/Holster");
 
-        var weaponPivot = new GameObject("WeaponPivot");
-        var rightHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
-        weaponPivot.transform.SetParent(rightHand, false);
-        rightHandPivot = weaponPivot.transform;
-
-        weaponPivot = new GameObject("WeaponPivot");
-        var leftHand = transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
-        weaponPivot.transform.SetParent(leftHand, false);
-        leftHandPivot = weaponPivot.transform;
-
-        gripPivot = new GameObject("GripPivot").transform;
-        gripPivot.transform.SetParent(transform, false);
-        chainIK.data.target = gripPivot;
-        rigBdr.Build();
-
         ownerType = _ownerType;
 
         // Mesh와 Ragdoll 설정
@@ -340,16 +325,6 @@ public class CharacterController : MonoBehaviour
         foreach (var rb in ragdollRbs)
         {
             rb.isKinematic = true;
-        }
-
-        // Weapon Pool 설정
-        var _weaponPool = Instantiate(Resources.Load<GameObject>("Prefabs/Weapon/WeaponPool"));
-        _weaponPool.transform.SetParent(transform, false);
-        weaponPoolTf = _weaponPool.transform;
-        weaponPool = weaponPoolTf.GetComponentsInChildren<Weapon>().ToList();
-        foreach (var weapon in weaponPool)
-        {
-            weapon.gameObject.SetActive(false);
         }
 
         // 이름 설정
@@ -627,8 +602,9 @@ public class CharacterController : MonoBehaviour
         if (!moveGripPivot) return;
         if (currentWeapon == null) return;
         if (currentWeapon.gripTf == null) return;
+        if (chainIK.data.target == null) return;
 
-        gripPivot.SetPositionAndRotation(currentWeapon.gripTf.position, currentWeapon.gripTf.rotation);
+        chainIK.data.target.SetPositionAndRotation(currentWeapon.gripTf.position, currentWeapon.gripTf.rotation);
     }
 
     private void SetWeightOfChainIK()
@@ -3078,7 +3054,7 @@ public class CharacterController : MonoBehaviour
         var find = weapons.Find(x => x.weaponData.ID == item.weaponData.ID && x.equipSlot.type == equipSlot.type);
         if (find != null) return;
 
-        var weapon = GetWeapon(item.weaponData.prefabName, equipSlot.type);
+        var weapon = GetWeapon(item.weaponData);
         weapon.SetComponets(this, equipSlot, item.weaponData);
         if (currentWeapon == null)
         {
@@ -3097,8 +3073,8 @@ public class CharacterController : MonoBehaviour
         var weapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipSlot.type == equipSlot.type);
         if (weapon == null) return;
 
-        weapon.transform.SetParent(weaponPoolTf, false);
-        weapon.Initialize();
+        //weapon.transform.SetParent(weaponPoolTf, false);
+        //weapon.Initialize();
         weapons.Remove(weapon);
         if (currentWeapon == weapon)
         {
@@ -3114,24 +3090,64 @@ public class CharacterController : MonoBehaviour
                 currentWeapon = null;
             }
         }
+        Destroy(weapon.gameObject);
     }
 
-    public Weapon GetWeapon(string prefabName, EquipType equipType)
+    public Weapon GetWeapon(WeaponDataInfo weaponData)
     {
-        var weaponName = prefabName;
-        switch (equipType)
+        string prefabPath = "Prefabs/Weapon/";
+        switch (weaponData.weaponType)
         {
-            case EquipType.MainWeapon1:
-                weaponName += "_A";
+            case WeaponType.Pistol:
+                prefabPath += "Handgun/";
                 break;
-            case EquipType.MainWeapon2:
-                weaponName += "_B";
+            case WeaponType.Revolver:
+                prefabPath += "Handgun/";
                 break;
             default:
+                prefabPath += $"{weaponData.weaponType}/";
                 break;
         }
+        Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponData.prefabName}"));
+        weapon.transform.localScale = Vector3.one;
+        return weapon;
 
-        var weapon = weaponPool.Find(x => x.name == weaponName);
+        //if (weaponPool.Count == 0) return null;
+
+        //var weaponName = prefabName;
+        //switch (equipType)
+        //{
+        //    case EquipType.MainWeapon1:
+        //        weaponName += "_A";
+        //        break;
+        //    case EquipType.MainWeapon2:
+        //        weaponName += "_B";
+        //        break;
+        //    default:
+        //        break;
+        //}
+
+        //var weapon = weaponPool.Find(x => x.name == weaponName);
+        //return weapon;
+    }
+
+    public Weapon GetWeapon(EnemyGearDataInfo.WeaponInfo weaponInfo)
+    {
+        string prefabPath = "Prefabs/Weapon/";
+        switch (weaponInfo.weaponType)
+        {
+            case WeaponType.Pistol:
+                prefabPath += "Handgun/";
+                break;
+            case WeaponType.Revolver:
+                prefabPath += "Handgun/";
+                break;
+            default:
+                prefabPath += $"{weaponInfo.weaponType}/";
+                break;
+        }
+        Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponInfo.prefabName}"));
+        weapon.transform.localScale = Vector3.one;
         return weapon;
     }
 

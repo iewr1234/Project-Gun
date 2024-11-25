@@ -25,12 +25,6 @@ public struct HitInfo
 
 public class Weapon : MonoBehaviour
 {
-    public enum FireModeType
-    {
-        SingleFire,
-        AutoFire,
-    }
-
     private enum AnimationLayers_A
     {
         Base,
@@ -45,9 +39,11 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
-    [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
-    [HideInInspector] public Transform bulletTf;
+    public Transform bulletTf;
     public Transform gripTf;
+
+    [Space(5f)][SerializeField] private GameObject baseSight;
+    [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -55,12 +51,8 @@ public class Weapon : MonoBehaviour
     public WeaponGripInfo gripInfo;
     [Space(5f)]
 
-    [Tooltip("사격타입")] public FireModeType fireMode;
-    [Tooltip("자동사격 발사 수")] public int autoFireNum;
-    [Space(5f)]
-
-    public int meshType;
-    [Tooltip("탄창용량")] public int magMax;
+    [HideInInspector] public int meshType;
+    [Space(5f)][Tooltip("탄창용량")] public int magMax;
     [Tooltip("장전된 탄환 수")] public int loadedNum;
 
     private HitAccuracy hitAccuracy;
@@ -87,8 +79,8 @@ public class Weapon : MonoBehaviour
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1) charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
 
-        bulletTf = transform.Find("BulletTransform");
-        gripTf = transform.Find("GripTransform");
+        if (bulletTf == null) bulletTf = transform.Find("BulletTransform");
+        if (gripTf == null) gripTf = transform.Find("GripTransform");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
@@ -113,7 +105,8 @@ public class Weapon : MonoBehaviour
         weaponData.gripType = _weaponInfo.gripType;
         gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
 
-        bulletTf = transform.Find("BulletTransform");
+        if (bulletTf == null) bulletTf = transform.Find("BulletTransform");
+        if (gripTf == null) gripTf = transform.Find("GripTransform");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
@@ -126,14 +119,16 @@ public class Weapon : MonoBehaviour
 
     private void AddWeaponPartsObjects()
     {
+        if (partsObjects.Count > 0) return;
+
         var parts = new List<GameObject>();
         var partsTf = transform.Find("PartsTransform");
 
-        var muzzleTf = partsTf.Find("Muzzle");
-        AddParts(muzzleTf);
-
         var magTf = partsTf.Find("Magazine");
         AddParts(magTf);
+
+        var muzzleTf = partsTf.Find("Muzzle");
+        AddParts(muzzleTf);
 
         var attachmentTf = partsTf.Find("Attachment");
         if (attachmentTf != null)
@@ -145,8 +140,8 @@ public class Weapon : MonoBehaviour
         var sightTf = partsTf.Find("Sight");
         AddParts(sightTf);
 
-        var underRailTf = partsTf.Find("UnderRail");
-        AddParts(underRailTf);
+        var underBarrelTf = partsTf.Find("UnderBarrel");
+        AddParts(underBarrelTf);
 
         partsObjects = parts;
 
@@ -187,17 +182,19 @@ public class Weapon : MonoBehaviour
 
     public void Initialize()
     {
-        charCtr = null;
-        equipSlot = null;
-        weaponData = null;
+        Destroy(gameObject);
 
-        var activeParts = partsObjects.FindAll(x => x.activeSelf);
-        for (int i = 0; i < activeParts.Count; i++)
-        {
-            var parts = activeParts[i];
-            parts.SetActive(false);
-        }
-        gameObject.SetActive(false);
+        //charCtr = null;
+        //equipSlot = null;
+        //weaponData = null;
+
+        //var activeParts = partsObjects.FindAll(x => x.activeSelf);
+        //for (int i = 0; i < activeParts.Count; i++)
+        //{
+        //    var parts = activeParts[i];
+        //    parts.SetActive(false);
+        //}
+        //gameObject.SetActive(false);
     }
 
     public void EquipWeapon()

@@ -1,5 +1,98 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &870355323919015410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3774717876341635961}
+  m_Layer: 0
+  m_Name: GripPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3774717876341635961
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 870355323919015410}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5056206622820828382}
+  m_RootOrder: 36
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2157506992745405937
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8599751746333898246}
+  m_Layer: 0
+  m_Name: WeaponPivot_L
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8599751746333898246
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2157506992745405937}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5055975504908490184}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4310972945909504297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5056201583295630204}
+  m_Layer: 0
+  m_Name: WeaponPivot_R
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5056201583295630204
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4310972945909504297}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5055888685836952908}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5053056390272584974
 GameObject:
   m_ObjectHideFlags: 0
@@ -1822,6 +1915,7 @@ Transform:
   - {fileID: 5058789008245801920}
   - {fileID: 5055912103050813918}
   - {fileID: 5058851990321386726}
+  - {fileID: 8599751746333898246}
   m_Father: {fileID: 5056251191335052312}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2965,6 +3059,7 @@ Transform:
   - {fileID: 5055956310154678186}
   - {fileID: 5056135557304085582}
   - {fileID: 5058708829276099360}
+  - {fileID: 5056201583295630204}
   m_Father: {fileID: 5059056462477382704}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7697,6 +7792,7 @@ Transform:
   - {fileID: 5058766411875975888}
   - {fileID: 5055872058264720940}
   - {fileID: 6845673881207872193}
+  - {fileID: 3774717876341635961}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7800,16 +7896,12 @@ MonoBehaviour:
   animator: {fileID: 0}
   outlinable: {fileID: 0}
   cd: {fileID: 0}
-  rigBdr: {fileID: 0}
-  headRig: {fileID: 0}
-  chestRig: {fileID: 0}
-  chainIK: {fileID: 0}
+  chainIK: {fileID: 2474392798842383457}
   aimPoint: {fileID: 0}
   mainHolsterPivot: {fileID: 0}
   subHolsterPivot: {fileID: 0}
-  rightHandPivot: {fileID: 0}
-  leftHandPivot: {fileID: 0}
-  gripPivot: {fileID: 0}
+  rightHandPivot: {fileID: 5056201583295630204}
+  leftHandPivot: {fileID: 8599751746333898246}
   meshs: []
   sMeshs: []
   ownerType: 0
@@ -7915,6 +8007,8 @@ MonoBehaviour:
     targetList: []
   commandList: []
   pause: 0
+  moveGripPivot: 0
+  targetWeight: 0
 --- !u!136 &7169690338416861373
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -8055,6 +8149,10 @@ PrefabInstance:
       propertyPath: m_Data.m_Root
       value: 
       objectReference: {fileID: 5058806264883681206}
+    - target: {fileID: 8510965843527658750, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
+      propertyPath: m_Data.m_Target
+      value: 
+      objectReference: {fileID: 3774717876341635961}
     - target: {fileID: 9076251966953780421, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
       propertyPath: m_Data.m_ConstrainedObject
       value: 
@@ -8073,6 +8171,17 @@ PrefabInstance:
       objectReference: {fileID: 6845673881207872193}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
+--- !u!114 &2474392798842383457 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8510965843527658750, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}
+  m_PrefabInstance: {fileID: 6074170020197957791}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 796b75e345bd64d47a31edd757bd2670, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &6619399116531372041 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1123398653455175830, guid: 6083d204df2ac3b48aa1573cd070e014, type: 3}

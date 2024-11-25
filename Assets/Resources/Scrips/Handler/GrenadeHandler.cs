@@ -34,6 +34,7 @@ public class GrenadeHandler : MonoBehaviour
 
     public void SetComponents(CharacterController _charCtr)
     {
+        name = "GrenadePool";
         charCtr = _charCtr;
 
         lineRdr = GetComponent<LineRenderer>();

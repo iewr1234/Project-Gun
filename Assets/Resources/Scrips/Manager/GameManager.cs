@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
     private Transform passPointPoolTf;
     private Transform floatTextPoolTf;
 
-    [Header("--- Assignment Variable---")]
+    [Header("---Assignment Variable---")]
     public CharacterOwner currentTurn;
     public GameState gameState;
     [HideInInspector] public List<FieldNode> nodeList = new List<FieldNode>();
@@ -279,7 +279,9 @@ public class GameManager : MonoBehaviour
                 if (weaponData.weaponType == WeaponType.None) continue;
 
                 var equipSlot = weapons[i].item.equipSlot;
-                var weapon = charCtr.GetWeapon(weaponData.prefabName, equipSlot.type);
+                var weapon = charCtr.GetWeapon(weaponData);
+                if (weapon == null) continue;
+
                 weapon.SetComponets(charCtr, equipSlot, weaponData);
             }
 
@@ -303,7 +305,7 @@ public class GameManager : MonoBehaviour
                 var weaponInfo = weaponInfos[i];
                 if (weaponInfo.weaponType == WeaponType.None) continue;
 
-                var weapon = charCtr.GetWeapon(weaponInfo.prefabName, EquipType.MainWeapon1 + i);
+                var weapon = charCtr.GetWeapon(weaponInfo);
                 weapon.SetComponets(charCtr, weaponInfo);
             }
 
