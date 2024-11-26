@@ -1045,10 +1045,11 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:Q";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:R";
     private enum BulletVariable
     {
         ID,
+        PrefabName,
         BulletName,
         MeshType,
         Level,
@@ -1093,6 +1094,7 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)BulletVariable.ID]}: {data[(int)BulletVariable.BulletName]}",
                     ID = data[(int)BulletVariable.ID],
+                    prefabName = data[(int)BulletVariable.PrefabName],
                     bulletName = data[(int)BulletVariable.BulletName],
                     meshType = int.Parse(data[(int)BulletVariable.MeshType]),
                     level = int.Parse(data[(int)BulletVariable.Level]),
@@ -1776,6 +1778,11 @@ public class DataManager : MonoBehaviour
             ReadPrefabFolder("Weapon/Shotgun");
             ReadPrefabFolder("Weapon/Bullet_item");
             ReadPrefabFolder("Weapon/Parts/Magazine");
+            ReadPrefabFolder("Weapon/Parts/Muzzle");
+            ReadPrefabFolder("Weapon/Parts/Sight");
+            ReadPrefabFolder("Weapon/Parts/Attachment/Handgun");
+            ReadPrefabFolder("Weapon/Parts/Attachment/Left");
+            ReadPrefabFolder("Weapon/Parts/Attachment/Right");
             ReadPrefabFolder("Weapon/Grenade");
 
             // 수정 사항을 프리팹에 저장하고 프리팹 로드를 닫기

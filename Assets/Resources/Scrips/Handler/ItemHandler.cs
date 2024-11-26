@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -199,7 +198,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 case ItemType.Bullet:
                     var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
                     bulletData = _bulletData.CopyData();
-                    return bulletData.bulletName;
+                    return bulletData.prefabName;
                 case ItemType.Magazine:
                     var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
                     magData = _magData.CopyData();
@@ -419,7 +418,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.SubWeapon:
                 return weaponData.prefabName;
             case ItemType.Bullet:
-                return bulletData.bulletName;
+                return bulletData.prefabName;
             case ItemType.Magazine:
                 return magData.prefabName;
             case ItemType.Muzzle:

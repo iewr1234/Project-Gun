@@ -74,8 +74,8 @@ public static class DataUtility
     public static readonly Quaternion weaponPivot_rot_AR = Quaternion.Euler(-12.9f, 98.92f, -97f);
     public static readonly Vector3 weaponPivot_pos_SR = new Vector3(0.092f, 0.024f, -0.048f);
     public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(5.1f, 95.7f, -89.67f);
-    public static readonly Vector3 weaponPivot_pos_SG_intMag = new Vector3(0.05f, 0.033f, -0.045f);
-    public static readonly Quaternion weaponPivot_rot_SG_intMag = Quaternion.Euler(-10.7f, 99f, -97f);
+    public static readonly Vector3 weaponPivot_pos_SG_PA = new Vector3(0.05f, 0.033f, -0.045f);
+    public static readonly Quaternion weaponPivot_rot_SG_PA = Quaternion.Euler(-10.7f, 99f, -97f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
@@ -361,11 +361,18 @@ public static class DataUtility
                     pivotRot = weaponPivot_rot_SR,
                 };
                 break;
-            case WeaponGripType.Shotgun_IntMagazine:
+            case WeaponGripType.Shotgun_PumpAction:
                 gripInfo = new WeaponGripInfo()
                 {
-                    pivotPos = weaponPivot_pos_SG_intMag,
-                    pivotRot = weaponPivot_rot_SG_intMag,
+                    pivotPos = weaponPivot_pos_SG_PA,
+                    pivotRot = weaponPivot_rot_SG_PA,
+                };
+                break;
+            case WeaponGripType.Shotgun_SemiAuto:
+                gripInfo = new WeaponGripInfo()
+                {
+                    pivotPos = weaponPivot_pos_AR,
+                    pivotRot = weaponPivot_rot_AR,
                 };
                 break;
             default:

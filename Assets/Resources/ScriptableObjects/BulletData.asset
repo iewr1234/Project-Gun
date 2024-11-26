@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BulletData
   m_EditorClassIdentifier: 
   bulletInfos:
-  - indexName: 'B0001: Bullet_1'
-    ID: B0001
-    bulletName: Bullet_1
+  - indexName: 'B00001: 5.56mm Bullet 1'
+    ID: B00001
+    bulletName: 5.56mm Bullet 1
     meshType: 0
     level: 1
     caliber: 5.56
@@ -30,9 +30,9 @@ MonoBehaviour:
     penetrate: 10
     armorBreak: 15
     critical: 3
-  - indexName: 'B0002: Bullet_2'
-    ID: B0002
-    bulletName: Bullet_2
+  - indexName: 'B00002: 5.56mm Bullet 2'
+    ID: B00002
+    bulletName: 5.56mm Bullet 2
     meshType: 0
     level: 1
     caliber: 5.56
@@ -47,9 +47,9 @@ MonoBehaviour:
     penetrate: 10
     armorBreak: 15
     critical: 3
-  - indexName: 'B0003: Bullet_3'
-    ID: B0003
-    bulletName: Bullet_3
+  - indexName: 'B01001: 9mm Bullet 1'
+    ID: B01001
+    bulletName: 9mm Bullet 1
     meshType: 0
     level: 1
     caliber: 9
@@ -64,26 +64,9 @@ MonoBehaviour:
     penetrate: 5
     armorBreak: 5
     critical: 3
-  - indexName: 'B0004: Bullet_4'
-    ID: B0004
-    bulletName: Bullet_4
-    meshType: 1
-    level: 1
-    caliber: 12
-    pelletNum: 8
-    spread: 75
-    weight: 0.1
-    MOA: -10
-    stability: -10
-    rebound: -10
-    propellant: 10
-    damage: 5
-    penetrate: 10
-    armorBreak: 15
-    critical: 10
-  - indexName: 'B0005: Bullet_5'
-    ID: B0005
-    bulletName: Bullet_5
+  - indexName: 'B02001: 7.92mm Bullet 1'
+    ID: B02001
+    bulletName: 7.92mm Bullet 1
     meshType: 0
     level: 1
     caliber: 7.92
@@ -98,3 +81,20 @@ MonoBehaviour:
     penetrate: 10
     armorBreak: 10
     critical: 3
+  - indexName: 'B03001: 12mm Gage 1'
+    ID: B03001
+    bulletName: 12mm Gage 1
+    meshType: 1
+    level: 1
+    caliber: 12
+    pelletNum: 8
+    spread: 75
+    weight: 0.1
+    MOA: -10
+    stability: -10
+    rebound: -10
+    propellant: 10
+    damage: 5
+    penetrate: 10
+    armorBreak: 15
+    critical: 10

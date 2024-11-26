@@ -130,15 +130,15 @@ public class Weapon : MonoBehaviour
         var muzzleTf = partsTf.Find("Muzzle");
         AddParts(muzzleTf);
 
+        var sightTf = partsTf.Find("Sight");
+        AddParts(sightTf);
+
         var attachmentTf = partsTf.Find("Attachment");
         if (attachmentTf != null)
         {
             AddParts(attachmentTf.Find("Left"));
             AddParts(attachmentTf.Find("Right"));
         }
-
-        var sightTf = partsTf.Find("Sight");
-        AddParts(sightTf);
 
         var underBarrelTf = partsTf.Find("UnderBarrel");
         AddParts(underBarrelTf);

@@ -31,8 +31,8 @@ public enum WeaponGripType
     SubMachineGun,
     AssaultRifle,
     SniperRifle,
-    Shotgun_Magazine,
-    Shotgun_IntMagazine,
+    Shotgun_PumpAction,
+    Shotgun_SemiAuto,
 }
 
 [System.Serializable]

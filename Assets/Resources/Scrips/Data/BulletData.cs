@@ -9,6 +9,7 @@ public class BulletDataInfo
     [Space(5f)]
 
     public string ID;
+    public string prefabName;
     public string bulletName;
     public int meshType;
     [Space(5f)]
@@ -38,6 +39,7 @@ public class BulletDataInfo
             indexName = indexName,
 
             ID = ID,
+            prefabName = prefabName,
             bulletName = bulletName,
             meshType = meshType,
 
