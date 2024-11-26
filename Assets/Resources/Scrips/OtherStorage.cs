@@ -250,9 +250,6 @@ public class OtherStorage : MonoBehaviour
             case ItemType.Sight:
                 storageItemInfo.partsData = item.partsData;
                 break;
-            case ItemType.FrontHandle:
-                storageItemInfo.partsData = item.partsData;
-                break;
             case ItemType.Attachment:
                 storageItemInfo.partsData = item.partsData;
                 break;

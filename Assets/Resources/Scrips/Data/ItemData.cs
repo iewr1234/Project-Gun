@@ -15,7 +15,6 @@ public enum ItemType
     Magazine,
     Muzzle,
     Sight,
-    FrontHandle,
     Attachment,
     UnderBarrel,
     Grenade = 30,

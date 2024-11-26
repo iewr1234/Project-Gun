@@ -18,7 +18,8 @@ public enum EquipType
     Magazine,
     Muzzle,
     Sight,
-    UnderRail,
+    Attachment,
+    UnderBarrel,
     Rail,
 }
 
@@ -115,11 +116,14 @@ public class EquipSlot : MonoBehaviour
                     && popUp.item.weaponData.caliber == putItem.bulletData.caliber;
             case EquipType.Magazine:
                 return MagazineType();
+            case EquipType.Muzzle:
+                return PartsType();
             case EquipType.Sight:
-                return !itemEquip
-                    && putItem.itemData.type == ItemType.Sight
-                    && putItem.partsData != null
-                    && putItem.partsData.compatModel.Contains(model);
+                return PartsType();
+            case EquipType.Attachment:
+                return PartsType();
+            case EquipType.UnderBarrel:
+                return PartsType();
             default:
                 return false;
         }
@@ -175,13 +179,37 @@ public class EquipSlot : MonoBehaviour
                         default:
                             return false;
                     }
-
-                //if (intMagMax == 0) return false;
-                //if (item != null && item.TotalCount == intMagMax) return false;
-
-                //return putItem.bulletData != null && putItem.bulletData.caliber == caliber;
                 case ItemType.Magazine:
                     return item == null && putItem.magData != null && popUp != null && putItem.magData.compatModel.Contains(model);
+                default:
+                    return false;
+            }
+        }
+
+        bool PartsType()
+        {
+            switch (putItem.partsData.type)
+            {
+                case WeaponPartsType.Muzzle:
+                    return !itemEquip
+                         && type == EquipType.Muzzle
+                         && putItem.partsData != null
+                         && putItem.partsData.compatModel.Contains(model);
+                case WeaponPartsType.Sight:
+                    return !itemEquip
+                         && type == EquipType.Sight
+                         && putItem.partsData != null
+                         && putItem.partsData.compatModel.Contains(model);
+                case WeaponPartsType.Attachment:
+                    return !itemEquip
+                         && type == EquipType.Attachment
+                         && putItem.partsData != null
+                         && putItem.partsData.compatModel.Contains(model);
+                case WeaponPartsType.UnderBarrel:
+                    return !itemEquip
+                         && type == EquipType.UnderBarrel
+                         && putItem.partsData != null
+                         && putItem.partsData.compatModel.Contains(model);
                 default:
                     return false;
             }

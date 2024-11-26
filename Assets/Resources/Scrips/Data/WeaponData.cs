@@ -79,8 +79,8 @@ public class WeaponDataInfo
     [HideInInspector][Tooltip("ÅºÃ¢ »ç¿ë")] public List<WeaponPartsSize> useMagazine;
     [HideInInspector][Tooltip("ÃÑ±¸ »ç¿ë")] public List<WeaponPartsSize> useMuzzle;
     [HideInInspector][Tooltip("Á¶ÁØ°æ »ç¿ë")] public List<WeaponPartsSize> useSight;
-    [HideInInspector][Tooltip("ÇÏºÎ »ç¿ë")] public List<WeaponPartsSize> useUnderRail;
-    [HideInInspector][Tooltip("·¹ÀÏ »ç¿ë")] public List<WeaponPartsSize> useRail;
+    [HideInInspector][Tooltip("ºÎÂø¹° »ç¿ë")] public List<WeaponPartsSize> useAttachment;
+    [HideInInspector][Tooltip("ÇÏºÎ »ç¿ë")] public List<WeaponPartsSize> useUnderBarrel;
 
     [HideInInspector][Tooltip("ÀåÂøÅºÃ¢ID")] public string equipMagID;
     [HideInInspector][Tooltip("ÀåÂøºÎÇ°IDs")] public List<string> equipPartsIDs;
@@ -117,8 +117,8 @@ public class WeaponDataInfo
             useMagazine = new List<WeaponPartsSize>(useMagazine),
             useMuzzle = new List<WeaponPartsSize>(useMuzzle),
             useSight = new List<WeaponPartsSize>(useSight),
-            useUnderRail = new List<WeaponPartsSize>(useUnderRail),
-            useRail = new List<WeaponPartsSize>(useRail),
+            useAttachment = new List<WeaponPartsSize>(useAttachment),
+            useUnderBarrel = new List<WeaponPartsSize>(useUnderBarrel),
             equipMagID = equipMagID,
             equipPartsIDs = new List<string>(equipPartsIDs),
         };

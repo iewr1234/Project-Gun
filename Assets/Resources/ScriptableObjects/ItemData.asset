@@ -450,7 +450,7 @@ MonoBehaviour:
   - indexName: 'T40001: Pistol 1 Magazine'
     serialID: 
     ID: T40001
-    dataID: M0001
+    dataID: M00001
     itemName: Pistol 1 Magazine
     type: 21
     level: 1
@@ -464,7 +464,7 @@ MonoBehaviour:
   - indexName: 'T40002: Pistol 2 Magazine'
     serialID: 
     ID: T40002
-    dataID: M0002
+    dataID: M00002
     itemName: Pistol 2 Magazine
     type: 21
     level: 1
@@ -478,7 +478,7 @@ MonoBehaviour:
   - indexName: 'T40003: Pistol 3 Magazine'
     serialID: 
     ID: T40003
-    dataID: M0003
+    dataID: M00003
     itemName: Pistol 3 Magazine
     type: 21
     level: 1
@@ -492,7 +492,7 @@ MonoBehaviour:
   - indexName: 'T40004: Pistol 4 Magazine'
     serialID: 
     ID: T40004
-    dataID: M0014
+    dataID: M00004
     itemName: Pistol 4 Magazine
     type: 21
     level: 1
@@ -506,7 +506,7 @@ MonoBehaviour:
   - indexName: 'T40005: Pistol 5 Magazine'
     serialID: 
     ID: T40005
-    dataID: M0015
+    dataID: M00005
     itemName: Pistol 5 Magazine
     type: 21
     level: 1
@@ -520,7 +520,7 @@ MonoBehaviour:
   - indexName: 'T40006: Pistol 6 Magazine'
     serialID: 
     ID: T40006
-    dataID: M0016
+    dataID: M00006
     itemName: Pistol 6 Magazine
     type: 21
     level: 1
@@ -534,7 +534,7 @@ MonoBehaviour:
   - indexName: 'T41001: SubMachineGun NS1 Magazine'
     serialID: 
     ID: T41001
-    dataID: M0017
+    dataID: M01001
     itemName: SubMachineGun NS1 Magazine
     type: 21
     level: 1
@@ -548,7 +548,7 @@ MonoBehaviour:
   - indexName: 'T42001: SubMachineGun S1 Magazine'
     serialID: 
     ID: T42001
-    dataID: M0018
+    dataID: M02001
     itemName: SubMachineGun S1 Magazine
     type: 21
     level: 1
@@ -562,7 +562,7 @@ MonoBehaviour:
   - indexName: 'T42002: SubMachineGun S2 Magazine'
     serialID: 
     ID: T42002
-    dataID: M0019
+    dataID: M02002
     itemName: SubMachineGun S2 Magazine
     type: 21
     level: 1
@@ -576,7 +576,7 @@ MonoBehaviour:
   - indexName: 'T42003: SubMachineGun S3 Magazine'
     serialID: 
     ID: T42003
-    dataID: M0027
+    dataID: M02003
     itemName: SubMachineGun S3 Magazine
     type: 21
     level: 1
@@ -590,7 +590,7 @@ MonoBehaviour:
   - indexName: 'T42004: SubMachineGun S4 Magazine'
     serialID: 
     ID: T42004
-    dataID: M0028
+    dataID: M02004
     itemName: SubMachineGun S4 Magazine
     type: 21
     level: 1
@@ -604,7 +604,7 @@ MonoBehaviour:
   - indexName: 'T43001: AssaultRifle 1 Magazine'
     serialID: 
     ID: T43001
-    dataID: M0029
+    dataID: M03001
     itemName: AssaultRifle 1 Magazine
     type: 21
     level: 1
@@ -618,7 +618,7 @@ MonoBehaviour:
   - indexName: 'T43002: AssaultRifle 2 Magazine'
     serialID: 
     ID: T43002
-    dataID: M0030
+    dataID: M03002
     itemName: AssaultRifle 2 Magazine
     type: 21
     level: 1
@@ -632,7 +632,7 @@ MonoBehaviour:
   - indexName: 'T43003: AssaultRifle 3 Magazine'
     serialID: 
     ID: T43003
-    dataID: M0031
+    dataID: M03003
     itemName: AssaultRifle 3 Magazine
     type: 21
     level: 1
@@ -646,7 +646,7 @@ MonoBehaviour:
   - indexName: 'T43004: AssaultRifle 4 Magazine'
     serialID: 
     ID: T43004
-    dataID: P0001
+    dataID: M03004
     itemName: AssaultRifle 4 Magazine
     type: 21
     level: 1
@@ -660,7 +660,7 @@ MonoBehaviour:
   - indexName: 'T43005: AssaultRifle 5 Magazine'
     serialID: 
     ID: T43005
-    dataID: P0002
+    dataID: M03005
     itemName: AssaultRifle 5 Magazine
     type: 21
     level: 1
@@ -674,7 +674,7 @@ MonoBehaviour:
   - indexName: 'T44001: SniperRifle 1 Magazine'
     serialID: 
     ID: T44001
-    dataID: P0003
+    dataID: M04001
     itemName: SniperRifle 1 Magazine
     type: 21
     level: 1
@@ -688,7 +688,7 @@ MonoBehaviour:
   - indexName: 'T45001: SemiAuto Shotgun 1 Magazine'
     serialID: 
     ID: T45001
-    dataID: P0004
+    dataID: M05001
     itemName: SemiAuto Shotgun 1 Magazine
     type: 21
     level: 1
@@ -702,9 +702,835 @@ MonoBehaviour:
   - indexName: 'T45002: SemiAuto Shotgun 2 Magazine'
     serialID: 
     ID: T45002
-    dataID: P0005
+    dataID: M05002
     itemName: SemiAuto Shotgun 2 Magazine
     type: 21
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T46001: Handgun Muzzle 1'
+    serialID: 
+    ID: T46001
+    dataID: P00001
+    itemName: Handgun Muzzle 1
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T46002: Handgun Muzzle 2'
+    serialID: 
+    ID: T46002
+    dataID: P00002
+    itemName: Handgun Muzzle 2
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T46003: Handgun Muzzle 3'
+    serialID: 
+    ID: T46003
+    dataID: P00003
+    itemName: Handgun Muzzle 3
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T46004: Handgun Muzzle 4'
+    serialID: 
+    ID: T46004
+    dataID: P00004
+    itemName: Handgun Muzzle 4
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47001: Muzzle 1'
+    serialID: 
+    ID: T47001
+    dataID: P01001
+    itemName: Muzzle 1
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47002: Muzzle 2'
+    serialID: 
+    ID: T47002
+    dataID: P01002
+    itemName: Muzzle 2
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47003: Muzzle 3'
+    serialID: 
+    ID: T47003
+    dataID: P01003
+    itemName: Muzzle 3
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47004: Muzzle 4'
+    serialID: 
+    ID: T47004
+    dataID: P01004
+    itemName: Muzzle 4
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47005: Muzzle 5'
+    serialID: 
+    ID: T47005
+    dataID: P01005
+    itemName: Muzzle 5
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47006: Muzzle 6'
+    serialID: 
+    ID: T47006
+    dataID: P01006
+    itemName: Muzzle 6
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47007: Muzzle 7'
+    serialID: 
+    ID: T47007
+    dataID: P01007
+    itemName: Muzzle 7
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47008: Muzzle 8'
+    serialID: 
+    ID: T47008
+    dataID: P01008
+    itemName: Muzzle 8
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47009: Muzzle 9'
+    serialID: 
+    ID: T47009
+    dataID: P01009
+    itemName: Muzzle 9
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47010: Muzzle 10'
+    serialID: 
+    ID: T47010
+    dataID: P01010
+    itemName: Muzzle 10
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47011: Muzzle 11'
+    serialID: 
+    ID: T47011
+    dataID: P01011
+    itemName: Muzzle 11
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47012: Muzzle 12'
+    serialID: 
+    ID: T47012
+    dataID: P01012
+    itemName: Muzzle 12
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T47013: Muzzle 13'
+    serialID: 
+    ID: T47013
+    dataID: P01013
+    itemName: Muzzle 13
+    type: 22
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T48001: Handgun Sight 1'
+    serialID: 
+    ID: T48001
+    dataID: P02001
+    itemName: Handgun Sight 1
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T48002: Handgun Sight 2'
+    serialID: 
+    ID: T48002
+    dataID: P02002
+    itemName: Handgun Sight 2
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T48003: Handgun Sight 3'
+    serialID: 
+    ID: T48003
+    dataID: P02003
+    itemName: Handgun Sight 3
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49001: Sight 1'
+    serialID: 
+    ID: T49001
+    dataID: P03001
+    itemName: Sight 1
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49002: Sight 2'
+    serialID: 
+    ID: T49002
+    dataID: P03002
+    itemName: Sight 2
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49003: Sight 3'
+    serialID: 
+    ID: T49003
+    dataID: P03003
+    itemName: Sight 3
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49004: Sight 4'
+    serialID: 
+    ID: T49004
+    dataID: P03004
+    itemName: Sight 4
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49005: Sight 5'
+    serialID: 
+    ID: T49005
+    dataID: P03005
+    itemName: Sight 5
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49006: Sight 6'
+    serialID: 
+    ID: T49006
+    dataID: P03006
+    itemName: Sight 6
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49007: Sight 7'
+    serialID: 
+    ID: T49007
+    dataID: P03007
+    itemName: Sight 7
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49008: Sight 8'
+    serialID: 
+    ID: T49008
+    dataID: P03008
+    itemName: Sight 8
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49009: Sight 9'
+    serialID: 
+    ID: T49009
+    dataID: P03009
+    itemName: Sight 9
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49010: Sight 10'
+    serialID: 
+    ID: T49010
+    dataID: P03010
+    itemName: Sight 10
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49011: Sight 11'
+    serialID: 
+    ID: T49011
+    dataID: P03011
+    itemName: Sight 11
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T49012: Sight 12'
+    serialID: 
+    ID: T49012
+    dataID: P03012
+    itemName: Sight 12
+    type: 23
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T50001: Handgun Laser 1'
+    serialID: 
+    ID: T50001
+    dataID: P04001
+    itemName: Handgun Laser 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T51001: Handgun Light 1'
+    serialID: 
+    ID: T51001
+    dataID: P05001
+    itemName: Handgun Light 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T52001: Left Attach Laser 1'
+    serialID: 
+    ID: T52001
+    dataID: P06001
+    itemName: Left Attach Laser 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T52002: Left Attach Laser 2'
+    serialID: 
+    ID: T52002
+    dataID: P06002
+    itemName: Left Attach Laser 2
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T52003: Left Attach Laser 3'
+    serialID: 
+    ID: T52003
+    dataID: P06003
+    itemName: Left Attach Laser 3
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T52004: Left Attach Laser 4'
+    serialID: 
+    ID: T52004
+    dataID: P06004
+    itemName: Left Attach Laser 4
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T53001: Left Attach Light 1'
+    serialID: 
+    ID: T53001
+    dataID: P07001
+    itemName: Left Attach Light 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T53002: Left Attach Light 2'
+    serialID: 
+    ID: T53002
+    dataID: P07002
+    itemName: Left Attach Light 2
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T53003: Left Attach Light 3'
+    serialID: 
+    ID: T53003
+    dataID: P07003
+    itemName: Left Attach Light 3
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T53004: Left Attach Light 4'
+    serialID: 
+    ID: T53004
+    dataID: P07004
+    itemName: Left Attach Light 4
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T54001: Right Attach Laser 1'
+    serialID: 
+    ID: T54001
+    dataID: P08001
+    itemName: Right Attach Laser 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T54002: Right Attach Laser 2'
+    serialID: 
+    ID: T54002
+    dataID: P08002
+    itemName: Right Attach Laser 2
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T54003: Right Attach Laser 3'
+    serialID: 
+    ID: T54003
+    dataID: P08003
+    itemName: Right Attach Laser 3
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T54004: Right Attach Laser 4'
+    serialID: 
+    ID: T54004
+    dataID: P08004
+    itemName: Right Attach Laser 4
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T55001: Right Attach Light 1'
+    serialID: 
+    ID: T55001
+    dataID: P09001
+    itemName: Right Attach Light 1
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T55002: Right Attach Light 2'
+    serialID: 
+    ID: T55002
+    dataID: P09002
+    itemName: Right Attach Light 2
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T55003: Right Attach Light 3'
+    serialID: 
+    ID: T55003
+    dataID: P09003
+    itemName: Right Attach Light 3
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T55004: Right Attach Light 4'
+    serialID: 
+    ID: T55004
+    dataID: P09004
+    itemName: Right Attach Light 4
+    type: 24
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56001: ForwardGrip 1'
+    serialID: 
+    ID: T56001
+    dataID: P10001
+    itemName: ForwardGrip 1
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56002: ForwardGrip 2'
+    serialID: 
+    ID: T56002
+    dataID: P10002
+    itemName: ForwardGrip 2
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56003: ForwardGrip 3'
+    serialID: 
+    ID: T56003
+    dataID: P10003
+    itemName: ForwardGrip 3
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56004: ForwardGrip 4'
+    serialID: 
+    ID: T56004
+    dataID: P10004
+    itemName: ForwardGrip 4
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56005: ForwardGrip 5'
+    serialID: 
+    ID: T56005
+    dataID: P10005
+    itemName: ForwardGrip 5
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56006: ForwardGrip 6'
+    serialID: 
+    ID: T56006
+    dataID: P10006
+    itemName: ForwardGrip 6
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56007: ForwardGrip 7'
+    serialID: 
+    ID: T56007
+    dataID: P10007
+    itemName: ForwardGrip 7
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56008: ForwardGrip 8'
+    serialID: 
+    ID: T56008
+    dataID: P10008
+    itemName: ForwardGrip 8
+    type: 25
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 100
+    size: {x: 1, y: 1}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T56009: ForwardGrip 9'
+    serialID: 
+    ID: T56009
+    dataID: P10009
+    itemName: ForwardGrip 9
+    type: 25
     level: 1
     rarity: 1
     maxNesting: 1

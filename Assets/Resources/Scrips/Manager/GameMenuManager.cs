@@ -1074,10 +1074,14 @@ public class GameMenuManager : MonoBehaviour
             case ItemType.Magazine:
                 return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
                     && !onItem.weaponData.isMag && putItem.magData.compatModel.Contains(onItem.weaponData.model);
+            case ItemType.Muzzle:
+                return Check_PartsType();
             case ItemType.Sight:
-                return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
-                    && onItem.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null
-                    && putItem.partsData.compatModel.Contains(onItem.weaponData.model);
+                return Check_PartsType();
+            case ItemType.Attachment:
+                return Check_PartsType();
+            case ItemType.UnderBarrel:
+                return Check_PartsType();
             default:
                 return false;
         }
@@ -1116,6 +1120,13 @@ public class GameMenuManager : MonoBehaviour
                     }
                 }
             }
+        }
+
+        bool Check_PartsType()
+        {
+            return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                    && onItem.weaponData.equipPartsList.Find(x => x.type == putItem.partsData.type) == null
+                    && putItem.partsData.compatModel.Contains(onItem.weaponData.model);
         }
     }
 

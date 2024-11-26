@@ -306,7 +306,7 @@ public class PopUp_Inventory : MonoBehaviour
                 EquipType.Magazine,
                 EquipType.Muzzle,
                 EquipType.Sight,
-                EquipType.UnderRail,
+                EquipType.UnderBarrel,
                 EquipType.Rail,
             };
 
@@ -342,11 +342,11 @@ public class PopUp_Inventory : MonoBehaviour
                     case EquipType.Sight:
                         SetWeaponPartSlot("조준경", equipSlot, type[i], item.weaponData.useSight);
                         break;
-                    case EquipType.UnderRail:
-                        SetWeaponPartSlot("하부", equipSlot, type[i], item.weaponData.useUnderRail);
+                    case EquipType.UnderBarrel:
+                        SetWeaponPartSlot("하부", equipSlot, type[i], item.weaponData.useUnderBarrel);
                         break;
                     case EquipType.Rail:
-                        SetWeaponPartSlot("레일", equipSlot, type[i], item.weaponData.useRail);
+                        SetWeaponPartSlot("레일", equipSlot, type[i], item.weaponData.useAttachment);
                         break;
                     default:
                         equipSlot.gameObject.SetActive(false);

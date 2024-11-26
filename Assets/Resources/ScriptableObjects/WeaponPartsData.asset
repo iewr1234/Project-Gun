@@ -13,445 +13,1006 @@ MonoBehaviour:
   m_Name: WeaponPartsData
   m_EditorClassIdentifier: 
   partsInfos:
-  - indexName: 'P0001: Sight_1'
-    ID: P0001
-    prefabName: Sight_1
-    partsName: Sight_1
+  - indexName: 'P00001: Handgun Muzzle 1'
+    ID: P00001
+    prefabName: Muzzle_HG_001
+    partsName: Handgun Muzzle 1
+    compatModel: 01000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P00002: Handgun Muzzle 2'
+    ID: P00002
+    prefabName: Muzzle_HG_002
+    partsName: Handgun Muzzle 2
+    compatModel: 01000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P00003: Handgun Muzzle 3'
+    ID: P00003
+    prefabName: Muzzle_HG_003
+    partsName: Handgun Muzzle 3
+    compatModel: 01000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P00004: Handgun Muzzle 4'
+    ID: P00004
+    prefabName: Muzzle_HG_004
+    partsName: Handgun Muzzle 4
+    compatModel: 01000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01001: Muzzle 1'
+    ID: P01001
+    prefabName: Muzzle_HG_001
+    partsName: Muzzle 1
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01002: Muzzle 2'
+    ID: P01002
+    prefabName: Muzzle_HG_002
+    partsName: Muzzle 2
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01003: Muzzle 3'
+    ID: P01003
+    prefabName: Muzzle_HG_003
+    partsName: Muzzle 3
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01004: Muzzle 4'
+    ID: P01004
+    prefabName: Muzzle_HG_004
+    partsName: Muzzle 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01005: Muzzle 5'
+    ID: P01005
+    prefabName: Muzzle_HG_005
+    partsName: Muzzle 5
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01006: Muzzle 6'
+    ID: P01006
+    prefabName: Muzzle_HG_006
+    partsName: Muzzle 6
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01007: Muzzle 7'
+    ID: P01007
+    prefabName: Muzzle_HG_007
+    partsName: Muzzle 7
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01008: Muzzle 8'
+    ID: P01008
+    prefabName: Muzzle_HG_008
+    partsName: Muzzle 8
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01009: Muzzle 9'
+    ID: P01009
+    prefabName: Muzzle_HG_009
+    partsName: Muzzle 9
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01010: Muzzle 10'
+    ID: P01010
+    prefabName: Muzzle_HG_010
+    partsName: Muzzle 10
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01011: Muzzle 11'
+    ID: P01011
+    prefabName: Muzzle_HG_011
+    partsName: Muzzle 11
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01012: Muzzle 12'
+    ID: P01012
+    prefabName: Muzzle_HG_012
+    partsName: Muzzle 12
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P01013: Muzzle 13'
+    ID: P01013
+    prefabName: Muzzle_HG_013
+    partsName: Muzzle 13
+    compatModel: 03000000
+    weight: 0.5
+    type: 1
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P02001: Handgun Sight 1'
+    ID: P02001
+    prefabName: Sight_HG_001
+    partsName: Handgun Sight 1
     compatModel: 01000000
     weight: 0.5
     type: 2
     size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0002: Sight_2'
-    ID: P0002
-    prefabName: Sight_2
-    partsName: Sight_2
-    compatModel: 0100000002000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0003: Sight_3'
-    ID: P0003
-    prefabName: Sight_3
-    partsName: Sight_3
+  - indexName: 'P02002: Handgun Sight 2'
+    ID: P02002
+    prefabName: Sight_HG_002
+    partsName: Handgun Sight 2
     compatModel: 01000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0004: Sight_4'
-    ID: P0004
-    prefabName: Sight_4
-    partsName: Sight_4
+  - indexName: 'P02003: Handgun Sight 3'
+    ID: P02003
+    prefabName: Sight_HG_003
+    partsName: Handgun Sight 3
     compatModel: 01000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0005: Sight_5'
-    ID: P0005
-    prefabName: Sight_5
-    partsName: Sight_5
-    compatModel: 01000000
+  - indexName: 'P03001: Sight 1'
+    ID: P03001
+    prefabName: Sight_001
+    partsName: Sight 1
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0006: Sight_6'
-    ID: P0006
-    prefabName: Sight_6
-    partsName: Sight_6
-    compatModel: 01000000
+  - indexName: 'P03002: Sight 2'
+    ID: P03002
+    prefabName: Sight_002
+    partsName: Sight 2
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0007: Sight_7'
-    ID: P0007
-    prefabName: Sight_7
-    partsName: Sight_7
-    compatModel: 01000000
+  - indexName: 'P03003: Sight 3'
+    ID: P03003
+    prefabName: Sight_003
+    partsName: Sight 3
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0008: Sight_8'
-    ID: P0008
-    prefabName: Sight_8
-    partsName: Sight_8
-    compatModel: 01000000
+  - indexName: 'P03004: Sight 4'
+    ID: P03004
+    prefabName: Sight_004
+    partsName: Sight 4
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0009: Sight_9'
-    ID: P0009
-    prefabName: Sight_9
-    partsName: Sight_9
-    compatModel: 01000000
+  - indexName: 'P03005: Sight 5'
+    ID: P03005
+    prefabName: Sight_005
+    partsName: Sight 5
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0010: Sight_10'
-    ID: P0010
-    prefabName: Sight_10
-    partsName: Sight_10
-    compatModel: 01000000
+  - indexName: 'P03006: Sight 6'
+    ID: P03006
+    prefabName: Sight_006
+    partsName: Sight 6
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0011: Sight_11'
-    ID: P0011
-    prefabName: Sight_11
-    partsName: Sight_11
-    compatModel: 01000000
+  - indexName: 'P03007: Sight 7'
+    ID: P03007
+    prefabName: Sight_007
+    partsName: Sight 7
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0012: Sight_12'
-    ID: P0012
-    prefabName: Sight_12
-    partsName: Sight_12
-    compatModel: 01000000
+  - indexName: 'P03008: Sight 8'
+    ID: P03008
+    prefabName: Sight_008
+    partsName: Sight 8
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0013: Sight_13'
-    ID: P0013
-    prefabName: Sight_13
-    partsName: Sight_13
-    compatModel: 01000000
+  - indexName: 'P03009: Sight 9'
+    ID: P03009
+    prefabName: Sight_009
+    partsName: Sight 9
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0014: Sight_14'
-    ID: P0014
-    prefabName: Sight_14
-    partsName: Sight_14
-    compatModel: 01000000
+  - indexName: 'P03010: Sight 10'
+    ID: P03010
+    prefabName: Sight_010
+    partsName: Sight 10
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0015: Sight_15'
-    ID: P0015
-    prefabName: Sight_15
-    partsName: Sight_15
-    compatModel: 01000000
+  - indexName: 'P03011: Sight 11'
+    ID: P03011
+    prefabName: Sight_011
+    partsName: Sight 11
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0016: Sight_16'
-    ID: P0016
-    prefabName: Sight_16
-    partsName: Sight_16
-    compatModel: 01000000
+  - indexName: 'P03012: Sight 12'
+    ID: P03012
+    prefabName: Sight_012
+    partsName: Sight 12
+    compatModel: 03000000
     weight: 0.5
     type: 2
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0017: Sight_17'
-    ID: P0017
-    prefabName: Sight_17
-    partsName: Sight_17
-    compatModel: 01000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0018: Sight_18'
-    ID: P0018
-    prefabName: Sight_18
-    partsName: Sight_18
-    compatModel: 01000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0019: Sight_19'
-    ID: P0019
-    prefabName: Sight_19
-    partsName: Sight_19
-    compatModel: 01000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0020: Sight_20'
-    ID: P0020
-    prefabName: Sight_20
-    partsName: Sight_20
-    compatModel: 01000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0021: Sight_21'
-    ID: P0021
-    prefabName: Sight_21
-    partsName: Sight_21
-    compatModel: 01000000
-    weight: 0.5
-    type: 2
-    size: 2
-    RPM: 0
-    range: 5
-    watchAngle: 0
-    MOA: 3
-    stability: 0
-    rebound: 0
-    ergonomy: 2
-    headShot: 3
-    actionCost: 0
-  - indexName: 'P0022: FrontHandle_1'
-    ID: P0022
-    prefabName: FrontHandle_1
-    partsName: FrontHandle_1
+  - indexName: 'P04001: Handgun Laser 1'
+    ID: P04001
+    prefabName: ATT_HG_Laser_001
+    partsName: Handgun Laser 1
     compatModel: 01000000
     weight: 0.5
     type: 3
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0023: FrontHandle_2'
-    ID: P0023
-    prefabName: FrontHandle_2
-    partsName: FrontHandle_2
+  - indexName: 'P05001: Handgun Light 1'
+    ID: P05001
+    prefabName: ATT_HG_Light_001
+    partsName: Handgun Light 1
     compatModel: 01000000
     weight: 0.5
     type: 3
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0024: FrontHandle_3'
-    ID: P0024
-    prefabName: FrontHandle_3
-    partsName: FrontHandle_3
-    compatModel: 01000000
+  - indexName: 'P06001: Left Attach Laser 1'
+    ID: P06001
+    prefabName: ATT_L_Laser_001
+    partsName: Left Attach Laser 1
+    compatModel: 03000000
     weight: 0.5
     type: 3
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0025: FrontHandle_4'
-    ID: P0025
-    prefabName: FrontHandle_4
-    partsName: FrontHandle_4
-    compatModel: 01000000
+  - indexName: 'P06002: Left Attach Laser 2'
+    ID: P06002
+    prefabName: ATT_L_Laser_002
+    partsName: Left Attach Laser 2
+    compatModel: 03000000
     weight: 0.5
     type: 3
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
     actionCost: 0
-  - indexName: 'P0026: FrontHandle_5'
-    ID: P0026
-    prefabName: FrontHandle_5
-    partsName: FrontHandle_5
-    compatModel: 01000000
+  - indexName: 'P06003: Left Attach Laser 3'
+    ID: P06003
+    prefabName: ATT_L_Laser_003
+    partsName: Left Attach Laser 3
+    compatModel: 03000000
     weight: 0.5
     type: 3
-    size: 2
+    size: 1
     RPM: 0
-    range: 5
+    range: 0
     watchAngle: 0
-    MOA: 3
+    MOA: 0
     stability: 0
     rebound: 0
-    ergonomy: 2
-    headShot: 3
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P06004: Left Attach Laser 4'
+    ID: P06004
+    prefabName: ATT_L_Laser_004
+    partsName: Left Attach Laser 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P07001: Left Attach Light 1'
+    ID: P07001
+    prefabName: ATT_L_Light_001
+    partsName: Left Attach Light 1
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P07002: Left Attach Light 2'
+    ID: P07002
+    prefabName: ATT_L_Light_002
+    partsName: Left Attach Light 2
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P07003: Left Attach Light 3'
+    ID: P07003
+    prefabName: ATT_L_Light_003
+    partsName: Left Attach Light 3
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P07004: Left Attach Light 4'
+    ID: P07004
+    prefabName: ATT_L_Light_004
+    partsName: Left Attach Light 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P08001: Right Attach Laser 1'
+    ID: P08001
+    prefabName: ATT_R_Laser_001
+    partsName: Right Attach Laser 1
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P08002: Right Attach Laser 2'
+    ID: P08002
+    prefabName: ATT_R_Laser_002
+    partsName: Right Attach Laser 2
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P08003: Right Attach Laser 3'
+    ID: P08003
+    prefabName: ATT_R_Laser_003
+    partsName: Right Attach Laser 3
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P08004: Right Attach Laser 4'
+    ID: P08004
+    prefabName: ATT_R_Laser_004
+    partsName: Right Attach Laser 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P09001: Right Attach Light 1'
+    ID: P09001
+    prefabName: ATT_R_Light_001
+    partsName: Right Attach Light 1
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P09002: Right Attach Light 2'
+    ID: P09002
+    prefabName: ATT_R_Light_002
+    partsName: Right Attach Light 2
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P09003: Right Attach Light 3'
+    ID: P09003
+    prefabName: ATT_R_Light_003
+    partsName: Right Attach Light 3
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P09004: Right Attach Light 4'
+    ID: P09004
+    prefabName: ATT_R_Light_004
+    partsName: Right Attach Light 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 3
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10001: ForwardGrip 1'
+    ID: P10001
+    prefabName: UB_ForwardGrip_001
+    partsName: ForwardGrip 1
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10002: ForwardGrip 2'
+    ID: P10002
+    prefabName: UB_ForwardGrip_002
+    partsName: ForwardGrip 2
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10003: ForwardGrip 3'
+    ID: P10003
+    prefabName: UB_ForwardGrip_003
+    partsName: ForwardGrip 3
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10004: ForwardGrip 4'
+    ID: P10004
+    prefabName: UB_ForwardGrip_004
+    partsName: ForwardGrip 4
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10005: ForwardGrip 5'
+    ID: P10005
+    prefabName: UB_ForwardGrip_005
+    partsName: ForwardGrip 5
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10006: ForwardGrip 6'
+    ID: P10006
+    prefabName: UB_ForwardGrip_006
+    partsName: ForwardGrip 6
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10007: ForwardGrip 7'
+    ID: P10007
+    prefabName: UB_ForwardGrip_007
+    partsName: ForwardGrip 7
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10008: ForwardGrip 8'
+    ID: P10008
+    prefabName: UB_ForwardGrip_008
+    partsName: ForwardGrip 8
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
+    actionCost: 0
+  - indexName: 'P10009: ForwardGrip 9'
+    ID: P10009
+    prefabName: UB_ForwardGrip_009
+    partsName: ForwardGrip 9
+    compatModel: 03000000
+    weight: 0.5
+    type: 4
+    size: 1
+    RPM: 0
+    range: 0
+    watchAngle: 0
+    MOA: 0
+    stability: 0
+    rebound: 0
+    ergonomy: 0
+    headShot: 0
     actionCost: 0

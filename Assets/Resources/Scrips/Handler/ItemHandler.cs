@@ -211,9 +211,21 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                         }
                     }
                     return magData.prefabName;
+                case ItemType.Muzzle:
+                    var _muzzleData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                    partsData = _muzzleData.CopyData();
+                    return partsData.prefabName;
                 case ItemType.Sight:
-                    var _partsData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
-                    partsData = _partsData.CopyData();
+                    var _sightData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                    partsData = _sightData.CopyData();
+                    return partsData.prefabName;
+                case ItemType.Attachment:
+                    var _attachData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                    partsData = _attachData.CopyData();
+                    return partsData.prefabName;
+                case ItemType.UnderBarrel:
+                    var _underBarrelData = gameMenuMgr.dataMgr.partsData.partsInfos.Find(x => x.ID == itemData.dataID);
+                    partsData = _underBarrelData.CopyData();
                     return partsData.prefabName;
                 case ItemType.Grenade:
                     var _grenadeData = gameMenuMgr.dataMgr.grenadeData.grenadeInfos.Find(x => x.ID == itemData.dataID);
@@ -285,9 +297,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 partsData = storageItem.partsData;
                 break;
             case ItemType.Sight:
-                partsData = storageItem.partsData;
-                break;
-            case ItemType.FrontHandle:
                 partsData = storageItem.partsData;
                 break;
             case ItemType.Attachment:
@@ -424,8 +433,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             case ItemType.Muzzle:
                 return partsData.prefabName;
             case ItemType.Sight:
-                return partsData.prefabName;
-            case ItemType.FrontHandle:
                 return partsData.prefabName;
             case ItemType.Attachment:
                 return partsData.prefabName;

@@ -830,8 +830,8 @@ public class DataManager : MonoBehaviour
                     useMagazine = ReadUseMagazineSize(data[(int)WeaponVariable.UseMagazine]),
                     useMuzzle = ReadUsePartsSize(data[(int)WeaponVariable.UseMuzzle]),
                     useSight = ReadUsePartsSize(data[(int)WeaponVariable.UseScope]),
-                    useUnderRail = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
-                    useRail = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
+                    useAttachment = ReadUsePartsSize(data[(int)WeaponVariable.UseAttachment]),
+                    useUnderBarrel = ReadUsePartsSize(data[(int)WeaponVariable.UseUnderBarrel]),
                     equipMagID = data[(int)WeaponVariable.EquipMagID],
                     equipPartsIDs = ReadEquipPartsID(data[(int)WeaponVariable.EquipPartsIDs]),
                 };
@@ -1783,6 +1783,7 @@ public class DataManager : MonoBehaviour
             ReadPrefabFolder("Weapon/Parts/Attachment/Handgun");
             ReadPrefabFolder("Weapon/Parts/Attachment/Left");
             ReadPrefabFolder("Weapon/Parts/Attachment/Right");
+            ReadPrefabFolder("Weapon/Parts/UnderBarrel");
             ReadPrefabFolder("Weapon/Grenade");
 
             // 수정 사항을 프리팹에 저장하고 프리팹 로드를 닫기
