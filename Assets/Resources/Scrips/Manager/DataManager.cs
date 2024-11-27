@@ -1792,7 +1792,7 @@ public class DataManager : MonoBehaviour
             }
             if (GUILayout.Button("Update WeaponPool"))
             {
-                UpdateWeaponPool();
+                UpdatePartsOfWeaponPrefab();
             }
 
             GUILayout.Label('\n' + "---Setting Prefab---");
@@ -1880,7 +1880,7 @@ public class DataManager : MonoBehaviour
             }
         }
 
-        private void UpdateWeaponPool()
+        private void UpdatePartsOfWeaponPrefab()
         {
             string prefabPath = "Assets/Resources/Prefabs/Weapon/";
             string parentPath = prefabPath + "WeaponPool.prefab";
@@ -1891,64 +1891,64 @@ public class DataManager : MonoBehaviour
                 return;
             }
 
-            ReadPrefabFolder("Handgun", false);
-            ReadPrefabFolder("SubMachineGun", true);
-            ReadPrefabFolder("AssaultRifle", true);
-            ReadPrefabFolder("SniperRifle", true);
-            ReadPrefabFolder("Shotgun", true);
+            //ReadPrefabFolder("Handgun", false);
+            //ReadPrefabFolder("SubMachineGun", true);
+            //ReadPrefabFolder("AssaultRifle", true);
+            //ReadPrefabFolder("SniperRifle", true);
+            //ReadPrefabFolder("Shotgun", true);
 
-            PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
-            PrefabUtility.UnloadPrefabContents(parentPrefabContents);
+            //PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
+            //PrefabUtility.UnloadPrefabContents(parentPrefabContents);
 
-            Debug.Log("프리팹 수정 완료: " + parentPath);
+            //Debug.Log("프리팹 수정 완료: " + parentPath);
 
-            void ReadPrefabFolder(string folderPath, bool isMain)
-            {
-                string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
-                foreach (string prefabFile in prefabFiles)
-                {
-                    if (isMain)
-                    {
-                        for (int i = 0; i < 2; i++)
-                        {
-                            GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
-                            if (childPrefab != null)
-                            {
-                                string prefabName = childPrefab.name + $"_{(char)('A' + i)}";
-                                AddPrefab(childPrefab, prefabName);
-                            }
-                            else
-                            {
-                                Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
-                        if (childPrefab != null)
-                        {
-                            AddPrefab(childPrefab, childPrefab.name);
-                        }
-                        else
-                        {
-                            Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
-                        }
-                    }
-                }
+            //void ReadPrefabFolder(string folderPath, bool isMain)
+            //{
+            //    string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
+            //    foreach (string prefabFile in prefabFiles)
+            //    {
+            //        if (isMain)
+            //        {
+            //            for (int i = 0; i < 2; i++)
+            //            {
+            //                GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+            //                if (childPrefab != null)
+            //                {
+            //                    string prefabName = childPrefab.name + $"_{(char)('A' + i)}";
+            //                    AddPrefab(childPrefab, prefabName);
+            //                }
+            //                else
+            //                {
+            //                    Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+            //                }
+            //            }
+            //        }
+            //        else
+            //        {
+            //            GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+            //            if (childPrefab != null)
+            //            {
+            //                AddPrefab(childPrefab, childPrefab.name);
+            //            }
+            //            else
+            //            {
+            //                Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+            //            }
+            //        }
+            //    }
 
-                void AddPrefab(GameObject childPrefab, string name)
-                {
-                    Transform existingChild = parentPrefabContents.transform.Find(name);
-                    if (existingChild != null) DestroyImmediate(existingChild.gameObject);
+            //    void AddPrefab(GameObject childPrefab, string name)
+            //    {
+            //        Transform existingChild = parentPrefabContents.transform.Find(name);
+            //        if (existingChild != null) DestroyImmediate(existingChild.gameObject);
 
-                    GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
-                    childInstance.name = name;
-                    childInstance.transform.SetParent(parentPrefabContents.transform, false);
-                    childInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                    childInstance.transform.localScale = Vector3.one;
-                }
-            }
+            //        GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
+            //        childInstance.name = name;
+            //        childInstance.transform.SetParent(parentPrefabContents.transform, false);
+            //        childInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            //        childInstance.transform.localScale = Vector3.one;
+            //    }
+            //}
         }
 
         private void SettingCharacterPrefab()
@@ -2025,27 +2025,6 @@ public class DataManager : MonoBehaviour
                     }
                     charCtr.chainIK.data.target = gripPivot;
                 }
-
-                //if (charCtr.weaponPoolTf == null)
-                //{
-                //    // WeaponPool 추가
-                //    GameObject weaponPool = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/Weapon/WeaponPool.prefab");
-                //    if (weaponPool == null)
-                //    {
-                //        Debug.LogError($"WeaponPool을 찾을 수 없습니다");
-                //        continue;
-                //    }
-
-                //    GameObject weaponPoolInstance = (GameObject)PrefabUtility.InstantiatePrefab(weaponPool);
-                //    weaponPoolInstance.transform.SetParent(prefabInstance.transform, false);
-                //    charCtr.weaponPoolTf = weaponPoolInstance.transform;
-                //    charCtr.weaponPool = new List<Weapon>(weaponPoolInstance.GetComponentsInChildren<Weapon>(true));
-                //    for (int i = 0; i < charCtr.weaponPool.Count; i++)
-                //    {
-                //        Weapon weapon = charCtr.weaponPool[i];
-                //        weapon.gameObject.SetActive(false);
-                //    }
-                //}
 
                 // 수정된 프리팹 저장
                 PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
