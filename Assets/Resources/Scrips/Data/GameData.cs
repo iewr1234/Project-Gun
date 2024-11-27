@@ -2,21 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CreatePos
-{
-    None,
-    Equip,
-    Pocket,
-    Rig,
-    Backpack,
-}
-
 [System.Serializable]
 public struct StartingItem_Inventory
 {
     public string ID;
     public int num;
-    public CreatePos createPos;
+    public CreateSpace createPos;
 }
 
 [System.Serializable]
@@ -81,9 +72,6 @@ public class GameData : ScriptableObject
     [Header("[BaseCamp]")]
     public List<StorageInfo> baseStorages = new List<StorageInfo>();
     public List<StorageInfo> floorStorages = new List<StorageInfo>();
-    [Space(10f)]
-
-    public List<StartingItem_Inventory> startingItemID_List = new List<StartingItem_Inventory>();
 
     public void RandomMapSelection()
     {

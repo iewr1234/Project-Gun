@@ -112,17 +112,24 @@ public class PopUp_Inventory : MonoBehaviour
             for (int i = 0; i < itemInfo.samplesTf.childCount; i++)
             {
                 var sample = _samplesTf.GetChild(i).gameObject;
-                if (sample.name[0] == 'W')
+                var weapon = sample.GetComponent<Weapon>();
+                if (weapon != null)
                 {
-                    var _partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
-                    for (int j = 0; j < _partsSamples.Length; j++)
+                    //var _partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
+                    //for (int j = 0; j < _partsSamples.Length; j++)
+                    //{
+                    //    var partsSample = _partsSamples[j];
+                    //    if (partsSample.CompareTag("WeaponParts"))
+                    //    {
+                    //        partsSample.gameObject.SetActive(false);
+                    //        partsSamples.Add(partsSample.gameObject);
+                    //    }
+                    //}
+
+                    for (int j = 0; j < weapon.partsObjects.Count; j++)
                     {
-                        var partsSample = _partsSamples[j];
-                        if (partsSample.CompareTag("WeaponParts"))
-                        {
-                            partsSample.gameObject.SetActive(false);
-                            partsSamples.Add(partsSample.gameObject);
-                        }
+                        GameObject parts = weapon.partsObjects[j];
+                        partsSamples.Add(parts);
                     }
                 }
                 sample.SetActive(false);
@@ -555,40 +562,13 @@ public class PopUp_Inventory : MonoBehaviour
                                     var smaple = smaples[j];
                                     smaple.SetActive(true);
                                 }
-                                //equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
-                                //equipSlot.countText.enabled = true;
                             }
-                            //else
-                            //{
-                            //    equipSlot.slotText.enabled = true;
-                            //    equipSlot.countText.enabled = false;
-                            //}
                             equipSlot.SetLoadedBulletCount(item);
                             break;
                         case MagazineType.IntMagazine:
-                            //if (item.weaponData.equipMag.loadedBullets.Count > 0)
-                            //{
-                            //    //if (equipSlot.item == null)
-                            //    //{
-                            //    //    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag.loadedBullets[0], item.weaponData.equipMag.loadedBullets.Count, equipSlot);
-                            //    //}
-
-                            //    equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
-                            //    equipSlot.countText.enabled = true;
-                            //}
                             equipSlot.SetLoadedBulletCount(item);
                             break;
                         case MagazineType.Cylinder:
-                            //if (item.weaponData.equipMag.loadedBullets.Count > 0)
-                            //{
-                            //    //if (equipSlot.item == null)
-                            //    //{
-                            //    //    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag.loadedBullets[0], item.weaponData.equipMag.loadedBullets.Count, equipSlot);
-                            //    //}
-
-                            //    equipSlot.countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}";
-                            //    equipSlot.countText.enabled = true;
-                            //}
                             equipSlot.SetLoadedBulletCount(item);
                             break;
                         default:
@@ -600,20 +580,7 @@ public class PopUp_Inventory : MonoBehaviour
                     var partsData = item.weaponData.equipPartsList.Find(x => equipSlot.CheckEquip(x) && !partsList.Contains(x));
                     if (partsData != null)
                     {
-                        if (equipSlot.item == null)
-                        {
-                            gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
-                        }
-
-                        //if (equipSlot.item && equipSlot.item.partsData != partsData)
-                        //{
-                        //    var itemData = invenMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
-                        //    equipSlot.item.SetItemInfo(itemData, 1);
-                        //}
-                        //else if (!equipSlot.item)
-                        //{
-                        //    invenMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
-                        //}
+                        if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
 
                         var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
                         for (int j = 0; j < smaples.Count; j++)
@@ -623,12 +590,8 @@ public class PopUp_Inventory : MonoBehaviour
                         }
                         partsList.Add(partsData);
                     }
-                    else /*if (equipSlot.item)*/
+                    else
                     {
-                        //if (equipSlot.item.itemSlots.Count == 0)
-                        //{
-                        //    invenMgr.InActiveItem(equipSlot.item);
-                        //}
                         equipSlot.slotText.enabled = true;
                         equipSlot.item = null;
                     }

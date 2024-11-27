@@ -104,6 +104,8 @@ public class DataManager : MonoBehaviour
         if (optionSheetData == null) optionSheetData = Resources.Load<OptionSheetData>("ScriptableObjects/OptionSheetData");
 
         if (dropTableData == null) dropTableData = Resources.Load<DropTableData>("ScriptableObjects/DropTableData");
+
+        if (startingItemData == null) startingItemData = Resources.Load<StartingItemData>("ScriptableObjects/StartingItemData");
     }
 
     #region GameData
@@ -1567,6 +1569,49 @@ public class DataManager : MonoBehaviour
     }
     #endregion
 
+    #region StartingItem Data
+    [HideInInspector] public StartingItemData startingItemData;
+    private readonly string startingItemDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=2060299532&range=A2:D";
+    private enum StartingItemDataVariable
+    {
+        CreateLocation,
+        ItemID,
+        CreateNum,
+        CreateSpace,
+    }
+
+    public void UpdateStartingItemData()
+    {
+        if (startingItemData == null) startingItemData = Resources.Load<StartingItemData>("ScriptableObjects/StartingItemData");
+        if (startingItemData.startingItemInfos.Count > 0) startingItemData.startingItemInfos.Clear();
+
+        StartCoroutine(ReadStartingItemData());
+
+        IEnumerator ReadStartingItemData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(startingItemDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var itemOptionInfo = new StartingItemDataInfo
+                {
+                    indexName = $"{data[(int)StartingItemDataVariable.CreateLocation]} <= {data[(int)StartingItemDataVariable.ItemID]}",
+                    createLocation = data[(int)StartingItemDataVariable.CreateLocation],
+                    itemID = data[(int)StartingItemDataVariable.ItemID],
+                    createNum = int.Parse(data[(int)StartingItemDataVariable.CreateNum]),
+                    createSpace = (CreateSpace)int.Parse(data[(int)StartingItemDataVariable.CreateSpace]),
+                };
+                startingItemData.startingItemInfos.Add(itemOptionInfo);
+            }
+            Debug.Log("Update StartingItem Data");
+        }
+    }
+    #endregion
+
     private List<ShootingModeInfo> ReadShootingModesInfo(string pointValue, string aimValue, string sightValue)
     {
         var sModeInfos = new List<ShootingModeInfo>();
@@ -1699,6 +1744,11 @@ public class DataManager : MonoBehaviour
             {
                 dataMgr.UpdateDropTableData();
                 EditorUtility.SetDirty(dataMgr.dropTableData);
+            }
+            if (GUILayout.Button("Update the StartingItem Database"))
+            {
+                dataMgr.UpdateStartingItemData();
+                EditorUtility.SetDirty(dataMgr.startingItemData);
             }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))

@@ -235,10 +235,25 @@ public class EquipSlot : MonoBehaviour
     {
         switch (type)
         {
+            case EquipType.Muzzle:
+                return partsData != null
+                    && popUp != null && popUp.item != null
+                    && partsData.type == WeaponPartsType.Muzzle
+                    && partsData.compatModel.Contains(model);
             case EquipType.Sight:
                 return partsData != null
                     && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.Sight
+                    && partsData.compatModel.Contains(model);
+            case EquipType.Attachment:
+                return partsData != null
+                    && popUp != null && popUp.item != null
+                    && partsData.type == WeaponPartsType.Attachment
+                    && partsData.compatModel.Contains(model);
+            case EquipType.UnderBarrel:
+                return partsData != null
+                    && popUp != null && popUp.item != null
+                    && partsData.type == WeaponPartsType.UnderBarrel
                     && partsData.compatModel.Contains(model);
             default:
                 return false;

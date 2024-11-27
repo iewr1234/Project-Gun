@@ -43,7 +43,7 @@ public class Weapon : MonoBehaviour
     public Transform gripTf;
 
     [Space(5f)][SerializeField] private GameObject baseSight;
-    [SerializeField] private List<GameObject> partsObjects = new List<GameObject>();
+    public List<GameObject> partsObjects = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;

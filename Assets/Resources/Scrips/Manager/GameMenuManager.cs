@@ -176,25 +176,26 @@ public class GameMenuManager : MonoBehaviour
 
             if (dataMgr != null)
             {
-                for (int i = 0; i < dataMgr.gameData.startingItemID_List.Count; i++)
+                List<StartingItemDataInfo> pStartingItems = dataMgr.startingItemData.startingItemInfos.FindAll(x => x.createLocation == "Player");
+                for (int i = 0; i < pStartingItems.Count; i++)
                 {
-                    var initialItem = dataMgr.gameData.startingItemID_List[i];
-                    switch (initialItem.createPos)
+                    var startingItem = pStartingItems[i];
+                    switch (startingItem.createSpace)
                     {
-                        case CreatePos.Equip:
-                            SetInitialItemInEquipSlot(initialItem);
+                        case CreateSpace.Equip:
+                            SetInitialItemInEquipSlot(startingItem);
                             break;
-                        case CreatePos.Pocket:
+                        case CreateSpace.Pocket:
                             var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
-                            SetInitialItemInStorage(initialItem.ID, initialItem.num, pocket.itemSlots, true);
+                            SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, pocket.itemSlots, true);
                             break;
-                        case CreatePos.Backpack:
+                        case CreateSpace.Backpack:
                             var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
-                            SetInitialItemInStorage(initialItem.ID, initialItem.num, backpack.itemSlots, true);
+                            SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, backpack.itemSlots, true);
                             break;
-                        case CreatePos.Rig:
+                        case CreateSpace.Rig:
                             var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
-                            SetInitialItemInStorage(initialItem.ID, initialItem.num, rig.itemSlots, true);
+                            SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, rig.itemSlots, true);
                             break;
                         default:
                             break;
@@ -946,11 +947,11 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    public void SetInitialItemInEquipSlot(StartingItem_Inventory initialItem)
+    public void SetInitialItemInEquipSlot(StartingItemDataInfo startingItem)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
-        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == initialItem.ID);
-        item.SetItemInfo(itemData, initialItem.num, true);
+        var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == startingItem.itemID);
+        item.SetItemInfo(itemData, startingItem.createNum, true);
 
         var equipSlot = allEquips.Find(x => x.CheckEquip(item) == true);
         equipSlot.item = item;
