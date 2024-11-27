@@ -80,17 +80,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 }
             }
 
-            if (sample.GetComponent<Weapon>() != null)
+            var weapon = sample.GetComponent<Weapon>();
+            if (weapon != null)
             {
-                var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
-                for (int j = 0; j < partsSamples.Length; j++)
+                for (int j = 0; j < weapon.partsObjects.Count; j++)
                 {
-                    var partsSample = partsSamples[j];
-                    if (partsSample.CompareTag("WeaponParts"))
-                    {
-                        partsSample.gameObject.SetActive(false);
-                        this.partsSamples.Add(partsSample.gameObject);
-                    }
+                    GameObject parts = weapon.partsObjects[j];
+                    partsSamples.Add(parts);
                 }
             }
             sample.SetActive(false);
@@ -132,17 +128,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 }
             }
 
-            if (sample.GetComponent<Weapon>() != null)
+            var weapon = sample.GetComponent<Weapon>();
+            if (weapon != null)
             {
-                var partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
-                for (int j = 0; j < partsSamples.Length; j++)
+                for (int j = 0; j < weapon.partsObjects.Count; j++)
                 {
-                    var partsSample = partsSamples[j];
-                    if (partsSample.CompareTag("WeaponParts"))
-                    {
-                        partsSample.gameObject.SetActive(false);
-                        this.partsSamples.Add(partsSample.gameObject);
-                    }
+                    GameObject parts = weapon.partsObjects[j];
+                    partsSamples.Add(parts);
                 }
             }
             sample.SetActive(false);
@@ -462,6 +454,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             if (smaple != null) smaple.SetActive(true);
         }
 
+        if (activeSample != null)
+        {
+            var weapon = activeSample.GetComponent<Weapon>();
+            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
+        }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
@@ -494,6 +491,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             }
         }
 
+        if (activeSample != null)
+        {
+            var weapon = activeSample.GetComponent<Weapon>();
+            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
+        }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];

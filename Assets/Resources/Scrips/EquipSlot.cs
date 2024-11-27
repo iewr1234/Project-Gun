@@ -20,7 +20,6 @@ public enum EquipType
     Sight,
     Attachment,
     UnderBarrel,
-    Rail,
 }
 
 public class EquipSlot : MonoBehaviour
@@ -188,27 +187,25 @@ public class EquipSlot : MonoBehaviour
 
         bool PartsType()
         {
+            if (putItem.partsData == null) return false;
+
             switch (putItem.partsData.type)
             {
                 case WeaponPartsType.Muzzle:
                     return !itemEquip
                          && type == EquipType.Muzzle
-                         && putItem.partsData != null
                          && putItem.partsData.compatModel.Contains(model);
                 case WeaponPartsType.Sight:
                     return !itemEquip
                          && type == EquipType.Sight
-                         && putItem.partsData != null
                          && putItem.partsData.compatModel.Contains(model);
                 case WeaponPartsType.Attachment:
                     return !itemEquip
                          && type == EquipType.Attachment
-                         && putItem.partsData != null
                          && putItem.partsData.compatModel.Contains(model);
                 case WeaponPartsType.UnderBarrel:
                     return !itemEquip
                          && type == EquipType.UnderBarrel
-                         && putItem.partsData != null
                          && putItem.partsData.compatModel.Contains(model);
                 default:
                     return false;

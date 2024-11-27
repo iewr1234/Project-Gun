@@ -115,17 +115,6 @@ public class PopUp_Inventory : MonoBehaviour
                 var weapon = sample.GetComponent<Weapon>();
                 if (weapon != null)
                 {
-                    //var _partsSamples = sample.transform.Find("PartsTransform").GetComponentsInChildren<Transform>();
-                    //for (int j = 0; j < _partsSamples.Length; j++)
-                    //{
-                    //    var partsSample = _partsSamples[j];
-                    //    if (partsSample.CompareTag("WeaponParts"))
-                    //    {
-                    //        partsSample.gameObject.SetActive(false);
-                    //        partsSamples.Add(partsSample.gameObject);
-                    //    }
-                    //}
-
                     for (int j = 0; j < weapon.partsObjects.Count; j++)
                     {
                         GameObject parts = weapon.partsObjects[j];
@@ -313,8 +302,8 @@ public class PopUp_Inventory : MonoBehaviour
                 EquipType.Magazine,
                 EquipType.Muzzle,
                 EquipType.Sight,
+                EquipType.Attachment,
                 EquipType.UnderBarrel,
-                EquipType.Rail,
             };
 
             for (int i = 0; i < type.Length; i++)
@@ -349,11 +338,11 @@ public class PopUp_Inventory : MonoBehaviour
                     case EquipType.Sight:
                         SetWeaponPartSlot("조준경", equipSlot, type[i], item.weaponData.useSight);
                         break;
+                    case EquipType.Attachment:
+                        SetWeaponPartSlot("부착물", equipSlot, type[i], item.weaponData.useAttachment);
+                        break;
                     case EquipType.UnderBarrel:
                         SetWeaponPartSlot("하부", equipSlot, type[i], item.weaponData.useUnderBarrel);
-                        break;
-                    case EquipType.Rail:
-                        SetWeaponPartSlot("레일", equipSlot, type[i], item.weaponData.useAttachment);
                         break;
                     default:
                         equipSlot.gameObject.SetActive(false);
@@ -523,8 +512,6 @@ public class PopUp_Inventory : MonoBehaviour
         for (int i = 0; i < itemInfo.equipSlots.Count; i++)
         {
             var equipSlot = itemInfo.equipSlots[i];
-            //if (equipSlot.item != null) continue;
-
             switch (equipSlot.type)
             {
                 case EquipType.Chamber:
@@ -576,26 +563,47 @@ public class PopUp_Inventory : MonoBehaviour
                             break;
                     }
                     break;
-                default:
-                    var partsData = item.weaponData.equipPartsList.Find(x => equipSlot.CheckEquip(x) && !partsList.Contains(x));
-                    if (partsData != null)
-                    {
-                        if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
-
-                        var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
-                        for (int j = 0; j < smaples.Count; j++)
-                        {
-                            var smaple = smaples[j];
-                            smaple.SetActive(true);
-                        }
-                        partsList.Add(partsData);
-                    }
-                    else
-                    {
-                        equipSlot.slotText.enabled = true;
-                        equipSlot.item = null;
-                    }
+                case EquipType.Muzzle:
+                    Sample_WeaponPartsType(WeaponPartsType.Muzzle);
                     break;
+                case EquipType.Sight:
+                    Sample_WeaponPartsType(WeaponPartsType.Sight);
+                    break;
+                case EquipType.Attachment:
+                    Sample_WeaponPartsType(WeaponPartsType.Attachment);
+                    break;
+                case EquipType.UnderBarrel:
+                    Sample_WeaponPartsType(WeaponPartsType.UnderBarrel);
+                    break;
+                default:
+                    break;
+
+                    void Sample_WeaponPartsType(WeaponPartsType partsType)
+                    {
+                        var partsData = item.weaponData.equipPartsList.Find(x => x.type == partsType);
+                        if (partsType == WeaponPartsType.Sight)
+                        {
+                            var weapon = itemInfo.activeSample.GetComponent<Weapon>();
+                            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(partsData == null);
+                        }
+
+                        if (partsData != null)
+                        {
+                            if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
+
+                            var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
+                            for (int j = 0; j < smaples.Count; j++)
+                            {
+                                var smaple = smaples[j];
+                                smaple.SetActive(true);
+                            }
+                        }
+                        else
+                        {
+                            equipSlot.slotText.enabled = true;
+                            equipSlot.item = null;
+                        }
+                    }
             }
         }
     }

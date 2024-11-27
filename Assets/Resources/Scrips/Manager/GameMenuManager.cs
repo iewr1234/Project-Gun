@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 public enum GameMenuState
 {
@@ -70,7 +69,7 @@ public class GameMenuManager : MonoBehaviour
     private float clickTime;
 
     private List<ItemHandler> items = new List<ItemHandler>();
-    private readonly int itemPoolMax = 30;
+    private readonly int itemPoolMax = 100;
 
     [Space(5f)]
     public List<ItemHandler> activeItem = new List<ItemHandler>();
@@ -189,13 +188,13 @@ public class GameMenuManager : MonoBehaviour
                             var pocket = myStorages.Find(x => x.type == MyStorageType.Pocket);
                             SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, pocket.itemSlots, true);
                             break;
-                        case CreateSpace.Backpack:
-                            var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
-                            SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, backpack.itemSlots, true);
-                            break;
                         case CreateSpace.Rig:
                             var rig = myStorages.Find(x => x.type == MyStorageType.Rig);
                             SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, rig.itemSlots, true);
+                            break;
+                        case CreateSpace.Backpack:
+                            var backpack = myStorages.Find(x => x.type == MyStorageType.Backpack);
+                            SetInitialItemInStorage(startingItem.itemID, startingItem.createNum, backpack.itemSlots, true);
                             break;
                         default:
                             break;
@@ -1419,22 +1418,19 @@ public class GameMenuManager : MonoBehaviour
                 case ItemType.Magazine:
                     Equip_MagazineType();
                     break;
+                case ItemType.Muzzle:
+                    Equip_WeaponPartsType();
+                    break;
+                case ItemType.Sight:
+                    Equip_WeaponPartsType();
+                    break;
+                case ItemType.Attachment:
+                    Equip_WeaponPartsType();
+                    break;
+                case ItemType.UnderBarrel:
+                    Equip_WeaponPartsType();
+                    break;
                 default:
-                    EquipProcess();
-                    equipSlot.countText.enabled = false;
-                    if (putItem.partsData != null && putItem.partsData.type != WeaponPartsType.None)
-                    {
-                        if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
-                        {
-                            equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
-                        }
-                        if (gameMgr != null && gameMgr.playerList.Count > 0)
-                        {
-                            var player = gameMgr.playerList[0];
-                            var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
-                            if (weapon != null) weapon.SetParts();
-                        }
-                    }
                     break;
             }
 
@@ -1584,6 +1580,22 @@ public class GameMenuManager : MonoBehaviour
                     break;
             }
 
+        }
+
+        void Equip_WeaponPartsType()
+        {
+            EquipProcess();
+            equipSlot.countText.enabled = false;
+            if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
+            {
+                equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
+            }
+            if (gameMgr != null && gameMgr.playerList.Count > 0)
+            {
+                var player = gameMgr.playerList[0];
+                var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
+                if (weapon != null) weapon.SetParts();
+            }
         }
     }
 

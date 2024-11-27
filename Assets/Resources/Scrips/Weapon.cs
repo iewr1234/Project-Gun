@@ -42,7 +42,7 @@ public class Weapon : MonoBehaviour
     public Transform bulletTf;
     public Transform gripTf;
 
-    [Space(5f)][SerializeField] private GameObject baseSight;
+    [Space(5f)] public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
@@ -231,6 +231,7 @@ public class Weapon : MonoBehaviour
             var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.magName);
             if (magParts != null) magParts.SetActive(true);
         }
+        if (baseSight != null) baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var equipParts = partsObjects.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
