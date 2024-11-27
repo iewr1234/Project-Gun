@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public enum EquipType
 {
@@ -152,6 +153,22 @@ public class EquipSlot : MonoBehaviour
 
                     return item.weaponData.magType == global::MagazineType.Magazine && !item.weaponData.isMag
                         && putItem.magData.compatModel.Contains(item.weaponData.model);
+                case ItemType.Muzzle:
+                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                        && item.weaponData.useMuzzle.Count > 0 && item.weaponData.useMuzzle.Contains(putItem.partsData.size)
+                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null;
+                case ItemType.Sight:
+                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                        && item.weaponData.useSight.Count > 0 && item.weaponData.useSight.Contains(putItem.partsData.size)
+                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null;
+                case ItemType.Attachment:
+                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                        && item.weaponData.useAttachment.Count > 0 && item.weaponData.useAttachment.Contains(putItem.partsData.size)
+                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Attachment) == null;
+                case ItemType.UnderBarrel:
+                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                        && item.weaponData.useUnderBarrel.Count > 0 && item.weaponData.useUnderBarrel.Contains(putItem.partsData.size)
+                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.UnderBarrel) == null;
                 default:
                     return false;
             }
@@ -187,26 +204,42 @@ public class EquipSlot : MonoBehaviour
 
         bool PartsType()
         {
-            if (putItem.partsData == null) return false;
+            var partsData = putItem.partsData;
+            if (partsData == null) return false;
 
-            switch (putItem.partsData.type)
+            if (popUp == null) return false;
+
+            var weapon = popUp.item;
+            if (weapon == null) return false;
+
+            switch (type)
             {
-                case WeaponPartsType.Muzzle:
-                    return !itemEquip
-                         && type == EquipType.Muzzle
-                         && putItem.partsData.compatModel.Contains(model);
-                case WeaponPartsType.Sight:
-                    return !itemEquip
-                         && type == EquipType.Sight
-                         && putItem.partsData.compatModel.Contains(model);
-                case WeaponPartsType.Attachment:
-                    return !itemEquip
-                         && type == EquipType.Attachment
-                         && putItem.partsData.compatModel.Contains(model);
-                case WeaponPartsType.UnderBarrel:
-                    return !itemEquip
-                         && type == EquipType.UnderBarrel
-                         && putItem.partsData.compatModel.Contains(model);
+                case EquipType.Muzzle:
+                    if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
+                    return partsData != null
+                        && partsData.type == WeaponPartsType.Muzzle
+                        && partsData.compatModel.Contains(model)
+                        && sizeList.Contains(partsData.size);
+                case EquipType.Sight:
+                    if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
+                    return partsData != null
+                        && partsData.type == WeaponPartsType.Sight
+                        && partsData.compatModel.Contains(model)
+                        && sizeList.Contains(partsData.size);
+                case EquipType.Attachment:
+                    return partsData != null
+                        && partsData.type == WeaponPartsType.Attachment
+                        && partsData.compatModel.Contains(model)
+                        && sizeList.Contains(partsData.size);
+                case EquipType.UnderBarrel:
+                    if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
+                    return partsData != null
+                        && partsData.type == WeaponPartsType.UnderBarrel
+                        && partsData.compatModel.Contains(model)
+                        && sizeList.Contains(partsData.size);
                 default:
                     return false;
             }
@@ -230,28 +263,39 @@ public class EquipSlot : MonoBehaviour
 
     public bool CheckEquip(WeaponPartsDataInfo partsData)
     {
+        if (popUp == null) return false;
+
+        var weapon = popUp.item;
+        if (weapon == null) return false;
+
         switch (type)
         {
             case EquipType.Muzzle:
+                if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
                 return partsData != null
-                    && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.Muzzle
-                    && partsData.compatModel.Contains(model);
+                    && partsData.compatModel.Contains(model)
+                    && sizeList.Contains(partsData.size);
             case EquipType.Sight:
+                if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
                 return partsData != null
-                    && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.Sight
-                    && partsData.compatModel.Contains(model);
+                    && partsData.compatModel.Contains(model)
+                    && sizeList.Contains(partsData.size);
             case EquipType.Attachment:
                 return partsData != null
-                    && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.Attachment
-                    && partsData.compatModel.Contains(model);
+                    && partsData.compatModel.Contains(model)
+                    && sizeList.Contains(partsData.size);
             case EquipType.UnderBarrel:
+                if (weapon.weaponData.equipPartsList.Find(x => x.type == partsData.type) != null) return false;
+
                 return partsData != null
-                    && popUp != null && popUp.item != null
                     && partsData.type == WeaponPartsType.UnderBarrel
-                    && partsData.compatModel.Contains(model);
+                    && partsData.compatModel.Contains(model)
+                    && sizeList.Contains(partsData.size);
             default:
                 return false;
         }

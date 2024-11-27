@@ -1124,9 +1124,30 @@ public class GameMenuManager : MonoBehaviour
 
         bool Check_PartsType()
         {
-            return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
-                    && onItem.weaponData.equipPartsList.Find(x => x.type == putItem.partsData.type) == null
-                    && putItem.partsData.compatModel.Contains(onItem.weaponData.model);
+            switch (putItem.partsData.type)
+            {
+                case WeaponPartsType.Muzzle:
+                    return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                         && onItem.weaponData.equipPartsList.Find(x => x.type == putItem.partsData.type) == null
+                         && putItem.partsData.compatModel.Contains(onItem.weaponData.model)
+                         && onItem.weaponData.useMuzzle.Contains(putItem.partsData.size);
+                case WeaponPartsType.Sight:
+                    return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                         && onItem.weaponData.equipPartsList.Find(x => x.type == putItem.partsData.type) == null
+                         && putItem.partsData.compatModel.Contains(onItem.weaponData.model)
+                         && onItem.weaponData.useSight.Contains(putItem.partsData.size);
+                case WeaponPartsType.Attachment:
+                    return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                         && putItem.partsData.compatModel.Contains(onItem.weaponData.model)
+                         && onItem.weaponData.useAttachment.Contains(putItem.partsData.size);
+                case WeaponPartsType.UnderBarrel:
+                    return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
+                         && onItem.weaponData.equipPartsList.Find(x => x.type == putItem.partsData.type) == null
+                         && putItem.partsData.compatModel.Contains(onItem.weaponData.model)
+                         && onItem.weaponData.useUnderBarrel.Contains(putItem.partsData.size);
+                default:
+                    return false;
+            }
         }
     }
 
@@ -1584,17 +1605,48 @@ public class GameMenuManager : MonoBehaviour
 
         void Equip_WeaponPartsType()
         {
-            EquipProcess();
-            equipSlot.countText.enabled = false;
-            if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
+            switch (equipSlot.type)
             {
-                equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
+                case EquipType.MainWeapon1:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.MainWeapon2:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.SubWeapon:
+                    QuickEquip(equipSlot.item, putItem);
+                    break;
+                case EquipType.Muzzle:
+                    WeaponPartsSlot();
+                    break;
+                case EquipType.Sight:
+                    WeaponPartsSlot();
+                    break;
+                case EquipType.Attachment:
+                    WeaponPartsSlot();
+                    break;
+                case EquipType.UnderBarrel:
+                    WeaponPartsSlot();
+                    break;
+                default:
+                    break;
             }
-            if (gameMgr != null && gameMgr.playerList.Count > 0)
+
+            void WeaponPartsSlot()
             {
-                var player = gameMgr.playerList[0];
-                var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
-                if (weapon != null) weapon.SetParts();
+                EquipProcess();
+                equipSlot.countText.enabled = false;
+                if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
+                {
+                    equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
+                }
+
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var player = gameMgr.playerList[0];
+                    var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
+                    if (weapon != null) weapon.SetParts();
+                }
             }
         }
     }
@@ -1635,7 +1687,22 @@ public class GameMenuManager : MonoBehaviour
                 onItem.SetPartsSample();
                 putItem.DisableItem();
                 break;
+            case ItemType.Muzzle:
+                onItem.weaponData.equipPartsList.Add(putItem.partsData);
+                onItem.SetPartsSample();
+                putItem.DisableItem();
+                break;
             case ItemType.Sight:
+                onItem.weaponData.equipPartsList.Add(putItem.partsData);
+                onItem.SetPartsSample();
+                putItem.DisableItem();
+                break;
+            case ItemType.Attachment:
+                onItem.weaponData.equipPartsList.Add(putItem.partsData);
+                onItem.SetPartsSample();
+                putItem.DisableItem();
+                break;
+            case ItemType.UnderBarrel:
                 onItem.weaponData.equipPartsList.Add(putItem.partsData);
                 onItem.SetPartsSample();
                 putItem.DisableItem();
@@ -2037,16 +2104,16 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
-    public void CreateStorageItems(StorageInfo storage, List<StartingItem_Storage> itemList)
+    public void CreateStorageItems(StorageInfo storage, List<StartingItemDataInfo> startingItems)
     {
-        for (int i = 0; i < itemList.Count; i++)
+        for (int i = 0; i < startingItems.Count; i++)
         {
-            var itemInfo = itemList[i];
-            var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemInfo.ID);
+            var itemInfo = startingItems[i];
+            var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == itemInfo.itemID);
             if (itemData == null) continue;
 
             var item = items.Find(x => !x.gameObject.activeSelf);
-            item.SetItemInfo(itemData, itemInfo.num, itemData.addOption);
+            item.SetItemInfo(itemData, itemInfo.createNum, itemData.addOption);
             otherStorage.PutInItemOfStorage(storage, item);
         }
     }

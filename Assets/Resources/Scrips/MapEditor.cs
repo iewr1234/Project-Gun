@@ -1114,8 +1114,10 @@ public class MapEditor : MonoBehaviour
             };
             baseStorages.Add(baseStorage);
 
-            if (node.baseStorage.startingItmes.Count > 0)
-                gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, node.baseStorage.startingItmes);
+            List<StartingItemDataInfo> startingStorageItems = gameMgr.dataMgr.startingItemData.startingItemInfos
+                                                             .FindAll(x => x.createLocation == baseStorage.storageName);
+            if (startingStorageItems.Count > 0)
+                gameMgr.gameMenuMgr.CreateStorageItems(baseStorage, startingStorageItems);
         }
         await Task.Yield();
     }

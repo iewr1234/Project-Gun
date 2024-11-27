@@ -399,6 +399,7 @@ public class PopUp_Inventory : MonoBehaviour
                 }
                 else
                 {
+                    equipSlot.sizeList = sizeList;
                     slotText += "\n<size=12>";
                     for (int i = 0; i < sizeList.Count; i++)
                     {
