@@ -593,8 +593,8 @@ public class CharacterController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MoveGripPivot();
-        SetWeightOfChainIK();
+        //MoveGripPivot();
+        //SetWeightOfChainIK();
     }
 
     private void MoveGripPivot()

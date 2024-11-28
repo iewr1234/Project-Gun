@@ -76,6 +76,7 @@ public static class DataUtility
     public static readonly Quaternion weaponPivot_rot_SR = Quaternion.Euler(5.1f, 95.7f, -89.67f);
     public static readonly Vector3 weaponPivot_pos_SG_PA = new Vector3(0.05f, 0.033f, -0.045f);
     public static readonly Quaternion weaponPivot_rot_SG_PA = Quaternion.Euler(-10.7f, 99f, -97f);
+    public static readonly Quaternion weaponPivot_defaultRot = Quaternion.Euler(0f, 90f, -90f);
 
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
@@ -323,56 +324,56 @@ public static class DataUtility
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_HG_1,
-                    pivotRot = weaponPivot_rot_HG_1,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.Handgun_2:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_HG_2,
-                    pivotRot = weaponPivot_rot_HG_2,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.SubMachineGun_noStock:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SMG,
-                    pivotRot = weaponPivot_rot_SMG,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.SubMachineGun:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SMG,
-                    pivotRot = weaponPivot_rot_SMG,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.AssaultRifle:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_AR,
-                    pivotRot = weaponPivot_rot_AR,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.SniperRifle:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SR,
-                    pivotRot = weaponPivot_rot_SR,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.Shotgun_PumpAction:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SG_PA,
-                    pivotRot = weaponPivot_rot_SG_PA,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             case WeaponGripType.Shotgun_SemiAuto:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_AR,
-                    pivotRot = weaponPivot_rot_AR,
+                    pivotRot = weaponPivot_defaultRot,
                 };
                 break;
             default:
