@@ -3242,6 +3242,8 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void Event_FireWeapon()
     {
+        if (commandList.Count == 0) return;
+
         var shootCommand = commandList[0];
         if (shootCommand.type != CommandType.Shoot)
         {
@@ -3262,7 +3264,29 @@ public class CharacterController : MonoBehaviour
     /// <param name="switchPos"></param>
     public void Event_WeaponSwitching(string switchPos)
     {
-        currentWeapon.WeaponSwitching(switchPos);
+        if (currentWeapon == null)
+        {
+            Weapon weapon = switchPos == "Right" ? leftHandPivot.GetComponentInChildren<Weapon>() : rightHandPivot.GetComponentInChildren<Weapon>();
+            if (weapon == null) return;
+
+            switch (switchPos)
+            {
+                case "Right":
+                    weapon.transform.SetParent(rightHandPivot, false);
+                    break;
+                case "Left":
+                    weapon.transform.SetParent(leftHandPivot, false);
+                    break;
+                default:
+                    break;
+            }
+            animator.SetBool("reload", false);
+            animator.SetBool("loadChamber", false);
+        }
+        else
+        {
+            currentWeapon.WeaponSwitching(switchPos);
+        }
     }
 
     public void Event_WeaponSwitching_Rifle(string switchPos)
@@ -3289,11 +3313,15 @@ public class CharacterController : MonoBehaviour
 
     public void Event_UnequipMagazine()
     {
+        if (currentWeapon == null) return;
+
         currentWeapon.SetAllParts("Magazine", false);
     }
 
     public void Event_EquipMagazine()
     {
+        if (currentWeapon == null) return;
+
         if (currentWeapon.weaponData.equipMag != null)
         {
             currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
