@@ -596,6 +596,7 @@ MonoBehaviour:
     chamberBullet:
       indexName: 
       ID: 
+      prefabName: 
       bulletName: 
       meshType: 0
       level: 0
@@ -628,8 +629,8 @@ MonoBehaviour:
     useMagazine: 
     useMuzzle: 
     useSight: 
-    useUnderRail: 
-    useRail: 
+    useAttachment: 
+    useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
   meshType: 0
@@ -825,14 +826,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9140353326060950337}
-  m_LocalRotation: {x: 0.16130863, y: 0.0034491771, z: -0.9866725, w: -0.021097844}
-  m_LocalPosition: {x: -0.094, y: 0, z: 0.24}
+  m_LocalRotation: {x: 0.119753525, y: -0.75417316, z: -0.6309168, w: -0.13720775}
+  m_LocalPosition: {x: -0.11, y: 0.008, z: 0.211}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4654624060136663484}
   m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 0, y: -18.57, z: -182.45}
+  m_LocalEulerAnglesHint: {x: -100.1, y: -18.57, z: -182.45}
 --- !u!1001 &6427832782514302722
 PrefabInstance:
   m_ObjectHideFlags: 0

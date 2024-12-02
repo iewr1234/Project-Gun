@@ -31,6 +31,8 @@ public class Test : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.C))
         {
+            if (char_before.GetBool("fullCover")) return;
+
             bool isCover = !char_before.GetBool("isCover");
             char_before.SetBool("isCover", isCover);
             char_before.SetBool("fullCover", false);
