@@ -3280,8 +3280,8 @@ public class CharacterController : MonoBehaviour
                 default:
                     break;
             }
-            animator.SetBool("reload", false);
-            animator.SetBool("loadChamber", false);
+            //animator.SetBool("reload", false);
+            //animator.SetBool("loadChamber", false);
         }
         else
         {
@@ -3301,6 +3301,8 @@ public class CharacterController : MonoBehaviour
         var reloadNum = animator.GetInteger("reloadNum") - 1;
         animator.SetInteger("reloadNum", reloadNum);
         if (reloadNum > 0) return;
+
+        if (currentWeapon == null) return;
         if (currentWeapon.weaponData.magType == MagazineType.Cylinder) return;
 
         if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
@@ -3340,7 +3342,13 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void Event_ReloadEnd()
     {
-        if (commandList.Count == 0) return;
+        if (commandList.Count == 0)
+        {
+            animator.SetBool("reload", false);
+            animator.SetBool("loadChamber", false);
+            return;
+        }
+
         if (commandList[0].type != CommandType.Reload) return;
 
         ReloadEnd();

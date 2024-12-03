@@ -67,7 +67,14 @@ public class Test : MonoBehaviour
         {
             char_before.SetBool("reload", true);
             char_before.SetBool("loadChamber", true);
+            char_before.SetInteger("reloadNum", 5);
             char_after.SetBool("reload", true);
+            char_after.SetBool("loadChamber", true);
+            char_after.SetInteger("reloadNum", 5);
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            char_before.SetBool("loadChamber", true);
             char_after.SetBool("loadChamber", true);
         }
         else if (Input.GetKeyDown(KeyCode.T))
