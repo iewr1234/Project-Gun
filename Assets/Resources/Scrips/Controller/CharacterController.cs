@@ -3266,6 +3266,8 @@ public class CharacterController : MonoBehaviour
     {
         if (currentWeapon == null)
         {
+            Debug.Log(rightHandPivot.transform.position);
+
             Weapon weapon = switchPos == "Right" ? leftHandPivot.GetComponentInChildren<Weapon>() : rightHandPivot.GetComponentInChildren<Weapon>();
             if (weapon == null) return;
 
@@ -3275,6 +3277,8 @@ public class CharacterController : MonoBehaviour
                     weapon.transform.SetParent(rightHandPivot, false);
                     break;
                 case "Left":
+                    leftHandPivot.transform.position = rightHandPivot.transform.position;
+                    leftHandPivot.transform.rotation = rightHandPivot.transform.rotation;
                     weapon.transform.SetParent(leftHandPivot, false);
                     break;
                 default:

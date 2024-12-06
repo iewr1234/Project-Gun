@@ -28,10 +28,11 @@ public class Weapon : MonoBehaviour
     private enum AnimationLayers_A
     {
         Base,
-        Sub_A_Base,
-        Sub_A_Upper,
-        Main_A_Base,
-        Main_A_Upper,
+        Sub_HG = 1,
+        Main_RF = 3,
+        Main_SMG = 5,
+        Main_Pump = 7,
+        Main_SR = 9,
     }
 
     [Header("---Access Script---")]
@@ -205,7 +206,32 @@ public class Weapon : MonoBehaviour
             charCtr.animator.SetLayerWeight(charCtr.upperIndex, 0f);
         }
 
-        charCtr.baseIndex = weaponData.isMain ? (int)AnimationLayers_A.Main_A_Base : (int)AnimationLayers_A.Sub_A_Base;
+        switch (weaponData.weaponType)
+        {
+            case WeaponType.Pistol:
+                charCtr.baseIndex = (int)AnimationLayers_A.Sub_HG;
+                break;
+            case WeaponType.Revolver:
+                charCtr.baseIndex = (int)AnimationLayers_A.Sub_HG;
+                break;
+            case WeaponType.SubMachineGun:
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_SMG;
+                break;
+            case WeaponType.AssaultRifle:
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_RF;
+                break;
+            case WeaponType.Rifle:
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_SR;
+                break;
+            case WeaponType.SniperRifle:
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_SR;
+                break;
+            case WeaponType.Shotgun:
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_Pump;
+                break;
+            default:
+                break;
+        }
         charCtr.upperIndex = charCtr.baseIndex + 1;
         charCtr.animator.SetLayerWeight(charCtr.baseIndex, 1f);
         charCtr.animator.SetLayerWeight(charCtr.upperIndex, 1f);

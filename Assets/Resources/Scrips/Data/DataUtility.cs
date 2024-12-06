@@ -78,6 +78,9 @@ public static class DataUtility
     public static readonly Quaternion weaponPivot_rot_SG_PA = Quaternion.Euler(-10.7f, 99f, -97f);
     public static readonly Quaternion weaponPivot_defaultRot = Quaternion.Euler(0f, 90f, -90f);
 
+    public static readonly Vector3 leftPivot_pos_HG = new Vector3(-0.083f, -0.059f, -0.047f);
+    public static readonly Quaternion leftPivot_rot_HG = Quaternion.Euler(-19.074f, -32.39f, -91.302f);
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);
