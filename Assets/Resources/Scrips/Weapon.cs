@@ -308,6 +308,8 @@ public class Weapon : MonoBehaviour
                 charCtr.moveGripPivot = true;
                 break;
             case "Left":
+                charCtr.leftHandPivot.transform.position = charCtr.rightHandPivot.transform.position;
+                charCtr.leftHandPivot.transform.rotation = charCtr.rightHandPivot.transform.rotation;
                 transform.SetParent(charCtr.leftHandPivot, true);
                 //charCtr.gripPivot.transform.SetParent(charCtr.leftHandPivot);
                 //charCtr.SetChainWeight(true, 0f);
