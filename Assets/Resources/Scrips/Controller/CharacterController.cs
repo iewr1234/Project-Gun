@@ -2911,7 +2911,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="reloadNum"></param>
-    public void AddCommand(CommandType type, int reloadNum, bool isReload, bool isCamber)
+    public void AddCommand(CommandType type, int reloadNum, bool isReload, bool loadChamber)
     {
         switch (type)
         {
@@ -2921,7 +2921,7 @@ public class CharacterController : MonoBehaviour
                     indexName = $"{type}",
                     type = CommandType.Reload,
                     isReload = isReload,
-                    loadChamber = !isCamber,
+                    loadChamber = loadChamber,
                 };
                 animator.SetInteger("reloadNum", reloadNum);
                 commandList.Add(reloadCommand);
@@ -3309,12 +3309,12 @@ public class CharacterController : MonoBehaviour
         if (currentWeapon == null) return;
         if (currentWeapon.weaponData.magType == MagazineType.Cylinder) return;
 
-        if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
-        {
-            animator.SetBool("reload", false);
-            currentWeapon.WeaponSwitching("Right");
-            StartCoroutine(Coroutine_ReloadEnd());
-        }
+        //if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
+        //{
+        //    animator.SetBool("reload", false);
+        //    currentWeapon.WeaponSwitching("Right");
+        //    StartCoroutine(Coroutine_ReloadEnd());
+        //}
     }
 
     public void Event_UnequipMagazine()
@@ -3333,12 +3333,12 @@ public class CharacterController : MonoBehaviour
             currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
         }
 
-        if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
-        {
-            animator.SetBool("reload", false);
-            currentWeapon.WeaponSwitching("Right");
-            StartCoroutine(Coroutine_ReloadEnd());
-        }
+        //if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)
+        //{
+        //    animator.SetBool("reload", false);
+        //    currentWeapon.WeaponSwitching("Right");
+        //    StartCoroutine(Coroutine_ReloadEnd());
+        //}
     }
 
     /// <summary>
@@ -3346,13 +3346,7 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void Event_ReloadEnd()
     {
-        if (commandList.Count == 0)
-        {
-            animator.SetBool("reload", false);
-            animator.SetBool("loadChamber", false);
-            return;
-        }
-
+        if (commandList.Count == 0) return;
         if (commandList[0].type != CommandType.Reload) return;
 
         ReloadEnd();
