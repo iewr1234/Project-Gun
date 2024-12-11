@@ -144,7 +144,8 @@ public class CharacterController : MonoBehaviour
     private MultiAimConstraint chestRig;
     [HideInInspector] public ChainIKConstraint chainIK;
 
-    [HideInInspector] public Transform aimPoint;
+    public Transform aimPoint;
+    public Transform aimTf;
 
     [HideInInspector] public Transform mainHolsterPivot;
     [HideInInspector] public Transform subHolsterPivot;
@@ -247,7 +248,7 @@ public class CharacterController : MonoBehaviour
     private readonly float coverInterval = 0.2f;
     private readonly float coverAimSpeed = 3f;
 
-    private Transform aimTf;
+
     private Vector3 aimInterval;
     private bool headAim;
     private bool chestAim;
@@ -299,6 +300,7 @@ public class CharacterController : MonoBehaviour
 
         // Aim°ú IK ¼³Á¤
         aimPoint = transform.Find("AimPoint");
+
         rigBdr = GetComponent<RigBuilder>();
         rig = transform.Find("Rig").GetComponent<Rig>();
         headRig = transform.Find("Rig/HeadAim").GetComponent<MultiAimConstraint>();
@@ -419,22 +421,22 @@ public class CharacterController : MonoBehaviour
         switch (weapon.weaponData.weaponType)
         {
             case WeaponType.Pistol:
-                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+                chestRig.data.offset = new Vector3(-8.4f, 0f, 5.3f);
                 break;
             case WeaponType.Revolver:
-                chestRig.data.offset = new Vector3(-10f, 0f, 10f);
+                chestRig.data.offset = new Vector3(-8.4f, 0f, 5.3f);
                 break;
             case WeaponType.SubMachineGun:
-                chestRig.data.offset = new Vector3(-40.8f, 0f, 0f);
+                chestRig.data.offset = new Vector3(-35.9f, 0f, 5f);
                 break;
             case WeaponType.AssaultRifle:
-                chestRig.data.offset = new Vector3(-46.7f, 0f, 0f);
+                chestRig.data.offset = new Vector3(-35.9f, 0f, 5f);
                 break;
             case WeaponType.SniperRifle:
                 chestRig.data.offset = new Vector3(-50f, 0f, 0f);
                 break;
             case WeaponType.Shotgun:
-                chestRig.data.offset = new Vector3(-43f, 0f, 0f);
+                chestRig.data.offset = new Vector3(-36.3f, 0f, 5f);
                 break;
             default:
                 break;
@@ -634,29 +636,31 @@ public class CharacterController : MonoBehaviour
     {
         SetAimWeight(headRig, headAim);
         SetAimWeight(chestRig, chestAim);
+        SetAimTransform();
 
-        if (aimTf != null)
-        {
-            aimPoint.position = aimTf.position + aimInterval;
-        }
+        //if (aimTf != null) aimPoint.position = aimTf.position + aimInterval;
 
         void SetAimWeight(MultiAimConstraint rig, bool value)
         {
             switch (value)
             {
                 case true:
-                    if (rig.weight != 1f)
-                    {
-                        rig.weight += aimSpeed * Time.deltaTime;
-                    }
+                    if (rig.weight != 1f) rig.weight += aimSpeed * Time.deltaTime;
                     break;
                 case false:
-                    if (rig.weight != 0f)
-                    {
-                        rig.weight -= aimSpeed * Time.deltaTime;
-                    }
+                    if (rig.weight != 0f) rig.weight -= aimSpeed * Time.deltaTime;
                     break;
             }
+        }
+
+        void SetAimTransform()
+        {
+            if (aimTf == null) return;
+
+            Vector3 intervalY = new Vector3(0f, 0.2f, 0f);
+            Vector3 pos = mainHolsterPivot.position + intervalY;
+            Vector3 dir = Vector3.Normalize(aimTf.position + intervalY - pos);
+            aimPoint.position = pos + (dir * 5f) + aimInterval;
         }
     }
 
@@ -1465,7 +1469,12 @@ public class CharacterController : MonoBehaviour
     /// <param name="targetInfo"></param>
     private void SetAiming(TargetInfo targetInfo)
     {
-        aimTf = targetInfo.target.transform;
+        aimTf = targetInfo.target.mainHolsterPivot;
+        //Vector3 pos = transform.position;
+        //pos.y += 1.45f;
+        //Vector3 aimDir = Vector3.Normalize(targetInfo.target.mainHolsterPivot.transform.position - pos);
+        //aimTf = pos + 
+
         if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum"), true))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
@@ -1510,7 +1519,7 @@ public class CharacterController : MonoBehaviour
                                 gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
                                 return;
                             case AimGauge.State.Done:
-                                break;
+                                return;
                             default:
                                 return;
                         }

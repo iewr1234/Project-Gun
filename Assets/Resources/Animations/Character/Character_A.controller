@@ -128,6 +128,7 @@ AnimatorState:
   - {fileID: 8933646964813713079}
   - {fileID: -1056483298638476610}
   - {fileID: -2469498268098444137}
+  - {fileID: -5346257361656629339}
   m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
@@ -2750,6 +2751,31 @@ AnimatorStateTransition:
   m_TransitionOffset: 0
   m_ExitTime: 0.75
   m_HasExitTime: 1
+  m_HasFixedDuration: 1
+  m_InterruptionSource: 0
+  m_OrderedInterruption: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &-5346257361656629339
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: isAim
+    m_EventTreshold: 0
+  m_DstStateMachine: {fileID: 0}
+  m_DstState: {fileID: -1922509887053313690}
+  m_Solo: 0
+  m_Mute: 0
+  m_IsExit: 0
+  serializedVersion: 3
+  m_TransitionDuration: 0.25
+  m_TransitionOffset: 0
+  m_ExitTime: 0.75
+  m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
@@ -7402,7 +7428,7 @@ AnimatorStateMachine:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Main_RF_Base
+  m_Name: Main_AR_Base
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 7950238517644911676}
@@ -7740,7 +7766,7 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   - serializedVersion: 5
-    m_Name: Main_RF_Base
+    m_Name: Main_AR_Base
     m_StateMachine: {fileID: -202419124951872634}
     m_Mask: {fileID: 0}
     m_Motions: []
@@ -7752,7 +7778,7 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   - serializedVersion: 5
-    m_Name: Main_RF_Upper
+    m_Name: Main_AR_Upper
     m_StateMachine: {fileID: 738017196694170413}
     m_Mask: {fileID: 31900000, guid: 8db4ccf2351f93144b718381941214a1, type: 2}
     m_Motions: []
@@ -8618,7 +8644,7 @@ AnimatorStateMachine:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Main_RF_Upper
+  m_Name: Main_AR_Upper
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -3279229201165525160}

@@ -41,7 +41,7 @@ public static class DataUtility
     public static readonly Color color_baseMarker = new Color(220 / 255f, 220 / 255f, 0f);
 
     public static readonly int minHitAccuracy = 5;
-    public static readonly float aimPointY = 0.9f;
+    public static readonly float aimPointY = 0f;
     public static readonly float aimPointZ = 5f;
 
     public static readonly float lineInterval = 0.5f;
@@ -275,21 +275,21 @@ public static class DataUtility
         return result == 0 ? 1 : result;
     }
 
-    public static Vector3 GetAimPosition(Transform charTf, bool isRight)
-    {
-        var pos = charTf.position;
-        if (isRight)
-        {
-            pos += charTf.right * aimPointZ;
-        }
-        else
-        {
-            pos -= charTf.right * aimPointZ;
-        }
-        pos.y = aimPointY;
+    //public static Vector3 GetAimPosition(Transform charTf, bool isRight)
+    //{
+    //    var pos = charTf.position;
+    //    if (isRight)
+    //    {
+    //        pos += charTf.right * aimPointZ;
+    //    }
+    //    else
+    //    {
+    //        pos -= charTf.right * aimPointZ;
+    //    }
+    //    pos.y = aimPointY;
 
-        return pos;
-    }
+    //    return pos;
+    //}
 
     public static float GetFloorValue(float value, int _decimalPoint)
     {

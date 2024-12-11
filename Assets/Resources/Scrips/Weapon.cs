@@ -29,7 +29,7 @@ public class Weapon : MonoBehaviour
     {
         Base,
         Sub_HG = 1,
-        Main_RF = 3,
+        Main_AR = 3,
         Main_SMG = 5,
         Main_Pump = 7,
         Main_SR = 9,
@@ -218,7 +218,7 @@ public class Weapon : MonoBehaviour
                 charCtr.baseIndex = (int)AnimationLayers_A.Main_SMG;
                 break;
             case WeaponType.AssaultRifle:
-                charCtr.baseIndex = (int)AnimationLayers_A.Main_RF;
+                charCtr.baseIndex = (int)AnimationLayers_A.Main_AR;
                 break;
             case WeaponType.Rifle:
                 charCtr.baseIndex = (int)AnimationLayers_A.Main_SR;
