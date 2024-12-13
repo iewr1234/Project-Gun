@@ -2965,7 +2965,7 @@ public class CharacterController : MonoBehaviour
         {
             SetHealth(-damage);
             Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피해량 = {damage}, 체력 = {health}/{maxHealth}");
-            gameMgr.SetFloatText(charUI.transform.position, $"{damage}", Color.white);
+            gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
         }
         else
         {
@@ -2987,7 +2987,7 @@ public class CharacterController : MonoBehaviour
     public void OnHit(Vector3 dir, int damage)
     {
         SetHealth(-damage);
-        gameMgr.SetFloatText(charUI.transform.position, $"{damage}", Color.white);
+        gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
 
         if (health == 0)
         {

@@ -73,7 +73,6 @@ public class Bullet : MonoBehaviour
         bulletCd.enabled = true;
         bulletRb.constraints = RigidbodyConstraints.None;
         bulletRb.isKinematic = false;
-        //bulletRb.velocity = transform.forward * speed;
         meshs[_meshType].SetActive(true);
 
         propellant = shooter.propellant;
@@ -126,7 +125,7 @@ public class Bullet : MonoBehaviour
             }
             else
             {
-                target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
+                target.GameMgr.SetFloatText(target.charUI, "Miss", Color.red);
             }
             isCheck = true;
         }

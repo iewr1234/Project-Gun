@@ -1638,11 +1638,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetFloatText(Vector3 pos, string text, Color color)
+    public void SetFloatText(CharacterUI charUI, string text, Color color)
     {
         var floatText = floatTextPool.Find(x => !x.gameObject.activeSelf);
-        floatText.transform.SetAsFirstSibling();
-        floatText.ShowFloatText(pos, text, color);
+        //floatText.transform.SetAsFirstSibling();
+        //floatText.transform.SetParent(charUI.transform, false);
+        floatText.ShowFloatText(charUI, text, color);
     }
 
     public void SetFireWarning(FieldNode node)

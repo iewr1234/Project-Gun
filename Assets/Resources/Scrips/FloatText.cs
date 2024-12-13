@@ -6,6 +6,9 @@ using TMPro;
 
 public class FloatText : MonoBehaviour
 {
+    private GameManager gameMgr;
+    private CharacterUI charUI;
+
     [Header("---Access Component---")]
     private Canvas canvas;
     [HideInInspector] public TextMeshProUGUI text;
@@ -18,6 +21,8 @@ public class FloatText : MonoBehaviour
 
     public void SetComponents(GameManager _gameMgr)
     {
+        gameMgr = _gameMgr;
+
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = _gameMgr.camMgr.mainCam;
         text = GetComponentInChildren<TextMeshProUGUI>();
@@ -43,17 +48,18 @@ public class FloatText : MonoBehaviour
     private void MoveText()
     {
         timer += Time.deltaTime;
-        transform.position += moveDir * (moveSpeed * Time.deltaTime);
-        if (timer > moveTime)
-        {
-            gameObject.SetActive(false);
-        }
+        Vector3 _moveDir = charUI.transform.TransformDirection(moveDir);
+        transform.position += _moveDir * (moveSpeed * Time.deltaTime);
+
+        if (timer > moveTime) gameObject.SetActive(false);
     }
 
-    public void ShowFloatText(Vector3 pos, string text, Color color)
+    public void ShowFloatText(CharacterUI _charUI, string text, Color color)
     {
         gameObject.SetActive(true);
-        transform.position = pos;
+        charUI = _charUI;
+
+        transform.position = charUI.transform.position;
         this.text.text = text;
         this.text.color = color;
 
