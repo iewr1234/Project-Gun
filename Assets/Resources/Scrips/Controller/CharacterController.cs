@@ -262,8 +262,6 @@ public class CharacterController : MonoBehaviour
     private readonly float targetingMoveSpeed_sub = 1.5f;
 
     private bool reloading;
-    private readonly float reloadTime = 0.3f;
-
     private bool changing;
     private int changeIndex;
 
@@ -421,19 +419,19 @@ public class CharacterController : MonoBehaviour
         switch (weapon.weaponData.weaponType)
         {
             case WeaponType.Pistol:
-                chestRig.data.offset = new Vector3(-8.4f, 0f, 5.3f);
+                chestRig.data.offset = new Vector3(-10.7f, 0f, 17.7f);
                 break;
             case WeaponType.Revolver:
-                chestRig.data.offset = new Vector3(-8.4f, 0f, 5.3f);
+                chestRig.data.offset = new Vector3(-10.7f, 0f, 17.7f);
                 break;
             case WeaponType.SubMachineGun:
-                chestRig.data.offset = new Vector3(-35.9f, 0f, 5f);
+                chestRig.data.offset = new Vector3(-36.17f, 0f, 4.5f);
                 break;
             case WeaponType.AssaultRifle:
                 chestRig.data.offset = new Vector3(-35.9f, 0f, 5f);
                 break;
             case WeaponType.SniperRifle:
-                chestRig.data.offset = new Vector3(-50f, 0f, 0f);
+                chestRig.data.offset = new Vector3(-49.75f, 0f, 16.27f);
                 break;
             case WeaponType.Shotgun:
                 chestRig.data.offset = new Vector3(-36.3f, 0f, 5f);
@@ -567,7 +565,7 @@ public class CharacterController : MonoBehaviour
         Gizmos.DrawLine(currentWeapon.bulletTf.position, endRayPos);
 
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(aimPoint.position, 0.1f);
+        Gizmos.DrawSphere(aimPoint.position, 0.025f);
     }
 
     /// <summary>
@@ -593,11 +591,11 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        //MoveGripPivot();
-        //SetWeightOfChainIK();
-    }
+    //private void FixedUpdate()
+    //{
+    //    MoveGripPivot();
+    //    SetWeightOfChainIK();
+    //}
 
     private void MoveGripPivot()
     {
@@ -623,10 +621,7 @@ public class CharacterController : MonoBehaviour
         AimProcess();
         CommandApplication();
 
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            rigBdr.Build();
-        }
+        //if (Input.GetKeyDown(KeyCode.F1)) rigBdr.Build();
     }
 
     /// <summary>
@@ -657,10 +652,11 @@ public class CharacterController : MonoBehaviour
         {
             if (aimTf == null) return;
 
-            Vector3 intervalY = new Vector3(0f, 0.2f, 0f);
-            Vector3 pos = mainHolsterPivot.position + intervalY;
-            Vector3 dir = Vector3.Normalize(aimTf.position + intervalY - pos);
-            aimPoint.position = pos + (dir * 5f) + aimInterval;
+            float dist = 5f;
+            Vector3 pos = GetAimTarget();
+            Vector3 targetPos = aimTf.position + DataUtility.aimInterval;
+            Vector3 dir = Vector3.Normalize(targetPos - pos);
+            aimPoint.position = pos + (dir * dist) + aimInterval;
         }
     }
 
@@ -1389,15 +1385,15 @@ public class CharacterController : MonoBehaviour
                         animator.SetBool("isRight", watchInfo.isRight);
                         coverPos = watchInfo.watchNode.transform.position;
                         aimTf = watchInfo.targetNode.transform;
-                        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-                        aimPoint.position = aimTf.position + aimInterval;
+                        aimInterval = Vector3.zero;
+                        //aimPoint.position = aimTf.position + aimInterval;
                         break;
                     case CommandType.ThrowAim:
                         animator.SetBool("isRight", throwInfo.isRight);
                         coverPos = throwInfo.throwNode.transform.position;
                         aimTf = throwInfo.targetNode.transform;
-                        aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-                        aimPoint.position = aimTf.position + aimInterval;
+                        aimInterval = Vector3.zero;
+                        //aimPoint.position = aimTf.position + aimInterval;
                         break;
                     default:
                         break;
@@ -1438,17 +1434,18 @@ public class CharacterController : MonoBehaviour
                     var watchTarget = watchInfo.targetNode.transform;
                     transform.LookAt(watchTarget);
                     aimTf = watchTarget;
+                    aimInterval = Vector3.zero;
                     break;
                 case CommandType.ThrowAim:
                     var throwTarget = throwInfo.targetNode.transform;
                     transform.LookAt(throwTarget);
                     aimTf = throwTarget;
+                    aimInterval = Vector3.zero;
                     break;
                 default:
                     break;
             }
-            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
-            aimPoint.transform.position = aimTf.position + aimInterval;
+            //aimPoint.transform.position = aimTf.position + aimInterval;
             chestAim = true;
             chestRig.weight = 1f;
             commandList.Remove(command);
@@ -1470,17 +1467,12 @@ public class CharacterController : MonoBehaviour
     private void SetAiming(TargetInfo targetInfo)
     {
         aimTf = targetInfo.target.mainHolsterPivot;
-        //Vector3 pos = transform.position;
-        //pos.y += 1.45f;
-        //Vector3 aimDir = Vector3.Normalize(targetInfo.target.mainHolsterPivot.transform.position - pos);
-        //aimTf = pos + 
-
         if (currentWeapon.CheckHitBullet(targetInfo, animator.GetInteger("shootNum"), true))
         {
             var dir = System.Convert.ToBoolean(Random.Range(0, 2)) ? transform.right : -transform.right;
             var errorInterval = 1f;
             aimInterval = dir * errorInterval;
-            aimInterval.y += DataUtility.aimPointY;
+            //aimInterval.y += DataUtility.aimPointY;
             //if (targetInfo.target.animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Targeting"))
             //{
             //    targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
@@ -1488,9 +1480,9 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            aimInterval = new Vector3(0f, DataUtility.aimPointY, 0f);
+            aimInterval = Vector3.zero;
         }
-        aimPoint.transform.position = aimTf.position + aimInterval;
+        //aimPoint.transform.position = aimTf.position + aimInterval;
     }
 
     /// <summary>
@@ -1519,7 +1511,7 @@ public class CharacterController : MonoBehaviour
                                 gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
                                 return;
                             case AimGauge.State.Done:
-                                return;
+                                break;
                             default:
                                 return;
                         }
@@ -1540,10 +1532,8 @@ public class CharacterController : MonoBehaviour
                         break;
                 }
 
-                if (!animator.GetBool("fireTrigger"))
-                {
-                    animator.SetBool("fireTrigger", true);
-                }
+                if (!animator.GetBool("fireTrigger")) animator.SetBool("fireTrigger", true);
+
                 //weapon.FireBullet();
                 //shootNum--;
                 //if (shootNum == 0)
@@ -2943,10 +2933,8 @@ public class CharacterController : MonoBehaviour
     /// <summary>
     /// 캐릭터 피격
     /// </summary>
-    public void OnHit(CharacterController shooter, Vector3 dir, Bullet bullet, int hitNum)
+    public void OnHit(CharacterController shooter, Bullet bullet)
     {
-        if (state == CharacterState.Dead) return;
-
         bool isPenetrate;
         float bulletproof;
         if (armor != null && armor.durability > 0)
@@ -2972,7 +2960,7 @@ public class CharacterController : MonoBehaviour
         }
 
         var penetrate = bulletproof - bullet.penetrate < 0 ? 0 : bulletproof - bullet.penetrate;
-        var damage = (int)Mathf.Floor((bullet.damage * hitNum) * (1 + penetrate * 0.01f));
+        var damage = (int)Mathf.Floor(bullet.damage * (1 + penetrate * 0.01f));
         if (isPenetrate)
         {
             SetHealth(-damage);
@@ -2984,10 +2972,11 @@ public class CharacterController : MonoBehaviour
             SetStamina(-damage);
         }
 
+        if (state == CharacterState.Dead) return;
         if (health == 0)
         {
             var force = 500f;
-            CharacterDead(dir, force);
+            CharacterDead(bullet.transform.forward, force);
         }
         else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
         {
@@ -3079,17 +3068,17 @@ public class CharacterController : MonoBehaviour
 
     public void RemoveWeapon(string weaponID, EquipSlot equipSlot)
     {
-        var weapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipSlot.type == equipSlot.type);
-        if (weapon == null) return;
+        var prevWeapon = weapons.Find(x => x.weaponData.ID == weaponID && x.equipSlot.type == equipSlot.type);
+        if (prevWeapon == null) return;
 
         //weapon.transform.SetParent(weaponPoolTf, false);
         //weapon.Initialize();
-        weapons.Remove(weapon);
-        if (currentWeapon == weapon)
+        weapons.Remove(prevWeapon);
+        if (currentWeapon == prevWeapon)
         {
             if (weapons.Count > 0)
             {
-                weapon = weapons[0];
+                var weapon = weapons[0];
                 weapon.WeaponSwitching("Right");
                 currentWeapon = weapon;
                 weapon.EquipWeapon();
@@ -3099,7 +3088,7 @@ public class CharacterController : MonoBehaviour
                 currentWeapon = null;
             }
         }
-        Destroy(weapon.gameObject);
+        Destroy(prevWeapon.gameObject);
     }
 
     public Weapon GetWeapon(WeaponDataInfo weaponData)
@@ -3158,6 +3147,11 @@ public class CharacterController : MonoBehaviour
         Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponInfo.prefabName}"));
         weapon.transform.localScale = Vector3.one;
         return weapon;
+    }
+
+    public Vector3 GetAimTarget()
+    {
+        return mainHolsterPivot.position + DataUtility.aimInterval;
     }
 
     public void EnterTheBase()
@@ -3235,13 +3229,6 @@ public class CharacterController : MonoBehaviour
         }
         commandList.Remove(command);
         curCoroutine = null;
-    }
-
-    private IEnumerator Coroutine_ReloadEnd()
-    {
-        yield return new WaitForSeconds(reloadTime);
-
-        ReloadEnd();
     }
     #endregion
 
@@ -3339,7 +3326,7 @@ public class CharacterController : MonoBehaviour
 
         if (currentWeapon.weaponData.equipMag != null)
         {
-            currentWeapon.SetParts(currentWeapon.weaponData.equipMag.magName, true);
+            currentWeapon.SetParts(currentWeapon.weaponData.equipMag.prefabName, true);
         }
 
         //if (commandList.Count > 0 && commandList[0].type == CommandType.Reload && !commandList[0].loadChamber)

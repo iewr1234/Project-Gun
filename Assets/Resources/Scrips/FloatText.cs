@@ -13,7 +13,7 @@ public class FloatText : MonoBehaviour
     [Header("--- Assignment Variable---")]
     [SerializeField] private float moveSpeed;
     [SerializeField] private float moveTime;
-
+    private Vector3 moveDir;
     private float timer;
 
     public void SetComponents(GameManager _gameMgr)
@@ -43,7 +43,7 @@ public class FloatText : MonoBehaviour
     private void MoveText()
     {
         timer += Time.deltaTime;
-        transform.position += new Vector3(0f, moveSpeed * Time.deltaTime, 0f);
+        transform.position += moveDir * (moveSpeed * Time.deltaTime);
         if (timer > moveTime)
         {
             gameObject.SetActive(false);
@@ -57,6 +57,7 @@ public class FloatText : MonoBehaviour
         this.text.text = text;
         this.text.color = color;
 
+        moveDir = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0f);
         timer = 0f;
     }
 }

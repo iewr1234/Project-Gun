@@ -85,11 +85,11 @@ public class Weapon : MonoBehaviour
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
-        if (weaponData.isMag) SetParts(weaponData.equipMag.magName, true);
+        if (weaponData.isMag) SetParts(weaponData.equipMag.prefabName, true);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            SetParts(partsData.partsName, true);
+            SetParts(partsData.prefabName, true);
         }
         hitAccuracy = new HitAccuracy(this);
         gameObject.SetActive(true);
@@ -254,7 +254,7 @@ public class Weapon : MonoBehaviour
 
         if (weaponData.isMag)
         {
-            var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.magName);
+            var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.prefabName);
             if (magParts != null) magParts.SetActive(true);
         }
         if (baseSight != null) baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
@@ -341,7 +341,7 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, hitInfo.isHit);
                 }
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
@@ -360,7 +360,7 @@ public class Weapon : MonoBehaviour
                         return;
                     }
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, meshType, i == 0 && hitInfo.isHit, i == 0 && !hitInfo.isHit, hitInfo.hitNum);
+                    bullet.SetBullet(charCtr, target, meshType, hitInfo.isHit);
                 }
                 hitInfos.RemoveAt(0);
                 loadedNum--;
@@ -397,7 +397,6 @@ public class Weapon : MonoBehaviour
                 disparity = shootDisparity_pellet;
             }
             var aimPos = charCtr.aimPoint.position;
-            aimPos.y += 0.3f;
             aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
             bullet.transform.LookAt(aimPos);
         }

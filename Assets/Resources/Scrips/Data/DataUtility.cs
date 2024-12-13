@@ -41,8 +41,9 @@ public static class DataUtility
     public static readonly Color color_baseMarker = new Color(220 / 255f, 220 / 255f, 0f);
 
     public static readonly int minHitAccuracy = 5;
-    public static readonly float aimPointY = 0f;
+    public static readonly float aimPointY = 0.2f;
     public static readonly float aimPointZ = 5f;
+    public static readonly Vector3 aimInterval = new Vector3(0f, 0.2f, 0f);
 
     public static readonly float lineInterval = 0.5f;
 
