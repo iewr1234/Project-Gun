@@ -8,7 +8,7 @@ using TMPro;
 public class CharacterUI : MonoBehaviour
 {
     [Header("---Access Script---")]
-    private CharacterController charCtr;
+    public CharacterController charCtr;
 
     [Header("---Access Component---")]
     public Canvas canvas;

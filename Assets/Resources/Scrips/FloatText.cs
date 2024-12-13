@@ -59,7 +59,9 @@ public class FloatText : MonoBehaviour
         gameObject.SetActive(true);
         charUI = _charUI;
 
-        transform.position = charUI.transform.position;
+        Vector3 pos = charUI.transform.position;
+        pos.y = charUI.charCtr.transform.position.y + 1.25f;
+        transform.position = pos;
         this.text.text = text;
         this.text.color = color;
 

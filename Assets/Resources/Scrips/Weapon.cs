@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using UnityEngine;
 
 [System.Serializable]
@@ -45,6 +44,8 @@ public class Weapon : MonoBehaviour
 
     [Space(5f)] public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
+
+    [Space(5f)] public ParticleSystem[] fx_gunShot;
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -323,82 +324,91 @@ public class Weapon : MonoBehaviour
 
     public void FireBullet(CharacterController target)
     {
-        var hitInfo = hitInfos[0];
-        int count;
-        switch (charCtr.ownerType)
+        if (fx_gunShot.Length > 0)
         {
-            case CharacterOwner.Player:
-                LoadingChamber();
-                var chamberBullet = weaponData.chamberBullet;
-                count = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
-                for (int i = 0; i < count; i++)
-                {
-                    var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
-                    if (bullet == null)
-                    {
-                        Debug.LogError("There are no bullet in the bulletPool");
-                        return;
-                    }
-
-                    SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, hitInfo.isHit);
-                }
-                hitInfos.RemoveAt(0);
-                weaponData.chamberBullet = null;
-                weaponData.isChamber = false;
-                if (weaponData.magType != MagazineType.Cylinder) LoadingChamber();
-                if (equipSlot != null) equipSlot.SetLoadedBulletCount();
-                break;
-            case CharacterOwner.Enemy:
-                count = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
-                for (int i = 0; i < count; i++)
-                {
-                    var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
-                    if (bullet == null)
-                    {
-                        Debug.LogError("There are no bullet in the bulletPool");
-                        return;
-                    }
-                    SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, meshType, hitInfo.isHit);
-                }
-                hitInfos.RemoveAt(0);
-                loadedNum--;
-                break;
-            default:
-                break;
+            fx_gunShot[0].Emit(10);
+            fx_gunShot[1].Emit(1);
+            fx_gunShot[2].Emit(1);
         }
-
-        void LoadingChamber()
+        else
         {
-            if (weaponData.isChamber) return;
-            if (!weaponData.isMag) return;
-            if (weaponData.equipMag.loadedBullets.Count == 0) return;
-
-            var loadedBullet = weaponData.equipMag.loadedBullets[^1];
-            weaponData.chamberBullet = loadedBullet;
-            weaponData.isChamber = true;
-            weaponData.equipMag.loadedBullets.Remove(loadedBullet);
-            charCtr.SetAbility();
-        }
-
-        void SetBulletDirection(Bullet bullet)
-        {
-            bullet.gameObject.SetActive(true);
-            bullet.transform.position = bulletTf.position;
-            float disparity;
-            if (count == 1)
+            var hitInfo = hitInfos[0];
+            int count;
+            switch (charCtr.ownerType)
             {
-                disparity = shootDisparity_bullet;
-                if (!hitInfo.isHit) disparity += shootDisparity_spread;
+                case CharacterOwner.Player:
+                    LoadingChamber();
+                    var chamberBullet = weaponData.chamberBullet;
+                    count = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
+                    for (int i = 0; i < count; i++)
+                    {
+                        var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
+                        if (bullet == null)
+                        {
+                            Debug.LogError("There are no bullet in the bulletPool");
+                            return;
+                        }
+
+                        SetBulletDirection(bullet);
+                        bullet.SetBullet(charCtr, target, chamberBullet.meshType, hitInfo.isHit);
+                    }
+                    hitInfos.RemoveAt(0);
+                    weaponData.chamberBullet = null;
+                    weaponData.isChamber = false;
+                    if (weaponData.magType != MagazineType.Cylinder) LoadingChamber();
+                    if (equipSlot != null) equipSlot.SetLoadedBulletCount();
+                    break;
+                case CharacterOwner.Enemy:
+                    count = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
+                    for (int i = 0; i < count; i++)
+                    {
+                        var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
+                        if (bullet == null)
+                        {
+                            Debug.LogError("There are no bullet in the bulletPool");
+                            return;
+                        }
+                        SetBulletDirection(bullet);
+                        bullet.SetBullet(charCtr, target, meshType, hitInfo.isHit);
+                    }
+                    hitInfos.RemoveAt(0);
+                    loadedNum--;
+                    break;
+                default:
+                    break;
             }
-            else
+
+            void LoadingChamber()
             {
-                disparity = shootDisparity_pellet;
+                if (weaponData.isChamber) return;
+                if (!weaponData.isMag) return;
+                if (weaponData.equipMag.loadedBullets.Count == 0) return;
+
+                var loadedBullet = weaponData.equipMag.loadedBullets[^1];
+                weaponData.chamberBullet = loadedBullet;
+                weaponData.isChamber = true;
+                weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+                charCtr.SetAbility();
             }
-            var aimPos = charCtr.aimPoint.position;
-            aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
-            bullet.transform.LookAt(aimPos);
+
+            void SetBulletDirection(Bullet bullet)
+            {
+                bullet.gameObject.SetActive(true);
+                bullet.transform.position = bulletTf.position;
+                float disparity;
+                if (count == 1)
+                {
+                    disparity = shootDisparity_bullet;
+                    if (!hitInfo.isHit) disparity += shootDisparity_spread;
+                }
+                else
+                {
+                    disparity = shootDisparity_pellet;
+                }
+                var aimPos = charCtr.aimPoint.position;
+                aimPos += (charCtr.transform.right * Random.Range(-disparity, disparity)) + (charCtr.transform.up * Random.Range(-disparity, disparity));
+                bullet.transform.LookAt(aimPos);
+            }
         }
     }
 
