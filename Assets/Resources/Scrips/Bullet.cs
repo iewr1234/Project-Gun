@@ -11,6 +11,7 @@ public class Bullet : MonoBehaviour
     private CharacterController target;
 
     [Header("---Access Component---")]
+    public ParticleSystem fx_smoke;
     private TrailRenderer trail;
     private Rigidbody bulletRb;
     private Collider bulletCd;
@@ -23,8 +24,8 @@ public class Bullet : MonoBehaviour
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
 
-    private LayerMask targetLayer;
-    [Space(5f)][SerializeField] private bool isHit;
+    [Space(5f)][SerializeField] private LayerMask targetLayer;
+    [SerializeField] private bool isHit;
     [SerializeField] private float speed = 30f;
     [SerializeField] private int hitNum;
 
@@ -84,6 +85,10 @@ public class Bullet : MonoBehaviour
         isHit = _isHit;
         targetLayer = isHit ? LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") : LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
         isCheck = false;
+
+        timer = 0f;
+        hitTime = DataUtility.GetDistance(transform.position, target.GetAimTarget()) / speed; // 시간 = 거리 ÷ 속력
+        destroyTime = _meshType == 0 ? destroyTime_bullet : destroyTime_pellet;
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, speed * destroyTime, targetLayer))
         {
             targetPos = hit.point;
@@ -93,10 +98,7 @@ public class Bullet : MonoBehaviour
             float dist = speed * destroyTime; // 거리 = 속력 x 시간
             targetPos = transform.position + (transform.forward * dist);
         }
-
-        timer = 0f;
-        hitTime = DataUtility.GetDistance(transform.position, target.GetAimTarget()) / speed; // 시간 = 거리 ÷ 속력
-        destroyTime = _meshType == 0 ? destroyTime_bullet : destroyTime_pellet;
+        fx_smoke.Play();
     }
 
     private void Update()
@@ -137,10 +139,11 @@ public class Bullet : MonoBehaviour
         {
             trail.Clear();
             trail.enabled = false;
+            fx_smoke.Stop();
             gameObject.SetActive(false);
         }
     }
-
+    
     private void HitBullet()
     {
         //if (isCheck) return;
@@ -161,5 +164,6 @@ public class Bullet : MonoBehaviour
         //    target.GameMgr.SetFloatText(target.charUI.transform.position, "Miss", Color.red);
         //    isMiss = false;
         //}
+        fx_smoke.Stop();
     }
 }
