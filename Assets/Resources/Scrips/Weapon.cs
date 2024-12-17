@@ -39,13 +39,12 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
-    public Transform bulletTf;
-    public Transform gripTf;
+    public Transform firePoint;
+    public ParticleSystem fx_gunShot;
+    public ParticleSystem fx_shellEjection;
 
     [Space(5f)] public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
-
-    [Space(5f)] public ParticleSystem fx_gunShot;
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -81,8 +80,7 @@ public class Weapon : MonoBehaviour
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1) charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
 
-        if (bulletTf == null) bulletTf = transform.Find("BulletTransform");
-        if (gripTf == null) gripTf = transform.Find("GripTransform");
+        if (firePoint == null) firePoint = transform.Find("FirePoint");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
@@ -107,8 +105,7 @@ public class Weapon : MonoBehaviour
         weaponData.gripType = _weaponInfo.gripType;
         gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
 
-        if (bulletTf == null) bulletTf = transform.Find("BulletTransform");
-        if (gripTf == null) gripTf = transform.Find("GripTransform");
+        if (firePoint == null) firePoint = transform.Find("FirePoint");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
@@ -371,6 +368,7 @@ public class Weapon : MonoBehaviour
         }
 
         if (fx_gunShot != null) fx_gunShot.Play();
+        if (fx_shellEjection != null) fx_shellEjection.Emit(1);
 
         void LoadingChamber()
         {
@@ -388,7 +386,7 @@ public class Weapon : MonoBehaviour
         void SetBulletDirection(Bullet bullet)
         {
             bullet.gameObject.SetActive(true);
-            bullet.transform.position = bulletTf.position;
+            bullet.transform.position = firePoint.position;
             float disparity;
             if (count == 1)
             {

@@ -425,6 +425,7 @@ namespace EPOOutline
             foreach (var renderer in renderers)
             {
                 if (renderer.CompareTag("Grenade")) continue;
+                if (renderer.CompareTag("FX")) continue;
                 if (!MatchingMode(renderer, renderersAddingMode))
                     continue;
 

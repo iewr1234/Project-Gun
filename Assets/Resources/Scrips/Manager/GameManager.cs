@@ -1641,8 +1641,6 @@ public class GameManager : MonoBehaviour
     public void SetFloatText(CharacterUI charUI, string text, Color color)
     {
         var floatText = floatTextPool.Find(x => !x.gameObject.activeSelf);
-        //floatText.transform.SetAsFirstSibling();
-        //floatText.transform.SetParent(charUI.transform, false);
         floatText.ShowFloatText(charUI, text, color);
     }
 

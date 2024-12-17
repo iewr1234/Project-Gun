@@ -560,9 +560,9 @@ public class CharacterController : MonoBehaviour
     {
         if (currentWeapon == null) return;
 
-        var endRayPos = currentWeapon.bulletTf.position + (currentWeapon.bulletTf.forward * range);
+        var endRayPos = currentWeapon.firePoint.position + (currentWeapon.firePoint.forward * range);
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(currentWeapon.bulletTf.position, endRayPos);
+        Gizmos.DrawLine(currentWeapon.firePoint.position, endRayPos);
 
         Gizmos.color = Color.green;
         Gizmos.DrawSphere(aimPoint.position, 0.025f);
@@ -589,29 +589,6 @@ public class CharacterController : MonoBehaviour
             Gizmos.DrawLine(startPos, endPos);
             startPos = endPos;
         }
-    }
-
-    //private void FixedUpdate()
-    //{
-    //    MoveGripPivot();
-    //    SetWeightOfChainIK();
-    //}
-
-    private void MoveGripPivot()
-    {
-        if (!moveGripPivot) return;
-        if (currentWeapon == null) return;
-        if (currentWeapon.gripTf == null) return;
-        if (chainIK.data.target == null) return;
-
-        chainIK.data.target.SetPositionAndRotation(currentWeapon.gripTf.position, currentWeapon.gripTf.rotation);
-    }
-
-    private void SetWeightOfChainIK()
-    {
-        if (chainIK.weight == targetWeight) return;
-
-        chainIK.weight = targetWeight;
     }
 
     private void Update()

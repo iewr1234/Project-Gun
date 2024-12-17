@@ -65,7 +65,7 @@ public class FloatText : MonoBehaviour
         this.text.text = text;
         this.text.color = color;
 
-        moveDir = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0f);
+        moveDir = this.text.text == "Miss" ? Vector3.up : new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0f);
         timer = 0f;
     }
 }
