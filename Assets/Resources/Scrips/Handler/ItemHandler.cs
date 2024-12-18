@@ -154,14 +154,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (activeSample == null)
         {
             Debug.LogError($"Not found Sample object: {sampleName}");
+            return;
+        }
+
+        if (itemData.type == ItemType.Bullet)
+        {
+            bulletData.bulletMesh = activeSample.GetComponent<MeshFilter>().mesh;
+            bulletData.bulletMat = activeSample.GetComponent<MeshRenderer>().material;
         }
         activeSample.SetActive(true);
         gameObject.SetActive(true);
 
-        if (!gameMenuMgr.activeItem.Contains(this))
-        {
-            gameMenuMgr.activeItem.Add(this);
-        }
+        if (!gameMenuMgr.activeItem.Contains(this)) gameMenuMgr.activeItem.Add(this);
 
         string InputItemData()
         {

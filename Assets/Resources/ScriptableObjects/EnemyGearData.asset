@@ -22,7 +22,8 @@ MonoBehaviour:
       weaponType: 0
       magType: 0
       gripType: 0
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       pelletNum: 0
       spread: 0
       magMax: 0
@@ -32,17 +33,19 @@ MonoBehaviour:
       weaponType: 0
       magType: 0
       gripType: 0
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       pelletNum: 0
       spread: 0
       magMax: 0
     subWeapon:
-      prefabName: HG_Pistol_002
+      prefabName: HG_Pistol_005
       isMain: 0
-      weaponType: 1
-      magType: 1
-      gripType: 1
-      meshType: 0
+      weaponType: 0
+      magType: 0
+      gripType: 0
+      bulletMesh: {fileID: 4300000, guid: 66e1861e92a65d4489cac79d2bb39a10, type: 2}
+      bulletMat: {fileID: 2100000, guid: 11fd501017d5ba84cb0f19a263439bac, type: 2}
       pelletNum: 0
       spread: 0
       magMax: 12
@@ -55,7 +58,8 @@ MonoBehaviour:
       weaponType: 4
       magType: 1
       gripType: 5
-      meshType: 0
+      bulletMesh: {fileID: 4300000, guid: a58dcae05245d6849a4fa156bbbe7131, type: 2}
+      bulletMat: {fileID: 2100000, guid: 11fd501017d5ba84cb0f19a263439bac, type: 2}
       pelletNum: 0
       spread: 0
       magMax: 30
@@ -65,7 +69,8 @@ MonoBehaviour:
       weaponType: 0
       magType: 0
       gripType: 0
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       pelletNum: 0
       spread: 0
       magMax: 0
@@ -75,7 +80,8 @@ MonoBehaviour:
       weaponType: 0
       magType: 0
       gripType: 0
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       pelletNum: 0
       spread: 0
       magMax: 0

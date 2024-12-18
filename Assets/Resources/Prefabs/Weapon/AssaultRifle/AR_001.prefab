@@ -1285,7 +1285,8 @@ MonoBehaviour:
   charCtr: {fileID: 0}
   firePoint: {fileID: 357450767681435767}
   fx_gunShot: {fileID: 1509507694270063040}
-  fx_shellEjection: {fileID: 0}
+  fx_sEject: {fileID: 8739846349416692491}
+  fx_sEject_Rdr: {fileID: 8739642314566084267}
   baseSight: {fileID: 5331676305565594741}
   partsObjects:
   - {fileID: 7237223518475176055}
@@ -1370,7 +1371,8 @@ MonoBehaviour:
       ID: 
       prefabName: 
       bulletName: 
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       level: 0
       caliber: 0
       pelletNum: 0
@@ -1405,7 +1407,6 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
-  meshType: 0
   magMax: 0
   loadedNum: 0
   hitInfos: []
@@ -3857,6 +3858,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6024c207ad1fc3a47aff157bef21a67e, type: 3}
+--- !u!199 &8739642314566084267 stripped
+ParticleSystemRenderer:
+  m_CorrespondingSourceObject: {fileID: 5627156650711757622, guid: 6024c207ad1fc3a47aff157bef21a67e, type: 3}
+  m_PrefabInstance: {fileID: 3989871826846717341}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &8739846349416692491 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5626390920417013398, guid: 6024c207ad1fc3a47aff157bef21a67e, type: 3}
+  m_PrefabInstance: {fileID: 3989871826846717341}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8900624174532272605 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5538162892585153600, guid: 6024c207ad1fc3a47aff157bef21a67e, type: 3}

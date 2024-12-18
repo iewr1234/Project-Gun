@@ -13,7 +13,9 @@ public class EnemyGearDataInfo
         public WeaponType weaponType;
         public MagazineType magType;
         public WeaponGripType gripType;
-        public int meshType;
+
+        [Space(5f)] public Mesh bulletMesh;
+        public Material bulletMat;
         public int pelletNum;
         public int spread;
         public int magMax;

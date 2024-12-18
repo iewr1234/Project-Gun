@@ -17,9 +17,6 @@ public class Bullet : MonoBehaviour
 
     [Header("---Access Component---")]
     public TrailRenderer trail;
-    private Rigidbody bulletRb;
-    private Collider bulletCd;
-    [SerializeField] private List<GameObject> meshs = new List<GameObject>();
 
     [Space(5f)][SerializeField] public ParticleSystem fx_tracerSmoke;
     public ParticleSystem[] fx_impactList;
@@ -56,34 +53,15 @@ public class Bullet : MonoBehaviour
         trail.endWidth = 0f;
         trail.enabled = false;
 
-        bulletRb = GetComponent<Rigidbody>();
-        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-        bulletRb.isKinematic = true;
-
-        bulletCd = GetComponent<Collider>();
-        bulletCd.enabled = false;
-
-        meshs.Add(transform.Find("Mesh1").gameObject);
-        meshs.Add(transform.Find("Mesh2").gameObject);
-        for (int i = 0; i < meshs.Count; i++)
-        {
-            var mesh = meshs[i];
-            mesh.SetActive(false);
-        }
-
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, int _meshType, bool _isHit)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, bool _isHit, bool _isPellet)
     {
         shooter = _shooter;
         target = _target;
 
         trail.enabled = true;
-        bulletCd.enabled = true;
-        bulletRb.constraints = RigidbodyConstraints.None;
-        bulletRb.isKinematic = false;
-        meshs[_meshType].SetActive(true);
 
         propellant = shooter.propellant;
         damage = shooter.damage;
@@ -98,7 +76,7 @@ public class Bullet : MonoBehaviour
 
         timer = 0f;
         hitTime = DataUtility.GetDistance(transform.position, target.GetAimTarget()) / speed; // 시간 = 거리 ÷ 속력
-        destroyTime = _meshType == 0 ? destroyTime_bullet : destroyTime_pellet;
+        destroyTime = _isPellet ? destroyTime_pellet : destroyTime_bullet;
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, speed * destroyTime, targetLayer))
         {
             targetPos = hit.point;
@@ -170,16 +148,6 @@ public class Bullet : MonoBehaviour
     private void HitBullet()
     {
         if (hitCheck) return;
-
-        bulletRb.velocity = Vector3.zero;
-        bulletRb.constraints = RigidbodyConstraints.FreezeAll;
-        bulletRb.isKinematic = true;
-        bulletCd.enabled = false;
-        for (int i = 0; i < meshs.Count; i++)
-        {
-            var mesh = meshs[i];
-            mesh.SetActive(false);
-        }
 
         fx_tracerSmoke.Stop();
         if (impactType != ImpactType.None) fx_impactList[(int)impactType].Play();

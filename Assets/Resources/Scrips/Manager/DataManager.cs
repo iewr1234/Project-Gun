@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using UnityEditor;
 using TMPro;
 using UnityEngine.Animations.Rigging;
+using static UnityEngine.Mesh;
 
 [System.Serializable]
 public struct ObjectData
@@ -471,14 +472,14 @@ public class DataManager : MonoBehaviour
 
     #region EnemyGear Data
     [HideInInspector] public EnemyGearData enemyGearData;
-    private readonly string enemyGearDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1212322922&range=A3:Z";
+    private readonly string enemyGearDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1212322922&range=A4:AC";
     private enum EnemyGearVariable
     {
         ID,
         GearName,
         MainWeapon1,
-        MainWeapon2 = 10,
-        SubWeapon = 18,
+        MainWeapon2 = 11,
+        SubWeapon = 20,
     }
 
     public void UpdateEnemyGearData()
@@ -523,13 +524,24 @@ public class DataManager : MonoBehaviour
                 weaponType = (WeaponType)int.Parse(gearData[startIndex + 1]),
                 magType = (MagazineType)int.Parse(gearData[startIndex + 2]),
                 gripType = (WeaponGripType)int.Parse(gearData[startIndex + 3]),
-                meshType = int.Parse(gearData[startIndex + 4]),
-                pelletNum = int.Parse(gearData[startIndex + 5]),
-                spread = int.Parse(gearData[startIndex + 6]),
-                magMax = int.Parse(gearData[startIndex + 7]),
+                bulletMesh = ReadBulletMesh(gearData[startIndex + 4]),
+                bulletMat = ReadBulletMaterial(gearData[startIndex + 5]),
+                pelletNum = int.Parse(gearData[startIndex + 6]),
+                spread = int.Parse(gearData[startIndex + 7]),
+                magMax = int.Parse(gearData[startIndex + 8]),
             };
 
             return weaponInfo;
+        }
+
+        Mesh ReadBulletMesh(string meshData)
+        {
+            return meshData == "None" ? null : Resources.Load<Mesh>($"Meshs/{meshData}");
+        }
+
+        Material ReadBulletMaterial(string matData)
+        {
+            return matData == "None" ? null : Resources.Load<Material>($"Materials/{matData}");
         }
     }
     #endregion
@@ -1053,7 +1065,8 @@ public class DataManager : MonoBehaviour
         ID,
         PrefabName,
         BulletName,
-        MeshType,
+        Mesh,
+        Marerial,
         Level,
         Caliber,
         PelletNum,
@@ -1098,7 +1111,8 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)BulletVariable.ID],
                     prefabName = data[(int)BulletVariable.PrefabName],
                     bulletName = data[(int)BulletVariable.BulletName],
-                    meshType = int.Parse(data[(int)BulletVariable.MeshType]),
+                    bulletMesh = Resources.Load<Mesh>($"Meshs/{data[(int)BulletVariable.Mesh]}"),
+                    bulletMat = Resources.Load<Material>($"Materials/{data[(int)BulletVariable.Marerial]}"),
                     level = int.Parse(data[(int)BulletVariable.Level]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
                     pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),

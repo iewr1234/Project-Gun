@@ -11,10 +11,10 @@ public class BulletDataInfo
     public string ID;
     public string prefabName;
     public string bulletName;
-    public int meshType;
-    [Space(5f)]
+    public Mesh bulletMesh;
+    public Material bulletMat;
 
-    public int level;
+    [Space(5f)] public int level;
     [Tooltip("±¸°æ")] public float caliber;
     [Tooltip("Æç¸´ ¼ö")] public int pelletNum;
     [Tooltip("È®»ê")] public int spread;
@@ -41,7 +41,8 @@ public class BulletDataInfo
             ID = ID,
             prefabName = prefabName,
             bulletName = bulletName,
-            meshType = meshType,
+            bulletMesh = bulletMesh,
+            bulletMat = bulletMat,
 
             level = level,
             caliber = caliber,

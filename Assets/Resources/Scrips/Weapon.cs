@@ -41,7 +41,8 @@ public class Weapon : MonoBehaviour
     [Header("---Access Component---")]
     public Transform firePoint;
     public ParticleSystem fx_gunShot;
-    public ParticleSystem fx_shellEjection;
+    public ParticleSystem fx_sEject;
+    public ParticleSystemRenderer fx_sEject_Rdr;
 
     [Space(5f)] public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
@@ -52,7 +53,6 @@ public class Weapon : MonoBehaviour
     public WeaponGripInfo gripInfo;
     [Space(5f)]
 
-    [HideInInspector] public int meshType;
     [Space(5f)][Tooltip("ÅºÃ¢¿ë·®")] public int magMax;
     [Tooltip("ÀåÀüµÈ ÅºÈ¯ ¼ö")] public int loadedNum;
 
@@ -109,7 +109,11 @@ public class Weapon : MonoBehaviour
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
-        meshType = _weaponInfo.meshType;
+        if (fx_sEject_Rdr != null)
+        {
+            fx_sEject_Rdr.mesh = _weaponInfo.bulletMesh;
+            fx_sEject_Rdr.material = _weaponInfo.bulletMat;
+        }
         magMax = _weaponInfo.magMax;
         loadedNum = magMax;
         hitAccuracy = new HitAccuracy(this, _weaponInfo);
@@ -327,6 +331,7 @@ public class Weapon : MonoBehaviour
         {
             case CharacterOwner.Player:
                 LoadingChamber();
+                SetBulletShell();
                 var chamberBullet = weaponData.chamberBullet;
                 count = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
                 for (int i = 0; i < count; i++)
@@ -339,7 +344,7 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, chamberBullet.meshType, hitInfo.isHit);
+                    bullet.SetBullet(charCtr, target, hitInfo.isHit, count > 1);
                 }
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
@@ -358,7 +363,7 @@ public class Weapon : MonoBehaviour
                         return;
                     }
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, meshType, hitInfo.isHit);
+                    bullet.SetBullet(charCtr, target, hitInfo.isHit, count > 1);
                 }
                 hitInfos.RemoveAt(0);
                 loadedNum--;
@@ -368,7 +373,20 @@ public class Weapon : MonoBehaviour
         }
 
         if (fx_gunShot != null) fx_gunShot.Play();
-        if (fx_shellEjection != null) fx_shellEjection.Emit(1);
+        switch (weaponData.weaponType)
+        {
+            case WeaponType.Pistol:
+                EjectionBulletShell();
+                break;
+            case WeaponType.SubMachineGun:
+                EjectionBulletShell();
+                break;
+            case WeaponType.AssaultRifle:
+                EjectionBulletShell();
+                break;
+            default:
+                break;
+        }
 
         void LoadingChamber()
         {
@@ -421,6 +439,23 @@ public class Weapon : MonoBehaviour
     public int GetHitValue()
     {
         return hitAccuracy.hitValue;
+    }
+
+    private void SetBulletShell()
+    {
+        if (fx_sEject_Rdr == null) return;
+        if (weaponData.chamberBullet == null) return;
+
+        fx_sEject_Rdr.mesh = weaponData.chamberBullet.bulletMesh;
+        fx_sEject_Rdr.material = weaponData.chamberBullet.bulletMat;
+    }
+
+    private void EjectionBulletShell()
+    {
+        if (fx_sEject == null) return;
+
+        fx_sEject.transform.localRotation = Quaternion.Euler(0f, 90f + Random.Range(-5f, 5f), 0f);
+        fx_sEject.Emit(1);
     }
 
     private class HitAccuracy
