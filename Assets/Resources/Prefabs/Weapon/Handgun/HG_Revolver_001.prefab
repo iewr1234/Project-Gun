@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 587214499230159045}
   - component: {fileID: 576612698757164501}
   - component: {fileID: 627592346638264511}
+  - component: {fileID: -8129390470974091898}
   - component: {fileID: 627852727541228529}
   m_Layer: 0
   m_Name: HG_Revolver_001
@@ -140,6 +141,8 @@ MonoBehaviour:
   charCtr: {fileID: 0}
   firePoint: {fileID: 6000409410992042279}
   fx_gunShot: {fileID: 4846592576141093008}
+  fx_sEject: {fileID: 0}
+  fx_sEject_Rdr: {fileID: 0}
   baseSight: {fileID: 0}
   partsObjects: []
   equipSlot: {fileID: 0}
@@ -169,7 +172,8 @@ MonoBehaviour:
       ID: 
       prefabName: 
       bulletName: 
-      meshType: 0
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
       level: 0
       caliber: 0
       pelletNum: 0
@@ -204,7 +208,6 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
-  meshType: 0
   magMax: 0
   loadedNum: 0
   hitInfos: []
@@ -272,6 +275,27 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 43009151696379492, guid: db233ffbd65309644aefee97b24764b3, type: 2}
+--- !u!95 &-8129390470974091898
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600387653368591511}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 25fe1c4ce5ea27b47a8abc6068494302, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!64 &627852727541228529
 MeshCollider:
   m_ObjectHideFlags: 0

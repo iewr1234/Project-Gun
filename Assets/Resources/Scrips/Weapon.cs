@@ -39,6 +39,7 @@ public class Weapon : MonoBehaviour
     [SerializeField] private CharacterController charCtr;
 
     [Header("---Access Component---")]
+    public Animator animator;
     public Transform firePoint;
     public ParticleSystem fx_gunShot;
     public ParticleSystem fx_sEject;
@@ -80,6 +81,7 @@ public class Weapon : MonoBehaviour
         charCtr.weapons.Add(this);
         if (charCtr.weapons.Count > 1) charCtr.weapons = charCtr.weapons.OrderBy(x => x.equipSlot.type).ToList();
 
+        animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
@@ -105,6 +107,7 @@ public class Weapon : MonoBehaviour
         weaponData.gripType = _weaponInfo.gripType;
         gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
 
+        animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
@@ -456,6 +459,11 @@ public class Weapon : MonoBehaviour
 
         fx_sEject.transform.localRotation = Quaternion.Euler(0f, 90f + Random.Range(-5f, 5f), 0f);
         fx_sEject.Emit(1);
+    }
+
+    public void Event_EjectionBulletShell()
+    {
+        EjectionBulletShell();
     }
 
     private class HitAccuracy

@@ -1797,6 +1797,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.optionSheetData);
                 dataMgr.UpdateDropTableData();
                 EditorUtility.SetDirty(dataMgr.dropTableData);
+                dataMgr.UpdateStartingItemData();
+                EditorUtility.SetDirty(dataMgr.startingItemData);
             }
 
             GUILayout.Label('\n' + "---Update Prefab---");

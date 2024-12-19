@@ -3229,6 +3229,8 @@ public class CharacterController : MonoBehaviour
         var shootNum = animator.GetInteger("shootNum");
         shootNum--;
         animator.SetInteger("shootNum", shootNum);
+
+        if (shootNum == 0) aimTf = null;
     }
 
     /// <summary>
@@ -3264,13 +3266,6 @@ public class CharacterController : MonoBehaviour
         {
             currentWeapon.WeaponSwitching(switchPos);
         }
-    }
-
-    public void Event_WeaponSwitching_Rifle(string switchPos)
-    {
-        if (!animator.GetBool("otherType")) return;
-
-        currentWeapon.WeaponSwitching(switchPos);
     }
 
     public void Event_InsertBullet()
@@ -3312,6 +3307,20 @@ public class CharacterController : MonoBehaviour
         //    currentWeapon.WeaponSwitching("Right");
         //    StartCoroutine(Coroutine_ReloadEnd());
         //}
+    }
+
+    public void Event_PumpAction()
+    {
+        if (currentWeapon == null) return;
+
+        currentWeapon.animator.SetTrigger("pump");
+    }
+
+    public void Event_BoltAction()
+    {
+        if (currentWeapon == null) return;
+
+        currentWeapon.animator.SetTrigger("bolt");
     }
 
     /// <summary>
