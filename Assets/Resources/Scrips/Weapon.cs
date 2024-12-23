@@ -34,6 +34,12 @@ public class Weapon : MonoBehaviour
         Main_SR = 9,
     }
 
+    private struct EjectBullet
+    {
+        public Mesh mesh;
+        public Material mat;
+    }
+
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [SerializeField] private CharacterController charCtr;
@@ -42,8 +48,8 @@ public class Weapon : MonoBehaviour
     public Animator animator;
     public Transform firePoint;
     public ParticleSystem fx_gunShot;
-    public ParticleSystem fx_sEject;
-    public ParticleSystemRenderer fx_sEject_Rdr;
+    public ParticleSystem[] fx_sEjects;
+    public ParticleSystemRenderer[] fx_sEject_Rdrs;
 
     [Space(5f)] public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
@@ -56,6 +62,7 @@ public class Weapon : MonoBehaviour
 
     [Space(5f)][Tooltip("ÅºÃ¢¿ë·®")] public int magMax;
     [Tooltip("ÀåÀüµÈ ÅºÈ¯ ¼ö")] public int loadedNum;
+    private List<EjectBullet> ejectBullets = new List<EjectBullet>();
 
     private HitAccuracy hitAccuracy;
     public List<HitInfo> hitInfos = new List<HitInfo>();
@@ -112,11 +119,11 @@ public class Weapon : MonoBehaviour
         AddWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
-        if (fx_sEject_Rdr != null)
-        {
-            fx_sEject_Rdr.mesh = _weaponInfo.bulletMesh;
-            fx_sEject_Rdr.material = _weaponInfo.bulletMat;
-        }
+        //if (fx_sEject_Rdrs != null)
+        //{
+        //    fx_sEject_Rdrs.mesh = _weaponInfo.bulletMesh;
+        //    fx_sEject_Rdrs.material = _weaponInfo.bulletMat;
+        //}
         magMax = _weaponInfo.magMax;
         loadedNum = magMax;
         hitAccuracy = new HitAccuracy(this, _weaponInfo);
@@ -232,7 +239,23 @@ public class Weapon : MonoBehaviour
                 charCtr.baseIndex = (int)AnimationLayers_A.Main_SR;
                 break;
             case WeaponType.Shotgun:
-                charCtr.baseIndex = (int)AnimationLayers_A.Main_Pump;
+                switch (weaponData.gripType)
+                {
+                    case WeaponGripType.Shotgun_PumpAction:
+                        charCtr.baseIndex = (int)AnimationLayers_A.Main_Pump;
+                        charCtr.animator.SetBool("isPump", true);
+                        break;
+                    case WeaponGripType.Shotgun_SemiAuto:
+                        charCtr.baseIndex = (int)AnimationLayers_A.Main_Pump;
+                        charCtr.animator.SetBool("isPump", false);
+                        break;
+                    case WeaponGripType.Shotgun_FullAuto:
+                        charCtr.baseIndex = (int)AnimationLayers_A.Main_AR;
+                        charCtr.animator.SetBool("isPump", false);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             default:
                 break;
@@ -300,6 +323,8 @@ public class Weapon : MonoBehaviour
                 transform.localRotation = Quaternion.Euler(holsterRot);
                 break;
             case "Right":
+                if (transform.parent == charCtr.rightHandPivot) return;
+
                 transform.SetParent(charCtr.rightHandPivot);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
@@ -313,6 +338,8 @@ public class Weapon : MonoBehaviour
                 charCtr.moveGripPivot = true;
                 break;
             case "Left":
+                if (transform.parent == charCtr.leftHandPivot) return;
+
                 charCtr.leftHandPivot.transform.position = charCtr.rightHandPivot.transform.position;
                 charCtr.leftHandPivot.transform.rotation = charCtr.rightHandPivot.transform.rotation;
                 transform.SetParent(charCtr.leftHandPivot, true);
@@ -320,6 +347,7 @@ public class Weapon : MonoBehaviour
                 //charCtr.SetChainWeight(true, 0f);
                 //charCtr.rigBdr.Build();
                 charCtr.moveGripPivot = false;
+                if (weaponData.weaponType == WeaponType.Revolver) animator.Play("OpenCylinder", 0, 0f);
                 break;
             default:
                 break;
@@ -387,6 +415,9 @@ public class Weapon : MonoBehaviour
             case WeaponType.AssaultRifle:
                 EjectionBulletShell();
                 break;
+            case WeaponType.Shotgun:
+                if (weaponData.magType == MagazineType.Magazine) EjectionBulletShell();
+                break;
             default:
                 break;
         }
@@ -401,6 +432,7 @@ public class Weapon : MonoBehaviour
             weaponData.chamberBullet = loadedBullet;
             weaponData.isChamber = true;
             weaponData.equipMag.loadedBullets.Remove(loadedBullet);
+            SetBulletShell_Revolver();
             charCtr.SetAbility();
         }
 
@@ -444,21 +476,50 @@ public class Weapon : MonoBehaviour
         return hitAccuracy.hitValue;
     }
 
-    private void SetBulletShell()
+    public void SetBulletShell()
     {
-        if (fx_sEject_Rdr == null) return;
+        if (weaponData.weaponType == WeaponType.Revolver) return;
         if (weaponData.chamberBullet == null) return;
 
-        fx_sEject_Rdr.mesh = weaponData.chamberBullet.bulletMesh;
-        fx_sEject_Rdr.material = weaponData.chamberBullet.bulletMat;
+        if (ejectBullets.Count > 0) ejectBullets.Clear();
+        EjectBullet ejectBullet = new EjectBullet
+        {
+            mesh = weaponData.chamberBullet.bulletMesh,
+            mat = weaponData.chamberBullet.bulletMat,
+        };
+        ejectBullets.Add(ejectBullet);
     }
 
-    private void EjectionBulletShell()
+    public void SetBulletShell_Revolver()
     {
-        if (fx_sEject == null) return;
+        if (weaponData.weaponType != WeaponType.Revolver) return;
+        if (ejectBullets.Count == weaponData.equipMag.magSize) return;
 
-        fx_sEject.transform.localRotation = Quaternion.Euler(0f, 90f + Random.Range(-5f, 5f), 0f);
-        fx_sEject.Emit(1);
+        EjectBullet ejectBullet = new EjectBullet
+        {
+            mesh = weaponData.chamberBullet.bulletMesh,
+            mat = weaponData.chamberBullet.bulletMat,
+        };
+        ejectBullets.Add(ejectBullet);
+    }
+
+    public void EjectionBulletShell()
+    {
+        if (fx_sEjects == null) return;
+        if (fx_sEject_Rdrs == null) return;
+
+        for (int i = 0; i < ejectBullets.Count; i++)
+        {
+            EjectBullet ejectBullet = ejectBullets[i];
+            ParticleSystem fx_sEject = fx_sEjects[i];
+            ParticleSystemRenderer fx_sEject_Rdr = fx_sEject_Rdrs[i];
+
+            if (weaponData.weaponType != WeaponType.Revolver) fx_sEject.transform.localRotation = Quaternion.Euler(0f, 90f + Random.Range(-5f, 5f), 0f);
+            fx_sEject_Rdr.mesh = ejectBullet.mesh;
+            fx_sEject_Rdr.material = ejectBullet.mat;
+            fx_sEject.Emit(1);
+        }
+        ejectBullets.Clear();
     }
 
     public void Event_EjectionBulletShell()

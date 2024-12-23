@@ -2868,6 +2868,7 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Reload:
+                currentWeapon.SetBulletShell();
                 var reloadCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -2892,6 +2893,7 @@ public class CharacterController : MonoBehaviour
         switch (type)
         {
             case CommandType.Reload:
+                currentWeapon.SetBulletShell();
                 var reloadCommand = new CharacterCommand
                 {
                     indexName = $"{type}",
@@ -3239,33 +3241,9 @@ public class CharacterController : MonoBehaviour
     /// <param name="switchPos"></param>
     public void Event_WeaponSwitching(string switchPos)
     {
-        if (currentWeapon == null)
-        {
-            Debug.Log(rightHandPivot.transform.position);
+        if (currentWeapon == null) return;
 
-            Weapon weapon = switchPos == "Right" ? leftHandPivot.GetComponentInChildren<Weapon>() : rightHandPivot.GetComponentInChildren<Weapon>();
-            if (weapon == null) return;
-
-            switch (switchPos)
-            {
-                case "Right":
-                    weapon.transform.SetParent(rightHandPivot, false);
-                    break;
-                case "Left":
-                    leftHandPivot.transform.position = rightHandPivot.transform.position;
-                    leftHandPivot.transform.rotation = rightHandPivot.transform.rotation;
-                    weapon.transform.SetParent(leftHandPivot, false);
-                    break;
-                default:
-                    break;
-            }
-            //animator.SetBool("reload", false);
-            //animator.SetBool("loadChamber", false);
-        }
-        else
-        {
-            currentWeapon.WeaponSwitching(switchPos);
-        }
+        currentWeapon.WeaponSwitching(switchPos);
     }
 
     public void Event_InsertBullet()
@@ -3309,6 +3287,13 @@ public class CharacterController : MonoBehaviour
         //}
     }
 
+    public void Event_EjectionBulletShell()
+    {
+        if (currentWeapon == null) return;
+
+        currentWeapon.EjectionBulletShell();
+    }
+
     public void Event_PumpAction()
     {
         if (currentWeapon == null) return;
@@ -3321,6 +3306,20 @@ public class CharacterController : MonoBehaviour
         if (currentWeapon == null) return;
 
         currentWeapon.animator.SetTrigger("bolt");
+    }
+
+    public void Event_CylinderOut()
+    {
+        if (currentWeapon == null) return;
+
+        currentWeapon.animator.SetTrigger("cylOut");
+    }
+
+    public void Event_CylinderIn()
+    {
+        if (currentWeapon == null) return;
+
+        currentWeapon.animator.SetTrigger("cylIn");
     }
 
     /// <summary>

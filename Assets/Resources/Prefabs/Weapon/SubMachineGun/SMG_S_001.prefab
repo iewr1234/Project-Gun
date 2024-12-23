@@ -642,10 +642,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
+  animator: {fileID: 0}
   firePoint: {fileID: 829466339398261820}
   fx_gunShot: {fileID: 1983248401856333195}
-  fx_sEject: {fileID: 4917548741848262181}
-  fx_sEject_Rdr: {fileID: 4917364636344269701}
+  fx_sEjects:
+  - {fileID: 4917548741848262181}
+  fx_sEject_Rdrs:
+  - {fileID: 4917364636344269701}
   baseSight: {fileID: 0}
   partsObjects:
   - {fileID: 8090539772591244929}

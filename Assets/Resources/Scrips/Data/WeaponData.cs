@@ -33,6 +33,7 @@ public enum WeaponGripType
     SniperRifle,
     Shotgun_PumpAction,
     Shotgun_SemiAuto,
+    Shotgun_FullAuto,
 }
 
 [System.Serializable]

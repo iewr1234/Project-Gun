@@ -893,8 +893,10 @@ MonoBehaviour:
   animator: {fileID: 0}
   firePoint: {fileID: 2717689563957138791}
   fx_gunShot: {fileID: 3868625710369967312}
-  fx_sEject: {fileID: 7802015070403547581}
-  fx_sEject_Rdr: {fileID: 7801653806087998493}
+  fx_sEjects:
+  - {fileID: 7802015070403547581}
+  fx_sEject_Rdrs:
+  - {fileID: 7801653806087998493}
   baseSight: {fileID: 0}
   partsObjects: []
   equipSlot: {fileID: 0}

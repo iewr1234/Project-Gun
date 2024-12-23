@@ -1413,146 +1413,6 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
-  - indexName: 'W07003: PumpAction Shotgun 3'
-    ID: W07003
-    prefabName: SG_PA_003
-    weaponName: PumpAction Shotgun 3
-    model: 7
-    caliber: 12
-    weight: 3
-    isMain: 1
-    weaponType: 7
-    magType: 2
-    gripType: 7
-    sModeInfos:
-    - indexName: 'PointShot: 60'
-      modeType: 0
-      value: 60
-    - indexName: 'AimShot: 70'
-      modeType: 1
-      value: 70
-    - indexName: 'SightShot: 80'
-      modeType: 2
-      value: 80
-    RPM: 50
-    range: 10
-    watchAngle: 30
-    actionCost: 4
-    MOA: 3
-    stability: 100
-    rebound: 150
-    propellant: 100
-    chamberBullet:
-      indexName: 
-      ID: 
-      prefabName: 
-      bulletName: 
-      bulletMesh: {fileID: 0}
-      bulletMat: {fileID: 0}
-      level: 0
-      caliber: 0
-      pelletNum: 0
-      spread: 0
-      weight: 0
-      MOA: 0
-      stability: 0
-      rebound: 0
-      propellant: 0
-      damage: 0
-      penetrate: 0
-      armorBreak: 0
-      critical: 0
-    isChamber: 0
-    equipMag:
-      indexName: InternalMagazine
-      ID: None
-      loadedBulletID: None
-      prefabName: None
-      magName: InternalMagazine
-      compatModel: 07000000
-      compatCaliber: 12
-      weight: 0
-      magSize: 7
-      loadedBullets: []
-    isMag: 1
-    equipPartsList: []
-    useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
-    equipMagID: None
-    equipPartsIDs: []
-  - indexName: 'W07004: PumpAction Shotgun 4'
-    ID: W07004
-    prefabName: SG_PA_004
-    weaponName: PumpAction Shotgun 4
-    model: 7
-    caliber: 12
-    weight: 3
-    isMain: 1
-    weaponType: 7
-    magType: 2
-    gripType: 7
-    sModeInfos:
-    - indexName: 'PointShot: 60'
-      modeType: 0
-      value: 60
-    - indexName: 'AimShot: 70'
-      modeType: 1
-      value: 70
-    - indexName: 'SightShot: 80'
-      modeType: 2
-      value: 80
-    RPM: 50
-    range: 10
-    watchAngle: 30
-    actionCost: 4
-    MOA: 3
-    stability: 100
-    rebound: 150
-    propellant: 100
-    chamberBullet:
-      indexName: 
-      ID: 
-      prefabName: 
-      bulletName: 
-      bulletMesh: {fileID: 0}
-      bulletMat: {fileID: 0}
-      level: 0
-      caliber: 0
-      pelletNum: 0
-      spread: 0
-      weight: 0
-      MOA: 0
-      stability: 0
-      rebound: 0
-      propellant: 0
-      damage: 0
-      penetrate: 0
-      armorBreak: 0
-      critical: 0
-    isChamber: 0
-    equipMag:
-      indexName: InternalMagazine
-      ID: None
-      loadedBulletID: None
-      prefabName: None
-      magName: InternalMagazine
-      compatModel: 07000000
-      compatCaliber: 12
-      weight: 0
-      magSize: 7
-      loadedBullets: []
-    isMag: 1
-    equipPartsList: []
-    useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
-    equipMagID: None
-    equipPartsIDs: []
   - indexName: 'W08001: SemiAuto Shotgun 1'
     ID: W08001
     prefabName: SG_SA_001
@@ -1562,8 +1422,148 @@ MonoBehaviour:
     weight: 3
     isMain: 1
     weaponType: 7
+    magType: 2
+    gripType: 8
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
+    RPM: 50
+    range: 10
+    watchAngle: 30
+    actionCost: 4
+    MOA: 3
+    stability: 100
+    rebound: 150
+    propellant: 100
+    chamberBullet:
+      indexName: 
+      ID: 
+      prefabName: 
+      bulletName: 
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
+      level: 0
+      caliber: 0
+      pelletNum: 0
+      spread: 0
+      weight: 0
+      MOA: 0
+      stability: 0
+      rebound: 0
+      propellant: 0
+      damage: 0
+      penetrate: 0
+      armorBreak: 0
+      critical: 0
+    isChamber: 0
+    equipMag:
+      indexName: InternalMagazine
+      ID: None
+      loadedBulletID: None
+      prefabName: None
+      magName: InternalMagazine
+      compatModel: 07000000
+      compatCaliber: 12
+      weight: 0
+      magSize: 7
+      loadedBullets: []
+    isMag: 1
+    equipPartsList: []
+    useMagazine: 
+    useMuzzle: 
+    useSight: 
+    useAttachment: 
+    useUnderBarrel: 
+    equipMagID: None
+    equipPartsIDs: []
+  - indexName: 'W08002: SemiAuto Shotgun 2'
+    ID: W08002
+    prefabName: SG_SA_002
+    weaponName: SemiAuto Shotgun 2
+    model: 7
+    caliber: 12
+    weight: 3
+    isMain: 1
+    weaponType: 7
+    magType: 2
+    gripType: 8
+    sModeInfos:
+    - indexName: 'PointShot: 60'
+      modeType: 0
+      value: 60
+    - indexName: 'AimShot: 70'
+      modeType: 1
+      value: 70
+    - indexName: 'SightShot: 80'
+      modeType: 2
+      value: 80
+    RPM: 50
+    range: 10
+    watchAngle: 30
+    actionCost: 4
+    MOA: 3
+    stability: 100
+    rebound: 150
+    propellant: 100
+    chamberBullet:
+      indexName: 
+      ID: 
+      prefabName: 
+      bulletName: 
+      bulletMesh: {fileID: 0}
+      bulletMat: {fileID: 0}
+      level: 0
+      caliber: 0
+      pelletNum: 0
+      spread: 0
+      weight: 0
+      MOA: 0
+      stability: 0
+      rebound: 0
+      propellant: 0
+      damage: 0
+      penetrate: 0
+      armorBreak: 0
+      critical: 0
+    isChamber: 0
+    equipMag:
+      indexName: InternalMagazine
+      ID: None
+      loadedBulletID: None
+      prefabName: None
+      magName: InternalMagazine
+      compatModel: 07000000
+      compatCaliber: 12
+      weight: 0
+      magSize: 7
+      loadedBullets: []
+    isMag: 1
+    equipPartsList: []
+    useMagazine: 
+    useMuzzle: 
+    useSight: 
+    useAttachment: 
+    useUnderBarrel: 
+    equipMagID: None
+    equipPartsIDs: []
+  - indexName: 'W09001: FullAuto Shotgun 1'
+    ID: W09001
+    prefabName: SG_FA_001
+    weaponName: FullAuto Shotgun 1
+    model: 7
+    caliber: 12
+    weight: 3
+    isMain: 1
+    weaponType: 7
     magType: 1
-    gripType: 5
+    gripType: 9
     sModeInfos:
     - indexName: 'PointShot: 60'
       modeType: 0
@@ -1623,17 +1623,17 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
-  - indexName: 'W08002: SemiAuto Shotgun 2'
-    ID: W08002
-    prefabName: SG_SA_002
-    weaponName: SemiAuto Shotgun 2
+  - indexName: 'W09002: FullAuto Shotgun 2'
+    ID: W09002
+    prefabName: SG_FA_002
+    weaponName: FullAuto Shotgun 2
     model: 7
     caliber: 12
     weight: 3
     isMain: 1
     weaponType: 7
     magType: 1
-    gripType: 5
+    gripType: 9
     sModeInfos:
     - indexName: 'PointShot: 60'
       modeType: 0
