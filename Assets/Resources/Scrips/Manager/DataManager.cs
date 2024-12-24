@@ -1660,395 +1660,395 @@ public class DataManager : MonoBehaviour
     }
 
     #region Custom Editor
-    [CustomEditor(typeof(DataManager))]
-    public class DataEditor : Editor
-    {
-        private DataManager dataMgr;
+    //[CustomEditor(typeof(DataManager))]
+    //public class DataEditor : Editor
+    //{
+    //    private DataManager dataMgr;
 
-        private void OnEnable()
-        {
-            dataMgr = (DataManager)target;
-        }
+    //    private void OnEnable()
+    //    {
+    //        dataMgr = (DataManager)target;
+    //    }
 
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-            GUILayout.Label('\n' + "---Read GoogleSheet Data---");
-            if (GUILayout.Button("Update the Player Database"))
-            {
-                dataMgr.UpdatePlayerData();
-                EditorUtility.SetDirty(dataMgr.playerData);
-            }
-            if (GUILayout.Button("Update the Enemy Database"))
-            {
-                dataMgr.UpdateEnemyData();
-                EditorUtility.SetDirty(dataMgr.enemyData);
-            }
-            if (GUILayout.Button("Update the EnemyGear Database"))
-            {
-                dataMgr.UpdateEnemyGearData();
-                EditorUtility.SetDirty(dataMgr.enemyGearData);
-            }
-            if (GUILayout.Button("Update the AI Database"))
-            {
-                dataMgr.UpdateAIData();
-                EditorUtility.SetDirty(dataMgr.aiData);
-            }
-            if (GUILayout.Button("Update the Stage Database"))
-            {
-                dataMgr.UpdateStageData();
-                EditorUtility.SetDirty(dataMgr.stageData);
-            }
-            if (GUILayout.Button("Update the Item Database"))
-            {
-                dataMgr.UpdateItemData();
-                EditorUtility.SetDirty(dataMgr.itemData);
-            }
-            if (GUILayout.Button("Update the Weapon Database"))
-            {
-                dataMgr.UpdateWeaponData();
-                EditorUtility.SetDirty(dataMgr.weaponData);
-            }
-            if (GUILayout.Button("Update the WeaponParts Database"))
-            {
-                dataMgr.UpdateWeaponPartsData();
-                EditorUtility.SetDirty(dataMgr.partsData);
-            }
-            if (GUILayout.Button("Update the Magazine Database"))
-            {
-                dataMgr.UpdateMagazineData();
-                EditorUtility.SetDirty(dataMgr.magData);
-            }
-            if (GUILayout.Button("Update the Bullet Database"))
-            {
-                dataMgr.UpdateBulletData();
-                EditorUtility.SetDirty(dataMgr.bulletData);
-            }
-            if (GUILayout.Button("Update the Grenade Database"))
-            {
-                dataMgr.UpdateGrenadeData();
-                EditorUtility.SetDirty(dataMgr.grenadeData);
-            }
-            if (GUILayout.Button("Update the Armor Database"))
-            {
-                dataMgr.UpdateArmorData();
-                EditorUtility.SetDirty(dataMgr.armorData);
-            }
-            if (GUILayout.Button("Update the Rig Database"))
-            {
-                dataMgr.UpdateRigData();
-                EditorUtility.SetDirty(dataMgr.rigData);
-            }
-            if (GUILayout.Button("Update the Backpack Database"))
-            {
-                dataMgr.UpdateBackpackData();
-                EditorUtility.SetDirty(dataMgr.backpackData);
-            }
-            if (GUILayout.Button("Update the ItemOption Database"))
-            {
-                dataMgr.UpdateItemOptionData();
-                EditorUtility.SetDirty(dataMgr.itemOptionData);
-            }
-            if (GUILayout.Button("Update the OptionSheet Database"))
-            {
-                dataMgr.UpdateOptionSheetData();
-                EditorUtility.SetDirty(dataMgr.optionSheetData);
-            }
-            if (GUILayout.Button("Update the DropTable Database"))
-            {
-                dataMgr.UpdateDropTableData();
-                EditorUtility.SetDirty(dataMgr.dropTableData);
-            }
-            if (GUILayout.Button("Update the StartingItem Database"))
-            {
-                dataMgr.UpdateStartingItemData();
-                EditorUtility.SetDirty(dataMgr.startingItemData);
-            }
-            GUILayout.Label(" ");
-            if (GUILayout.Button("Update All Database"))
-            {
-                dataMgr.UpdatePlayerData();
-                EditorUtility.SetDirty(dataMgr.playerData);
-                dataMgr.UpdateEnemyData();
-                EditorUtility.SetDirty(dataMgr.enemyData);
-                dataMgr.UpdateEnemyGearData();
-                EditorUtility.SetDirty(dataMgr.enemyGearData);
-                dataMgr.UpdateAIData();
-                EditorUtility.SetDirty(dataMgr.aiData);
-                dataMgr.UpdateStageData();
-                EditorUtility.SetDirty(dataMgr.stageData);
-                dataMgr.UpdateItemData();
-                EditorUtility.SetDirty(dataMgr.itemData);
-                dataMgr.UpdateWeaponData();
-                EditorUtility.SetDirty(dataMgr.weaponData);
-                dataMgr.UpdateWeaponPartsData();
-                EditorUtility.SetDirty(dataMgr.partsData);
-                dataMgr.UpdateMagazineData();
-                EditorUtility.SetDirty(dataMgr.magData);
-                dataMgr.UpdateBulletData();
-                EditorUtility.SetDirty(dataMgr.bulletData);
-                dataMgr.UpdateGrenadeData();
-                EditorUtility.SetDirty(dataMgr.grenadeData);
-                dataMgr.UpdateArmorData();
-                EditorUtility.SetDirty(dataMgr.armorData);
-                dataMgr.UpdateItemOptionData();
-                EditorUtility.SetDirty(dataMgr.itemOptionData);
-                dataMgr.UpdateOptionSheetData();
-                EditorUtility.SetDirty(dataMgr.optionSheetData);
-                dataMgr.UpdateDropTableData();
-                EditorUtility.SetDirty(dataMgr.dropTableData);
-                dataMgr.UpdateStartingItemData();
-                EditorUtility.SetDirty(dataMgr.startingItemData);
-            }
+    //    public override void OnInspectorGUI()
+    //    {
+    //        base.OnInspectorGUI();
+    //        GUILayout.Label('\n' + "---Read GoogleSheet Data---");
+    //        if (GUILayout.Button("Update the Player Database"))
+    //        {
+    //            dataMgr.UpdatePlayerData();
+    //            EditorUtility.SetDirty(dataMgr.playerData);
+    //        }
+    //        if (GUILayout.Button("Update the Enemy Database"))
+    //        {
+    //            dataMgr.UpdateEnemyData();
+    //            EditorUtility.SetDirty(dataMgr.enemyData);
+    //        }
+    //        if (GUILayout.Button("Update the EnemyGear Database"))
+    //        {
+    //            dataMgr.UpdateEnemyGearData();
+    //            EditorUtility.SetDirty(dataMgr.enemyGearData);
+    //        }
+    //        if (GUILayout.Button("Update the AI Database"))
+    //        {
+    //            dataMgr.UpdateAIData();
+    //            EditorUtility.SetDirty(dataMgr.aiData);
+    //        }
+    //        if (GUILayout.Button("Update the Stage Database"))
+    //        {
+    //            dataMgr.UpdateStageData();
+    //            EditorUtility.SetDirty(dataMgr.stageData);
+    //        }
+    //        if (GUILayout.Button("Update the Item Database"))
+    //        {
+    //            dataMgr.UpdateItemData();
+    //            EditorUtility.SetDirty(dataMgr.itemData);
+    //        }
+    //        if (GUILayout.Button("Update the Weapon Database"))
+    //        {
+    //            dataMgr.UpdateWeaponData();
+    //            EditorUtility.SetDirty(dataMgr.weaponData);
+    //        }
+    //        if (GUILayout.Button("Update the WeaponParts Database"))
+    //        {
+    //            dataMgr.UpdateWeaponPartsData();
+    //            EditorUtility.SetDirty(dataMgr.partsData);
+    //        }
+    //        if (GUILayout.Button("Update the Magazine Database"))
+    //        {
+    //            dataMgr.UpdateMagazineData();
+    //            EditorUtility.SetDirty(dataMgr.magData);
+    //        }
+    //        if (GUILayout.Button("Update the Bullet Database"))
+    //        {
+    //            dataMgr.UpdateBulletData();
+    //            EditorUtility.SetDirty(dataMgr.bulletData);
+    //        }
+    //        if (GUILayout.Button("Update the Grenade Database"))
+    //        {
+    //            dataMgr.UpdateGrenadeData();
+    //            EditorUtility.SetDirty(dataMgr.grenadeData);
+    //        }
+    //        if (GUILayout.Button("Update the Armor Database"))
+    //        {
+    //            dataMgr.UpdateArmorData();
+    //            EditorUtility.SetDirty(dataMgr.armorData);
+    //        }
+    //        if (GUILayout.Button("Update the Rig Database"))
+    //        {
+    //            dataMgr.UpdateRigData();
+    //            EditorUtility.SetDirty(dataMgr.rigData);
+    //        }
+    //        if (GUILayout.Button("Update the Backpack Database"))
+    //        {
+    //            dataMgr.UpdateBackpackData();
+    //            EditorUtility.SetDirty(dataMgr.backpackData);
+    //        }
+    //        if (GUILayout.Button("Update the ItemOption Database"))
+    //        {
+    //            dataMgr.UpdateItemOptionData();
+    //            EditorUtility.SetDirty(dataMgr.itemOptionData);
+    //        }
+    //        if (GUILayout.Button("Update the OptionSheet Database"))
+    //        {
+    //            dataMgr.UpdateOptionSheetData();
+    //            EditorUtility.SetDirty(dataMgr.optionSheetData);
+    //        }
+    //        if (GUILayout.Button("Update the DropTable Database"))
+    //        {
+    //            dataMgr.UpdateDropTableData();
+    //            EditorUtility.SetDirty(dataMgr.dropTableData);
+    //        }
+    //        if (GUILayout.Button("Update the StartingItem Database"))
+    //        {
+    //            dataMgr.UpdateStartingItemData();
+    //            EditorUtility.SetDirty(dataMgr.startingItemData);
+    //        }
+    //        GUILayout.Label(" ");
+    //        if (GUILayout.Button("Update All Database"))
+    //        {
+    //            dataMgr.UpdatePlayerData();
+    //            EditorUtility.SetDirty(dataMgr.playerData);
+    //            dataMgr.UpdateEnemyData();
+    //            EditorUtility.SetDirty(dataMgr.enemyData);
+    //            dataMgr.UpdateEnemyGearData();
+    //            EditorUtility.SetDirty(dataMgr.enemyGearData);
+    //            dataMgr.UpdateAIData();
+    //            EditorUtility.SetDirty(dataMgr.aiData);
+    //            dataMgr.UpdateStageData();
+    //            EditorUtility.SetDirty(dataMgr.stageData);
+    //            dataMgr.UpdateItemData();
+    //            EditorUtility.SetDirty(dataMgr.itemData);
+    //            dataMgr.UpdateWeaponData();
+    //            EditorUtility.SetDirty(dataMgr.weaponData);
+    //            dataMgr.UpdateWeaponPartsData();
+    //            EditorUtility.SetDirty(dataMgr.partsData);
+    //            dataMgr.UpdateMagazineData();
+    //            EditorUtility.SetDirty(dataMgr.magData);
+    //            dataMgr.UpdateBulletData();
+    //            EditorUtility.SetDirty(dataMgr.bulletData);
+    //            dataMgr.UpdateGrenadeData();
+    //            EditorUtility.SetDirty(dataMgr.grenadeData);
+    //            dataMgr.UpdateArmorData();
+    //            EditorUtility.SetDirty(dataMgr.armorData);
+    //            dataMgr.UpdateItemOptionData();
+    //            EditorUtility.SetDirty(dataMgr.itemOptionData);
+    //            dataMgr.UpdateOptionSheetData();
+    //            EditorUtility.SetDirty(dataMgr.optionSheetData);
+    //            dataMgr.UpdateDropTableData();
+    //            EditorUtility.SetDirty(dataMgr.dropTableData);
+    //            dataMgr.UpdateStartingItemData();
+    //            EditorUtility.SetDirty(dataMgr.startingItemData);
+    //        }
 
-            GUILayout.Label('\n' + "---Update Prefab---");
-            if (GUILayout.Button("Update ItemSample"))
-            {
-                UpdateItemSample();
-            }
-            if (GUILayout.Button("Update WeaponPool"))
-            {
-                UpdatePartsOfWeaponPrefab();
-            }
+    //        GUILayout.Label('\n' + "---Update Prefab---");
+    //        if (GUILayout.Button("Update ItemSample"))
+    //        {
+    //            UpdateItemSample();
+    //        }
+    //        if (GUILayout.Button("Update WeaponPool"))
+    //        {
+    //            UpdatePartsOfWeaponPrefab();
+    //        }
 
-            GUILayout.Label('\n' + "---Setting Prefab---");
-            if (GUILayout.Button("Setting CharacterPrefab"))
-            {
-                SettingCharacterPrefab();
-            }
-        }
+    //        GUILayout.Label('\n' + "---Setting Prefab---");
+    //        if (GUILayout.Button("Setting CharacterPrefab"))
+    //        {
+    //            SettingCharacterPrefab();
+    //        }
+    //    }
 
-        private void UpdateItemSample()
-        {
-            // 수정할 프리팹의 경로 (예: Assets/Prefabs/MyPrefab.prefab)
-            string prefabPath = "Assets/Resources/Prefabs/";
+    //    private void UpdateItemSample()
+    //    {
+    //        // 수정할 프리팹의 경로 (예: Assets/Prefabs/MyPrefab.prefab)
+    //        string prefabPath = "Assets/Resources/Prefabs/";
 
-            // 부모 프리팹 경로 설정
-            string parentPath = prefabPath + "Inventory/ItemSample.prefab";
+    //        // 부모 프리팹 경로 설정
+    //        string parentPath = prefabPath + "Inventory/ItemSample.prefab";
 
-            // 부모 프리팹 내용을 에디터 내에서 직접 로드하여 수정 가능하게 함
-            GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
-            if (parentPrefabContents == null)
-            {
-                Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
-                return;
-            }
+    //        // 부모 프리팹 내용을 에디터 내에서 직접 로드하여 수정 가능하게 함
+    //        GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
+    //        if (parentPrefabContents == null)
+    //        {
+    //            Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
+    //            return;
+    //        }
 
-            // 자식 프리팹 추가
-            ReadPrefabFolder("Rig");
-            ReadPrefabFolder("Backpack");
-            ReadPrefabFolder("Weapon/Handgun");
-            ReadPrefabFolder("Weapon/SubMachineGun");
-            ReadPrefabFolder("Weapon/AssaultRifle");
-            ReadPrefabFolder("Weapon/SniperRifle");
-            ReadPrefabFolder("Weapon/Shotgun");
-            ReadPrefabFolder("Weapon/Bullet_item");
-            ReadPrefabFolder("Weapon/Parts/Magazine");
-            ReadPrefabFolder("Weapon/Parts/Muzzle");
-            ReadPrefabFolder("Weapon/Parts/Sight");
-            ReadPrefabFolder("Weapon/Parts/Attachment/Handgun");
-            ReadPrefabFolder("Weapon/Parts/Attachment/Left");
-            ReadPrefabFolder("Weapon/Parts/Attachment/Right");
-            ReadPrefabFolder("Weapon/Parts/UnderBarrel");
-            ReadPrefabFolder("Weapon/Grenade");
+    //        // 자식 프리팹 추가
+    //        ReadPrefabFolder("Rig");
+    //        ReadPrefabFolder("Backpack");
+    //        ReadPrefabFolder("Weapon/Handgun");
+    //        ReadPrefabFolder("Weapon/SubMachineGun");
+    //        ReadPrefabFolder("Weapon/AssaultRifle");
+    //        ReadPrefabFolder("Weapon/SniperRifle");
+    //        ReadPrefabFolder("Weapon/Shotgun");
+    //        ReadPrefabFolder("Weapon/Bullet_item");
+    //        ReadPrefabFolder("Weapon/Parts/Magazine");
+    //        ReadPrefabFolder("Weapon/Parts/Muzzle");
+    //        ReadPrefabFolder("Weapon/Parts/Sight");
+    //        ReadPrefabFolder("Weapon/Parts/Attachment/Handgun");
+    //        ReadPrefabFolder("Weapon/Parts/Attachment/Left");
+    //        ReadPrefabFolder("Weapon/Parts/Attachment/Right");
+    //        ReadPrefabFolder("Weapon/Parts/UnderBarrel");
+    //        ReadPrefabFolder("Weapon/Grenade");
 
-            // 수정 사항을 프리팹에 저장하고 프리팹 로드를 닫기
-            PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
-            PrefabUtility.UnloadPrefabContents(parentPrefabContents);
+    //        // 수정 사항을 프리팹에 저장하고 프리팹 로드를 닫기
+    //        PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
+    //        PrefabUtility.UnloadPrefabContents(parentPrefabContents);
 
-            Debug.Log("프리팹 수정 완료: " + parentPath);
+    //        Debug.Log("프리팹 수정 완료: " + parentPath);
 
-            void ReadPrefabFolder(string folderPath)
-            {
-                // 지정된 폴더에서 모든 프리팹 파일 검색
-                string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
+    //        void ReadPrefabFolder(string folderPath)
+    //        {
+    //            // 지정된 폴더에서 모든 프리팹 파일 검색
+    //            string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
 
-                // 자식 프리팹들을 부모의 자식으로 추가
-                foreach (string prefabFile in prefabFiles)
-                {
-                    GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
-                    if (childPrefab != null)
-                    {
-                        // 자식 프리팹의 이름을 사용해 기존에 같은 이름을 가진 자식이 있는지 확인
-                        Transform existingChild = parentPrefabContents.transform.Find(childPrefab.name);
-                        if (existingChild != null)
-                        {
-                            // 같은 이름의 자식이 이미 존재하면 삭제
-                            DestroyImmediate(existingChild.gameObject);
-                        }
+    //            // 자식 프리팹들을 부모의 자식으로 추가
+    //            foreach (string prefabFile in prefabFiles)
+    //            {
+    //                GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+    //                if (childPrefab != null)
+    //                {
+    //                    // 자식 프리팹의 이름을 사용해 기존에 같은 이름을 가진 자식이 있는지 확인
+    //                    Transform existingChild = parentPrefabContents.transform.Find(childPrefab.name);
+    //                    if (existingChild != null)
+    //                    {
+    //                        // 같은 이름의 자식이 이미 존재하면 삭제
+    //                        DestroyImmediate(existingChild.gameObject);
+    //                    }
 
-                        // 새로운 자식 프리팹 인스턴스화 및 부모에 추가
-                        GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
-                        childInstance.transform.SetParent(parentPrefabContents.transform, false);
-                        childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
-                        Transform[] childTfs = childInstance.GetComponentsInChildren<Transform>();
-                        foreach (Transform childTf in childTfs)
-                        {
-                            childTf.gameObject.layer = LayerMask.NameToLayer("UI"); // 레이어 설정
-                        }
-                        childInstance.SetActive(false);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
-                    }
-                }
-            }
-        }
+    //                    // 새로운 자식 프리팹 인스턴스화 및 부모에 추가
+    //                    GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
+    //                    childInstance.transform.SetParent(parentPrefabContents.transform, false);
+    //                    childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
+    //                    Transform[] childTfs = childInstance.GetComponentsInChildren<Transform>();
+    //                    foreach (Transform childTf in childTfs)
+    //                    {
+    //                        childTf.gameObject.layer = LayerMask.NameToLayer("UI"); // 레이어 설정
+    //                    }
+    //                    childInstance.SetActive(false);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+    //                }
+    //            }
+    //        }
+    //    }
 
-        private void UpdatePartsOfWeaponPrefab()
-        {
-            string prefabPath = "Assets/Resources/Prefabs/Weapon/";
-            string parentPath = prefabPath + "WeaponPool.prefab";
-            GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
-            if (parentPrefabContents == null)
-            {
-                Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
-                return;
-            }
+    //    private void UpdatePartsOfWeaponPrefab()
+    //    {
+    //        string prefabPath = "Assets/Resources/Prefabs/Weapon/";
+    //        string parentPath = prefabPath + "WeaponPool.prefab";
+    //        GameObject parentPrefabContents = PrefabUtility.LoadPrefabContents(parentPath);
+    //        if (parentPrefabContents == null)
+    //        {
+    //            Debug.LogError("부모 프리팹을 찾을 수 없습니다: " + parentPath);
+    //            return;
+    //        }
 
-            //ReadPrefabFolder("Handgun", false);
-            //ReadPrefabFolder("SubMachineGun", true);
-            //ReadPrefabFolder("AssaultRifle", true);
-            //ReadPrefabFolder("SniperRifle", true);
-            //ReadPrefabFolder("Shotgun", true);
+    //        //ReadPrefabFolder("Handgun", false);
+    //        //ReadPrefabFolder("SubMachineGun", true);
+    //        //ReadPrefabFolder("AssaultRifle", true);
+    //        //ReadPrefabFolder("SniperRifle", true);
+    //        //ReadPrefabFolder("Shotgun", true);
 
-            //PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
-            //PrefabUtility.UnloadPrefabContents(parentPrefabContents);
+    //        //PrefabUtility.SaveAsPrefabAsset(parentPrefabContents, parentPath);
+    //        //PrefabUtility.UnloadPrefabContents(parentPrefabContents);
 
-            //Debug.Log("프리팹 수정 완료: " + parentPath);
+    //        //Debug.Log("프리팹 수정 완료: " + parentPath);
 
-            //void ReadPrefabFolder(string folderPath, bool isMain)
-            //{
-            //    string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
-            //    foreach (string prefabFile in prefabFiles)
-            //    {
-            //        if (isMain)
-            //        {
-            //            for (int i = 0; i < 2; i++)
-            //            {
-            //                GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
-            //                if (childPrefab != null)
-            //                {
-            //                    string prefabName = childPrefab.name + $"_{(char)('A' + i)}";
-            //                    AddPrefab(childPrefab, prefabName);
-            //                }
-            //                else
-            //                {
-            //                    Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
-            //                }
-            //            }
-            //        }
-            //        else
-            //        {
-            //            GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
-            //            if (childPrefab != null)
-            //            {
-            //                AddPrefab(childPrefab, childPrefab.name);
-            //            }
-            //            else
-            //            {
-            //                Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
-            //            }
-            //        }
-            //    }
+    //        //void ReadPrefabFolder(string folderPath, bool isMain)
+    //        //{
+    //        //    string[] prefabFiles = Directory.GetFiles(prefabPath + folderPath, "*.prefab");
+    //        //    foreach (string prefabFile in prefabFiles)
+    //        //    {
+    //        //        if (isMain)
+    //        //        {
+    //        //            for (int i = 0; i < 2; i++)
+    //        //            {
+    //        //                GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+    //        //                if (childPrefab != null)
+    //        //                {
+    //        //                    string prefabName = childPrefab.name + $"_{(char)('A' + i)}";
+    //        //                    AddPrefab(childPrefab, prefabName);
+    //        //                }
+    //        //                else
+    //        //                {
+    //        //                    Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+    //        //                }
+    //        //            }
+    //        //        }
+    //        //        else
+    //        //        {
+    //        //            GameObject childPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile);
+    //        //            if (childPrefab != null)
+    //        //            {
+    //        //                AddPrefab(childPrefab, childPrefab.name);
+    //        //            }
+    //        //            else
+    //        //            {
+    //        //                Debug.LogWarning("프리팹이 아닌 파일이 포함되어 있습니다: " + prefabFile);
+    //        //            }
+    //        //        }
+    //        //    }
 
-            //    void AddPrefab(GameObject childPrefab, string name)
-            //    {
-            //        Transform existingChild = parentPrefabContents.transform.Find(name);
-            //        if (existingChild != null) DestroyImmediate(existingChild.gameObject);
+    //        //    void AddPrefab(GameObject childPrefab, string name)
+    //        //    {
+    //        //        Transform existingChild = parentPrefabContents.transform.Find(name);
+    //        //        if (existingChild != null) DestroyImmediate(existingChild.gameObject);
 
-            //        GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
-            //        childInstance.name = name;
-            //        childInstance.transform.SetParent(parentPrefabContents.transform, false);
-            //        childInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            //        childInstance.transform.localScale = Vector3.one;
-            //    }
-            //}
-        }
+    //        //        GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
+    //        //        childInstance.name = name;
+    //        //        childInstance.transform.SetParent(parentPrefabContents.transform, false);
+    //        //        childInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+    //        //        childInstance.transform.localScale = Vector3.one;
+    //        //    }
+    //        //}
+    //    }
 
-        private void SettingCharacterPrefab()
-        {
-            // 프로젝트 내의 상대 경로
-            string prefabPath = "Assets/Resources/Prefabs/Character";
+    //    private void SettingCharacterPrefab()
+    //    {
+    //        // 프로젝트 내의 상대 경로
+    //        string prefabPath = "Assets/Resources/Prefabs/Character";
 
-            // 프리팹 파일들 찾기
-            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabPath });
+    //        // 프리팹 파일들 찾기
+    //        string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabPath });
 
-            foreach (string guid in prefabGuids)
-            {
-                // GUID를 에셋 경로로 변환
-                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+    //        foreach (string guid in prefabGuids)
+    //        {
+    //            // GUID를 에셋 경로로 변환
+    //            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                // 프리팹 콘텐츠 로드 (수정 가능한 인스턴스)
-                GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
-                if (prefabInstance == null)
-                {
-                    Debug.LogError($"프리팹을 로드할 수 없습니다: {assetPath}");
-                    continue;
-                }
+    //            // 프리팹 콘텐츠 로드 (수정 가능한 인스턴스)
+    //            GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
+    //            if (prefabInstance == null)
+    //            {
+    //                Debug.LogError($"프리팹을 로드할 수 없습니다: {assetPath}");
+    //                continue;
+    //            }
 
-                CharacterController charCtr = prefabInstance.GetComponent<CharacterController>();
-                if (charCtr == null)
-                {
-                    Debug.LogError($"프리팹에 CharacterController가 존재하지 않습니다: {assetPath}");
-                    PrefabUtility.UnloadPrefabContents(prefabInstance);
-                    continue;
-                }
+    //            CharacterController charCtr = prefabInstance.GetComponent<CharacterController>();
+    //            if (charCtr == null)
+    //            {
+    //                Debug.LogError($"프리팹에 CharacterController가 존재하지 않습니다: {assetPath}");
+    //                PrefabUtility.UnloadPrefabContents(prefabInstance);
+    //                continue;
+    //            }
 
-                // Character Prefab 수정
-                if (charCtr.rightHandPivot == null)
-                {
-                    // 오른손 무기위치 추가
-                    Transform rightHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
-                    if (rightHand == null)
-                    {
-                        Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
-                        PrefabUtility.UnloadPrefabContents(prefabInstance);
-                        continue;
-                    }
+    //            // Character Prefab 수정
+    //            if (charCtr.rightHandPivot == null)
+    //            {
+    //                // 오른손 무기위치 추가
+    //                Transform rightHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R");
+    //                if (rightHand == null)
+    //                {
+    //                    Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
+    //                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+    //                    continue;
+    //                }
 
-                    GameObject weaponPivot = new GameObject("WeaponPivot_R");
-                    weaponPivot.transform.SetParent(rightHand, false);
-                    charCtr.rightHandPivot = weaponPivot.transform;
-                }
+    //                GameObject weaponPivot = new GameObject("WeaponPivot_R");
+    //                weaponPivot.transform.SetParent(rightHand, false);
+    //                charCtr.rightHandPivot = weaponPivot.transform;
+    //            }
 
-                if (charCtr.leftHandPivot == null)
-                {
-                    // 왼손 무기위치 추가
-                    Transform leftHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
-                    if (leftHand == null)
-                    {
-                        Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
-                        PrefabUtility.UnloadPrefabContents(prefabInstance);
-                        continue;
-                    }
+    //            if (charCtr.leftHandPivot == null)
+    //            {
+    //                // 왼손 무기위치 추가
+    //                Transform leftHand = prefabInstance.transform.Find("Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L");
+    //                if (leftHand == null)
+    //                {
+    //                    Debug.LogError($"Right Hand 본을 찾을 수 없습니다: {assetPath}");
+    //                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+    //                    continue;
+    //                }
 
-                    GameObject weaponPivot = new GameObject("WeaponPivot_L");
-                    weaponPivot.transform.SetParent(leftHand, false);
-                    charCtr.leftHandPivot = weaponPivot.transform;
-                }
+    //                GameObject weaponPivot = new GameObject("WeaponPivot_L");
+    //                weaponPivot.transform.SetParent(leftHand, false);
+    //                charCtr.leftHandPivot = weaponPivot.transform;
+    //            }
 
-                if (charCtr.chainIK == null) charCtr.chainIK = charCtr.transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
-                if (charCtr.chainIK.data.target == null)
-                {
-                    // ChainIK 타겟 설정
-                    Transform gripPivot = charCtr.transform.Find("GripPivot");
-                    if (gripPivot == null)
-                    {
-                        gripPivot = new GameObject("GripPivot").transform;
-                        gripPivot.transform.SetParent(prefabInstance.transform, false);
-                    }
-                    charCtr.chainIK.data.target = gripPivot;
-                }
+    //            if (charCtr.chainIK == null) charCtr.chainIK = charCtr.transform.Find("Rig/Chain_IK").GetComponent<ChainIKConstraint>();
+    //            if (charCtr.chainIK.data.target == null)
+    //            {
+    //                // ChainIK 타겟 설정
+    //                Transform gripPivot = charCtr.transform.Find("GripPivot");
+    //                if (gripPivot == null)
+    //                {
+    //                    gripPivot = new GameObject("GripPivot").transform;
+    //                    gripPivot.transform.SetParent(prefabInstance.transform, false);
+    //                }
+    //                charCtr.chainIK.data.target = gripPivot;
+    //            }
 
-                // 수정된 프리팹 저장
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
-                PrefabUtility.UnloadPrefabContents(prefabInstance);
-            }
+    //            // 수정된 프리팹 저장
+    //            PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+    //            PrefabUtility.UnloadPrefabContents(prefabInstance);
+    //        }
 
-            Debug.Log("캐릭터 프리팹 수정완료");
-        }
-        #endregion
-    }
+    //        Debug.Log("캐릭터 프리팹 수정완료");
+    //    }
+    //}
+    #endregion
 }
