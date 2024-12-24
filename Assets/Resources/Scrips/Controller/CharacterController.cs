@@ -3294,32 +3294,12 @@ public class CharacterController : MonoBehaviour
         currentWeapon.EjectionBulletShell();
     }
 
-    public void Event_PumpAction()
+    public void Event_SetWeaponAnimator_Trigger(string triggerName)
     {
         if (currentWeapon == null) return;
 
-        currentWeapon.animator.SetTrigger("pump");
-    }
-
-    public void Event_BoltAction()
-    {
-        if (currentWeapon == null) return;
-
-        currentWeapon.animator.SetTrigger("bolt");
-    }
-
-    public void Event_CylinderOut()
-    {
-        if (currentWeapon == null) return;
-
-        currentWeapon.animator.SetTrigger("cylOut");
-    }
-
-    public void Event_CylinderIn()
-    {
-        if (currentWeapon == null) return;
-
-        currentWeapon.animator.SetTrigger("cylIn");
+        Time.timeScale = 0.1f;
+        currentWeapon.animator.SetTrigger(triggerName);
     }
 
     /// <summary>
