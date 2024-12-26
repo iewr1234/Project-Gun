@@ -1402,6 +1402,7 @@ public class GameManager : MonoBehaviour
 
         if (charCtr.animator.GetCurrentAnimatorStateInfo(charCtr.baseIndex).IsTag("Cover"))
         {
+            charCtr.currentCover = null;
             charCtr.AddCommand(CommandType.LeaveCover);
         }
         charCtr.AddCommand(CommandType.Move, movePass, targetNode);
@@ -1740,11 +1741,15 @@ public class GameManager : MonoBehaviour
                 for (int i = 0; i < playerList.Count; i++)
                 {
                     var player = playerList[i];
+                    if (player.state == CharacterState.Dead) continue;
+
                     Reset(player);
                 }
                 for (int i = 0; i < enemyList.Count; i++)
                 {
                     var enemy = enemyList[i];
+                    if (enemy.state == CharacterState.Dead) continue;
+
                     Reset(enemy);
                 }
                 break;
@@ -1973,10 +1978,11 @@ public class GameManager : MonoBehaviour
         {
             ResultNodePass(enemy, maxScoreNode);
             CharacterMove(enemy, maxScoreNode);
+            EnemyAI_Shoot(enemy, maxScoreNode);
         }
         else
         {
-            EnemyAI_Shoot(enemy);
+            EnemyAI_Shoot(enemy, enemy.currentNode);
         }
         enemy.targetList.Clear();
 
@@ -2021,9 +2027,9 @@ public class GameManager : MonoBehaviour
         enemy.state = CharacterState.Watch;
     }
 
-    public void EnemyAI_Shoot(CharacterController enemy)
+    public void EnemyAI_Shoot(CharacterController enemy, FieldNode node)
     {
-        enemy.FindTargets(enemy.currentNode, false);
+        enemy.FindTargets(node, false);
         if (enemy.aiData.actionType == UseActionType.Rest || enemy.targetList.Count == 0)
         {
             enemy.AddCommand(CommandType.TakeCover);
@@ -2042,7 +2048,6 @@ public class GameManager : MonoBehaviour
             {
                 enemy.SetTargeting(targetInfo, CharacterOwner.Enemy);
                 enemy.AddCommand(CommandType.Aim, targetInfo);
-
                 var schedule = new AttackSchedule
                 {
                     type = GetScheduleType(targetInfo),
@@ -2083,17 +2088,7 @@ public class GameManager : MonoBehaviour
 
                 enemy.animator.SetInteger("shootNum", shootNum);
                 enemy.SetAction(-totalCost);
-                //if (targetInfo.shooterCover != null)
-                //{
-                //    enemy.AddCommand(CommandType.Aim);
-                //    enemy.AddCommand(CommandType.Shoot);
-                //    enemy.AddCommand(CommandType.BackCover);
-                //}
-                //else
-                //{
-                //    enemy.AddCommand(CommandType.Aim);
-                //    enemy.AddCommand(CommandType.Shoot);
-                //}
+                enemy.state = CharacterState.Schedule;
             }
         }
     }
@@ -2173,7 +2168,7 @@ public class GameManager : MonoBehaviour
         {
             var schedule = scheduleList[0];
             var shooter = schedule.targetInfo.shooter;
-            if (scheduleList.Count > 1 && shooter.commandList.Find(x => x.type == CommandType.Reload) != null)
+            if (scheduleList.Count > 1 && !shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("Aim"))
             {
                 scheduleList.RemoveAt(0);
                 scheduleList.Add(schedule);
@@ -2184,10 +2179,7 @@ public class GameManager : MonoBehaviour
             if (targetState != schedule.type)
             {
                 var targetInfo = schedule.targetInfo;
-                if (targetState != CoverState.None && targetState != CoverState.NoCover)
-                {
-                    targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
-                }
+                targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
                 targetInfo.shooter.SetTargeting(targetInfo, CharacterOwner.Player);
                 scheduleState = ScheduleState.Wait;
                 targetState = schedule.type;
@@ -2225,6 +2217,8 @@ public class GameManager : MonoBehaviour
             if (timer > scheduleWaitTime)
             {
                 var curSchedule = scheduleList[0];
+                var enemy = curSchedule.targetInfo.shooter;
+                enemy.state = CharacterState.None;
                 if (scheduleList.Count > 1)
                 {
                     var nextSchedule = scheduleList[1];
@@ -2235,8 +2229,7 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        var shooter = curSchedule.targetInfo.shooter;
-                        if (shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("None"))
+                        if (enemy.animator.GetCurrentAnimatorStateInfo(enemy.upperIndex).IsTag("None"))
                         {
                             scheduleList.RemoveAt(0);
                             scheduleState = ScheduleState.Check;
@@ -2245,13 +2238,22 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    var shooter = curSchedule.targetInfo.shooter;
-                    if (shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("None"))
+                    List<CharacterController> enemys = enemyList.FindAll(x => x.TurnEnd == true && x.state != CharacterState.Dead);
+                    List<CharacterController> endEnemys = enemyList.FindAll(x => x.state == CharacterState.None);
+                    if (enemys.Count == endEnemys.Count)
                     {
-                        curSchedule.targetInfo.target.AddCommand(CommandType.Targeting, false, curSchedule.targetInfo.target.transform);
+                        if (enemy.animator.GetCurrentAnimatorStateInfo(enemy.upperIndex).IsTag("None"))
+                        {
+                            curSchedule.targetInfo.target.AddCommand(CommandType.Targeting, false, curSchedule.targetInfo.target.transform);
+                            scheduleList.RemoveAt(0);
+                            scheduleState = ScheduleState.None;
+                            TurnEnd();
+                        }
+                    }
+                    else
+                    {
                         scheduleList.RemoveAt(0);
-                        scheduleState = ScheduleState.None;
-                        TurnEnd();
+                        scheduleState = ScheduleState.Check;
                     }
                 }
             }

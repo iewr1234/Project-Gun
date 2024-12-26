@@ -45531,7 +45531,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 1.4
+    m_StopTime: 1.4333333
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -90159,6 +90159,13 @@ AnimationClip:
     functionName: Event_WeaponSwitching
     data: Right
     objectReferenceParameter: {fileID: 11500000, guid: 6ede2b73251332942852d17ca1c7d28c, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.4333333
+    functionName: Event_ReloadEnd
+    data: 
+    objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

@@ -260,17 +260,31 @@ public class DataManager : MonoBehaviour
 
     public MapData LoadMapData(string loadName)
     {
-        var folderPath = Application.dataPath + DataUtility.mapDataPath;
-        var filePath = Path.Combine(folderPath, $"{loadName}.json");
-        if (File.Exists(filePath))
+        //var folderPath = Application.dataPath + DataUtility.mapDataPath;
+        //var filePath = Path.Combine(folderPath, $"{loadName}.json");
+        //if (File.Exists(filePath))
+        //{
+        //    var jsonData = File.ReadAllText(filePath);
+        //    var mapData = JsonUtility.FromJson<MapData>(jsonData);
+        //    return mapData;
+        //}
+        //else
+        //{
+        //    Debug.Log($"Not Found: {folderPath}/{loadName}.json");
+        //    return null;
+        //}
+
+        // Resources에서 JSON 파일 로드 (확장자 제외)
+        TextAsset jsonFile = Resources.Load<TextAsset>($"MapData/{loadName}"); // "Maps" 폴더 내 JSON 파일
+        if (jsonFile != null)
         {
-            var jsonData = File.ReadAllText(filePath);
-            var mapData = JsonUtility.FromJson<MapData>(jsonData);
+            // JSON 데이터를 클래스 객체로 변환
+            var mapData = JsonUtility.FromJson<MapData>(jsonFile.text);
             return mapData;
         }
         else
         {
-            Debug.Log("Not Found");
+            Debug.LogError($"Not Found: Resources/MapData/{loadName}.json");
             return null;
         }
     }

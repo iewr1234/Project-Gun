@@ -16839,7 +16839,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1233439287}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41745278
+  m_Size: 0.41745284
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -18318,6 +18318,84 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2519941953888621998, guid: 411fd0a184205544dbbe5d6c6f083581, type: 3}
   m_PrefabInstance: {fileID: 746701423}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &773341667
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 618316022750808840, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_Weight
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2077099684862639412, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_Name
+      value: Soldier_A
+      objectReference: {fileID: 0}
+    - target: {fileID: 2077099684862639412, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_RootOrder
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079099129505339146, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2126838736485109542, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'Clavicle_L'\n\tTransform 'Neck'\n\tTransform
+        'Elbow_L'\n\tTransform 'Head'\n\tTransform 'Hand_L'\n\tTransform 'Shoulder_L'\n\tTransform
+        'Spine_01'\n\tTransform 'Hips'\n\tTransform 'Clavicle_L'\n\tTransform 'Neck'\n\tand
+        more ..."
+      objectReference: {fileID: 0}
+    - target: {fileID: 7568661836660508264, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 61d06d72cfac8b5489b442eaa65d60ac, type: 3}
 --- !u!1001 &776253200
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27776,7 +27854,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1078359337}
   m_HandleRect: {fileID: 1078359336}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

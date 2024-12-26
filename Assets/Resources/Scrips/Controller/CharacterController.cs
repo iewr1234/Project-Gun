@@ -18,6 +18,7 @@ public enum CharacterState
 {
     None,
     Watch,
+    Schedule,
     Dead,
     Base,
 }
@@ -222,7 +223,6 @@ public class CharacterController : MonoBehaviour
 
     [Space(5f)]
     public AIDataInfo aiData;
-    //private List<FieldNode> visibleNodes = new List<FieldNode>();
 
     [Space(5f)]
     public List<TargetInfo> targetList = new List<TargetInfo>();
@@ -822,7 +822,7 @@ public class CharacterController : MonoBehaviour
                                 }
                                 break;
                             case CharacterOwner.Enemy:
-                                gameMgr.EnemyAI_Shoot(this);
+                                //gameMgr.EnemyAI_Shoot(this);
                                 //if (state == CharacterState.Watch)
                                 //{
                                 //    gameMgr.EnemyAI_Watch(this, currentNode);
@@ -3298,7 +3298,6 @@ public class CharacterController : MonoBehaviour
     {
         if (currentWeapon == null) return;
 
-        Time.timeScale = 0.1f;
         currentWeapon.animator.SetTrigger(triggerName);
     }
 
