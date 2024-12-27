@@ -266,6 +266,7 @@ public class Weapon : MonoBehaviour
         charCtr.animator.SetBool("isMain", weaponData.isMain);
         charCtr.animator.SetInteger("weaponType", (int)weaponData.weaponType);
         charCtr.animator.SetInteger("magType", (int)weaponData.magType);
+        charCtr.animator.SetInteger("gripType", (int)weaponData.gripType);
         charCtr.SetRig(this);
         charCtr.SetWeaponPivot(gripInfo);
         charCtr.SetAbility();

@@ -359,14 +359,14 @@ public static class DataUtility
                     pivotRot = weaponPivot_defaultRot,
                 };
                 break;
-            case WeaponGripType.SniperRifle_SemiAuto:
+            case WeaponGripType.SniperRifle_BoltAction:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SR,
                     pivotRot = weaponPivot_defaultRot,
                 };
                 break;
-            case WeaponGripType.SniperRifle_BoltAction:
+            case WeaponGripType.SniperRifle_SemiAuto:
                 gripInfo = new WeaponGripInfo()
                 {
                     pivotPos = weaponPivot_pos_SR,

@@ -173,18 +173,68 @@ MonoBehaviour:
     weight: 0.2
     magSize: 30
     loadedBullets: []
-  - indexName: 'M04001: SniperRifle 1 Magazine'
+  - indexName: 'M04001: BoltAction SniperRifle 1 Magazine'
     ID: M04001
     loadedBulletID: 
-    prefabName: MAG_SR_001
-    magName: SniperRifle 1 Magazine
+    prefabName: MAG_SR_BA_001
+    magName: BoltAction SniperRifle 1 Magazine
     compatModel: 06000000
     compatCaliber: 7.92
     weight: 0.2
     magSize: 12
     loadedBullets: []
-  - indexName: 'M05001: SemiAuto Shotgun 1 Magazine'
+  - indexName: 'M04002: BoltAction SniperRifle 2 Magazine'
+    ID: M04002
+    loadedBulletID: 
+    prefabName: MAG_SR_BA_002
+    magName: BoltAction SniperRifle 2 Magazine
+    compatModel: 06000000
+    compatCaliber: 7.92
+    weight: 0.2
+    magSize: 12
+    loadedBullets: []
+  - indexName: 'M04003: BoltAction SniperRifle 3 Magazine'
+    ID: M04003
+    loadedBulletID: 
+    prefabName: MAG_SR_BA_003
+    magName: BoltAction SniperRifle 3 Magazine
+    compatModel: 06000000
+    compatCaliber: 7.92
+    weight: 0.2
+    magSize: 12
+    loadedBullets: []
+  - indexName: 'M04004: BoltAction SniperRifle 4 Magazine'
+    ID: M04004
+    loadedBulletID: 
+    prefabName: MAG_SR_BA_004
+    magName: BoltAction SniperRifle 4 Magazine
+    compatModel: 06000000
+    compatCaliber: 7.92
+    weight: 0.2
+    magSize: 12
+    loadedBullets: []
+  - indexName: 'M04005: BoltAction SniperRifle 5 Magazine'
+    ID: M04005
+    loadedBulletID: 
+    prefabName: MAG_SR_BA_005
+    magName: BoltAction SniperRifle 5 Magazine
+    compatModel: 06000000
+    compatCaliber: 7.92
+    weight: 0.2
+    magSize: 12
+    loadedBullets: []
+  - indexName: 'M05001: SemiAuto SniperRifle 1 Magazine'
     ID: M05001
+    loadedBulletID: 
+    prefabName: MAG_SR_SA_001
+    magName: SemiAuto SniperRifle 1 Magazine
+    compatModel: 06000000
+    compatCaliber: 7.92
+    weight: 0.2
+    magSize: 12
+    loadedBullets: []
+  - indexName: 'M06001: SemiAuto Shotgun 1 Magazine'
+    ID: M06001
     loadedBulletID: 
     prefabName: MAG_SG_SA_001
     magName: SemiAuto Shotgun 1 Magazine
@@ -193,8 +243,8 @@ MonoBehaviour:
     weight: 0.2
     magSize: 25
     loadedBullets: []
-  - indexName: 'M05002: SemiAuto Shotgun 2 Magazine'
-    ID: M05002
+  - indexName: 'M06002: SemiAuto Shotgun 2 Magazine'
+    ID: M06002
     loadedBulletID: 
     prefabName: MAG_SG_SA_002
     magName: SemiAuto Shotgun 2 Magazine

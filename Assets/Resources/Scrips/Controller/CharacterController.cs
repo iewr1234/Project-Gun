@@ -3290,6 +3290,7 @@ public class CharacterController : MonoBehaviour
     public void Event_EjectionBulletShell()
     {
         if (currentWeapon == null) return;
+        if (currentWeapon.weaponData.gripType == WeaponGripType.SniperRifle_BoltAction) return;
 
         currentWeapon.EjectionBulletShell();
     }
@@ -3297,6 +3298,7 @@ public class CharacterController : MonoBehaviour
     public void Event_SetWeaponAnimator_Trigger(string triggerName)
     {
         if (currentWeapon == null) return;
+        if (triggerName == "bolt" && currentWeapon.weaponData.gripType == WeaponGripType.SniperRifle_SemiAuto) return;
 
         currentWeapon.animator.SetTrigger(triggerName);
     }
