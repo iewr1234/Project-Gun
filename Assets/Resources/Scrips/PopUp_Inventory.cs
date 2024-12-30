@@ -582,10 +582,19 @@ public class PopUp_Inventory : MonoBehaviour
                     void Sample_WeaponPartsType(WeaponPartsType partsType)
                     {
                         var partsData = item.weaponData.equipPartsList.Find(x => x.type == partsType);
-                        if (partsType == WeaponPartsType.Sight)
+                        Weapon weapon;
+                        switch (partsType)
                         {
-                            var weapon = itemInfo.activeSample.GetComponent<Weapon>();
-                            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(partsData == null);
+                            case WeaponPartsType.Muzzle:
+                                weapon = itemInfo.activeSample.GetComponent<Weapon>();
+                                if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(partsData == null);
+                                break;
+                            case WeaponPartsType.Sight:
+                                weapon = itemInfo.activeSample.GetComponent<Weapon>();
+                                if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(partsData == null);
+                                break;
+                            default:
+                                break;
                         }
 
                         if (partsData != null)

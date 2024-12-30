@@ -783,8 +783,8 @@ public class DataManager : MonoBehaviour
     private enum WeaponVariable
     {
         ID,
-        PrefabName,
         WeaponName,
+        PrefabName,
         Model,
         Caliber,
         Weight,
@@ -835,8 +835,8 @@ public class DataManager : MonoBehaviour
                 {
                     indexName = $"{data[(int)WeaponVariable.ID]}: {data[(int)WeaponVariable.WeaponName]}",
                     ID = data[(int)WeaponVariable.ID],
-                    prefabName = data[(int)WeaponVariable.PrefabName],
                     weaponName = data[(int)WeaponVariable.WeaponName],
+                    prefabName = data[(int)WeaponVariable.PrefabName],
                     model = int.Parse(data[(int)WeaponVariable.Model]),
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
                     weight = float.Parse(data[(int)WeaponVariable.Weight]),

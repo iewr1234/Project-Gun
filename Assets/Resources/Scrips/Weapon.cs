@@ -51,7 +51,8 @@ public class Weapon : MonoBehaviour
     public ParticleSystem[] fx_sEjects;
     public ParticleSystemRenderer[] fx_sEject_Rdrs;
 
-    [Space(5f)] public GameObject baseSight;
+    [Space(5f)] public GameObject baseMuzzle;
+    public GameObject baseSight;
     public List<GameObject> partsObjects = new List<GameObject>();
 
     [Header("--- Assignment Variable---")]
@@ -90,7 +91,7 @@ public class Weapon : MonoBehaviour
 
         animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
-        AddWeaponPartsObjects();
+        partsObjects = GetWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
         if (weaponData.isMag) SetParts(weaponData.equipMag.prefabName, true);
@@ -116,7 +117,7 @@ public class Weapon : MonoBehaviour
 
         animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
-        AddWeaponPartsObjects();
+        partsObjects = GetWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
         //if (fx_sEject_Rdrs != null)
@@ -130,10 +131,8 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    private void AddWeaponPartsObjects()
+    public List<GameObject> GetWeaponPartsObjects()
     {
-        if (partsObjects.Count > 0) return;
-
         var parts = new List<GameObject>();
         var partsTf = transform.Find("PartsTransform");
 
@@ -156,7 +155,7 @@ public class Weapon : MonoBehaviour
         var underBarrelTf = partsTf.Find("UnderBarrel");
         AddParts(underBarrelTf);
 
-        partsObjects = parts;
+        return parts;
 
         void AddParts(Transform partsTf)
         {
@@ -165,7 +164,7 @@ public class Weapon : MonoBehaviour
             for (int i = 0; i < partsTf.childCount; i++)
             {
                 var sample = partsTf.GetChild(i).gameObject;
-                sample.SetActive(false);
+                //sample.SetActive(false);
                 parts.Add(sample);
             }
         }
@@ -286,6 +285,7 @@ public class Weapon : MonoBehaviour
             var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.prefabName);
             if (magParts != null) magParts.SetActive(true);
         }
+        if (baseMuzzle != null) baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
         if (baseSight != null) baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {

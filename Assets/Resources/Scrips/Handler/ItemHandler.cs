@@ -83,9 +83,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                for (int j = 0; j < weapon.partsObjects.Count; j++)
+                List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                for (int j = 0; j < partsObjects.Count; j++)
                 {
-                    GameObject parts = weapon.partsObjects[j];
+                    GameObject parts = partsObjects[j];
                     partsSamples.Add(parts);
                 }
             }
@@ -131,9 +132,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                for (int j = 0; j < weapon.partsObjects.Count; j++)
+                List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                for (int j = 0; j < partsObjects.Count; j++)
                 {
-                    GameObject parts = weapon.partsObjects[j];
+                    GameObject parts = partsObjects[j];
                     partsSamples.Add(parts);
                 }
             }
@@ -454,13 +456,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (weaponData.isMag)
         {
-            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.prefabName);
-            if (smaple != null) smaple.SetActive(true);
+            var samples = partsSamples.FindAll(x => x.name == weaponData.equipMag.prefabName);
+            for (int i = 0; i < samples.Count; i++)
+            {
+                GameObject sample = samples[i];
+                sample.SetActive(true);
+            }
         }
 
         if (activeSample != null)
         {
             var weapon = activeSample.GetComponent<Weapon>();
+            if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
             if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
@@ -488,16 +495,18 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (weaponData.isMag)
         {
-            var smaple = partsSamples.Find(x => x.name == weaponData.equipMag.prefabName);
-            if (smaple)
+            var samples = partsSamples.FindAll(x => x.name == weaponData.equipMag.prefabName);
+            for (int i = 0; i < samples.Count; i++)
             {
-                smaple.SetActive(true);
+                GameObject sample = samples[i];
+                sample.SetActive(true);
             }
         }
 
         if (activeSample != null)
         {
             var weapon = activeSample.GetComponent<Weapon>();
+            if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
             if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)

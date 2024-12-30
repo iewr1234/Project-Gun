@@ -44,8 +44,8 @@ public class WeaponDataInfo
     [Space(5f)]
 
     public string ID;
-    public string prefabName;
     public string weaponName;
+    public string prefabName;
     [Space(5f)]
 
     [Tooltip("¸ðµ¨")] public int model;
@@ -94,8 +94,8 @@ public class WeaponDataInfo
             indexName = indexName,
 
             ID = ID,
-            prefabName = prefabName,
             weaponName = weaponName,
+            prefabName = prefabName,
 
             model = model,
             caliber = caliber,
