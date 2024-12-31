@@ -1895,6 +1895,14 @@ public class DataManager : MonoBehaviour
                         GameObject childInstance = (GameObject)PrefabUtility.InstantiatePrefab(childPrefab);
                         childInstance.transform.SetParent(parentPrefabContents.transform, false);
                         childInstance.name = childPrefab.name; // 자식 오브젝트 이름 설정
+
+                        ItemPivot pivot = childInstance.GetComponent<ItemPivot>();
+                        if (pivot != null)
+                        {
+                            childInstance.transform.SetLocalPositionAndRotation(pivot.itemPivot.pos, Quaternion.Euler(pivot.itemPivot.rot));
+                            childInstance.transform.localScale = pivot.itemPivot.scale;
+                        }
+
                         Transform[] childTfs = childInstance.GetComponentsInChildren<Transform>();
                         foreach (Transform childTf in childTfs)
                         {

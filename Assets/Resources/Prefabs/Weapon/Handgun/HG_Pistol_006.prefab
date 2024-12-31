@@ -127,6 +127,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1697080502323343288}
+  - component: {fileID: 5128445652785596564}
   - component: {fileID: -5945492217051300065}
   - component: {fileID: 1721533729907552870}
   - component: {fileID: 1715728918403588022}
@@ -147,8 +148,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1700573768158826580}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.0064, z: -0.0461}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1696998562615896894}
@@ -159,6 +160,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5128445652785596564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700573768158826580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f82c9be8c24199944bc874b8deb62cbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemPivot:
+    pos: {x: 0, y: 0.0064, z: -0.0461}
+    rot: {x: 0, y: 0, z: 0}
+    scale: {x: 0.5, y: 0.5, z: 0.5}
+  prefabPivot:
+    pos: {x: 0, y: 0, z: 0}
+    rot: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
 --- !u!114 &-5945492217051300065
 MonoBehaviour:
   m_ObjectHideFlags: 0

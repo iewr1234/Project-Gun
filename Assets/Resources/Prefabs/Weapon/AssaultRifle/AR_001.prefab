@@ -1233,6 +1233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8419281916813318366}
+  - component: {fileID: 5758114373916389496}
   - component: {fileID: 2636755632528450246}
   - component: {fileID: 4535633015736851005}
   m_Layer: 0
@@ -1250,8 +1251,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9195397056497664612}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: -0.094}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1848468151491362327}
@@ -1270,6 +1271,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5758114373916389496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9195397056497664612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f82c9be8c24199944bc874b8deb62cbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemPivot:
+    pos: {x: 0, y: 0, z: -0.094}
+    rot: {x: 0, y: 0, z: 0}
+    scale: {x: 0.5, y: 0.5, z: 0.5}
+  prefabPivot:
+    pos: {x: 0, y: 0, z: 0}
+    rot: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &2636755632528450246
 Animator:
   serializedVersion: 5

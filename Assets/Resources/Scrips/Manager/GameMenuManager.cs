@@ -1073,7 +1073,9 @@ public class GameMenuManager : MonoBehaviour
                 return Check_BulletType();
             case ItemType.Magazine:
                 return (onItem.itemData.type == ItemType.MainWeapon || onItem.itemData.type == ItemType.SubWeapon)
-                    && !onItem.weaponData.isMag && putItem.magData.compatModel.Contains(onItem.weaponData.model);
+                    && !onItem.weaponData.isMag
+                    && putItem.magData.compatModel.Contains(onItem.weaponData.model)
+                    && putItem.magData.compatCaliber == onItem.weaponData.caliber;
             case ItemType.Muzzle:
                 return Check_PartsType();
             case ItemType.Sight:

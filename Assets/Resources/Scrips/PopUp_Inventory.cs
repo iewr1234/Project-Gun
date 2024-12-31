@@ -115,9 +115,10 @@ public class PopUp_Inventory : MonoBehaviour
                 var weapon = sample.GetComponent<Weapon>();
                 if (weapon != null)
                 {
-                    for (int j = 0; j < weapon.partsObjects.Count; j++)
+                    List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                    for (int j = 0; j < partsObjects.Count; j++)
                     {
-                        GameObject parts = weapon.partsObjects[j];
+                        GameObject parts = partsObjects[j];
                         partsSamples.Add(parts);
                     }
                 }

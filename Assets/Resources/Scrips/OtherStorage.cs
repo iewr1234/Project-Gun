@@ -335,7 +335,11 @@ public class OtherStorage : MonoBehaviour
     {
         if (index == tabIndex) return;
 
-        ClearStorage();
+        for (int i = gameMenuMgr.activePopUp.Count - 1; i >= 0; i--)
+        {
+            PopUp_Inventory popUp = gameMenuMgr.activePopUp[i];
+            popUp.ClosePopUp();
+        }
         GetStorageInfo(index);
     }
 }

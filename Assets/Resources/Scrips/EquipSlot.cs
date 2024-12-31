@@ -152,7 +152,8 @@ public class EquipSlot : MonoBehaviour
                     if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
 
                     return item.weaponData.magType == global::MagazineType.Magazine && !item.weaponData.isMag
-                        && putItem.magData.compatModel.Contains(item.weaponData.model);
+                        && putItem.magData.compatModel.Contains(item.weaponData.model)
+                        && putItem.magData.compatCaliber == item.weaponData.caliber;
                 case ItemType.Muzzle:
                     return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
                         && item.weaponData.useMuzzle.Count > 0 && item.weaponData.useMuzzle.Contains(putItem.partsData.size)
@@ -196,7 +197,9 @@ public class EquipSlot : MonoBehaviour
                             return false;
                     }
                 case ItemType.Magazine:
-                    return item == null && putItem.magData != null && popUp != null && putItem.magData.compatModel.Contains(model);
+                    return item == null && putItem.magData != null && popUp != null
+                        && putItem.magData.compatModel.Contains(model)
+                        && putItem.magData.compatCaliber == caliber;
                 default:
                     return false;
             }

@@ -15,8 +15,8 @@ MonoBehaviour:
   weaponInfos:
   - indexName: 'W00001: Pistol 1'
     ID: W00001
-    prefabName: HG_Pistol_001
     weaponName: Pistol 1
+    prefabName: HG_Pistol_001
     model: 1
     caliber: 9
     weight: 3
@@ -85,8 +85,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W00002: Pistol 2'
     ID: W00002
-    prefabName: HG_Pistol_002
     weaponName: Pistol 2
+    prefabName: HG_Pistol_002
     model: 1
     caliber: 9
     weight: 3
@@ -155,8 +155,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W00003: Pistol 3'
     ID: W00003
-    prefabName: HG_Pistol_003
     weaponName: Pistol 3
+    prefabName: HG_Pistol_003
     model: 1
     caliber: 9
     weight: 3
@@ -225,8 +225,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W00004: Pistol 4'
     ID: W00004
-    prefabName: HG_Pistol_004
     weaponName: Pistol 4
+    prefabName: HG_Pistol_004
     model: 1
     caliber: 9
     weight: 3
@@ -295,8 +295,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W00005: Pistol 5'
     ID: W00005
-    prefabName: HG_Pistol_005
     weaponName: Pistol 5
+    prefabName: HG_Pistol_005
     model: 1
     caliber: 9
     weight: 3
@@ -365,8 +365,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W00006: Pistol 6'
     ID: W00006
-    prefabName: HG_Pistol_006
     weaponName: Pistol 6
+    prefabName: HG_Pistol_006
     model: 1
     caliber: 9
     weight: 3
@@ -435,9 +435,9 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W01001: Revolver 1'
     ID: W01001
-    prefabName: HG_Revolver_001
     weaponName: Revolver 1
-    model: 2
+    prefabName: HG_Revolver_001
+    model: 1
     caliber: 9
     weight: 3
     isMain: 0
@@ -489,7 +489,7 @@ MonoBehaviour:
       loadedBulletID: None
       prefabName: None
       magName: InternalMagazine
-      compatModel: 02000000
+      compatModel: 01000000
       compatCaliber: 9
       weight: 0
       magSize: 6
@@ -505,8 +505,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W02001: SubMachineGun NS1'
     ID: W02001
-    prefabName: SMG_NS_001
     weaponName: SubMachineGun NS1
+    prefabName: SMG_NS_001
     model: 3
     caliber: 10
     weight: 3
@@ -567,16 +567,16 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W03001: SubMachineGun S1'
     ID: W03001
-    prefabName: SMG_S_001
     weaponName: SubMachineGun S1
+    prefabName: SMG_S_001
     model: 3
     caliber: 10
     weight: 3
@@ -637,16 +637,16 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W03002: SubMachineGun S2'
     ID: W03002
-    prefabName: SMG_S_002
     weaponName: SubMachineGun S2
+    prefabName: SMG_S_002
     model: 3
     caliber: 10
     weight: 3
@@ -707,16 +707,16 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W03003: SubMachineGun S3'
     ID: W03003
-    prefabName: SMG_S_003
     weaponName: SubMachineGun S3
+    prefabName: SMG_S_003
     model: 3
     caliber: 10
     weight: 3
@@ -777,16 +777,16 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W03004: SubMachineGun S4'
     ID: W03004
-    prefabName: SMG_S_004
     weaponName: SubMachineGun S4
+    prefabName: SMG_S_004
     model: 3
     caliber: 10
     weight: 3
@@ -847,16 +847,16 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W04001: AssaultRifle 1'
     ID: W04001
-    prefabName: AR_001
     weaponName: AssaultRifle 1
+    prefabName: AR_001
     model: 3
     caliber: 5.56
     weight: 3
@@ -925,8 +925,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W04002: AssaultRifle 2'
     ID: W04002
-    prefabName: AR_002
     weaponName: AssaultRifle 2
+    prefabName: AR_002
     model: 3
     caliber: 5.56
     weight: 3
@@ -995,8 +995,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W04003: AssaultRifle 3'
     ID: W04003
-    prefabName: AR_003
     weaponName: AssaultRifle 3
+    prefabName: AR_003
     model: 3
     caliber: 5.56
     weight: 3
@@ -1065,8 +1065,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W04004: AssaultRifle 4'
     ID: W04004
-    prefabName: AR_004
     weaponName: AssaultRifle 4
+    prefabName: AR_004
     model: 3
     caliber: 5.56
     weight: 3
@@ -1135,8 +1135,8 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W04005: AssaultRifle 5'
     ID: W04005
-    prefabName: AR_005
     weaponName: AssaultRifle 5
+    prefabName: AR_005
     model: 3
     caliber: 5.56
     weight: 3
@@ -1205,9 +1205,9 @@ MonoBehaviour:
     equipPartsIDs: []
   - indexName: 'W05001: BoltAction SniperRifle 1'
     ID: W05001
-    prefabName: SR_BA_001
     weaponName: BoltAction SniperRifle 1
-    model: 6
+    prefabName: SR_BA_001
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1267,17 +1267,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W05002: BoltAction SniperRifle 2'
     ID: W05002
-    prefabName: SR_BA_002
     weaponName: BoltAction SniperRifle 2
-    model: 6
+    prefabName: SR_BA_002
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1337,17 +1337,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
     useUnderBarrel: 
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W05003: BoltAction SniperRifle 3'
     ID: W05003
-    prefabName: SR_BA_003
     weaponName: BoltAction SniperRifle 3
-    model: 6
+    prefabName: SR_BA_003
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1407,17 +1407,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W05004: BoltAction SniperRifle 4'
     ID: W05004
-    prefabName: SR_BA_004
     weaponName: BoltAction SniperRifle 4
-    model: 6
+    prefabName: SR_BA_004
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1477,17 +1477,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W05005: BoltAction SniperRifle 5'
     ID: W05005
-    prefabName: SR_BA_005
     weaponName: BoltAction SniperRifle 5
-    model: 6
+    prefabName: SR_BA_005
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1547,17 +1547,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W06001: SemiAuto SniperRifle 1'
     ID: W06001
-    prefabName: SR_SA_001
     weaponName: SemiAuto SniperRifle 1
-    model: 6
+    prefabName: SR_SA_001
+    model: 3
     caliber: 7.92
     weight: 3
     isMain: 1
@@ -1617,17 +1617,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W07001: PumpAction Shotgun 1'
     ID: W07001
-    prefabName: SG_PA_001
     weaponName: PumpAction Shotgun 1
-    model: 7
+    prefabName: SG_PA_001
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -1679,7 +1679,7 @@ MonoBehaviour:
       loadedBulletID: None
       prefabName: None
       magName: InternalMagazine
-      compatModel: 07000000
+      compatModel: 03000000
       compatCaliber: 12
       weight: 0
       magSize: 7
@@ -1687,17 +1687,17 @@ MonoBehaviour:
     isMag: 1
     equipPartsList: []
     useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W07002: PumpAction Shotgun 2'
     ID: W07002
-    prefabName: SG_PA_002
     weaponName: PumpAction Shotgun 2
-    model: 7
+    prefabName: SG_PA_002
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -1749,7 +1749,7 @@ MonoBehaviour:
       loadedBulletID: None
       prefabName: None
       magName: InternalMagazine
-      compatModel: 07000000
+      compatModel: 03000000
       compatCaliber: 12
       weight: 0
       magSize: 7
@@ -1757,17 +1757,17 @@ MonoBehaviour:
     isMag: 1
     equipPartsList: []
     useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W08001: SemiAuto Shotgun 1'
     ID: W08001
-    prefabName: SG_SA_001
     weaponName: SemiAuto Shotgun 1
-    model: 7
+    prefabName: SG_SA_001
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -1819,7 +1819,7 @@ MonoBehaviour:
       loadedBulletID: None
       prefabName: None
       magName: InternalMagazine
-      compatModel: 07000000
+      compatModel: 03000000
       compatCaliber: 12
       weight: 0
       magSize: 7
@@ -1827,17 +1827,17 @@ MonoBehaviour:
     isMag: 1
     equipPartsList: []
     useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W08002: SemiAuto Shotgun 2'
     ID: W08002
-    prefabName: SG_SA_002
     weaponName: SemiAuto Shotgun 2
-    model: 7
+    prefabName: SG_SA_002
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -1889,7 +1889,7 @@ MonoBehaviour:
       loadedBulletID: None
       prefabName: None
       magName: InternalMagazine
-      compatModel: 07000000
+      compatModel: 03000000
       compatCaliber: 12
       weight: 0
       magSize: 7
@@ -1897,17 +1897,17 @@ MonoBehaviour:
     isMag: 1
     equipPartsList: []
     useMagazine: 
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W09001: FullAuto Shotgun 1'
     ID: W09001
-    prefabName: SG_FA_001
     weaponName: FullAuto Shotgun 1
-    model: 7
+    prefabName: SG_FA_001
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -1967,17 +1967,17 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
   - indexName: 'W09002: FullAuto Shotgun 2'
     ID: W09002
-    prefabName: SG_FA_002
     weaponName: FullAuto Shotgun 2
-    model: 7
+    prefabName: SG_FA_002
+    model: 3
     caliber: 12
     weight: 3
     isMain: 1
@@ -2037,9 +2037,9 @@ MonoBehaviour:
     isMag: 0
     equipPartsList: []
     useMagazine: 01000000
-    useMuzzle: 
-    useSight: 
-    useAttachment: 
-    useUnderBarrel: 
+    useMuzzle: 01000000
+    useSight: 01000000
+    useAttachment: 01000000
+    useUnderBarrel: 01000000
     equipMagID: None
     equipPartsIDs: []
