@@ -772,10 +772,6 @@ MonoBehaviour:
     pos: {x: 0, y: -0.001, z: -0.008}
     rot: {x: 0, y: 0, z: 0}
     scale: {x: 0.45, y: 0.45, z: 0.45}
-  prefabPivot:
-    pos: {x: 0, y: 0, z: 0}
-    rot: {x: 0, y: 0, z: 0}
-    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &3689151880412646562
 Animator:
   serializedVersion: 5
@@ -1378,7 +1374,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4955464423194224586, guid: 8f96b7fb6e8f1894e97d40f63930d9e0, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9217766592982448304, guid: 8f96b7fb6e8f1894e97d40f63930d9e0, type: 3}
       propertyPath: m_RootOrder

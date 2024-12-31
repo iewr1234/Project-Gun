@@ -25,6 +25,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [HideInInspector] public Image frameImage;
     [HideInInspector] public Image targetImage;
     [HideInInspector] public TextMeshProUGUI countText;
+    [HideInInspector] public Image chamberImage;
 
     private Transform samplesTf;
     [SerializeField] private List<GameObject> samples = new List<GameObject>();
@@ -63,6 +64,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         frameImage.enabled = false;
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
+        chamberImage.enabled = false;
 
         samplesTf = transform.Find("Sample");
         for (int i = 0; i < samplesTf.childCount; i++)
@@ -112,6 +115,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         frameImage.enabled = false;
         targetImage = transform.Find("BackGround").GetComponent<Image>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
+        chamberImage.enabled = false;
 
         samplesTf = transform.Find("Sample");
         for (int i = 0; i < samplesTf.childCount; i++)
@@ -554,6 +559,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 break;
             default:
                 countText.enabled = itemData.maxNesting > 1;
+                chamberImage.enabled = false;
                 SetTotalCount(count);
                 break;
         }
@@ -586,20 +592,23 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             var bulletNum = 0;
             var magSize = 0;
-            if (weaponData.isChamber) bulletNum++;
             if (weaponData.isMag)
             {
                 bulletNum += weaponData.equipMag.loadedBullets.Count;
                 magSize = weaponData.equipMag.magSize;
             }
-
             countText.enabled = true;
+
+            string spriteName = weaponData.isChamber ? "Icon_Chamber_on" : "Icon_Chamber_off";
+            chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
+            chamberImage.enabled = true;
             SetTotalCount(bulletNum, magSize);
         }
 
         void MagazineType()
         {
             countText.enabled = true;
+            chamberImage.enabled = false;
             SetTotalCount(magData.loadedBullets.Count, magData.magSize);
         }
     }

@@ -35,6 +35,7 @@ public class EquipSlot : MonoBehaviour
     public Image backImage;
     public TextMeshProUGUI slotText;
     public TextMeshProUGUI countText;
+    public Image chamberImage;
 
     [Header("--- Assignment Variable---")]
     public EquipType type;
@@ -54,6 +55,8 @@ public class EquipSlot : MonoBehaviour
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
+        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
+        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -69,6 +72,8 @@ public class EquipSlot : MonoBehaviour
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
+        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
+        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -84,6 +89,8 @@ public class EquipSlot : MonoBehaviour
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
         countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
         countText.enabled = false;
+        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
+        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -314,6 +321,7 @@ public class EquipSlot : MonoBehaviour
         {
             slotText.enabled = true;
             countText.enabled = false;
+            chamberImage.enabled = false;
         }
     }
 
@@ -339,6 +347,7 @@ public class EquipSlot : MonoBehaviour
                 break;
             default:
                 countText.enabled = false;
+                chamberImage.enabled = false;
                 break;
         }
 
@@ -358,7 +367,6 @@ public class EquipSlot : MonoBehaviour
                         slotText.enabled = true;
                         countText.enabled = false;
                     }
-
                 }
                 else
                 {
@@ -366,13 +374,12 @@ public class EquipSlot : MonoBehaviour
                     countText.enabled = true;
                     countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
                 }
+                chamberImage.enabled = false;
             }
             else
             {
                 var loadedNum = 0;
                 var magMax = 0;
-                if (item.weaponData.isChamber) loadedNum++;
-
                 if (item.weaponData.magType == global::MagazineType.Magazine)
                 {
                     if (item.weaponData.isMag)
@@ -390,6 +397,10 @@ public class EquipSlot : MonoBehaviour
                 slotText.enabled = false;
                 countText.enabled = true;
                 countText.text = $"{loadedNum}<size=14>/{magMax}</size>";
+
+                string spriteName = item.weaponData.isChamber ? "Icon_Chamber_on" : "Icon_Chamber_off";
+                chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
+                chamberImage.enabled = true;
             }
         }
 
@@ -397,6 +408,7 @@ public class EquipSlot : MonoBehaviour
         {
             countText.enabled = true;
             countText.text = $"{item.TotalCount}/{item.magData.magSize}";
+            chamberImage.enabled = false;
         }
     }
 

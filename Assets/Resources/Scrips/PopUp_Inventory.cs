@@ -532,6 +532,7 @@ public class PopUp_Inventory : MonoBehaviour
                     {
                         equipSlot.slotText.enabled = true;
                         equipSlot.countText.enabled = false;
+                        equipSlot.chamberImage.enabled = false;
                     }
                     break;
                 case EquipType.Magazine:
