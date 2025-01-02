@@ -128,10 +128,10 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public CharacterUI charUI;
     public List<Weapon> weapons;
     public GrenadeHandler grenadeHlr;
-    public Armor armor;
-    [Space(5f)]
+    public ArmorDataInfo headArmor;
+    public ArmorDataInfo bodyArmor;
 
-    public DropTableDataInfo dropTableData;
+    [Space(5f)] public DropTableDataInfo dropTableData;
     public ItemDataInfo uniqueItemData;
 
     [Header("---Access Component---")]
@@ -207,6 +207,10 @@ public class CharacterController : MonoBehaviour
     [Tooltip("파편화")] public int critical;
     public Ability ability = new Ability();
     public Ability addAbility = new Ability();
+
+    [Header("[Armor]")]
+    [HideInInspector] public bool equipHead;
+    [HideInInspector] public bool equipBody;
 
     [HideInInspector] public int baseIndex;
     [HideInInspector] public int upperIndex;
@@ -1726,7 +1730,7 @@ public class CharacterController : MonoBehaviour
     /// 방어구 내구값 설정
     /// </summary>
     /// <param name="value"></param>
-    public void SetArmor(int value)
+    public void SetArmor(ArmorDataInfo armor, int value)
     {
         armor.durability += value;
         if (armor.durability < 0)
@@ -2916,21 +2920,30 @@ public class CharacterController : MonoBehaviour
     {
         bool isPenetrate;
         float bulletproof;
+        ArmorDataInfo armor = bodyArmor;
         if (armor != null && armor.durability > 0)
         {
             var value = Random.Range(0, 100);
-            armor.bulletproof = Mathf.Floor(((121 - (5000 / (45 + ((float)armor.durability / armor.maxDurability) * 200))) / 100 * armor.bulletproof) * 10f) / 10f;
-            if (armor.bulletproof < 0f)
-            {
-                armor.bulletproof = 0f;
-            }
+            //armor.bulletproof = Mathf.Floor(((121 - (5000 / (45 + ((float)armor.durability / armor.maxDurability) * 200))) / 100 * armor.bulletproof) * 10f) / 10f;
+            float bpResult = (6 * armor.durability) / (5 * armor.durability + armor.maxDurability) * armor.bulletProof;
+            armor.bulletProof = DataUtility.GetFloorValue(bpResult, 1);
+            if (armor.bulletProof < 0f) armor.bulletProof = 0f;
 
-            var penetrateRate = bullet.penetrate <= armor.bulletproof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletproof - bullet.penetrate)) * 100f) : 95;
+            //var penetrateRate = bullet.penetrate <= armor.bulletProof ? (int)Mathf.Floor(0.9f - (0.1f * (armor.bulletProof - bullet.penetrate)) * 100f) : 95;
+            int penetrateRate;
+            if (bullet.penetrate + 5 - armor.bulletProof >= 0)
+            {
+                penetrateRate = Mathf.FloorToInt(50 + Mathf.Min(bullet.penetrate + 5 - armor.bulletProof, 5f) * 8 + Mathf.Max(bullet.penetrate - armor.bulletProof, 0));
+            }
+            else
+            {
+                penetrateRate = Mathf.FloorToInt(50 + Mathf.Max(bullet.penetrate + 5 - armor.bulletProof, -5f) * 8 + Mathf.Min(bullet.penetrate + 10 - armor.bulletProof, 0f));
+            }
             isPenetrate = value < penetrateRate;
 
             var armorDamage = (int)Mathf.Floor(bullet.damage * (bullet.armorBreak / 100f));
-            SetArmor(-armorDamage);
-            bulletproof = armor.bulletproof;
+            SetArmor(armor, -armorDamage);
+            bulletproof = armor.bulletProof;
         }
         else
         {
@@ -3087,6 +3100,7 @@ public class CharacterController : MonoBehaviour
         }
         Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponData.prefabName}"));
         weapon.transform.localScale = Vector3.one;
+
         return weapon;
 
         //if (weaponPool.Count == 0) return null;
@@ -3125,7 +3139,50 @@ public class CharacterController : MonoBehaviour
         }
         Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponInfo.prefabName}"));
         weapon.transform.localScale = Vector3.one;
+
         return weapon;
+    }
+
+    public void AddArmor(ItemHandler item)
+    {
+        switch (item.itemData.type)
+        {
+            case ItemType.Head:
+                if (equipHead) return;
+
+                headArmor = item.armorData;
+                equipHead = true;
+                break;
+            case ItemType.Body:
+                if (equipBody) return;
+
+                bodyArmor = item.armorData;
+                equipBody = true;
+                break;
+            default:
+                return;
+        }
+    }
+
+    public void RemoveArmor(ItemHandler item)
+    {
+        switch (item.itemData.type)
+        {
+            case ItemType.Head:
+                if (!equipHead) return;
+
+                headArmor = null;
+                equipHead = false;
+                break;
+            case ItemType.Body:
+                if (!equipBody) return;
+
+                bodyArmor = null;
+                equipBody = false;
+                break;
+            default:
+                return;
+        }
     }
 
     public Vector3 GetAimTarget()
@@ -3486,6 +3543,9 @@ public class CharacterController : MonoBehaviour
             armorBreak = 0;
             critical = 0;
 
+            ArmorDataInfo armorData = charCtr.equipHead ? charCtr.headArmor : null;
+
+
             var weaponData = charCtr.currentWeapon != null ? charCtr.currentWeapon.weaponData : null;
             var bulletData = weaponData != null && weaponData.isChamber ? weaponData.chamberBullet : null;
             ApllyAbilitys(this, weaponData, bulletData);
@@ -3507,41 +3567,38 @@ public class CharacterController : MonoBehaviour
 
         private void ApllyAbilitys(Ability ability, WeaponDataInfo weaponData, BulletDataInfo bulletData)
         {
-            if (weaponData != null)
-            {
-                int[] modeValues =
-                {
-                    weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
-                    weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
-                    weaponData.sModeInfos[(int)ShootingMode.SightShot].value
-                };
-                for (int i = 0; i < modeValues.Length; i++)
-                {
-                    var sModeInfo = ability.sModeInfos[i];
-                    var newValue = sModeInfo.value + modeValues[i];
-                    sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
-                    sModeInfo.value = newValue;
-                }
-                ability.RPM += weaponData.RPM;
-                ability.range += weaponData.range;
-                ability.watchAngle += weaponData.watchAngle;
-                ability.MOA += weaponData.MOA;
-                ability.stability += weaponData.stability;
-                ability.rebound += weaponData.rebound;
-                ability.propellant += weaponData.propellant;
+            if (weaponData == null) return;
 
-                if (bulletData != null)
-                {
-                    ability.MOA += bulletData.MOA;
-                    ability.stability += bulletData.stability;
-                    ability.rebound += bulletData.rebound;
-                    ability.propellant += bulletData.propellant;
-                    ability.damage += bulletData.damage;
-                    ability.penetrate += bulletData.penetrate;
-                    ability.armorBreak += bulletData.armorBreak;
-                    ability.critical += bulletData.critical;
-                }
+            int[] modeValues =
+            {
+                weaponData.sModeInfos[(int)ShootingMode.PointShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.AimShot].value,
+                weaponData.sModeInfos[(int)ShootingMode.SightShot].value
+            };
+            for (int i = 0; i < modeValues.Length; i++)
+            {
+                var sModeInfo = ability.sModeInfos[i];
+                var newValue = sModeInfo.value + modeValues[i];
+                sModeInfo.indexName = $"{sModeInfo.modeType}: {newValue}";
+                sModeInfo.value = newValue;
             }
+            ability.RPM += weaponData.RPM;
+            ability.range += weaponData.range;
+            ability.watchAngle += weaponData.watchAngle;
+            ability.MOA += weaponData.MOA;
+            ability.stability += weaponData.stability;
+            ability.rebound += weaponData.rebound;
+            ability.propellant += weaponData.propellant;
+            if (bulletData == null) return;
+
+            ability.MOA += bulletData.MOA;
+            ability.stability += bulletData.stability;
+            ability.rebound += bulletData.rebound;
+            ability.propellant += bulletData.propellant;
+            ability.damage += bulletData.damage;
+            ability.penetrate += bulletData.penetrate;
+            ability.armorBreak += bulletData.armorBreak;
+            ability.critical += bulletData.critical;
         }
     }
 

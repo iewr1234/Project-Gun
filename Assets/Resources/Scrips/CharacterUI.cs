@@ -79,9 +79,9 @@ public class CharacterUI : MonoBehaviour
 
     public void SetCharacterValue()
     {
-        if (charCtr.armor != null)
+        if (charCtr.equipBody)
         {
-            armorGauge.value = charCtr.armor.durability;
+            armorGauge.value = charCtr.bodyArmor.durability;
             armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
         }
         healthGauge.value = charCtr.health;

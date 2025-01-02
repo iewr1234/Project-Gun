@@ -1206,11 +1206,12 @@ public class DataManager : MonoBehaviour
 
     #region Armor Data
     [HideInInspector] public ArmorData armorData;
-    private readonly string armorDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1373614489&range=A2:D";
+    private readonly string armorDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1373614489&range=A2:E";
     private enum ArmorVariable
     {
         ID,
         ArmorName,
+        PrefabName,
         MaxBulletproof,
         MaxDurability,
     }
@@ -1237,7 +1238,8 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)ArmorVariable.ID]}: {data[(int)ArmorVariable.ArmorName]}",
                     ID = data[(int)ArmorVariable.ID],
                     armorName = data[(int)ArmorVariable.ArmorName],
-                    maxBulletproof = float.Parse(data[(int)ArmorVariable.MaxBulletproof]),
+                    prefabName = data[(int)ArmorVariable.PrefabName],
+                    maxBulletProof = float.Parse(data[(int)ArmorVariable.MaxBulletproof]),
                     maxDurability = int.Parse(data[(int)ArmorVariable.MaxDurability]),
                 };
                 armorData.armorInfos.Add(armorInfo);
@@ -1849,6 +1851,7 @@ public class DataManager : MonoBehaviour
             }
 
             // 자식 프리팹 추가
+            ReadPrefabFolder("BodyArmor");
             ReadPrefabFolder("Rig");
             ReadPrefabFolder("Backpack");
             ReadPrefabFolder("Weapon/Handgun");

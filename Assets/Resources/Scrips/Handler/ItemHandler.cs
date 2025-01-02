@@ -12,6 +12,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public GameMenuManager gameMenuMgr;
     [Space(5f)]
 
+    public ArmorDataInfo armorData;
     public RigDataInfo rigData;
     public BackpackDataInfo backpackData;
     public WeaponDataInfo weaponData;
@@ -33,7 +34,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     [Header("--- Assignment Variable---")]
     public ItemDataInfo itemData;
-    [HideInInspector] public Vector2Int size = new Vector2Int(1, 1);
+    [HideInInspector] public Vector2Int size = Vector2Int.one;
     [HideInInspector] public bool rotation;
 
     [Space(5f)]
@@ -180,6 +181,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             size = itemData.size;
             switch (itemData.type)
             {
+                case ItemType.Head:
+                    var _hArmorData = gameMenuMgr.dataMgr.armorData.armorInfos.Find(x => x.ID == itemData.dataID);
+                    armorData = _hArmorData.CopyData();
+                    return armorData.prefabName;
+                case ItemType.Body:
+                    var _bArmorData = gameMenuMgr.dataMgr.armorData.armorInfos.Find(x => x.ID == itemData.dataID);
+                    armorData = _bArmorData.CopyData();
+                    return armorData.prefabName;
                 case ItemType.Rig:
                     var _rigData = gameMenuMgr.dataMgr.rigData.rigInfos.Find(x => x.ID == itemData.dataID);
                     rigData = _rigData.CopyData();
@@ -278,6 +287,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         transform.name = $"Item_{index}_{itemData.itemName}";
         switch (itemData.type)
         {
+            case ItemType.Head:
+                armorData = storageItem.armorData;
+                break;
+            case ItemType.Body:
+                armorData = storageItem.armorData;
+                break;
             case ItemType.Rig:
                 rigData = storageItem.rigData;
                 break;
@@ -421,6 +436,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         switch (itemData.type)
         {
+            case ItemType.Head:
+                return armorData.prefabName;
+            case ItemType.Body:
+                return armorData.prefabName;
             case ItemType.Rig:
                 return rigData.rigName;
             case ItemType.Backpack:
@@ -647,11 +666,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void SetItemScale(bool value)
     {
         if (size == new Vector2Int(1, 1)) return;
-        if (itemData != null && itemData.type == ItemType.Rig) return;
-        if (itemData != null && itemData.type == ItemType.Backpack) return;
-        if (itemData != null && itemData.type == ItemType.MainWeapon) return;
-        if (itemData != null && itemData.type == ItemType.SubWeapon) return;
-        if (itemData != null && itemData.type == ItemType.Bullet) return;
+        if (itemData == null) return;
+        if (itemData.type == ItemType.Head) return;
+        if (itemData.type == ItemType.Body) return;
+        if (itemData.type == ItemType.Rig) return;
+        if (itemData.type == ItemType.Backpack) return;
+        if (itemData.type == ItemType.MainWeapon) return;
+        if (itemData.type == ItemType.SubWeapon) return;
+        if (itemData.type == ItemType.Bullet) return;
 
         switch (value)
         {

@@ -28,6 +28,7 @@ public class StorageItemInfo
     [Space(5f)]
 
     public ItemDataInfo itemData;
+    [HideInInspector] public ArmorDataInfo armorData;
     [HideInInspector] public RigDataInfo rigData;
     [HideInInspector] public BackpackDataInfo backpackData;
     [HideInInspector] public WeaponDataInfo weaponData;

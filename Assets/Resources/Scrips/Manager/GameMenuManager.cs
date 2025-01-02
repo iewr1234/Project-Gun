@@ -1417,6 +1417,22 @@ public class GameMenuManager : MonoBehaviour
         {
             switch (putItem.itemData.type)
             {
+                case ItemType.Head:
+                    EquipProcess();
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        playerCtr.AddArmor(putItem);
+                    }
+                    break;
+                case ItemType.Body:
+                    EquipProcess();
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var playerCtr = gameMgr.playerList[0];
+                        playerCtr.AddArmor(putItem);
+                    }
+                    break;
                 case ItemType.Rig:
                     EquipProcess();
                     if (equipSlot.myStorage != null && putItem.rigData != null)

@@ -225,6 +225,12 @@ public class OtherStorage : MonoBehaviour
 
         switch (item.itemData.type)
         {
+            case ItemType.Head:
+                storageItemInfo.armorData = item.armorData;
+                break;
+            case ItemType.Body:
+                storageItemInfo.armorData = item.armorData;
+                break;
             case ItemType.Rig:
                 storageItemInfo.rigData = item.rigData;
                 break;

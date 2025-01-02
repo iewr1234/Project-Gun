@@ -13,6 +13,20 @@ MonoBehaviour:
   m_Name: ItemData
   m_EditorClassIdentifier: 
   itemInfos:
+  - indexName: 'T02001: Armor 1'
+    serialID: 
+    ID: T02001
+    dataID: A10001
+    itemName: Armor 1
+    type: 2
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 1000
+    size: {x: 2, y: 2}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
   - indexName: 'T03001: Rig 1'
     serialID: 
     ID: T03001
@@ -22,7 +36,7 @@ MonoBehaviour:
     level: 1
     rarity: 1
     maxNesting: 1
-    price: 100
+    price: 1000
     size: {x: 2, y: 2}
     addOption: 1
     setDropTable: 1
@@ -36,7 +50,7 @@ MonoBehaviour:
     level: 1
     rarity: 1
     maxNesting: 1
-    price: 100
+    price: 1000
     size: {x: 2, y: 3}
     addOption: 1
     setDropTable: 1

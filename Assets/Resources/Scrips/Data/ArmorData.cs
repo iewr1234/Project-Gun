@@ -10,10 +10,31 @@ public class ArmorDataInfo
 
     public string ID;
     public string armorName;
-    [Space(5f)]
+    public string prefabName;
 
-    public float maxBulletproof;
-    public int maxDurability;
+    [Space(5f)][Tooltip("최대 방탄력")] public float maxBulletProof;
+    [Tooltip("방탄력")] public float bulletProof;
+    [Tooltip("최대 내구도")] public int maxDurability;
+    [Tooltip("내구도")] public int durability;
+
+    public ArmorDataInfo CopyData()
+    {
+        ArmorDataInfo armorData = new ArmorDataInfo()
+        {
+            indexName = indexName,
+
+            ID = ID,
+            armorName = armorName,
+            prefabName = prefabName,
+
+            maxBulletProof = maxBulletProof,
+            bulletProof = maxBulletProof,
+            maxDurability = maxDurability,
+            durability = maxDurability
+        };
+
+        return armorData;
+    }
 }
 
 [CreateAssetMenu(fileName = "ArmorData", menuName = "Scriptable Object/ArmorData")]

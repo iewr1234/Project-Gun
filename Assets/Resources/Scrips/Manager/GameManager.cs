@@ -270,6 +270,11 @@ public class GameManager : MonoBehaviour
             charCtr.transform.position = node.transform.position;
             charCtr.SetComponents(this, ownerType, playerData, node);
 
+            var headSlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Head);
+            if (headSlot.item != null) charCtr.AddArmor(headSlot.item);
+            var bodySlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Body);
+            if (bodySlot.item != null) charCtr.AddArmor(bodySlot.item);
+
             var weapons = gameMenuMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon1
                                                                              || x.type == EquipType.MainWeapon2
                                                                              || x.type == EquipType.SubWeapon));
