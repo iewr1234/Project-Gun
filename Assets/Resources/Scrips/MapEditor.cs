@@ -1145,6 +1145,7 @@ public class MapEditor : MonoBehaviour
         {
             var markerNode = eMarkerNodes[i];
             SpawnEnemyInfo enemyInfo = GetEnemyInfo(markerNode.enemyType, stageData);
+            if (enemyInfo.ID == null) continue;
 
             if (enemyInfo.ID.Length > 0)
             {

@@ -562,7 +562,7 @@ public class PopUp_Inventory : MonoBehaviour
                             equipSlot.SetLoadedBulletCount(item);
                             break;
                         default:
-                            equipSlot.SetLoadedBulletCount();
+                            equipSlot.SetItemCount();
                             break;
                     }
                     break;

@@ -45,6 +45,12 @@ public class EnemyDataInfo
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
+    [Space(5f)]
+
+    [Tooltip("최대 머리 방탄력")] public float maxBP_head;
+    [Tooltip("최대 머리 내구도")] public int maxDura_head;
+    [Tooltip("최대 방탄력")] public float maxBP_body;
+    [Tooltip("최대 내구도")] public int maxDura_body;
 }
 
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Object/EnemyData")]

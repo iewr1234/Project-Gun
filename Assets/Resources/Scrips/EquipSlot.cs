@@ -311,11 +311,11 @@ public class EquipSlot : MonoBehaviour
         }
     }
 
-    public void SetLoadedBulletCount()
+    public void SetItemCount()
     {
         if (item != null)
         {
-            SetCountText(item);
+            FixTextTheItemCount(item);
         }
         else
         {
@@ -327,15 +327,21 @@ public class EquipSlot : MonoBehaviour
 
     public void SetLoadedBulletCount(ItemHandler item)
     {
-        SetCountText(item);
+        FixTextTheItemCount(item);
     }
 
-    private void SetCountText(ItemHandler item)
+    private void FixTextTheItemCount(ItemHandler item)
     {
         if (item == null) return;
 
         switch (item.itemData.type)
         {
+            case ItemType.Head:
+                ArmorType();
+                break;
+            case ItemType.Body:
+                ArmorType();
+                break;
             case ItemType.MainWeapon:
                 WeaponType();
                 break;
@@ -349,6 +355,13 @@ public class EquipSlot : MonoBehaviour
                 countText.enabled = false;
                 chamberImage.enabled = false;
                 break;
+        }
+
+        void ArmorType()
+        {
+            countText.enabled = true;
+            countText.text = $"{item.armorData.durability}<size=14>/{item.armorData.maxDurability}</size>";
+            chamberImage.enabled = false;
         }
 
         void WeaponType()

@@ -551,10 +551,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         countText.text = $"{totalCount}";
     }
 
-    public void SetTotalCount(int newCount, int maxValue)
+    public void SetTotalCount(int newCount_1, int newCount_2)
     {
-        totalCount = newCount;
-        countText.text = $"{totalCount}/{maxValue}";
+        if (itemData.maxNesting > 1) totalCount = newCount_1;
+        countText.text = $"{newCount_1}/{newCount_2}";
+    }
+
+    public void SetTotalCount(float newCount_1, int newCount_2)
+    {
+        countText.text = $"{newCount_1}/{newCount_2}";
     }
 
     public void ResultTotalCount(int value)
@@ -567,14 +572,20 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         switch (itemData.type)
         {
+            case ItemType.Head:
+                FixTextTheItemCount();
+                break;
+            case ItemType.Body:
+                FixTextTheItemCount();
+                break;
             case ItemType.MainWeapon:
-                SetLoadedBulletCount();
+                FixTextTheItemCount();
                 break;
             case ItemType.SubWeapon:
-                SetLoadedBulletCount();
+                FixTextTheItemCount();
                 break;
             case ItemType.Magazine:
-                SetLoadedBulletCount();
+                FixTextTheItemCount();
                 break;
             default:
                 countText.enabled = itemData.maxNesting > 1;
@@ -584,16 +595,40 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
-    public void SetLoadedBulletCount()
+    public void SetArmorValue()
     {
         if (equipSlot != null)
         {
-            equipSlot.SetLoadedBulletCount();
             return;
         }
 
         switch (itemData.type)
         {
+            case ItemType.Head:
+                break;
+            case ItemType.Body:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void FixTextTheItemCount()
+    {
+        if (equipSlot != null)
+        {
+            equipSlot.SetItemCount();
+            return;
+        }
+
+        switch (itemData.type)
+        {
+            case ItemType.Head:
+                ArmorType();
+                break;
+            case ItemType.Body:
+                ArmorType();
+                break;
             case ItemType.MainWeapon:
                 WeaponType();
                 break;
@@ -605,6 +640,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 break;
             default:
                 break;
+        }
+
+        void ArmorType()
+        {
+            countText.enabled = true;
+            chamberImage.enabled = false;
+            SetTotalCount(armorData.durability, armorData.maxDurability);
         }
 
         void WeaponType()

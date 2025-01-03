@@ -292,7 +292,7 @@ public class DataManager : MonoBehaviour
 
     #region Player Data
     [HideInInspector] public PlayerData playerData;
-    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A3:AC";
+    private readonly string playerDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=676425891&range=A4:AG";
     private enum PlayerVariable
     {
         ID,
@@ -324,6 +324,10 @@ public class DataManager : MonoBehaviour
         Penetrate,
         ArmorBreak,
         Critical,
+        MaxBulletProof_head,
+        MaxDurability_head,
+        MaxBulletProof_body,
+        MaxDurability_body,
     }
 
     public void UpdatePlayerData()
@@ -375,6 +379,10 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)PlayerVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)PlayerVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)PlayerVariable.Critical]),
+                    maxBP_head = float.Parse(data[(int)PlayerVariable.MaxBulletProof_head]),
+                    maxDura_head = int.Parse(data[(int)PlayerVariable.MaxDurability_head]),
+                    maxBP_body = float.Parse(data[(int)PlayerVariable.MaxBulletProof_body]),
+                    maxDura_body = int.Parse(data[(int)PlayerVariable.MaxDurability_body]),
                 };
                 playerData.playerInfos.Add(playerInfo);
             }
@@ -385,7 +393,7 @@ public class DataManager : MonoBehaviour
 
     #region Enemy Data
     [HideInInspector] public EnemyData enemyData;
-    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A3:AG";
+    private readonly string enemyDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=437348199&range=A4:AK";
     private enum EnemyVariable
     {
         ID,
@@ -421,6 +429,10 @@ public class DataManager : MonoBehaviour
         Penetrate,
         ArmorBreak,
         Critical,
+        MaxBulletProof_head,
+        MaxDurability_head,
+        MaxBulletProof_body,
+        MaxDurability_body,
     }
 
     public void UpdateEnemyData()
@@ -476,6 +488,10 @@ public class DataManager : MonoBehaviour
                     penetrate = int.Parse(data[(int)EnemyVariable.Penetrate]),
                     armorBreak = int.Parse(data[(int)EnemyVariable.ArmorBreak]),
                     critical = int.Parse(data[(int)EnemyVariable.Critical]),
+                    maxBP_head = float.Parse(data[(int)EnemyVariable.MaxBulletProof_head]),
+                    maxDura_head = int.Parse(data[(int)EnemyVariable.MaxDurability_head]),
+                    maxBP_body = float.Parse(data[(int)EnemyVariable.MaxBulletProof_body]),
+                    maxDura_body = int.Parse(data[(int)EnemyVariable.MaxDurability_body]),
                 };
                 enemyData.enemyInfos.Add(enemyInfo);
             }

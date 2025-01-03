@@ -124,7 +124,7 @@ public class ContextMenu : MonoBehaviour
         onItem.weaponData.equipMag = null;
         onItem.weaponData.isMag = false;
         onItem.SetPartsSample();
-        onItem.SetLoadedBulletCount();
+        onItem.FixTextTheItemCount();
         if (onItem.itemSlots.Count > 0)
         {
             if (onItem.itemSlots[0].myStorage != null)
@@ -180,7 +180,7 @@ public class ContextMenu : MonoBehaviour
             MoveBulletInStorage(loadedBullet);
         }
         magData.loadedBullets.Clear();
-        onItem.SetLoadedBulletCount();
+        onItem.FixTextTheItemCount();
         var popUp = gameMenuMgr.activePopUp.Find(x => x.state == PopUpState.ItemInformation && x.item == onItem);
         if (popUp != null) popUp.PopUp_ItemInformation(popUp.item);
     }
@@ -288,7 +288,7 @@ public class ContextMenu : MonoBehaviour
     public void Button_ContextMenu_RemoveChamber()
     {
         RemoveChamber();
-        gameMenuMgr.selectItem.SetLoadedBulletCount();
+        gameMenuMgr.selectItem.FixTextTheItemCount();
         CloseTheContextMenu(true);
     }
 

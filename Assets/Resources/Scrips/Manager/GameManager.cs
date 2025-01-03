@@ -1163,7 +1163,7 @@ public class GameManager : MonoBehaviour
             weapon.weaponData.chamberBullet = chamberBullet;
             weapon.weaponData.isChamber = true;
             magData.loadedBullets.Remove(chamberBullet);
-            weaponItem.SetLoadedBulletCount();
+            weaponItem.FixTextTheItemCount();
         }
     }
 
@@ -1765,11 +1765,8 @@ public class GameManager : MonoBehaviour
                     var enemy = enemyList[i];
                     if (enemy.state == CharacterState.Dead) continue;
 
-                    if (enemy.currentWeapon.loadedNum == 0)
-                    {
-                        EnemyAI_Reload(enemy);
-                        enemy.SetTurnEnd(true);
-                    }
+                    var reload = enemy.currentWeapon.loadedNum == 0;
+                    if (reload) EnemyAI_Reload(enemy);
                     EnemyAI_Move(enemy);
                 }
                 break;
@@ -2103,6 +2100,7 @@ public class GameManager : MonoBehaviour
         var weapon = enemy.currentWeapon;
         weapon.loadedNum = weapon.magMax;
         enemy.AddCommand(CommandType.Reload, true, true);
+        enemy.state = CharacterState.Schedule;
     }
     #endregion
 
@@ -2111,7 +2109,7 @@ public class GameManager : MonoBehaviour
     {
         if (ownerType == CharacterOwner.Player) return;
 
-        var endEnemys = enemyList.FindAll(x => x.TurnEnd == true || x.state == CharacterState.Dead);
+        var endEnemys = enemyList.FindAll(x => x.TurnEnd == true || x.state == CharacterState.Schedule || x.state == CharacterState.Dead);
         if (endEnemys.Count != enemyList.Count) return;
 
         if (scheduleList.Count == 0)

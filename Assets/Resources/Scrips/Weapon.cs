@@ -382,7 +382,7 @@ public class Weapon : MonoBehaviour
                 weaponData.chamberBullet = null;
                 weaponData.isChamber = false;
                 if (weaponData.magType != MagazineType.Cylinder) LoadingChamber();
-                if (equipSlot != null) equipSlot.SetLoadedBulletCount();
+                if (equipSlot != null) equipSlot.SetItemCount();
                 break;
             case CharacterOwner.Enemy:
                 count = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
