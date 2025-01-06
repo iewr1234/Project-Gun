@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum GameState
@@ -270,11 +271,6 @@ public class GameManager : MonoBehaviour
             charCtr.transform.position = node.transform.position;
             charCtr.SetComponents(this, ownerType, playerData, node);
 
-            var headSlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Head);
-            if (headSlot.item != null) charCtr.AddArmor(headSlot.item);
-            var bodySlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Body);
-            if (bodySlot.item != null) charCtr.AddArmor(bodySlot.item);
-
             var weapons = gameMenuMgr.allEquips.FindAll(x => x.item != null && (x.type == EquipType.MainWeapon1
                                                                              || x.type == EquipType.MainWeapon2
                                                                              || x.type == EquipType.SubWeapon));
@@ -288,6 +284,17 @@ public class GameManager : MonoBehaviour
                 if (weapon == null) continue;
 
                 weapon.SetComponets(charCtr, equipSlot, weaponData);
+            }
+
+            var headSlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Head);
+            if (headSlot.item != null)
+            {
+                charCtr.AddArmor(headSlot.item);
+            }
+            var bodySlot = gameMenuMgr.allEquips.Find(x => x.type == EquipType.Body);
+            if (bodySlot.item != null)
+            {
+                charCtr.AddArmor(bodySlot.item);
             }
 
             return charCtr;
@@ -312,6 +319,18 @@ public class GameManager : MonoBehaviour
 
                 var weapon = charCtr.GetWeapon(weaponInfo);
                 weapon.SetComponets(charCtr, weaponInfo);
+            }
+
+            if (enemyData.maxDura_head > 0)
+            {
+                Armor headArmor = new Armor();
+                headArmor.SetComponets(charCtr, Armor.Type.Head, enemyData.maxBP_head, enemyData.maxDura_head);
+            }
+
+            if (enemyData.maxDura_body > 0)
+            {
+                Armor bodyArmor = new Armor();
+                bodyArmor.SetComponets(charCtr, Armor.Type.Body, enemyData.maxBP_body, enemyData.maxDura_body);
             }
 
             return charCtr;
@@ -2108,6 +2127,7 @@ public class GameManager : MonoBehaviour
     public void SetPositionOfAI(CharacterOwner ownerType)
     {
         if (ownerType == CharacterOwner.Player) return;
+        if (scheduleState != ScheduleState.None) return;
 
         var endEnemys = enemyList.FindAll(x => x.TurnEnd == true || x.state == CharacterState.Schedule || x.state == CharacterState.Dead);
         if (endEnemys.Count != enemyList.Count) return;
@@ -2154,9 +2174,6 @@ public class GameManager : MonoBehaviour
             case ScheduleState.Check:
                 Check();
                 break;
-            //case ScheduleState.Wait:
-            //    Wait();
-            //    break;
             case ScheduleState.Shoot:
                 Shoot();
                 break;
@@ -2192,15 +2209,6 @@ public class GameManager : MonoBehaviour
                 scheduleState = ScheduleState.Shoot;
             }
         }
-
-        //void Wait()
-        //{
-        //    var targetInfo = scheduleList[0].targetInfo;
-        //    if (targetInfo.target.commandList.Count == 0)
-        //    {
-        //        scheduleState = ScheduleState.Shoot;
-        //    }
-        //}
 
         void Shoot()
         {

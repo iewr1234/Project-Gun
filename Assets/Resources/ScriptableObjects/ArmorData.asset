@@ -13,10 +13,18 @@ MonoBehaviour:
   m_Name: ArmorData
   m_EditorClassIdentifier: 
   armorInfos:
-  - indexName: 'A10001: Armor 1'
+  - indexName: 'A00001: Head Armor 1'
+    ID: A00001
+    armorName: Head Armor 1
+    prefabName: HeadArmor_001
+    maxBulletProof: 10
+    bulletProof: 0
+    maxDurability: 15
+    durability: 0
+  - indexName: 'A10001: Body Armor 1'
     ID: A10001
-    armorName: Armor 1
-    prefabName: Armor_001
+    armorName: Body Armor 1
+    prefabName: BodyArmor_001
     maxBulletProof: 10
     bulletProof: 0
     maxDurability: 15

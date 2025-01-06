@@ -13,11 +13,25 @@ MonoBehaviour:
   m_Name: ItemData
   m_EditorClassIdentifier: 
   itemInfos:
-  - indexName: 'T02001: Armor 1'
+  - indexName: 'T01001: Head Armor 1'
+    serialID: 
+    ID: T01001
+    dataID: A00001
+    itemName: Head Armor 1
+    type: 1
+    level: 1
+    rarity: 1
+    maxNesting: 1
+    price: 1000
+    size: {x: 2, y: 2}
+    addOption: 1
+    setDropTable: 1
+    itemOptions: []
+  - indexName: 'T02001: Body Armor 1'
     serialID: 
     ID: T02001
     dataID: A10001
-    itemName: Armor 1
+    itemName: Body Armor 1
     type: 2
     level: 1
     rarity: 1

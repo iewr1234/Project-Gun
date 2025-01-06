@@ -50,10 +50,14 @@ MonoBehaviour:
     stability: 100
     rebound: 150
     propellant: 100
-    damage: 2
-    penetrate: 0
-    armorBreak: 0
+    damage: 10
+    penetrate: 5
+    armorBreak: 10
     critical: 0
+    maxBP_head: 0
+    maxDura_head: 0
+    maxBP_body: 5
+    maxDura_body: 5
   - indexName: 'E0002: Insurgent_B'
     ID: E0002
     prefabName: Insurgent_B
@@ -91,10 +95,14 @@ MonoBehaviour:
     stability: 100
     rebound: 150
     propellant: 100
-    damage: 1
-    penetrate: 0
-    armorBreak: 0
+    damage: 10
+    penetrate: 5
+    armorBreak: 10
     critical: 0
+    maxBP_head: 0
+    maxDura_head: 0
+    maxBP_body: 0
+    maxDura_body: 0
   - indexName: 'E0003: Insurgent_C'
     ID: E0003
     prefabName: Insurgent_C
@@ -132,10 +140,14 @@ MonoBehaviour:
     stability: 100
     rebound: 150
     propellant: 100
-    damage: 1
-    penetrate: 0
-    armorBreak: 0
+    damage: 10
+    penetrate: 5
+    armorBreak: 10
     critical: 0
+    maxBP_head: 0
+    maxDura_head: 0
+    maxBP_body: 0
+    maxDura_body: 0
   - indexName: 'E0004: Insurgent_D'
     ID: E0004
     prefabName: Insurgent_D
@@ -173,10 +185,14 @@ MonoBehaviour:
     stability: 100
     rebound: 150
     propellant: 100
-    damage: 1
-    penetrate: 0
-    armorBreak: 0
+    damage: 10
+    penetrate: 5
+    armorBreak: 10
     critical: 0
+    maxBP_head: 0
+    maxDura_head: 0
+    maxBP_body: 0
+    maxDura_body: 0
   - indexName: 'E0010: Insurgent_G'
     ID: E0010
     prefabName: Insurgent_G
@@ -214,7 +230,11 @@ MonoBehaviour:
     stability: 100
     rebound: 150
     propellant: 100
-    damage: 3
-    penetrate: 0
-    armorBreak: 0
+    damage: 10
+    penetrate: 5
+    armorBreak: 10
     critical: 0
+    maxBP_head: 0
+    maxDura_head: 0
+    maxBP_body: 10
+    maxDura_body: 15

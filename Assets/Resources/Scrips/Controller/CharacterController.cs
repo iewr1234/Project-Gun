@@ -127,8 +127,9 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public CharacterUI charUI;
     public List<Weapon> weapons;
-    public ArmorDataInfo headArmor;
-    public ArmorDataInfo bodyArmor;
+    public List<Armor> armors;
+    //public ArmorDataInfo headArmor;
+    //public ArmorDataInfo bodyArmor;
     public GrenadeHandler grenadeHlr;
 
     [Space(5f)] public DropTableDataInfo dropTableData;
@@ -225,8 +226,6 @@ public class CharacterController : MonoBehaviour
     [Space(5f)] public Weapon currentWeapon;
     [HideInInspector] public int fiarRate;
     [HideInInspector] public ShootingMode sMode;
-    [HideInInspector] public bool equipHead;
-    [HideInInspector] public bool equipBody;
 
     [Space(5f)] public FieldNode currentNode;
     private FieldNode prevNode;
@@ -373,15 +372,6 @@ public class CharacterController : MonoBehaviour
             aiming = playerData.aiming;
             reaction = playerData.reaction;
 
-            //maxBP_head = playerData.maxBP_head;
-            //BP_head = maxBP_head;
-            //maxDura_head = playerData.maxDura_head;
-            //dura_head = maxDura_head;
-            //maxBP_body = playerData.maxBP_body;
-            //BP_body = maxBP_body;
-            //maxDura_body = playerData.maxDura_body;
-            //dura_body = maxDura_body;
-
             ability.charCtr = this;
             addAbility.charCtr = this;
             ability.SetAbility(playerData);
@@ -406,39 +396,6 @@ public class CharacterController : MonoBehaviour
             sight = enemyData.sight;
             aiming = enemyData.aiming;
             reaction = enemyData.reaction;
-
-            equipHead = enemyData.maxDura_head > 0;
-            if (equipHead)
-            {
-                headArmor = new ArmorDataInfo()
-                {
-                    maxBulletProof = enemyData.maxBP_head,
-                    bulletProof = enemyData.maxBP_head,
-                    maxDurability = enemyData.maxDura_head,
-                    durability = enemyData.maxDura_head,
-                };
-            }
-
-            equipBody = enemyData.maxDura_body > 0;
-            if (equipBody)
-            {
-                bodyArmor = new ArmorDataInfo()
-                {
-                    maxBulletProof = enemyData.maxBP_body,
-                    bulletProof = enemyData.maxBP_body,
-                    maxDurability = enemyData.maxDura_body,
-                    durability = enemyData.maxDura_body,
-                };
-            }
-
-            //maxBP_head = enemyData.maxBP_head;
-            //BP_head = maxBP_head;
-            //maxDura_head = enemyData.maxDura_head;
-            //dura_head = maxDura_head;
-            //maxBP_body = enemyData.maxBP_body;
-            //BP_body = maxBP_body;
-            //maxDura_body = enemyData.maxDura_body;
-            //dura_body = maxDura_body;
 
             ability.charCtr = this;
             addAbility.charCtr = this;
@@ -1779,18 +1736,23 @@ public class CharacterController : MonoBehaviour
     /// 방어구 내구값 설정
     /// </summary>
     /// <param name="value"></param>
-    public void SetArmor(ArmorDataInfo armor, int value)
+    public void SetArmor(Armor armor, int value)
     {
-        armor.durability += value;
-        if (armor.durability < 0)
+        armor.armorData.durability += value;
+        if (armor.armorData.durability < 0)
         {
-            armor.durability = 0;
+            armor.armorData.durability = 0;
         }
-        else if (armor.durability > armor.maxDurability)
+        else if (armor.armorData.durability > armor.armorData.maxDurability)
         {
-            armor.durability = armor.maxDurability;
+            armor.armorData.durability = armor.armorData.maxDurability;
         }
         charUI.SetCharacterValue();
+
+        if (ownerType == CharacterOwner.Player && gameMgr.playerList[0] == this)
+        {
+            armor.equipSlot.item.FixTextTheItemCount();
+        }
     }
 
     /// <summary>
@@ -2968,16 +2930,17 @@ public class CharacterController : MonoBehaviour
     public void OnHit(CharacterController shooter, Bullet bullet)
     {
         bool isPenetrate;
-        ArmorDataInfo armor = bodyArmor;
-        if (armor != null && armor.durability > 0)
+        bool headHit = Random.Range(0, 100) < 25;
+        Armor armor = headHit ? armors.Find(x => x.type == Armor.Type.Head) : armors.Find(x => x.type == Armor.Type.Body);
+        if (armors.Count > 0)
         {
             var value = Random.Range(0, 100);
-            armor.bulletProof = DataUtility.GetFloorValue((float)(6 * armor.durability) / (5 * armor.durability + armor.maxDurability) * armor.maxBulletProof, 1);
-            if (armor.bulletProof < 0f) armor.bulletProof = 0f;
+            armor.armorData.bulletProof = DataUtility.GetFloorValue((float)(6 * armor.armorData.durability) / (5 * armor.armorData.durability + armor.armorData.maxDurability) * armor.armorData.maxBulletProof, 1);
+            if (armor.armorData.bulletProof < 0f) armor.armorData.bulletProof = 0f;
 
-            int penetrateRate = bullet.penetrate + 5 - armor.bulletProof >= 0
-                              ? Mathf.FloorToInt(50 + Mathf.Min(bullet.penetrate + 5 - armor.bulletProof, 5f) * 8 + Mathf.Max(bullet.penetrate - armor.bulletProof, 0))
-                              : Mathf.FloorToInt(50 + Mathf.Max(bullet.penetrate + 5 - armor.bulletProof, -5f) * 8 + Mathf.Min(bullet.penetrate + 10 - armor.bulletProof, 0f));
+            int penetrateRate = bullet.penetrate + 5 - armor.armorData.bulletProof >= 0
+                              ? Mathf.FloorToInt(50 + Mathf.Min(bullet.penetrate + 5 - armor.armorData.bulletProof, 5f) * 8 + Mathf.Max(bullet.penetrate - armor.armorData.bulletProof, 0))
+                              : Mathf.FloorToInt(50 + Mathf.Max(bullet.penetrate + 5 - armor.armorData.bulletProof, -5f) * 8 + Mathf.Min(bullet.penetrate + 10 - armor.armorData.bulletProof, 0f));
             isPenetrate = value < penetrateRate;
 
             var armorDamage = Mathf.FloorToInt(bullet.damage * (bullet.armorBreak / 100f));
@@ -2991,14 +2954,16 @@ public class CharacterController : MonoBehaviour
         int damage;
         if (isPenetrate)
         {
-            damage = Mathf.FloorToInt(bullet.damage - ((armor != null ? armor.durability : 0f) * 0.1f));
+            float hDamage = bullet.damage - ((armor != null ? armor.armorData.durability : 0f) * 0.1f);
+            damage = headHit ? Mathf.FloorToInt(hDamage * 1.5f) : Mathf.FloorToInt(hDamage);
             SetHealth(-damage);
             Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피해량 = {damage}, 체력 = {health}/{maxHealth}");
             gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
         }
         else
         {
-            damage = Mathf.FloorToInt(bullet.propellant * 0.1f);
+            float sDamage = bullet.propellant * 0.1f;
+            damage = headHit ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
             SetStamina(-damage);
         }
 
@@ -3183,46 +3148,29 @@ public class CharacterController : MonoBehaviour
 
     public void AddArmor(ItemHandler item)
     {
-        switch (item.itemData.type)
-        {
-            case ItemType.Head:
-                if (equipHead) return;
-
-                headArmor = item.armorData;
-                equipHead = true;
-                SetAbility();
-                break;
-            case ItemType.Body:
-                if (equipBody) return;
-
-                bodyArmor = item.armorData;
-                equipBody = true;
-                SetAbility();
-                break;
-            default:
-                return;
-        }
+        Armor armor = new Armor();
+        armor.SetComponets(this, item);
     }
 
-    public void RemoveArmor(ItemHandler item)
+    public void RemoveArmor(Armor armor)
     {
-        switch (item.itemData.type)
-        {
-            case ItemType.Head:
-                if (!equipHead) return;
+        //switch (item.itemData.type)
+        //{
+        //    case ItemType.Head:
+        //        if (!equipHead) return;
 
-                headArmor = null;
-                equipHead = false;
-                break;
-            case ItemType.Body:
-                if (!equipBody) return;
+        //        headArmor = null;
+        //        equipHead = false;
+        //        break;
+        //    case ItemType.Body:
+        //        if (!equipBody) return;
 
-                bodyArmor = null;
-                equipBody = false;
-                break;
-            default:
-                return;
-        }
+        //        bodyArmor = null;
+        //        equipBody = false;
+        //        break;
+        //    default:
+        //        return;
+        //}
     }
 
     public Vector3 GetAimTarget()

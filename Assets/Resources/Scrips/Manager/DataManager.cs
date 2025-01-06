@@ -1867,6 +1867,7 @@ public class DataManager : MonoBehaviour
             }
 
             // 자식 프리팹 추가
+            ReadPrefabFolder("HeadArmor");
             ReadPrefabFolder("BodyArmor");
             ReadPrefabFolder("Rig");
             ReadPrefabFolder("Backpack");
