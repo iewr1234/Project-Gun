@@ -1885,6 +1885,20 @@ public class GameMenuManager : MonoBehaviour
         ItemHandler onItem;
         switch (item.itemData.type)
         {
+            case ItemType.Head:
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var player = gameMgr.playerList[0];
+                    player.RemoveArmor(item.armorData.ID, item.equipSlot);
+                }
+                break;
+            case ItemType.Body:
+                if (gameMgr != null && gameMgr.playerList.Count > 0)
+                {
+                    var player = gameMgr.playerList[0];
+                    player.RemoveArmor(item.armorData.ID, item.equipSlot);
+                }
+                break;
             case ItemType.Rig:
                 var rigStorage = item.equipSlot.myStorage;
                 if (rigStorage != null)

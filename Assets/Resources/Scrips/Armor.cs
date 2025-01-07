@@ -15,8 +15,8 @@ public class Armor
     [HideInInspector] public CharacterController charCtr;
 
     [Header("--- Assignment Variable---")]
-    public ArmorDataInfo armorData;
     [HideInInspector] public EquipSlot equipSlot;
+    public ArmorDataInfo armorData;
     public Type type;
 
     public void SetComponets(CharacterController _charCtr, ItemHandler _item)
@@ -25,8 +25,6 @@ public class Armor
         equipSlot = _item.equipSlot;
         armorData = equipSlot.item.armorData;
         type = equipSlot.item.itemData.type == ItemType.Head ? Type.Head : Type.Body;
-
-        charCtr.armors.Add(this);
     }
 
     public void SetComponets(CharacterController _charCtr, Type _type, float maxBulletProof, int maxDurability)
@@ -40,7 +38,5 @@ public class Armor
             durability = maxDurability,
         };
         type = _type;
-
-        charCtr.armors.Add(this);
     }
 }

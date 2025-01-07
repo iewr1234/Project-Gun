@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum GameState
@@ -166,7 +165,6 @@ public class GameManager : MonoBehaviour
         if (dataMgr.gameData.gameMenuMgr == null)
         {
             gameMenuMgr = FindAnyObjectByType<GameMenuManager>();
-            //invenMgr.SetComponents(this);
             gameMenuMgr.gameMgr = this;
             gameMenuMgr.dataMgr = dataMgr;
             dataMgr.gameData.gameMenuMgr = gameMenuMgr;
@@ -325,12 +323,14 @@ public class GameManager : MonoBehaviour
             {
                 Armor headArmor = new Armor();
                 headArmor.SetComponets(charCtr, Armor.Type.Head, enemyData.maxBP_head, enemyData.maxDura_head);
+                charCtr.armors.Add(headArmor);
             }
 
             if (enemyData.maxDura_body > 0)
             {
                 Armor bodyArmor = new Armor();
                 bodyArmor.SetComponets(charCtr, Armor.Type.Body, enemyData.maxBP_body, enemyData.maxDura_body);
+                charCtr.armors.Add(bodyArmor);
             }
 
             return charCtr;

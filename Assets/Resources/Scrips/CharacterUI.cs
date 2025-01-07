@@ -11,18 +11,23 @@ public class CharacterUI : MonoBehaviour
     public CharacterController charCtr;
 
     [Header("---Access Component---")]
-    public Canvas canvas;
-    public GameObject components;
-    private Slider armorGauge;
+    [HideInInspector] public Canvas canvas;
+    [HideInInspector] public GameObject components;
+
+    private Slider hArmorGauge;
+    private Slider bArmorGauge;
     private Slider healthGauge;
     private Slider staminaGauge;
-    private TextMeshProUGUI armorText;
+
+    private TextMeshProUGUI hArmorText;
+    private TextMeshProUGUI bArmorText;
     private TextMeshProUGUI healthText;
     private TextMeshProUGUI staminaText;
+
     [HideInInspector] public AimGauge aimGauge;
 
     [Header("--- Assignment Variable---")]
-    [SerializeField] private Vector3 uiPos;
+    [SerializeField] private Vector3 uiPos = new Vector3(0f, 2f, 0f);
 
     public void SetComponents(CharacterController _charCtr)
     {
@@ -35,30 +40,24 @@ public class CharacterUI : MonoBehaviour
         canvas.worldCamera = charCtr.GameMgr.camMgr.mainCam;
         canvas.sortingOrder = -1;
         components = transform.Find("Components").gameObject;
-        armorGauge = components.transform.Find("ArmorGauge").GetComponent<Slider>();
+
+        hArmorGauge = components.transform.Find("HeadArmorGauge").GetComponent<Slider>();
+        bArmorGauge = components.transform.Find("BodyArmorGauge").GetComponent<Slider>();
         healthGauge = components.transform.Find("HealthGauge").GetComponent<Slider>();
         staminaGauge = components.transform.Find("StaminaGauge").GetComponent<Slider>();
-        armorText = armorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+
+        hArmorText = hArmorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        bArmorText = bArmorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         aimGauge = components.transform.Find("AimGauge").GetComponent<AimGauge>();
         aimGauge.SetComponents();
 
-        //if (charCtr.armor != null)
-        //{
-        //    armorGauge.maxValue = charCtr.armor.maxDurability;
-        //    armorGauge.value = charCtr.armor.durability;
-        //}
-        //else
-        //{
-        //    armorGauge.gameObject.SetActive(false);
-        //}
-        armorGauge.gameObject.SetActive(false);
-
         healthGauge.maxValue = charCtr.maxHealth;
         healthGauge.value = charCtr.health;
         staminaGauge.maxValue = charCtr.maxStamina;
         staminaGauge.value = charCtr.stamina;
+        SetActiveArmorGauge();
         SetCharacterValue();
     }
 
@@ -77,13 +76,32 @@ public class CharacterUI : MonoBehaviour
         transform.LookAt(pos, rot);
     }
 
+    public void SetActiveArmorGauge()
+    {
+        hArmorGauge.gameObject.SetActive(false);
+        bArmorGauge.gameObject.SetActive(false);
+        if (charCtr.armors.Count == 0) return;
+
+        for (int i = 0; i < charCtr.armors.Count; i++)
+        {
+            Armor armor = charCtr.armors[i];
+            Slider armorGauge = armor.type == Armor.Type.Head ? hArmorGauge : bArmorGauge;
+            armorGauge.maxValue = armor.armorData.maxDurability;
+            armorGauge.value = armor.armorData.durability;
+            armorGauge.gameObject.SetActive(true);
+        }
+    }
+
     public void SetCharacterValue()
     {
-        //if (charCtr.equipBody)
-        //{
-        //    armorGauge.value = charCtr.bodyArmor.durability;
-        //    armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
-        //}
+        for (int i = 0; i < charCtr.armors.Count; i++)
+        {
+            Armor armor = charCtr.armors[i];
+            Slider armorGauge = armor.type == Armor.Type.Head ? hArmorGauge : bArmorGauge;
+            TextMeshProUGUI armorText = armor.type == Armor.Type.Head ? hArmorText : bArmorText;
+            armorGauge.value = armor.armorData.durability;
+            armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
+        }
         healthGauge.value = charCtr.health;
         healthText.text = $"{healthGauge.value} / {healthGauge.maxValue}";
         staminaGauge.value = charCtr.stamina;

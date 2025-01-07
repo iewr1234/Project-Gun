@@ -1749,10 +1749,7 @@ public class CharacterController : MonoBehaviour
         }
         charUI.SetCharacterValue();
 
-        if (ownerType == CharacterOwner.Player && gameMgr.playerList[0] == this)
-        {
-            armor.equipSlot.item.FixTextTheItemCount();
-        }
+        if (ownerType == CharacterOwner.Player && gameMgr.playerList[0] == this) armor.equipSlot.item.FixTextTheItemCount();
     }
 
     /// <summary>
@@ -2932,9 +2929,9 @@ public class CharacterController : MonoBehaviour
         bool isPenetrate;
         bool headHit = Random.Range(0, 100) < 25;
         Armor armor = headHit ? armors.Find(x => x.type == Armor.Type.Head) : armors.Find(x => x.type == Armor.Type.Body);
-        if (armors.Count > 0)
+        if (armor != null && armor.armorData.durability > 0)
         {
-            var value = Random.Range(0, 100);
+            int value = Random.Range(0, 100);
             armor.armorData.bulletProof = DataUtility.GetFloorValue((float)(6 * armor.armorData.durability) / (5 * armor.armorData.durability + armor.armorData.maxDurability) * armor.armorData.maxBulletProof, 1);
             if (armor.armorData.bulletProof < 0f) armor.armorData.bulletProof = 0f;
 
@@ -2943,7 +2940,7 @@ public class CharacterController : MonoBehaviour
                               : Mathf.FloorToInt(50 + Mathf.Max(bullet.penetrate + 5 - armor.armorData.bulletProof, -5f) * 8 + Mathf.Min(bullet.penetrate + 10 - armor.armorData.bulletProof, 0f));
             isPenetrate = value < penetrateRate;
 
-            var armorDamage = Mathf.FloorToInt(bullet.damage * (bullet.armorBreak / 100f));
+            int armorDamage = Mathf.FloorToInt(bullet.damage * (bullet.armorBreak / 100f));
             SetArmor(armor, -armorDamage);
         }
         else
@@ -2957,7 +2954,7 @@ public class CharacterController : MonoBehaviour
             float hDamage = bullet.damage - ((armor != null ? armor.armorData.durability : 0f) * 0.1f);
             damage = headHit ? Mathf.FloorToInt(hDamage * 1.5f) : Mathf.FloorToInt(hDamage);
             SetHealth(-damage);
-            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피해량 = {damage}, 체력 = {health}/{maxHealth}");
+            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 체력 피해량 = {damage}, 체력 = {health}/{maxHealth}");
             gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
         }
         else
@@ -2965,6 +2962,8 @@ public class CharacterController : MonoBehaviour
             float sDamage = bullet.propellant * 0.1f;
             damage = headHit ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
             SetStamina(-damage);
+            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 기력 피해량 = {damage}, 기력 = {stamina}/{maxStamina}");
+            gameMgr.SetFloatText(charUI, $"{damage}", Color.green);
         }
 
         if (state == CharacterState.Dead) return;
@@ -3150,27 +3149,19 @@ public class CharacterController : MonoBehaviour
     {
         Armor armor = new Armor();
         armor.SetComponets(this, item);
+        armors.Add(armor);
+        charUI.SetActiveArmorGauge();
+        charUI.SetCharacterValue();
     }
 
-    public void RemoveArmor(Armor armor)
+    public void RemoveArmor(string armorID, EquipSlot equipSlot)
     {
-        //switch (item.itemData.type)
-        //{
-        //    case ItemType.Head:
-        //        if (!equipHead) return;
+        Armor armor = armors.Find(x => x.armorData.ID == armorID && x.equipSlot == equipSlot);
+        if (armor == null) return;
 
-        //        headArmor = null;
-        //        equipHead = false;
-        //        break;
-        //    case ItemType.Body:
-        //        if (!equipBody) return;
-
-        //        bodyArmor = null;
-        //        equipBody = false;
-        //        break;
-        //    default:
-        //        return;
-        //}
+        armors.Remove(armor);
+        charUI.SetActiveArmorGauge();
+        charUI.SetCharacterValue();
     }
 
     public Vector3 GetAimTarget()

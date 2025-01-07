@@ -73,6 +73,23 @@ public class CameraManager : MonoBehaviour
         lockCam = false;
     }
 
+    private void FixedUpdate()
+    {
+        CameraRotate();
+
+        void CameraRotate()
+        {
+            var rotDiff = Mathf.DeltaAngle(pivotPoint.transform.eulerAngles.y, currentRot);
+            if (rotDiff == 0f) return;
+
+            var rotDir = Mathf.Sign(rotDiff);
+            var rotStep = rotSpeed * Time.deltaTime;
+            if (Mathf.Abs(rotDiff) < rotStep) rotStep = Mathf.Abs(rotDiff);
+            pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
+            mainCam.transform.LookAt(pivotPoint);
+        }
+    }
+
     private void Update()
     {
         if (gameMgr != null)
@@ -90,38 +107,37 @@ public class CameraManager : MonoBehaviour
         CameraMove();
         CameraRotate();
         CameraZoom();
-    }
 
-    private void CameraMove()
-    {
-        var dir = Vector3.zero;
-        if (Input.GetKey(KeyCode.W))
+        void CameraMove()
         {
-            dir += mainCam.transform.forward;
+            var dir = Vector3.zero;
+            if (Input.GetKey(KeyCode.W))
+            {
+                dir += mainCam.transform.forward;
+            }
+            else if (Input.GetKey(KeyCode.S))
+            {
+                dir -= mainCam.transform.forward;
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                dir -= mainCam.transform.right;
+            }
+            else if (Input.GetKey(KeyCode.D))
+            {
+                dir += mainCam.transform.right;
+            }
+            dir.y = 0f;
+            var newPos = pivotPoint.transform.position + dir * (moveSpeed * Time.deltaTime);
+            newPos.y = pivotPoint.transform.position.y;
+            pivotPoint.transform.position = newPos;
         }
-        else if (Input.GetKey(KeyCode.S))
-        {
-            dir -= mainCam.transform.forward;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            dir -= mainCam.transform.right;
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            dir += mainCam.transform.right;
-        }
-        dir.y = 0f;
-        var newPos = pivotPoint.transform.position + dir * (moveSpeed * Time.deltaTime);
-        newPos.y = pivotPoint.transform.position.y;
-        pivotPoint.transform.position = newPos;
-    }
 
-    private void CameraRotate()
-    {
-        var rotDiff = Mathf.DeltaAngle(pivotPoint.transform.eulerAngles.y, currentRot);
-        if (rotDiff == 0f)
+        void CameraRotate()
         {
+            var rotDiff = Mathf.DeltaAngle(pivotPoint.transform.eulerAngles.y, currentRot);
+            if (rotDiff != 0f) return;
+
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 currentRot += 45f;
@@ -131,33 +147,25 @@ public class CameraManager : MonoBehaviour
                 currentRot -= 45f;
             }
         }
-        else
-        {
-            var rotDir = Mathf.Sign(rotDiff);
-            var rotStep = rotSpeed * Time.deltaTime;
-            if (Mathf.Abs(rotDiff) < rotStep) rotStep = Mathf.Abs(rotDiff);
-            pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
-            mainCam.transform.LookAt(pivotPoint);
-        }
-    }
 
-    private void CameraZoom()
-    {
-        var scroll = Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
-        if (scroll != 0f)
+        void CameraZoom()
         {
-            camDistance -= scroll;
-            if (camDistance < zoomMin)
+            var scroll = Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
+            if (scroll != 0f)
             {
-                camDistance = zoomMin;
+                camDistance -= scroll;
+                if (camDistance < zoomMin)
+                {
+                    camDistance = zoomMin;
+                }
+                else if (camDistance > zoomMax)
+                {
+                    camDistance = zoomMax;
+                }
             }
-            else if (camDistance > zoomMax)
-            {
-                camDistance = zoomMax;
-            }
-        }
 
-        mainCam.transform.localPosition = camDirection * camDistance;
+            mainCam.transform.localPosition = camDirection * camDistance;
+        }
     }
 
     public void SetCameraState(CameraState _state)
