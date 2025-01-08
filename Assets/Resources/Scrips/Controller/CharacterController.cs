@@ -3150,6 +3150,8 @@ public class CharacterController : MonoBehaviour
         Armor armor = new Armor();
         armor.SetComponets(this, item);
         armors.Add(armor);
+        if (charUI == null) return;
+
         charUI.SetActiveArmorGauge();
         charUI.SetCharacterValue();
     }

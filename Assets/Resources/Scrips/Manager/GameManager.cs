@@ -83,7 +83,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<FieldNode> closeNodes = new List<FieldNode>();
     [SerializeField] private List<MovePass> passList = new List<MovePass>();
     [SerializeField] private int moveNum;
-    private LineRenderer moveLine;
+    private LineRenderer canMoveLine;
+    private LineRenderer notMoveLine;
 
     [Header("[Character]")]
     public List<CharacterController> playerList;
@@ -246,13 +247,6 @@ public class GameManager : MonoBehaviour
         //charCtr.grenadeHlr = charCtr.transform.Find("GrenadePool").GetComponent<GrenadeHandler>();
         //charCtr.grenadeHlr.SetComponents();
 
-        //// Set Armor
-        //if (charData.armorID != "None")
-        //{
-        //    var armorData = dataMgr.armorData.armorInfos.Find(x => x.ID == charData.armorID);
-        //    charCtr.armor = new Armor(armorData);
-        //}
-
         // Set CharacterUI
         var charUI = Instantiate(Resources.Load<CharacterUI>("Prefabs/CharacterUI/CharacterUI"));
         charUI.transform.SetParent(characterUI_Tf, false);
@@ -343,19 +337,26 @@ public class GameManager : MonoBehaviour
     private void CreateLines()
     {
         var width = 0.03f;
-        moveLine = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
-        moveLine.transform.SetParent(linePoolTf, false);
-        moveLine.startWidth = width;
-        moveLine.material = Resources.Load<Material>("Materials/Line/DrawLine_Move");
-        moveLine.enabled = false;
-
         for (int i = 0; i < linePoolMax; i++)
         {
             var line = Instantiate(Resources.Load<LineRenderer>("Prefabs/DrawLine"));
             line.transform.SetParent(linePoolTf, false);
             line.startWidth = width;
             line.enabled = false;
-            linePool.Add(line);
+            if (i == 0)
+            {
+                line.material = Resources.Load<Material>("Materials/Line/DrawLine_CanMove");
+                canMoveLine = line;
+            }
+            else if (i == 1)
+            {
+                line.material = Resources.Load<Material>("Materials/Line/DrawLine_NotMove");
+                notMoveLine = line;
+            }
+            else
+            {
+                linePool.Add(line);
+            }
         }
     }
 
@@ -689,10 +690,7 @@ public class GameManager : MonoBehaviour
                         if (selectChar.state == CharacterState.Watch)
                         {
                             selectChar.AimOff();
-                            if (selectChar.animator.GetBool("isCover"))
-                            {
-                                selectChar.AddCommand(CommandType.BackCover);
-                            }
+                            if (selectChar.animator.GetBool("isCover")) selectChar.AddCommand(CommandType.BackCover);
                             selectChar.watchInfo.drawRang.gameObject.SetActive(false);
                             selectChar.state = CharacterState.None;
                         }
@@ -710,6 +708,7 @@ public class GameManager : MonoBehaviour
                     }
                     else if (node == targetNode && node.canMove && selectChar != null)
                     {
+                        if (notMoveLine.enabled) return;
                         if (selectChar.commandList.Count > 0) return;
 
                         CharacterMove(selectChar, node);
@@ -726,16 +725,14 @@ public class GameManager : MonoBehaviour
                 case GameState.Throw:
                     node = GetOnPointerNode();
                     if (node == null) return;
-
-                    if (selectChar == null) return;
                     if (node != targetNode) return;
+                    if (selectChar == null) return;
 
                     ThrowAction_Grenade();
                     break;
                 case GameState.Base:
                     node = GetOnPointerNode();
                     if (node == null) return;
-
                     if (gameMenuMgr.showMenu) return;
                     if (playerList.Count == 0) return;
 
@@ -867,7 +864,7 @@ public class GameManager : MonoBehaviour
                     if (targetNode != node && node == selectChar.currentNode && passList.Count == 0)
                     {
                         arrowPointer.gameObject.SetActive(false);
-                        moveLine.enabled = false;
+                        canMoveLine.enabled = false;
                         ClearFireWarning();
                         RemoveTargetNode();
                         selectChar.FindTargets(node, false);
@@ -1266,20 +1263,14 @@ public class GameManager : MonoBehaviour
         visited.Add(charCtr.currentNode);
 
         var action = charCtr.action;
-        if (charCtr.stamina < action * 5)
-        {
-            action = (int)(charCtr.stamina * 0.2f);
-        }
+        //if (charCtr.stamina < action * 5) action = (int)(charCtr.stamina * 0.2f);
         charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
 
         int remainingShootCost = 0;
         if (charCtr.currentWeapon != null)
         {
             remainingShootCost = action - charCtr.currentWeapon.weaponData.actionCost;
-            if (remainingShootCost > 0)
-            {
-                charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
-            }
+            if (remainingShootCost > 0) charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
         }
 
         int moveRange = 0;
@@ -1519,14 +1510,13 @@ public class GameManager : MonoBehaviour
     {
         ClearFireWarning();
         moveNum = 0;
-        moveLine.enabled = true;
-        moveLine.positionCount = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
         var height = 0.1f;
         var passNodes = new List<FieldNode>();
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var node = closeNodes[i];
-            moveNum += RanderAndCheck(node, i, closeNodes);
+            var _moveNum = RanderAndCheck(node, i, closeNodes);
+            moveNum += _moveNum;
             passNodes.Add(node);
         }
         foreach (var movePass in passList)
@@ -1534,15 +1524,57 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < movePass.passNodes.Count; i++)
             {
                 var node = movePass.passNodes[i];
-                RanderAndCheck(node, i, movePass.passNodes);
-
+                var _moveNum = RanderAndCheck(node, i, movePass.passNodes);
+                moveNum += _moveNum;
                 if (i > 0) passNodes.Add(node);
             }
         }
+
+        passNodes.Reverse();
+        int useStamina = selectChar.stamina / 5;
+        canMoveLine.enabled = true;
+        if (moveNum <= useStamina)
+        {
+            notMoveLine.enabled = false;
+            canMoveLine.positionCount = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
+        }
+        else
+        {
+            var index = 0;
+            var _moveNum = 0;
+            for (int i = 0; i < passNodes.Count; i++)
+            {
+                var passNode = passNodes[i];
+                _moveNum += passNode.moveCost;
+                if (_moveNum > useStamina)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            var count = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
+            notMoveLine.enabled = true;
+            notMoveLine.positionCount = count - index;
+            canMoveLine.positionCount = index + 1;
+        }
+
         for (int i = 0; i < passNodes.Count; i++)
         {
             var passNode = passNodes[i];
-            moveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
+            if (notMoveLine.enabled && i == canMoveLine.positionCount - 1)
+            {
+                canMoveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
+                notMoveLine.SetPosition(i - canMoveLine.positionCount + 1, passNode.transform.position + new Vector3(0f, height, 0f));
+            }
+            else if (notMoveLine.enabled && i > canMoveLine.positionCount - 1)
+            {
+                notMoveLine.SetPosition(i - canMoveLine.positionCount + 1, passNode.transform.position + new Vector3(0f, height, 0f));
+            }
+            else
+            {
+                canMoveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
+            }
         }
 
         arrowPointer.gameObject.SetActive(true);
@@ -1612,14 +1644,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                if (!line.enabled)
-                {
-                    break;
-                }
-                else
-                {
-                    line.enabled = false;
-                }
+                if (line.enabled) line.enabled = false;
             }
         }
     }
@@ -1630,7 +1655,7 @@ public class GameManager : MonoBehaviour
     private void ClearLine()
     {
         arrowPointer.gameObject.SetActive(false);
-        moveLine.enabled = false;
+        canMoveLine.enabled = false;
         ClearFireWarning();
         for (int i = 0; i < linePool.Count; i++)
         {

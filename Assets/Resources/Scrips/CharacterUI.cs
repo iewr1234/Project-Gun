@@ -54,9 +54,7 @@ public class CharacterUI : MonoBehaviour
         aimGauge.SetComponents();
 
         healthGauge.maxValue = charCtr.maxHealth;
-        healthGauge.value = charCtr.health;
         staminaGauge.maxValue = charCtr.maxStamina;
-        staminaGauge.value = charCtr.stamina;
         SetActiveArmorGauge();
         SetCharacterValue();
     }
@@ -87,7 +85,6 @@ public class CharacterUI : MonoBehaviour
             Armor armor = charCtr.armors[i];
             Slider armorGauge = armor.type == Armor.Type.Head ? hArmorGauge : bArmorGauge;
             armorGauge.maxValue = armor.armorData.maxDurability;
-            armorGauge.value = armor.armorData.durability;
             armorGauge.gameObject.SetActive(true);
         }
     }
