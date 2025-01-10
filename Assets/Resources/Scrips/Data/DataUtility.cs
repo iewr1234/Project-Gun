@@ -82,6 +82,9 @@ public static class DataUtility
     public static readonly Vector3 leftPivot_pos_HG = new Vector3(-0.083f, -0.059f, -0.047f);
     public static readonly Quaternion leftPivot_rot_HG = Quaternion.Euler(-19.074f, -32.39f, -91.302f);
 
+    public static readonly Color maxMoveLineColor = Color.white;
+    public static readonly Color canShotLineColor = new Color(97f / 255, 197f / 255, 1f);
+
     public static float GetDistance(Vector3 posA, Vector3 posB)
     {
         var distance = Mathf.Sqrt((posA - posB).sqrMagnitude);

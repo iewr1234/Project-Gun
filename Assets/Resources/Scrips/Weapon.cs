@@ -579,7 +579,7 @@ public class Weapon : MonoBehaviour
                 if (weapon.charCtr.ownerType == CharacterOwner.Player && i == loadedBulletNum) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
-                ResultHitAccuracys(i);
+                ResultHitAccuracys(shootNum, i);
                 var hitAccuracyText = pelletAccuracys.Count > 0 ? $"{hitAccuracy}~{pelletAccuracys[^1]}" : $"{hitAccuracy}";
                 var hitInfo = new HitInfo()
                 {
@@ -613,7 +613,7 @@ public class Weapon : MonoBehaviour
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
                 hitNum = 0;
-                ResultHitAccuracys(i);
+                ResultHitAccuracys(shootNum, i);
                 weapon.charCtr.SetStamina(-impact);
                 var hitText = isHit ? $"{hitNum}발 명중" : "빗나감";
                 var hitAccuracyText = pelletAccuracys.Count > 0 ? $"{hitAccuracy}~{pelletAccuracys[^1]}" : $"{hitAccuracy}";
@@ -636,15 +636,15 @@ public class Weapon : MonoBehaviour
             return hitCount == 0;
         }
 
-        private void ResultHitAccuracys(int index)
+        private void ResultHitAccuracys(int maxShotNum, int shotNum)
         {
             pelletAccuracys.Clear();
 
             // 사격자 스텟을 가져옴
-            SetUseValue(index);
+            SetUseValue(shotNum);
 
             // 스테미너 체크
-            CheckStabilityStamina(index);
+            CheckStabilityStamina(shotNum);
 
             // 추가 확산 명중치
             GetSpreadAccuracy();
@@ -727,7 +727,7 @@ public class Weapon : MonoBehaviour
                 if (index == 0 && !burnout) return;
 
                 // 추가 명중치
-                var addAccuracy = Mathf.CeilToInt(distance * 0.01f * (rebound * propellant * 0.01f));
+                int addAccuracy = Mathf.CeilToInt((propellant * 0.1f) * (distance * 0.1f) * (rebound * 0.01f) * (1 - ((maxShotNum - 1) / (maxShotNum - 1 + 10))));
                 if (addAccuracy < 1) addAccuracy = 1;
 
                 if (index == 0)

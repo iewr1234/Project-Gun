@@ -57,7 +57,7 @@ public class NodeOutline : MonoBehaviour
         {
             var mesh = meshs[i];
             mesh.enabled = value;
-            mesh.material.color = Color.white;
+            mesh.material.color = DataUtility.canShotLineColor;
         }
     }
 

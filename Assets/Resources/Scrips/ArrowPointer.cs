@@ -8,6 +8,7 @@ public class ArrowPointer : MonoBehaviour
     [Header("---Access Component---")]
     private GameObject actionCost;
     private TextMeshProUGUI costText;
+    private MeshRenderer[] pointerMeshs;
 
     [Header("--- Assignment Variable---")]
     private readonly float speed = 200f;
@@ -16,6 +17,7 @@ public class ArrowPointer : MonoBehaviour
     {
         actionCost = transform.Find("ActionCost").gameObject;
         costText = actionCost.transform.GetComponentInChildren<TextMeshProUGUI>();
+        pointerMeshs = GetComponentsInChildren<MeshRenderer>();
     }
 
     private void Update()
@@ -42,6 +44,14 @@ public class ArrowPointer : MonoBehaviour
     public void SetMoveCost(int cost)
     {
         costText.text = $"{cost}";
+    }
+
+    public void SetMeshMaterial(Material mat)
+    {
+        foreach (var pointerMesh in pointerMeshs)
+        {
+            pointerMesh.material = mat;
+        }
     }
 
     public int GetMoveCost()

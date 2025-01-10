@@ -365,7 +365,7 @@ public class CharacterController : MonoBehaviour
             maxAction = playerData.maxAction;
             action = maxAction;
             maxHealth = playerData.maxHealth;
-            health = maxHealth;
+            health = gameMgr.dataMgr.gameData.health;
             maxStamina = playerData.maxStamina;
             stamina = maxStamina;
             sight = playerData.sight;
@@ -725,10 +725,7 @@ public class CharacterController : MonoBehaviour
         if (targetList.Count > 0)
         {
             var tagetInfo = targetList.OrderBy(x => DataUtility.GetDistance(x.shooterNode.transform.position, x.targetNode.transform.position)).FirstOrDefault();
-            if (tagetInfo.shooterCover != null)
-            {
-                AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
-            }
+            if (tagetInfo.shooterCover != null) AddCommand(CommandType.TakeCover, tagetInfo.shooterCover, tagetInfo.isRight);
             targetList.Clear();
         }
 
@@ -741,10 +738,7 @@ public class CharacterController : MonoBehaviour
             {
                 var _targetNode = commandList[0].targetNode;
                 commandList.RemoveAt(0);
-                if (currentNode.markerType == MarkerType.Base)
-                {
-                    gameMgr.BaseEvent(_targetNode);
-                }
+                if (currentNode.markerType == MarkerType.Base) gameMgr.BaseEvent(_targetNode);
             }
         }
         else
@@ -2963,7 +2957,7 @@ public class CharacterController : MonoBehaviour
             damage = headHit ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
             SetStamina(-damage);
             Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 기력 피해량 = {damage}, 기력 = {stamina}/{maxStamina}");
-            gameMgr.SetFloatText(charUI, $"{damage}", Color.green);
+            gameMgr.SetFloatText(charUI, $"{damage}", Color.yellow);
         }
 
         if (state == CharacterState.Dead) return;

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static CharacterController;
 
 public enum GameState
 {
@@ -865,6 +866,7 @@ public class GameManager : MonoBehaviour
                     {
                         arrowPointer.gameObject.SetActive(false);
                         canMoveLine.enabled = false;
+                        notMoveLine.enabled = false;
                         ClearFireWarning();
                         RemoveTargetNode();
                         selectChar.FindTargets(node, false);
@@ -1262,16 +1264,12 @@ public class GameManager : MonoBehaviour
         queue.Enqueue(charCtr.currentNode);
         visited.Add(charCtr.currentNode);
 
-        var action = charCtr.action;
-        //if (charCtr.stamina < action * 5) action = (int)(charCtr.stamina * 0.2f);
-        charCtr.maxMoveNum = (int)(charCtr.Mobility * action);
-
-        int remainingShootCost = 0;
-        if (charCtr.currentWeapon != null)
-        {
-            remainingShootCost = action - charCtr.currentWeapon.weaponData.actionCost;
-            if (remainingShootCost > 0) charCtr.shootMoveNum = (int)(charCtr.Mobility * (action - charCtr.currentWeapon.weaponData.actionCost));
-        }
+        float tiredMOB = 0.5f;
+        int AP = charCtr.action;
+        int activeAP = Mathf.Min(AP, charCtr.stamina / 5);
+        charCtr.maxMoveNum = AP == activeAP ? Mathf.FloorToInt(charCtr.Mobility * AP)
+                                            : Mathf.FloorToInt((charCtr.Mobility * activeAP) + (tiredMOB * (AP - activeAP)));
+        int canShotMoveNum = GetCanShotMoveNum();
 
         int moveRange = 0;
         while (queue.Count > 0 && moveRange <= charCtr.maxMoveNum)
@@ -1280,23 +1278,37 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < nodesInCurrentRange; i++)
             {
                 FieldNode node = queue.Dequeue();
-                node.moveCost = DataUtility.GetMoveCost(moveRange, charCtr.Mobility);
+                node.moveCost = moveRange <= charCtr.Mobility * activeAP ? Mathf.CeilToInt(moveRange / charCtr.mobility)
+                                                                         : Mathf.CeilToInt((moveRange - (charCtr.Mobility * activeAP)) / tiredMOB + activeAP);
                 movableNodes.Add(node); // 이동 가능 노드로 추가
 
                 foreach (FieldNode onAxisNode in node.onAxisNodes)
                 {
-                    if (onAxisNode != null && onAxisNode.canMove && !visited.Contains(onAxisNode))
-                    {
-                        onAxisNode.canShoot = remainingShootCost > 0 && remainingShootCost > moveRange;
-                        queue.Enqueue(onAxisNode);
-                        visited.Add(onAxisNode);
-                    }
+                    if (onAxisNode == null) continue;
+                    if (!onAxisNode.canMove) continue;
+                    if (visited.Contains(onAxisNode)) continue;
+
+                    onAxisNode.canShoot = canShotMoveNum > 0 && canShotMoveNum > moveRange;
+                    queue.Enqueue(onAxisNode);
+                    visited.Add(onAxisNode);
                 }
             }
             moveRange++;
         }
 
         SwitchMovableNodes(showNode);
+
+        int GetCanShotMoveNum()
+        {
+            if (charCtr.currentWeapon == null) return 0;
+
+            int shotAP = charCtr.currentWeapon.weaponData.actionCost;
+            if (AP < shotAP) return 0;
+
+            int canUseAP = AP - shotAP;
+            return canUseAP <= activeAP ? Mathf.FloorToInt((AP - shotAP) * charCtr.Mobility)
+                                        : Mathf.FloorToInt(activeAP * charCtr.Mobility + (canUseAP - activeAP) * tiredMOB);
+        }
     }
 
     private void FindMovableNodes(CharacterController charCtr)
@@ -1481,11 +1493,9 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < openNodes.Count; i++)
             {
                 var node = openNodes[i];
-                if (node.F < lowestNode.F)
-                {
-                    lowestNode = node;
-                }
+                if (node.F < lowestNode.F) lowestNode = node;
             }
+
             return lowestNode;
         }
 
@@ -1510,13 +1520,14 @@ public class GameManager : MonoBehaviour
     {
         ClearFireWarning();
         moveNum = 0;
+        canMoveLine.enabled = true;
+        canMoveLine.positionCount = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
         var height = 0.1f;
         var passNodes = new List<FieldNode>();
         for (int i = 0; i < closeNodes.Count; i++)
         {
             var node = closeNodes[i];
-            var _moveNum = RanderAndCheck(node, i, closeNodes);
-            moveNum += _moveNum;
+            moveNum += RanderAndCheck(node, i, closeNodes);
             passNodes.Add(node);
         }
         foreach (var movePass in passList)
@@ -1524,62 +1535,26 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < movePass.passNodes.Count; i++)
             {
                 var node = movePass.passNodes[i];
-                var _moveNum = RanderAndCheck(node, i, movePass.passNodes);
-                moveNum += _moveNum;
+                RanderAndCheck(node, i, movePass.passNodes);
+
                 if (i > 0) passNodes.Add(node);
             }
         }
 
         passNodes.Reverse();
-        int useStamina = selectChar.stamina / 5;
-        canMoveLine.enabled = true;
-        if (moveNum <= useStamina)
-        {
-            notMoveLine.enabled = false;
-            canMoveLine.positionCount = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
-        }
-        else
-        {
-            var index = 0;
-            var _moveNum = 0;
-            for (int i = 0; i < passNodes.Count; i++)
-            {
-                var passNode = passNodes[i];
-                _moveNum += passNode.moveCost;
-                if (_moveNum > useStamina)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            var count = closeNodes.Count + passList.Sum(x => x.passNodes.Count - 1);
-            notMoveLine.enabled = true;
-            notMoveLine.positionCount = count - index;
-            canMoveLine.positionCount = index + 1;
-        }
-
         for (int i = 0; i < passNodes.Count; i++)
         {
             var passNode = passNodes[i];
-            if (notMoveLine.enabled && i == canMoveLine.positionCount - 1)
-            {
-                canMoveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
-                notMoveLine.SetPosition(i - canMoveLine.positionCount + 1, passNode.transform.position + new Vector3(0f, height, 0f));
-            }
-            else if (notMoveLine.enabled && i > canMoveLine.positionCount - 1)
-            {
-                notMoveLine.SetPosition(i - canMoveLine.positionCount + 1, passNode.transform.position + new Vector3(0f, height, 0f));
-            }
-            else
-            {
-                canMoveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
-            }
+            canMoveLine.SetPosition(i, passNode.transform.position + new Vector3(0f, height, 0f));
         }
 
         arrowPointer.gameObject.SetActive(true);
         arrowPointer.transform.position = closeNodes[0].transform.position + new Vector3(0f, 0.5f, 0f);
-        var moveCost = (int)Mathf.Ceil((moveNum + passList.Sum(x => x.moveNum)) / selectChar.Mobility);
+
+        var mat = notMoveLine.enabled ? Resources.Load<Material>("Materials/ArrowPointer_NotMove") : Resources.Load<Material>("Materials/ArrowPointer_CanMove");
+        arrowPointer.SetMeshMaterial(mat);
+
+        var moveCost = passNodes[^1].moveCost;
         arrowPointer.SetMoveCost(moveCost);
         uiMgr.SetUsedActionPoint_Bottom(selectChar, moveCost);
 
@@ -1656,6 +1631,7 @@ public class GameManager : MonoBehaviour
     {
         arrowPointer.gameObject.SetActive(false);
         canMoveLine.enabled = false;
+        notMoveLine.enabled = false;
         ClearFireWarning();
         for (int i = 0; i < linePool.Count; i++)
         {
@@ -1859,6 +1835,7 @@ public class GameManager : MonoBehaviour
         dataMgr.gameData.floorStorages.Clear();
         dataMgr.gameData.stageData = uiMgr.selcetStage.stageData.CopyData();
         dataMgr.gameData.RandomMapSelection();
+        ResetPlayerHealth();
         sceneHlr.StartLoadScene("GameScene");
     }
 
@@ -1878,6 +1855,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
         dataMgr.gameData.floorStorages.Clear();
+        SavePlayerHealth();
         sceneHlr.StartLoadScene("GameScene");
     }
 
@@ -1903,7 +1881,24 @@ public class GameManager : MonoBehaviour
         dataMgr.gameData.stageData = null;
         dataMgr.gameData.mapName = "BASECAMP";
         dataMgr.gameData.mapLoad = true;
+        ResetPlayerHealth();
         sceneHlr.StartLoadScene("GameScene");
+    }
+
+    private void ResetPlayerHealth()
+    {
+        if (playerList.Count == 0) return;
+
+        CharacterController player = playerList[0];
+        dataMgr.gameData.health = player.maxHealth;
+    }
+
+    private void SavePlayerHealth()
+    {
+        if (playerList.Count == 0) return;
+
+        CharacterController player = playerList[0];
+        dataMgr.gameData.health = player.health;
     }
 
     public IEnumerator Coroutine_GameEnd()

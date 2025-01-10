@@ -19,7 +19,6 @@ public class TitleManager : MonoBehaviour
     public void Button_Start()
     {
         dataMgr.gameData.playerID = "P0001";
-        //sceneHlr.StartLoadScene("StageScene");
         dataMgr.gameData.mapName = "BASECAMP";
         dataMgr.gameData.mapLoad = true;
         dataMgr.gameData.baseStorages.Clear();

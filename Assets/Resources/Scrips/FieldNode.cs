@@ -44,6 +44,7 @@ public class FieldNode : MonoBehaviour
     public bool canMove;
     public bool canShoot;
     public int moveCost;
+    public float costMOB;
     [Space(5f)]
 
     public MarkerType markerType;
@@ -349,7 +350,7 @@ public class FieldNode : MonoBehaviour
                 }
                 else
                 {
-                    outlines[i].SetActiveLine(true, Color.yellow);
+                    outlines[i].SetActiveLine(true, DataUtility.maxMoveLineColor);
                 }
             }
             else if (movableNodes.Contains(onAxisNode) && canShoot && !onAxisNode.canShoot)
@@ -364,7 +365,7 @@ public class FieldNode : MonoBehaviour
                 }
                 else
                 {
-                    outlines[i].SetActiveLine(true, Color.yellow);
+                    outlines[i].SetActiveLine(true, DataUtility.maxMoveLineColor);
                 }
             }
         }
