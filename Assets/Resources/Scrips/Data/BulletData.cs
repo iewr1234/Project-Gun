@@ -18,7 +18,7 @@ public class BulletDataInfo
     [Tooltip("구경")] public float caliber;
     [Tooltip("펠릿 수")] public int pelletNum;
     [Tooltip("확산")] public int spread;
-    [Tooltip("무게")] public float weight;
+    [Tooltip("무게")] public int weight;
     [Space(5f)]
 
     [Tooltip("정확도")] public float MOA;

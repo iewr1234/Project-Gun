@@ -125,6 +125,60 @@ public class MyStorage : MonoBehaviour
         }
     }
 
+    public int GetTotalWeight()
+    {
+        int totalWeight = 0;
+        List<ItemHandler> checkItem = new List<ItemHandler>();
+        for (int i = 0; i < itemSlots.Count; i++)
+        {
+            ItemSlot itemSlot = itemSlots[i];
+            if (!itemSlot.gameObject.activeSelf) continue;
+            if (itemSlot.item == null) continue;
+            if (checkItem.Contains(itemSlot.item)) continue;
+
+            int count = itemSlot.item.itemData.maxNesting > 1 ? itemSlot.item.TotalCount : 1;
+            totalWeight += count * GetItemWeight(itemSlot.item);
+            checkItem.Add(itemSlot.item);
+        }
+
+        return totalWeight;
+
+        int GetItemWeight(ItemHandler item)
+        {
+            switch (item.itemData.type)
+            {
+                case ItemType.Head:
+                    return item.armorData.weight;
+                case ItemType.Body:
+                    return item.armorData.weight;
+                case ItemType.Rig:
+                    return item.rigData.weight;
+                case ItemType.Backpack:
+                    return item.backpackData.weight;
+                case ItemType.SubWeapon:
+                    return item.weaponData.weight;
+                case ItemType.MainWeapon:
+                    return item.weaponData.weight;
+                case ItemType.Bullet:
+                    return item.bulletData.weight;
+                case ItemType.Magazine:
+                    return item.magData.weight;
+                case ItemType.Muzzle:
+                    return item.partsData.weight;
+                case ItemType.Sight:
+                    return item.partsData.weight;
+                case ItemType.Attachment:
+                    return item.partsData.weight;
+                case ItemType.UnderBarrel:
+                    return item.partsData.weight;
+                case ItemType.Grenade:
+                    return item.grenadeData.weight;
+                default:
+                    return 0;
+            }
+        }
+    }
+
     //private void Update()
     //{
     //    ResizeStorage();

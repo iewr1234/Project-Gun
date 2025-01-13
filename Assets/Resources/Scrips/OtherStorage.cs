@@ -268,6 +268,8 @@ public class OtherStorage : MonoBehaviour
                 break;
         }
         storageInfo.itemList.Add(storageItemInfo);
+        FieldNode node = gameMenuMgr.gameMgr.nodeList.Find(x => x.nodePos == storageInfo.nodePos);
+        if (node != null) node.SetItemCase(true);
     }
 
     public void UpdateStorageInfo(ItemHandler item)
@@ -298,7 +300,7 @@ public class OtherStorage : MonoBehaviour
             };
             gameData.floorStorages.Add(floorStorage);
             storageInfos.Add(floorStorage);
-            node.SetItemCase(true);
+            if (floorStorage.itemList.Count > 0) node.SetItemCase(true);
         }
         else if (!storageInfos.Contains(floor))
         {

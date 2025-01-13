@@ -11,7 +11,7 @@ public class GrenadeDataInfo
     public string FX_name;
     public float throwRange;
     public float blastRange;
-    public float weight;
+    public int weight;
     public int damage;
 
     public GrenadeDataInfo CopyData()

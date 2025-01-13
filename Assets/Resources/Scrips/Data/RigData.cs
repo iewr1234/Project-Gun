@@ -8,6 +8,7 @@ public class RigDataInfo
     public string indexName;
     public string ID;
     public string rigName;
+    public int weight;
     public Vector2Int storageSize;
 
     public RigDataInfo CopyData()
@@ -17,6 +18,7 @@ public class RigDataInfo
             indexName = indexName,
             ID = ID,
             rigName = rigName,
+            weight = weight,
             storageSize = storageSize,
         };
 

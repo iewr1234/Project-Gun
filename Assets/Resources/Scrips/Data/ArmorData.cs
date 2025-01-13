@@ -12,7 +12,8 @@ public class ArmorDataInfo
     public string armorName;
     public string prefabName;
 
-    [Space(5f)][Tooltip("최대 방탄력")] public float maxBulletProof;
+    [Space(5f)][Tooltip("무게")] public int weight;
+    [Tooltip("최대 방탄력")] public float maxBulletProof;
     [Tooltip("방탄력")] public float bulletProof;
     [Tooltip("최대 내구도")] public int maxDurability;
     [Tooltip("내구도")] public int durability;
@@ -27,6 +28,7 @@ public class ArmorDataInfo
             armorName = armorName,
             prefabName = prefabName,
 
+            weight = weight,
             maxBulletProof = maxBulletProof,
             bulletProof = maxBulletProof,
             maxDurability = maxDurability,

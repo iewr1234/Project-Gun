@@ -31,7 +31,7 @@ public class WeaponPartsDataInfo
     [Space(5f)]
 
     public List<int> compatModel;
-    public float weight;
+    public int weight;
     public WeaponPartsType type;
     public WeaponPartsSize size;
     [Space(5f)]

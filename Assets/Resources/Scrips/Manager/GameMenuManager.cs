@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+using TMPro;
 
 public enum GameMenuState
 {
@@ -20,6 +19,7 @@ public class GameMenuManager : MonoBehaviour
 
     [Header("[InventoryUI]")]
     public List<EquipSlot> allEquips = new List<EquipSlot>();
+    public TextMeshProUGUI weightText;
     public List<MyStorage> myStorages = new List<MyStorage>();
     public OtherStorage otherStorage;
     private List<PopUp_Inventory> popUpList;
@@ -109,6 +109,7 @@ public class GameMenuManager : MonoBehaviour
             var popUp = popUpList[i];
             popUp.SetComponents(this);
         }
+        weightText = transform.Find("GameMenuUI/InventoryUI/Equip/WeightText").GetComponent<TextMeshProUGUI>();
         contextMenu = transform.Find("GameMenuUI/ContextMenu").GetComponent<ContextMenu>();
         contextMenu.SetComponents(this);
 
@@ -1539,6 +1540,12 @@ public class GameMenuManager : MonoBehaviour
         holdingItem = null;
         InactiveSampleItem();
 
+        if (gameMgr != null && gameMgr.playerList.Count > 0)
+        {
+            var player = gameMgr.playerList[0];
+            player.SetTotalWeight();
+        }
+
         void EquipProcess()
         {
             otherStorage.CheckBaseStorage(putItem);
@@ -1761,6 +1768,7 @@ public class GameMenuManager : MonoBehaviour
             player.SetAbility();
             var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
             if (weapon != null) weapon.SetParts();
+            player.SetTotalWeight();
         }
 
         void WeaponType()
@@ -1880,133 +1888,141 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="item"></param>
     public void UnequipItem(ItemHandler item)
     {
-        if (item.equipSlot == null) return;
-
-        ItemHandler onItem;
-        switch (item.itemData.type)
+        if (item.equipSlot != null)
         {
-            case ItemType.Head:
-                if (gameMgr != null && gameMgr.playerList.Count > 0)
-                {
-                    var player = gameMgr.playerList[0];
-                    player.RemoveArmor(item.armorData.ID, item.equipSlot);
-                }
-                break;
-            case ItemType.Body:
-                if (gameMgr != null && gameMgr.playerList.Count > 0)
-                {
-                    var player = gameMgr.playerList[0];
-                    player.RemoveArmor(item.armorData.ID, item.equipSlot);
-                }
-                break;
-            case ItemType.Rig:
-                var rigStorage = item.equipSlot.myStorage;
-                if (rigStorage != null)
-                {
-                    var inItemSlots = rigStorage.itemSlots.FindAll(x => x.item != null);
-                    for (int i = 0; i < inItemSlots.Count; i++)
+            ItemHandler onItem;
+            switch (item.itemData.type)
+            {
+                case ItemType.Head:
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
-                        var itemSlot = inItemSlots[i];
-                        if (itemSlot.item == null) continue;
-
-                        MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
+                        var player = gameMgr.playerList[0];
+                        player.RemoveArmor(item.armorData.ID, item.equipSlot);
                     }
-                    rigStorage.SetStorageSize(Vector2Int.zero);
-                }
-                break;
-            case ItemType.Backpack:
-                var backpackStorage = item.equipSlot.myStorage;
-                if (backpackStorage != null)
-                {
-                    var inItemSlots = backpackStorage.itemSlots.FindAll(x => x.item != null);
-                    for (int i = 0; i < inItemSlots.Count; i++)
+                    break;
+                case ItemType.Body:
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
-                        var itemSlot = inItemSlots[i];
-                        if (itemSlot.item == null) continue;
-
-                        MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
+                        var player = gameMgr.playerList[0];
+                        player.RemoveArmor(item.armorData.ID, item.equipSlot);
                     }
-                    backpackStorage.SetStorageSize(Vector2Int.zero);
-                }
-                break;
-            case ItemType.MainWeapon:
-                //item.SetLoadedBulletCount();
-                if (gameMgr != null && gameMgr.playerList.Count > 0)
-                {
-                    var player = gameMgr.playerList[0];
-                    player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
-                }
-                break;
-            case ItemType.SubWeapon:
-                //item.SetLoadedBulletCount();
-                if (gameMgr != null && gameMgr.playerList.Count > 0)
-                {
-                    var player = gameMgr.playerList[0];
-                    player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
-                }
-                break;
-            case ItemType.Bullet:
-                onItem = item.equipSlot.popUp.item;
-                if (onItem.weaponData.magType == MagazineType.IntMagazine && onItem.weaponData.equipMag.loadedBullets.Count > 0)
-                {
-                    var chamberBullet = onItem.weaponData.equipMag.loadedBullets[^1];
-                    onItem.weaponData.chamberBullet = chamberBullet;
-                    onItem.weaponData.equipMag.loadedBullets.Remove(chamberBullet);
-                }
-                else
-                {
-                    onItem.weaponData.chamberBullet = null;
-                    onItem.weaponData.isChamber = false;
-                }
-                item.countText.enabled = true;
-                item.equipSlot.popUp.item.FixTextTheItemCount();
-                break;
-            case ItemType.Magazine:
-                onItem = item.equipSlot.popUp.item;
-                onItem.weaponData.equipMag = null;
-                onItem.weaponData.isMag = false;
-                onItem.FixTextTheItemCount();
-                if (gameMgr != null && gameMgr.playerList.Count > 0)
-                {
-                    var player = gameMgr.playerList[0];
-                    player.SetAbility();
-                    var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
-                    if (weapon != null) weapon.SetParts();
-                }
-                break;
-            default:
-                if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
-                {
-                    var find = item.equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
-                    item.equipSlot.popUp.item.weaponData.equipPartsList.Remove(find);
+                    break;
+                case ItemType.Rig:
+                    var rigStorage = item.equipSlot.myStorage;
+                    if (rigStorage != null)
+                    {
+                        var inItemSlots = rigStorage.itemSlots.FindAll(x => x.item != null);
+                        for (int i = 0; i < inItemSlots.Count; i++)
+                        {
+                            var itemSlot = inItemSlots[i];
+                            if (itemSlot.item == null) continue;
+
+                            MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
+                        }
+                        rigStorage.SetStorageSize(Vector2Int.zero);
+                    }
+                    break;
+                case ItemType.Backpack:
+                    var backpackStorage = item.equipSlot.myStorage;
+                    if (backpackStorage != null)
+                    {
+                        var inItemSlots = backpackStorage.itemSlots.FindAll(x => x.item != null);
+                        for (int i = 0; i < inItemSlots.Count; i++)
+                        {
+                            var itemSlot = inItemSlots[i];
+                            if (itemSlot.item == null) continue;
+
+                            MoveItemInMyStorage(itemSlot.item, otherStorage.itemSlots);
+                        }
+                        backpackStorage.SetStorageSize(Vector2Int.zero);
+                    }
+                    break;
+                case ItemType.MainWeapon:
+                    //item.SetLoadedBulletCount();
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var player = gameMgr.playerList[0];
+                        player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+                    }
+                    break;
+                case ItemType.SubWeapon:
+                    //item.SetLoadedBulletCount();
+                    if (gameMgr != null && gameMgr.playerList.Count > 0)
+                    {
+                        var player = gameMgr.playerList[0];
+                        player.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+                    }
+                    break;
+                case ItemType.Bullet:
+                    onItem = item.equipSlot.popUp.item;
+                    if (onItem.weaponData.magType == MagazineType.IntMagazine && onItem.weaponData.equipMag.loadedBullets.Count > 0)
+                    {
+                        var chamberBullet = onItem.weaponData.equipMag.loadedBullets[^1];
+                        onItem.weaponData.chamberBullet = chamberBullet;
+                        onItem.weaponData.equipMag.loadedBullets.Remove(chamberBullet);
+                    }
+                    else
+                    {
+                        onItem.weaponData.chamberBullet = null;
+                        onItem.weaponData.isChamber = false;
+                    }
+                    item.countText.enabled = true;
+                    item.equipSlot.popUp.item.FixTextTheItemCount();
+                    break;
+                case ItemType.Magazine:
+                    onItem = item.equipSlot.popUp.item;
+                    onItem.weaponData.equipMag = null;
+                    onItem.weaponData.isMag = false;
+                    onItem.FixTextTheItemCount();
                     if (gameMgr != null && gameMgr.playerList.Count > 0)
                     {
                         var player = gameMgr.playerList[0];
                         player.SetAbility();
-                        var weapon = player.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
+                        var weapon = player.weapons.Find(x => x.weaponData == onItem.weaponData);
                         if (weapon != null) weapon.SetParts();
                     }
-                }
-                break;
+                    break;
+                default:
+                    if (item.partsData != null && item.partsData.type != WeaponPartsType.None)
+                    {
+                        var find = item.equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == item.partsData.ID);
+                        item.equipSlot.popUp.item.weaponData.equipPartsList.Remove(find);
+                        if (gameMgr != null && gameMgr.playerList.Count > 0)
+                        {
+                            var player = gameMgr.playerList[0];
+                            player.SetAbility();
+                            var weapon = player.weapons.Find(x => x.weaponData == item.equipSlot.popUp.item.weaponData);
+                            if (weapon != null) weapon.SetParts();
+                        }
+                    }
+                    break;
+            }
+
+            //if (gameMgr != null && gameMgr.playerList.Count > 0
+            //&& (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
+            //{
+            //    var playerCtr = gameMgr.playerList[0];
+            //    //var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
+            //    playerCtr.RemoveWeapon(item.weaponData.ID, item.equipSlot);
+            //}
+
+            item.equipSlot.item = null;
+            item.equipSlot.SetItemCount();
+            if (activePopUp.Contains(item.equipSlot.popUp))
+            {
+                item.equipSlot.popUp.item.SetPartsSample();
+                item.equipSlot.popUp.PopUp_ItemInformation(item.equipSlot.popUp.item);
+            }
+            item.equipSlot = null;
+            item.FixTextTheItemCount();
+
         }
 
-        //if (gameMgr != null && gameMgr.playerList.Count > 0
-        //&& (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon))
-        //{
-        //    var playerCtr = gameMgr.playerList[0];
-        //    //var weaponName = item.weaponData.GetWeaponName(item.equipSlot.type);
-        //    playerCtr.RemoveWeapon(item.weaponData.ID, item.equipSlot);
-        //}
-
-        item.equipSlot.item = null;
-        item.equipSlot.SetItemCount();
-        if (activePopUp.Contains(item.equipSlot.popUp))
+        if (gameMgr != null && gameMgr.playerList.Count > 0)
         {
-            item.equipSlot.popUp.item.SetPartsSample();
-            item.equipSlot.popUp.PopUp_ItemInformation(item.equipSlot.popUp.item);
+            var player = gameMgr.playerList[0];
+            player.SetTotalWeight();
         }
-        item.equipSlot = null;
-        item.FixTextTheItemCount();
     }
 
     /// <summary>

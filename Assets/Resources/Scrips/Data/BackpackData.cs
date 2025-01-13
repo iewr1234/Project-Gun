@@ -8,6 +8,7 @@ public class BackpackDataInfo
     public string indexName;
     public string ID;
     public string backpackName;
+    public int weight;
     public Vector2Int storageSize;
 
     public BackpackDataInfo CopyData()
@@ -17,6 +18,7 @@ public class BackpackDataInfo
             indexName = indexName,
             ID = ID,
             backpackName = backpackName,
+            weight = weight,
             storageSize = storageSize,
         };
 

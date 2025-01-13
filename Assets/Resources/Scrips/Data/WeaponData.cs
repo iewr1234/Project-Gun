@@ -50,7 +50,7 @@ public class WeaponDataInfo
 
     [Tooltip("모델")] public int model;
     [Tooltip("구경")] public float caliber;
-    [Tooltip("무게")] public float weight;
+    [Tooltip("무게")] public int weight;
     [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType weaponType;
     [Tooltip("탄창분류")] public MagazineType magType;
@@ -167,7 +167,7 @@ public class WeaponDataInfo
     //    }
     //}
 
-    public float GetWeaponWeight()
+    public int GetWeaponWeight()
     {
         var totalWegiht = weight;
         if (isMag)
@@ -185,7 +185,7 @@ public class WeaponDataInfo
             totalWegiht += parts.weight;
         }
 
-        return DataUtility.GetFloorValue(totalWegiht, 1);
+        return totalWegiht;
     }
 
     public int GetWeaponRebound(int propellant)

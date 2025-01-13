@@ -15,7 +15,7 @@ public class MagazineDataInfo
 
     public List<int> compatModel;
     public float compatCaliber;
-    public float weight;
+    public int weight;
     public int magSize;
     [Space(5f)]
 

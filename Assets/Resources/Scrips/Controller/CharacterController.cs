@@ -170,7 +170,7 @@ public class CharacterController : MonoBehaviour
 
     [Header("[Status]")]
     [Tooltip("힘")] public int strength;
-    [Tooltip("활력")] public int vitality;
+    [Tooltip("신체")] public int vitality;
     [Tooltip("지능")] public int intellect;
     [Tooltip("지혜")] public int wisdom;
     [Tooltip("민첩")] public int agility;
@@ -179,6 +179,10 @@ public class CharacterController : MonoBehaviour
     public float mobility;
     [HideInInspector] public int maxMoveNum;
     [HideInInspector] public int shootMoveNum;
+
+    public float MaxWeight => 50000 + strength * 1000;
+    [Space(5f)] public float maxWeight;
+    public float currentWeight;
 
     [Header("[Physical]")]
     [Tooltip("최대 행동력")] public int maxAction;
@@ -361,6 +365,7 @@ public class CharacterController : MonoBehaviour
             agility = playerData.agility;
             dexterity = playerData.dexterity;
             mobility = Mobility;
+            maxWeight = MaxWeight;
 
             maxAction = playerData.maxAction;
             action = maxAction;
@@ -386,6 +391,7 @@ public class CharacterController : MonoBehaviour
             agility = enemyData.agility;
             dexterity = enemyData.dexterity;
             mobility = Mobility;
+            maxWeight = MaxWeight;
 
             maxAction = enemyData.maxAction;
             action = maxAction;
@@ -1805,11 +1811,18 @@ public class CharacterController : MonoBehaviour
                 if (ownerType == CharacterOwner.Enemy) gameMgr.SetPositionOfAI(ownerType);
                 break;
             case false:
-                var newStamina = 30 + (action * 10);
+                RecoveryStamina();
                 SetAction(maxAction);
-                SetStamina(newStamina);
                 break;
         }
+    }
+
+    private void RecoveryStamina()
+    {
+        float rs_turn = DataUtility.GetFloorValue(15 + 30 * ((float)vitality / (vitality + 100)), 1);
+        float rs_action = DataUtility.GetFloorValue(5 + 10 * ((float)vitality / (vitality + 100)), 1);
+        int addStamina = Mathf.FloorToInt(rs_turn + (action * rs_action));
+        SetStamina(addStamina);
     }
 
     /// <summary>
@@ -3163,6 +3176,76 @@ public class CharacterController : MonoBehaviour
     public Vector3 GetAimTarget()
     {
         return mainHolsterPivot.position + DataUtility.aimInterval;
+    }
+
+    public void SetTotalWeight()
+    {
+        if (ownerType != CharacterOwner.Player) return;
+
+        int totalWeight = 0;
+        foreach (var weapon in weapons)
+        {
+            int weaponWeight = weapon.weaponData.GetWeaponWeight();
+            totalWeight += weaponWeight;
+        }
+        foreach (var armor in armors)
+        {
+            int armorWeight = armor.armorData.weight;
+            totalWeight += armorWeight;
+        }
+        foreach (var storage in gameMgr.gameMenuMgr.myStorages)
+        {
+            switch (storage.type)
+            {
+                case MyStorageType.Pocket:
+                    totalWeight += storage.GetTotalWeight();
+                    break;
+                case MyStorageType.Backpack:
+                    if (storage.equipSlot.item != null) totalWeight += storage.equipSlot.item.backpackData.weight;
+                    totalWeight += storage.GetTotalWeight();
+                    break;
+                case MyStorageType.Rig:
+                    if (storage.equipSlot.item != null) totalWeight += storage.equipSlot.item.rigData.weight;
+                    totalWeight += storage.GetTotalWeight();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        currentWeight = totalWeight;
+        gameMgr.gameMenuMgr.weightText.text = $"{DataUtility.GetFloorValue(currentWeight / 1000f, 1)}/{DataUtility.GetFloorValue(maxWeight / 1000f, 1)}";
+    }
+
+    public float GetMobility()
+    {
+        float MOB = mobility;
+        int weightRate = Mathf.RoundToInt(currentWeight / maxWeight * 100);
+        if (weightRate < 55)
+        {
+            //case 1: 55미만
+            return MOB;
+        }
+        else if (weightRate < 65)
+        {
+            //case 2: 55이상 65미만
+            return DataUtility.GetFloorValue(MOB * 0.9f, 2);
+        }
+        else if (weightRate < 80)
+        {
+            //case 3: 65이상 80미만
+            return DataUtility.GetFloorValue(MOB * 0.8f, 2);
+        }
+        else if (weightRate < 95)
+        {
+            //case 5: 80이상 95미만
+            return DataUtility.GetFloorValue(MOB * 0.5f, 2);
+        }
+        else
+        {
+            //case 5: 95이상
+            return DataUtility.GetFloorValue(MOB * 0.2f, 2);
+        }
     }
 
     public void EnterTheBase()

@@ -855,7 +855,7 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)WeaponVariable.PrefabName],
                     model = int.Parse(data[(int)WeaponVariable.Model]),
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
-                    weight = float.Parse(data[(int)WeaponVariable.Weight]),
+                    weight = int.Parse(data[(int)WeaponVariable.Weight]),
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     weaponType = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     magType = (MagazineType)int.Parse(data[(int)WeaponVariable.MagazineType]),
@@ -959,7 +959,7 @@ public class DataManager : MonoBehaviour
                     magName = "InternalMagazine",
                     compatModel = new List<int> { weaponInfo.model },
                     compatCaliber = weaponInfo.caliber,
-                    weight = 0f,
+                    weight = 0,
                     magSize = intMagMax,
                 };
                 weaponInfo.equipMag = intMag;
@@ -1016,7 +1016,7 @@ public class DataManager : MonoBehaviour
                     prefabName = data[(int)WeaponPartsVariable.PrefabName],
                     partsName = data[(int)WeaponPartsVariable.PartsName],
                     compatModel = ReadCompatModelInfo(data[(int)WeaponPartsVariable.CompatModel]),
-                    weight = float.Parse(data[(int)WeaponPartsVariable.Weight]),
+                    weight = int.Parse(data[(int)WeaponPartsVariable.Weight]),
                     type = (WeaponPartsType)int.Parse(data[(int)WeaponPartsVariable.PartsType]),
                     size = (WeaponPartsSize)int.Parse(data[(int)WeaponPartsVariable.Size]),
                     RPM = int.Parse(data[(int)WeaponPartsVariable.RPM]),
@@ -1077,7 +1077,7 @@ public class DataManager : MonoBehaviour
                     magName = data[(int)MagazineVariable.MagazineName],
                     compatModel = ReadCompatModelInfo(data[(int)MagazineVariable.CompatModel]),
                     compatCaliber = float.Parse(data[(int)MagazineVariable.CompatCaliber]),
-                    weight = float.Parse(data[(int)MagazineVariable.Weight]),
+                    weight = int.Parse(data[(int)MagazineVariable.Weight]),
                     magSize = int.Parse(data[(int)MagazineVariable.MagazineSize]),
                 };
                 magData.magInfos.Add(magInfo);
@@ -1147,7 +1147,7 @@ public class DataManager : MonoBehaviour
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
                     pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),
                     spread = int.Parse(data[(int)BulletVariable.Spread]),
-                    weight = float.Parse(data[(int)BulletVariable.Weight]),
+                    weight = int.Parse(data[(int)BulletVariable.Weight]),
                     MOA = int.Parse(data[(int)BulletVariable.MOA]),
                     stability = int.Parse(data[(int)BulletVariable.Stability]),
                     rebound = int.Parse(data[(int)BulletVariable.Rebound]),
@@ -1209,7 +1209,7 @@ public class DataManager : MonoBehaviour
                     FX_name = data[(int)GrenadeVariable.FX_Name],
                     throwRange = float.Parse(data[(int)GrenadeVariable.ThrowRange]),
                     blastRange = float.Parse(data[(int)GrenadeVariable.BlastRange]),
-                    weight = float.Parse(data[(int)GrenadeVariable.Weight]),
+                    weight = int.Parse(data[(int)GrenadeVariable.Weight]),
                     damage = int.Parse(data[(int)GrenadeVariable.Damage]),
                 };
                 grenadeData.grenadeInfos.Add(bulletInfo);
@@ -1222,12 +1222,13 @@ public class DataManager : MonoBehaviour
 
     #region Armor Data
     [HideInInspector] public ArmorData armorData;
-    private readonly string armorDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1373614489&range=A2:E";
+    private readonly string armorDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1373614489&range=A2:F";
     private enum ArmorVariable
     {
         ID,
         ArmorName,
         PrefabName,
+        Weight,
         MaxBulletproof,
         MaxDurability,
     }
@@ -1255,6 +1256,7 @@ public class DataManager : MonoBehaviour
                     ID = data[(int)ArmorVariable.ID],
                     armorName = data[(int)ArmorVariable.ArmorName],
                     prefabName = data[(int)ArmorVariable.PrefabName],
+                    weight = int.Parse(data[(int)ArmorVariable.Weight]),
                     maxBulletProof = float.Parse(data[(int)ArmorVariable.MaxBulletproof]),
                     maxDurability = int.Parse(data[(int)ArmorVariable.MaxDurability]),
                 };
@@ -1267,11 +1269,12 @@ public class DataManager : MonoBehaviour
 
     #region Rig Data
     [HideInInspector] public RigData rigData;
-    private readonly string rigDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=3068856&range=A3:D";
+    private readonly string rigDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=3068856&range=A3:E";
     private enum RigVariable
     {
         ID,
         RigName,
+        Weight,
         X_Size,
         Y_Size,
     }
@@ -1298,6 +1301,7 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)RigVariable.ID]}: {data[(int)RigVariable.RigName]}",
                     ID = data[(int)RigVariable.ID],
                     rigName = data[(int)RigVariable.RigName],
+                    weight = int.Parse(data[(int)RigVariable.Weight]),
                     storageSize = new Vector2Int(int.Parse(data[(int)RigVariable.X_Size]), int.Parse(data[(int)RigVariable.Y_Size])),
                 };
                 rigData.rigInfos.Add(rigInfo);
@@ -1309,11 +1313,12 @@ public class DataManager : MonoBehaviour
 
     #region Backpack Data
     [HideInInspector] public BackpackData backpackData;
-    private readonly string backpackDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=954121519&range=A3:D";
+    private readonly string backpackDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=954121519&range=A3:E";
     private enum BackpackVariable
     {
         ID,
         BackpackName,
+        Weight,
         X_Size,
         Y_Size,
     }
@@ -1340,6 +1345,7 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)BackpackVariable.ID]}: {data[(int)BackpackVariable.BackpackName]}",
                     ID = data[(int)BackpackVariable.ID],
                     backpackName = data[(int)BackpackVariable.BackpackName],
+                    weight = int.Parse(data[(int)BackpackVariable.Weight]),
                     storageSize = new Vector2Int(int.Parse(data[(int)BackpackVariable.X_Size]), int.Parse(data[(int)BackpackVariable.Y_Size])),
                 };
                 backpackData.backpackInfos.Add(backpackInfo);

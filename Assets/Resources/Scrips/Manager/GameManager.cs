@@ -289,6 +289,7 @@ public class GameManager : MonoBehaviour
             {
                 charCtr.AddArmor(bodySlot.item);
             }
+            charCtr.SetTotalWeight();
 
             return charCtr;
         }
@@ -1264,11 +1265,12 @@ public class GameManager : MonoBehaviour
         queue.Enqueue(charCtr.currentNode);
         visited.Add(charCtr.currentNode);
 
-        float tiredMOB = 0.5f;
+        float MOB = charCtr.GetMobility();
+        float tiredMOB = 0.2f;
         int AP = charCtr.action;
         int activeAP = Mathf.Min(AP, charCtr.stamina / 5);
-        charCtr.maxMoveNum = AP == activeAP ? Mathf.FloorToInt(charCtr.Mobility * AP)
-                                            : Mathf.FloorToInt((charCtr.Mobility * activeAP) + (tiredMOB * (AP - activeAP)));
+        charCtr.maxMoveNum = AP == activeAP ? Mathf.FloorToInt(MOB * AP)
+                                            : Mathf.FloorToInt((MOB * activeAP) + (tiredMOB * (AP - activeAP)));
         int canShotMoveNum = GetCanShotMoveNum();
 
         int moveRange = 0;
@@ -1278,8 +1280,8 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < nodesInCurrentRange; i++)
             {
                 FieldNode node = queue.Dequeue();
-                node.moveCost = moveRange <= charCtr.Mobility * activeAP ? Mathf.CeilToInt(moveRange / charCtr.mobility)
-                                                                         : Mathf.CeilToInt((moveRange - (charCtr.Mobility * activeAP)) / tiredMOB + activeAP);
+                node.moveCost = moveRange <= MOB * activeAP ? Mathf.CeilToInt(moveRange / MOB)
+                                                            : Mathf.CeilToInt((moveRange - (MOB * activeAP)) / tiredMOB + activeAP);
                 movableNodes.Add(node); // 이동 가능 노드로 추가
 
                 foreach (FieldNode onAxisNode in node.onAxisNodes)
@@ -1306,8 +1308,8 @@ public class GameManager : MonoBehaviour
             if (AP < shotAP) return 0;
 
             int canUseAP = AP - shotAP;
-            return canUseAP <= activeAP ? Mathf.FloorToInt((AP - shotAP) * charCtr.Mobility)
-                                        : Mathf.FloorToInt(activeAP * charCtr.Mobility + (canUseAP - activeAP) * tiredMOB);
+            return canUseAP <= activeAP ? Mathf.FloorToInt((AP - shotAP) * MOB)
+                                        : Mathf.FloorToInt(activeAP * MOB + (canUseAP - activeAP) * tiredMOB);
         }
     }
 
