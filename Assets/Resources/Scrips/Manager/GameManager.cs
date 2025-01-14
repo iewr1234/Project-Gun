@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static CharacterController;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public enum GameState
 {
@@ -936,7 +936,7 @@ public class GameManager : MonoBehaviour
             Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
             return;
         }
-        if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost)
+        if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost_shot)
         {
             Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
             return;
@@ -962,7 +962,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        var totalCost = weapon.weaponData.actionCost + selectChar.fiarRate + (int)selectChar.sMode;
+        var totalCost = weapon.weaponData.actionCost_shot + selectChar.fiarRate + (int)selectChar.sMode;
         if (totalCost > selectChar.action)
         {
             Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
@@ -1129,20 +1129,34 @@ public class GameManager : MonoBehaviour
                                                       && (x.itemData.type == ItemType.MainWeapon || x.itemData.type == ItemType.SubWeapon)
                                                        && x.weaponData.ID == weapon.weaponData.ID);
         var ammoIcon = uiMgr.GetAmmoIcon();
+        int useAP;
         if (ammoIcon.type == AmmoIconType.Chamber)
         {
+            useAP = 1;
+            if (useAP > selectChar.action)
+            {
+                Debug.Log("행동이 소모량보다 적음");
+                return;
+            }
+
             selectChar.AddCommand(CommandType.Reload, false, true);
             LoadChamber(weapon.weaponData.equipMag);
             selectChar.SetAbility();
         }
         else
         {
-            //var rigItem = rigItems[uiMgr.iconIndex];
             var rigItem = ammoIcon.item;
             bool loadChamber;
             switch (weapon.weaponData.magType)
             {
                 case MagazineType.Magazine:
+                    useAP = Mathf.CeilToInt(weapon.weaponData.actionCost_reload);
+                    if (useAP > selectChar.action)
+                    {
+                        Debug.Log("행동이 소모량보다 적음");
+                        return;
+                    }
+
                     loadChamber = !weapon.weaponData.isChamber && rigItem.magData.loadedBullets.Count > 0;
                     if (weapon.weaponData.isMag)
                     {
@@ -1157,18 +1171,26 @@ public class GameManager : MonoBehaviour
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
                     break;
                 default:
+                    useAP = Mathf.CeilToInt(weapon.weaponData.actionCost_reload * ammoIcon.value);
+                    if (useAP > selectChar.action)
+                    {
+                        Debug.Log("행동이 소모량보다 적음");
+                        return;
+                    }
+
                     loadChamber = !weapon.weaponData.isChamber;
                     selectChar.AddCommand(CommandType.Reload, ammoIcon.value, true, loadChamber);
                     gameMenuMgr.QuickEquip(weaponItem, rigItem);
                     break;
             }
         }
+        selectChar.SetAction(-useAP);
+        Debug.Log($"{selectChar.name}: 재장전(AP소모량 = {useAP})");
         selectChar = null;
         uiMgr.SetActiveAmmoIcon(false);
         uiMgr.reloadButton.SetActiveButton(false);
         rigItems.Clear();
         gameState = GameState.None;
-        //camMgr.lockCam = false;
 
         void LoadChamber(MagazineDataInfo magData)
         {
@@ -1267,8 +1289,9 @@ public class GameManager : MonoBehaviour
 
         float MOB = charCtr.GetMobility();
         float tiredMOB = 0.2f;
+        int useStamina_move = charCtr.GetUseStamina(5);
         int AP = charCtr.action;
-        int activeAP = Mathf.Min(AP, charCtr.stamina / 5);
+        int activeAP = Mathf.Min(AP, charCtr.stamina / useStamina_move);
         charCtr.maxMoveNum = AP == activeAP ? Mathf.FloorToInt(MOB * AP)
                                             : Mathf.FloorToInt((MOB * activeAP) + (tiredMOB * (AP - activeAP)));
         int canShotMoveNum = GetCanShotMoveNum();
@@ -1304,7 +1327,7 @@ public class GameManager : MonoBehaviour
         {
             if (charCtr.currentWeapon == null) return 0;
 
-            int shotAP = charCtr.currentWeapon.weaponData.actionCost;
+            int shotAP = charCtr.currentWeapon.weaponData.actionCost_shot;
             if (AP < shotAP) return 0;
 
             int canUseAP = AP - shotAP;
@@ -2082,7 +2105,7 @@ public class GameManager : MonoBehaviour
         {
             enemy.targetIndex = Random.Range(0, enemy.targetList.Count);
             var targetInfo = enemy.targetList[enemy.targetIndex];
-            if (enemy.action < enemy.currentWeapon.weaponData.actionCost)
+            if (enemy.action < enemy.currentWeapon.weaponData.actionCost_shot)
             {
                 enemy.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
                 enemy.SetTurnEnd(true);
@@ -2099,7 +2122,7 @@ public class GameManager : MonoBehaviour
                 schedule.indexName = $"{schedule.targetInfo.target.name}: {schedule.type}";
                 scheduleList.Add(schedule);
 
-                var totalCost = enemy.currentWeapon.weaponData.actionCost;
+                var totalCost = enemy.currentWeapon.weaponData.actionCost_shot;
                 var remCost = enemy.action - totalCost;
                 if (remCost > 0)
                 {

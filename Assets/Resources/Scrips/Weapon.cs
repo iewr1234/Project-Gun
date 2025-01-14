@@ -708,7 +708,7 @@ public class Weapon : MonoBehaviour
             void CheckStabilityStamina(int index)
             {
                 // 충격량
-                impact = Mathf.CeilToInt(propellant * 0.1f * 3 / (1 + stability * 0.02f));
+                impact = weapon.charCtr.GetUseStamina(Mathf.CeilToInt(propellant * 0.1f * 3 / (1 + stability * 0.02f)));
 
                 // 현재 스테미너 - 충격량
                 curStamina -= impact;

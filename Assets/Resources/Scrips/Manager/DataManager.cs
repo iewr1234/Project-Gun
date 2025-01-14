@@ -795,7 +795,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AB";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AC";
     private enum WeaponVariable
     {
         ID,
@@ -814,7 +814,8 @@ public class DataManager : MonoBehaviour
         RPM,
         Range,
         WatchAngle,
-        ActionCost,
+        ActionCost_shot,
+        ActionCost_reload,
         MOA,
         Stability,
         Rebound,
@@ -866,7 +867,8 @@ public class DataManager : MonoBehaviour
                     RPM = int.Parse(data[(int)WeaponVariable.RPM]),
                     range = float.Parse(data[(int)WeaponVariable.Range]),
                     watchAngle = int.Parse(data[(int)WeaponVariable.WatchAngle]),
-                    actionCost = int.Parse(data[(int)WeaponVariable.ActionCost]),
+                    actionCost_shot = int.Parse(data[(int)WeaponVariable.ActionCost_shot]),
+                    actionCost_reload = float.Parse(data[(int)WeaponVariable.ActionCost_reload]),
                     MOA = float.Parse(data[(int)WeaponVariable.MOA]),
                     stability = int.Parse(data[(int)WeaponVariable.Stability]),
                     rebound = int.Parse(data[(int)WeaponVariable.Rebound]),

@@ -484,6 +484,8 @@ public class FieldNode : MonoBehaviour
 
     public void SetItemCase(bool value)
     {
+        if (baseType == BaseCampMarker.Storage_Node) return;
+
         itemCase.SetActive(value);
     }
 

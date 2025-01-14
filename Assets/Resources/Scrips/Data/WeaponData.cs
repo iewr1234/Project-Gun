@@ -61,7 +61,8 @@ public class WeaponDataInfo
     [Tooltip("발사속도")] public int RPM;
     [Tooltip("사거리")] public float range;
     [Tooltip("경계각")] public int watchAngle;
-    [Tooltip("행동소모")] public int actionCost;
+    [Tooltip("사격행동 소모량")] public int actionCost_shot;
+    [Tooltip("재장전행동 소모량")] public float actionCost_reload;
     [Space(5f)]
 
     [Tooltip("정확도")] public float MOA;
@@ -109,7 +110,8 @@ public class WeaponDataInfo
             RPM = RPM,
             range = range,
             watchAngle = watchAngle,
-            actionCost = actionCost,
+            actionCost_shot = actionCost_shot,
+            actionCost_reload = actionCost_reload,
 
             MOA = MOA,
             stability = stability,

@@ -128,8 +128,6 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public CharacterUI charUI;
     public List<Weapon> weapons;
     public List<Armor> armors;
-    //public ArmorDataInfo headArmor;
-    //public ArmorDataInfo bodyArmor;
     public GrenadeHandler grenadeHlr;
 
     [Space(5f)] public DropTableDataInfo dropTableData;
@@ -1811,18 +1809,10 @@ public class CharacterController : MonoBehaviour
                 if (ownerType == CharacterOwner.Enemy) gameMgr.SetPositionOfAI(ownerType);
                 break;
             case false:
-                RecoveryStamina();
+                SetStamina(GetRecoveryStamina());
                 SetAction(maxAction);
                 break;
         }
-    }
-
-    private void RecoveryStamina()
-    {
-        float rs_turn = DataUtility.GetFloorValue(15 + 30 * ((float)vitality / (vitality + 100)), 1);
-        float rs_action = DataUtility.GetFloorValue(5 + 10 * ((float)vitality / (vitality + 100)), 1);
-        int addStamina = Mathf.FloorToInt(rs_turn + (action * rs_action));
-        SetStamina(addStamina);
     }
 
     /// <summary>
@@ -2419,7 +2409,7 @@ public class CharacterController : MonoBehaviour
             targetInfo.target.charUI.components.SetActive(true);
 
             gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
-            gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost);
+            gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost_shot);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
             gameMgr.uiMgr.aimGauge.components.SetActive(true);
             gameMgr.uiMgr.SetHitAccuracy(targetInfo.shooter);
@@ -2547,9 +2537,9 @@ public class CharacterController : MonoBehaviour
     public void SetWatch()
     {
         if (currentWeapon == null) return;
-        if (action < currentWeapon.weaponData.actionCost) return;
+        if (action < currentWeapon.weaponData.actionCost_shot) return;
 
-        SetAction(-currentWeapon.weaponData.actionCost);
+        SetAction(-currentWeapon.weaponData.actionCost_shot);
         if (animator.GetBool("isCover"))
         {
             if (watchInfo.shooterCover == null)
@@ -3217,34 +3207,60 @@ public class CharacterController : MonoBehaviour
         gameMgr.gameMenuMgr.weightText.text = $"{DataUtility.GetFloorValue(currentWeight / 1000f, 1)}/{DataUtility.GetFloorValue(maxWeight / 1000f, 1)}";
     }
 
+    public int GetWeightRate()
+    {
+        return Mathf.FloorToInt(currentWeight / maxWeight * 100);
+    }
+
     public float GetMobility()
     {
+        int weightRate = GetWeightRate();
         float MOB = mobility;
-        int weightRate = Mathf.RoundToInt(currentWeight / maxWeight * 100);
-        if (weightRate < 55)
+        switch (weightRate)
         {
-            //case 1: 55미만
-            return MOB;
+            case < 55:
+                return MOB;
+            case < 65:
+                return DataUtility.GetFloorValue(MOB * 0.9f, 2);
+            case < 80:
+                return DataUtility.GetFloorValue(MOB * 0.8f, 2);
+            case < 95:
+                return DataUtility.GetFloorValue(MOB * 0.5f, 2);
+            default:
+                return DataUtility.GetFloorValue(MOB * 0.2f, 2);
         }
-        else if (weightRate < 65)
+    }
+
+    public int GetUseStamina(int useStamina)
+    {
+        int weightRate = GetWeightRate();
+        switch (weightRate)
         {
-            //case 2: 55이상 65미만
-            return DataUtility.GetFloorValue(MOB * 0.9f, 2);
+            case < 65:
+                return useStamina;
+            case < 80:
+                return Mathf.FloorToInt(useStamina * 1.2f);
+            case < 95:
+                return Mathf.FloorToInt(useStamina * 1.5f);
+            default:
+                return useStamina * 2;
         }
-        else if (weightRate < 80)
+    }
+
+    private int GetRecoveryStamina()
+    {
+        int weightRate = GetWeightRate();
+        float rs_turn = DataUtility.GetFloorValue(15 + 30 * ((float)vitality / (vitality + 100)), 1);
+        float rs_action = DataUtility.GetFloorValue(5 + 10 * ((float)vitality / (vitality + 100)), 1);
+        float result = rs_turn + (action * rs_action);
+        switch (weightRate)
         {
-            //case 3: 65이상 80미만
-            return DataUtility.GetFloorValue(MOB * 0.8f, 2);
-        }
-        else if (weightRate < 95)
-        {
-            //case 5: 80이상 95미만
-            return DataUtility.GetFloorValue(MOB * 0.5f, 2);
-        }
-        else
-        {
-            //case 5: 95이상
-            return DataUtility.GetFloorValue(MOB * 0.2f, 2);
+            case < 80:
+                return Mathf.FloorToInt(result);
+            case < 95:
+                return Mathf.FloorToInt(result * 0.8f);
+            default:
+                return Mathf.FloorToInt(result * 0.5f);
         }
     }
 

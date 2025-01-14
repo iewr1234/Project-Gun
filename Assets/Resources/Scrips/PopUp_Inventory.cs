@@ -283,7 +283,7 @@ public class PopUp_Inventory : MonoBehaviour
                 $"{item.weaponData.MOA}",
                 $"{item.weaponData.stability}",
                 $"{item.weaponData.rebound}",
-                $"{item.weaponData.actionCost}"
+                $"{item.weaponData.actionCost_shot}"
             };
 
             for (int i = 0; i < labels.Length; i++)

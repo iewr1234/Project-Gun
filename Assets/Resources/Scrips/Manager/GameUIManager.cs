@@ -371,7 +371,7 @@ public class GameUIManager : MonoBehaviour
 
     public void SetActionPoint_Aim(CharacterController charCtr)
     {
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost_shot + charCtr.fiarRate + (int)charCtr.sMode;
         if (totalCost > charCtr.action)
         {
             actionPointText.color = Color.red;
@@ -392,7 +392,7 @@ public class GameUIManager : MonoBehaviour
         }
 
         fireRateGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.fiarRate + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost_shot + charCtr.fiarRate + (int)charCtr.sMode;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootNum(charCtr);
         SetActionPoint_Aim(charCtr);
@@ -408,7 +408,7 @@ public class GameUIManager : MonoBehaviour
         }
 
         //sightGauge.sprite = Resources.Load<Sprite>(aimUIGaugePath + $"{charCtr.sightRate + 1}");
-        var totalCost = charCtr.currentWeapon.weaponData.actionCost + charCtr.fiarRate + (int)charCtr.sMode;
+        var totalCost = charCtr.currentWeapon.weaponData.actionCost_shot + charCtr.fiarRate + (int)charCtr.sMode;
         SetUsedActionPoint_Bottom(charCtr, totalCost);
         SetShootingModeText(charCtr.sMode);
         SetActionPoint_Aim(charCtr);

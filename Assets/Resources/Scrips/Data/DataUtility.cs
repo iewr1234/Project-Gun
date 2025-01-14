@@ -181,7 +181,7 @@ public static class DataUtility
     /// 조준 시 스테미나 사용량 계산
     /// </summary>
     /// <returns></returns>
-    public static int GetAimStaminaCost(CharacterController charCtr)
+    public static int GetAimingStaminaCost(CharacterController charCtr)
     {
         var weaponData = charCtr.currentWeapon.weaponData;
         var rebound = charCtr.rebound;
