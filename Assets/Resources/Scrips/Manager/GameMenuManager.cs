@@ -1955,17 +1955,19 @@ public class GameMenuManager : MonoBehaviour
                     break;
                 case ItemType.Bullet:
                     onItem = item.equipSlot.popUp.item;
-                    if (onItem.weaponData.magType == MagazineType.IntMagazine && onItem.weaponData.equipMag.loadedBullets.Count > 0)
-                    {
-                        var chamberBullet = onItem.weaponData.equipMag.loadedBullets[^1];
-                        onItem.weaponData.chamberBullet = chamberBullet;
-                        onItem.weaponData.equipMag.loadedBullets.Remove(chamberBullet);
-                    }
-                    else
-                    {
-                        onItem.weaponData.chamberBullet = null;
-                        onItem.weaponData.isChamber = false;
-                    }
+                    //if (onItem.weaponData.magType == MagazineType.IntMagazine && onItem.weaponData.equipMag.loadedBullets.Count > 0)
+                    //{
+                    //    var chamberBullet = onItem.weaponData.equipMag.loadedBullets[^1];
+                    //    onItem.weaponData.chamberBullet = chamberBullet;
+                    //    onItem.weaponData.equipMag.loadedBullets.Remove(chamberBullet);
+                    //}
+                    //else
+                    //{
+                    //    onItem.weaponData.chamberBullet = null;
+                    //    onItem.weaponData.isChamber = false;
+                    //}
+                    onItem.weaponData.chamberBullet = null;
+                    onItem.weaponData.isChamber = false;
                     item.countText.enabled = true;
                     item.equipSlot.popUp.item.FixTextTheItemCount();
                     break;

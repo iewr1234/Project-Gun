@@ -3121,10 +3121,10 @@ public class CharacterController : MonoBehaviour
         //return weapon;
     }
 
-    public Weapon GetWeapon(EnemyGearDataInfo.WeaponInfo weaponInfo)
+    public Weapon GetWeapon(EnemyGearDataInfo gearInfo)
     {
         string prefabPath = "Prefabs/Weapon/";
-        switch (weaponInfo.weaponType)
+        switch (gearInfo.weaponType)
         {
             case WeaponType.Pistol:
                 prefabPath += "Handgun/";
@@ -3133,10 +3133,10 @@ public class CharacterController : MonoBehaviour
                 prefabPath += "Handgun/";
                 break;
             default:
-                prefabPath += $"{weaponInfo.weaponType}/";
+                prefabPath += $"{gearInfo.weaponType}/";
                 break;
         }
-        Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{weaponInfo.prefabName}"));
+        Weapon weapon = Instantiate(Resources.Load<Weapon>(prefabPath + $"{gearInfo.prefabName}"));
         weapon.transform.localScale = Vector3.one;
 
         return weapon;
@@ -3303,6 +3303,9 @@ public class CharacterController : MonoBehaviour
                 {
                     target.AddCommand(CommandType.Targeting, false, transform);
                 }
+                AimOff();
+                break;
+            case CharacterState.Schedule:
                 AimOff();
                 break;
             case CharacterState.Watch:

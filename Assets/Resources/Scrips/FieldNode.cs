@@ -344,7 +344,7 @@ public class FieldNode : MonoBehaviour
 
             if (onAxisNode == null)
             {
-                if (canShoot || charCtr != null)
+                if (canShoot)
                 {
                     outlines[i].SetActiveLine(true);
                 }

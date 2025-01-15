@@ -104,15 +104,17 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void SetComponets(CharacterController _charCtr, EnemyGearDataInfo.WeaponInfo _weaponInfo)
+    public void SetComponets(CharacterController _charCtr, EnemyGearDataInfo _gearInfo)
     {
         gameMgr = _charCtr.GameMgr;
         charCtr = _charCtr;
         charCtr.weapons.Add(this);
-        weaponData.isMain = _weaponInfo.isMain;
-        weaponData.weaponType = _weaponInfo.weaponType;
-        weaponData.magType = _weaponInfo.magType;
-        weaponData.gripType = _weaponInfo.gripType;
+        weaponData.isMain = _gearInfo.isMain;
+        weaponData.weaponType = _gearInfo.weaponType;
+        weaponData.magType = _gearInfo.magType;
+        weaponData.gripType = _gearInfo.gripType;
+        weaponData.actionCost_shot = _gearInfo.actionCost_shot;
+        weaponData.actionCost_reload = _gearInfo.actionCost_reload;
         gripInfo = DataUtility.GetWeaponGripInfo(weaponData.gripType);
 
         animator = GetComponent<Animator>();
@@ -120,14 +122,9 @@ public class Weapon : MonoBehaviour
         partsObjects = GetWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
-        //if (fx_sEject_Rdrs != null)
-        //{
-        //    fx_sEject_Rdrs.mesh = _weaponInfo.bulletMesh;
-        //    fx_sEject_Rdrs.material = _weaponInfo.bulletMat;
-        //}
-        magMax = _weaponInfo.magMax;
+        magMax = _gearInfo.magMax;
         loadedNum = magMax;
-        hitAccuracy = new HitAccuracy(this, _weaponInfo);
+        hitAccuracy = new HitAccuracy(this, _gearInfo);
         gameObject.SetActive(true);
     }
 
@@ -190,23 +187,6 @@ public class Weapon : MonoBehaviour
             holsterPos = Vector3.zero;
             holsterRot = Vector3.zero;
         }
-    }
-
-    public void Initialize()
-    {
-        Destroy(gameObject);
-
-        //charCtr = null;
-        //equipSlot = null;
-        //weaponData = null;
-
-        //var activeParts = partsObjects.FindAll(x => x.activeSelf);
-        //for (int i = 0; i < activeParts.Count; i++)
-        //{
-        //    var parts = activeParts[i];
-        //    parts.SetActive(false);
-        //}
-        //gameObject.SetActive(false);
     }
 
     public void EquipWeapon()
@@ -554,11 +534,11 @@ public class Weapon : MonoBehaviour
             pelletAccuracys = new List<int>();
         }
 
-        public HitAccuracy(Weapon _weapon, EnemyGearDataInfo.WeaponInfo _weaponInfo)
+        public HitAccuracy(Weapon _weapon, EnemyGearDataInfo _gearInfo)
         {
             weapon = _weapon;
-            pelletNum = _weaponInfo.pelletNum;
-            spread = _weaponInfo.spread;
+            pelletNum = _gearInfo.pelletNum;
+            spread = _gearInfo.spread;
             pelletAccuracys = new List<int>();
         }
 

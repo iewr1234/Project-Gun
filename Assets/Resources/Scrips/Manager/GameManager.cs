@@ -305,15 +305,8 @@ public class GameManager : MonoBehaviour
             charCtr.SetComponents(this, ownerType, enemyData, node);
 
             var gearData = dataMgr.enemyGearData.enemyGearInfo.Find(x => x.ID == enemyData.gearID);
-            var weaponInfos = new EnemyGearDataInfo.WeaponInfo[3] { gearData.mainWeapon1, gearData.mainWeapon2, gearData.subWeapon };
-            for (int i = 0; i < weaponInfos.Length; i++)
-            {
-                var weaponInfo = weaponInfos[i];
-                if (weaponInfo.weaponType == WeaponType.None) continue;
-
-                var weapon = charCtr.GetWeapon(weaponInfo);
-                weapon.SetComponets(charCtr, weaponInfo);
-            }
+            var weapon = charCtr.GetWeapon(gearData);
+            weapon.SetComponets(charCtr, gearData);
 
             if (enemyData.maxDura_head > 0)
             {
@@ -1303,6 +1296,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < nodesInCurrentRange; i++)
             {
                 FieldNode node = queue.Dequeue();
+                node.canShoot = canShotMoveNum > 0 && canShotMoveNum > moveRange;
                 node.moveCost = moveRange <= MOB * activeAP ? Mathf.CeilToInt(moveRange / MOB)
                                                             : Mathf.CeilToInt((moveRange - (MOB * activeAP)) / tiredMOB + activeAP);
                 movableNodes.Add(node); // 이동 가능 노드로 추가
@@ -1313,7 +1307,7 @@ public class GameManager : MonoBehaviour
                     if (!onAxisNode.canMove) continue;
                     if (visited.Contains(onAxisNode)) continue;
 
-                    onAxisNode.canShoot = canShotMoveNum > 0 && canShotMoveNum > moveRange;
+                    //onAxisNode.canShoot = canShotMoveNum > 0 && canShotMoveNum > moveRange;
                     queue.Enqueue(onAxisNode);
                     visited.Add(onAxisNode);
                 }
@@ -2162,9 +2156,22 @@ public class GameManager : MonoBehaviour
     public void EnemyAI_Reload(CharacterController enemy)
     {
         var weapon = enemy.currentWeapon;
-        weapon.loadedNum = weapon.magMax;
+        int actionCost;
+        int loadNum = weapon.magMax - weapon.loadedNum;
+        weapon.loadedNum += loadNum;
+        switch (weapon.weaponData.magType)
+        {
+            case MagazineType.Magazine:
+                actionCost = (int)weapon.weaponData.actionCost_reload;
+                break;
+            default:
+                actionCost = Mathf.CeilToInt(weapon.weaponData.actionCost_reload * loadNum);
+                break;
+        }
+        enemy.SetAction(-actionCost);
         enemy.AddCommand(CommandType.Reload, true, true);
         enemy.state = CharacterState.Schedule;
+        Debug.Log($"{enemy.name}: 재장전(장전수: {loadNum}, 사용 코스트: {actionCost})");
     }
     #endregion
 

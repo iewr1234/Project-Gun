@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
-using TMPro;
 using UnityEngine.Animations.Rigging;
-using static UnityEngine.Mesh;
+using TMPro;
 
 [System.Serializable]
 public struct ObjectData
@@ -107,6 +105,8 @@ public class DataManager : MonoBehaviour
         if (dropTableData == null) dropTableData = Resources.Load<DropTableData>("ScriptableObjects/DropTableData");
 
         if (startingItemData == null) startingItemData = Resources.Load<StartingItemData>("ScriptableObjects/StartingItemData");
+
+        if (errorCodeData == null) errorCodeData = Resources.Load<ErrorCodeData>("ScriptableObjects/ErrorCodeData");
     }
 
     #region GameData
@@ -502,14 +502,23 @@ public class DataManager : MonoBehaviour
 
     #region EnemyGear Data
     [HideInInspector] public EnemyGearData enemyGearData;
-    private readonly string enemyGearDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1212322922&range=A4:AC";
+    private readonly string enemyGearDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1212322922&range=A4:N";
     private enum EnemyGearVariable
     {
         ID,
         GearName,
-        MainWeapon1,
-        MainWeapon2 = 11,
-        SubWeapon = 20,
+        PrefabName,
+        IsMain,
+        WeaponType,
+        MagazineType,
+        GripType,
+        MagazineSize,
+        ActionCost_shot,
+        ActionCost_reload,
+        BulletMesh,
+        BulletMaterial,
+        PelletNum,
+        Spread,
     }
 
     public void UpdateEnemyGearData()
@@ -534,34 +543,22 @@ public class DataManager : MonoBehaviour
                     indexName = $"{data[(int)EnemyGearVariable.ID]}: {data[(int)EnemyGearVariable.GearName]}",
                     ID = data[(int)EnemyGearVariable.ID],
                     gearName = data[(int)EnemyGearVariable.GearName],
-                    mainWeapon1 = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.MainWeapon1, true),
-                    mainWeapon2 = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.MainWeapon2, true),
-                    subWeapon = ReadEnemyWeaponInfo(data, (int)EnemyGearVariable.SubWeapon, false),
+                    prefabName = data[(int)EnemyGearVariable.PrefabName],
+                    isMain = System.Convert.ToBoolean(int.Parse(data[(int)EnemyGearVariable.IsMain])),
+                    weaponType = (WeaponType)int.Parse(data[(int)EnemyGearVariable.WeaponType]),
+                    magType = (MagazineType)int.Parse(data[(int)EnemyGearVariable.MagazineType]),
+                    gripType = (WeaponGripType)int.Parse(data[(int)EnemyGearVariable.GripType]),
+                    magMax = int.Parse(data[(int)EnemyGearVariable.MagazineSize]),
+                    actionCost_shot = int.Parse(data[(int)EnemyGearVariable.ActionCost_shot]),
+                    actionCost_reload = float.Parse(data[(int)EnemyGearVariable.ActionCost_reload]),
+                    bulletMesh = ReadBulletMesh(data[(int)EnemyGearVariable.BulletMesh]),
+                    bulletMat = ReadBulletMaterial(data[(int)EnemyGearVariable.BulletMaterial]),
+                    pelletNum = int.Parse(data[(int)EnemyGearVariable.PelletNum]),
+                    spread = int.Parse(data[(int)EnemyGearVariable.Spread]),
                 };
                 enemyGearData.enemyGearInfo.Add(enemyGearInfo);
             }
             Debug.Log("Update EnemyGear Data");
-        }
-
-        EnemyGearDataInfo.WeaponInfo ReadEnemyWeaponInfo(string[] gearData, int startIndex, bool isMain)
-        {
-            if (gearData[startIndex] == "None") return new EnemyGearDataInfo.WeaponInfo();
-
-            var weaponInfo = new EnemyGearDataInfo.WeaponInfo()
-            {
-                prefabName = gearData[startIndex],
-                isMain = isMain,
-                weaponType = (WeaponType)int.Parse(gearData[startIndex + 1]),
-                magType = (MagazineType)int.Parse(gearData[startIndex + 2]),
-                gripType = (WeaponGripType)int.Parse(gearData[startIndex + 3]),
-                bulletMesh = ReadBulletMesh(gearData[startIndex + 4]),
-                bulletMat = ReadBulletMaterial(gearData[startIndex + 5]),
-                pelletNum = int.Parse(gearData[startIndex + 6]),
-                spread = int.Parse(gearData[startIndex + 7]),
-                magMax = int.Parse(gearData[startIndex + 8]),
-            };
-
-            return weaponInfo;
         }
 
         Mesh ReadBulletMesh(string meshData)
@@ -1651,7 +1648,7 @@ public class DataManager : MonoBehaviour
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i].Split('\t');
-                var itemOptionInfo = new StartingItemDataInfo
+                var startingItemInfo = new StartingItemDataInfo
                 {
                     indexName = $"{data[(int)StartingItemDataVariable.CreateLocation]} <= {data[(int)StartingItemDataVariable.ItemID]}",
                     createLocation = data[(int)StartingItemDataVariable.CreateLocation],
@@ -1659,9 +1656,47 @@ public class DataManager : MonoBehaviour
                     createNum = int.Parse(data[(int)StartingItemDataVariable.CreateNum]),
                     createSpace = (CreateSpace)int.Parse(data[(int)StartingItemDataVariable.CreateSpace]),
                 };
-                startingItemData.startingItemInfos.Add(itemOptionInfo);
+                startingItemData.startingItemInfos.Add(startingItemInfo);
             }
             Debug.Log("Update StartingItem Data");
+        }
+    }
+    #endregion
+
+    #region
+    [HideInInspector] public ErrorCodeData errorCodeData;
+    private readonly string errorCodeDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=1452781322&range=A2:B";
+    private enum ErrorCodeDataVariable
+    {
+        ErrorID,
+        ErrorText,
+    }
+
+    public void UpdateErrorCodeData()
+    {
+        if (errorCodeData == null) errorCodeData = Resources.Load<ErrorCodeData>("ScriptableObjects/ErrorCodeData");
+        if (errorCodeData.errorCodeInfos.Count > 0) errorCodeData.errorCodeInfos.Clear();
+
+        StartCoroutine(ReadErrorCodeData());
+
+        IEnumerator ReadErrorCodeData()
+        {
+            UnityWebRequest www = UnityWebRequest.Get(errorCodeDB);
+            yield return www.SendWebRequest();
+
+            var text = www.downloadHandler.text;
+            var datas = text.Split('\n');
+            for (int i = 0; i < datas.Length; i++)
+            {
+                var data = datas[i].Split('\t');
+                var errorCodeInfo = new ErrorCodeDataInfo
+                {
+                    errorID = data[(int)ErrorCodeDataVariable.ErrorID],
+                    errorText = data[(int)ErrorCodeDataVariable.ErrorText],
+                };
+                errorCodeData.errorCodeInfos.Add(errorCodeInfo);
+            }
+            Debug.Log("Update ErrorCode Data");
         }
     }
     #endregion
@@ -1804,6 +1839,11 @@ public class DataManager : MonoBehaviour
                 dataMgr.UpdateStartingItemData();
                 EditorUtility.SetDirty(dataMgr.startingItemData);
             }
+            if (GUILayout.Button("Update the ErrorCode Database"))
+            {
+                dataMgr.UpdateErrorCodeData();
+                EditorUtility.SetDirty(dataMgr.errorCodeData);
+            }
             GUILayout.Label(" ");
             if (GUILayout.Button("Update All Database"))
             {
@@ -1839,6 +1879,8 @@ public class DataManager : MonoBehaviour
                 EditorUtility.SetDirty(dataMgr.dropTableData);
                 dataMgr.UpdateStartingItemData();
                 EditorUtility.SetDirty(dataMgr.startingItemData);
+                dataMgr.UpdateErrorCodeData();
+                EditorUtility.SetDirty(dataMgr.errorCodeData);
             }
 
             GUILayout.Label('\n' + "---Update Prefab---");
