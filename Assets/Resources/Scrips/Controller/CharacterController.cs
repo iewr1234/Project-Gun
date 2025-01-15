@@ -2384,7 +2384,8 @@ public class CharacterController : MonoBehaviour
     {
         if (targetList.Count == 0)
         {
-            Debug.Log($"{transform.name}: No Target");
+            //Debug.Log($"{transform.name}: No Target");
+            gameMgr.errorUI.ShowError("EC00003");
             return false;
         }
         else

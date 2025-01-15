@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
@@ -52,6 +53,7 @@ public class GameManager : MonoBehaviour
     public GameUIManager uiMgr;
     public MapEditor mapEdt;
     public GameMenuManager gameMenuMgr;
+    public ErrorUI errorUI;
 
     [Header("---Access Component---")]
     [SerializeField] private ArrowPointer arrowPointer;
@@ -135,6 +137,7 @@ public class GameManager : MonoBehaviour
         uiMgr.SetComponents(this);
         mapEdt = FindAnyObjectByType<MapEditor>();
         mapEdt.SetComponents(this);
+        errorUI = FindAnyObjectByType<ErrorUI>();
 
         arrowPointer = FindAnyObjectByType<ArrowPointer>();
         arrowPointer.SetComponents();
@@ -926,12 +929,12 @@ public class GameManager : MonoBehaviour
         if ((weapon.weaponData.magType != MagazineType.Cylinder && !weapon.weaponData.isChamber)
          || (weapon.weaponData.magType == MagazineType.Cylinder && weapon.weaponData.equipMag.loadedBullets.Count == 0))
         {
-            Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
+            errorUI.ShowError("EC00001");
             return;
         }
         if (selectChar.action < selectChar.currentWeapon.weaponData.actionCost_shot)
         {
-            Debug.Log($"{selectChar.name}: 사격에 사용할 행동력 부족");
+            errorUI.ShowError("EC00008");
             return;
         }
 
@@ -951,14 +954,14 @@ public class GameManager : MonoBehaviour
         var weapon = selectChar.currentWeapon;
         if (weapon.weaponData.magType != MagazineType.Cylinder && !weapon.weaponData.isChamber)
         {
-            Debug.Log($"{selectChar.name}: 장전된 탄환이 없음");
+            errorUI.ShowError("EC00001");
             return;
         }
 
         var totalCost = weapon.weaponData.actionCost_shot + selectChar.fiarRate + (int)selectChar.sMode;
         if (totalCost > selectChar.action)
         {
-            Debug.Log($"{selectChar.name}: 사용할 행동력이 현재 행동력보다 많음");
+            errorUI.ShowError("EC00008");
             return;
         }
 
@@ -967,7 +970,7 @@ public class GameManager : MonoBehaviour
         if (selectChar.currentWeapon.weaponData.isMag) loadedBulletNum += selectChar.currentWeapon.weaponData.equipMag.loadedBullets.Count;
         if (shootNum > loadedBulletNum)
         {
-            Debug.Log($"{selectChar.name}: 발사할 총알 수가 장전된 총알 수보다 많음");
+            errorUI.ShowError("EC00009");
             return;
         }
 
@@ -1025,21 +1028,24 @@ public class GameManager : MonoBehaviour
             case MagazineType.Magazine:
                 if ((!weaponData.isMag || weaponData.equipMag.loadedBullets.Count == 0) && rigItems.Count == 0)
                 {
-                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    //Debug.Log("리그 또는 포켓에 탄이 없음");
+                    errorUI.ShowError("EC00002");
                     return;
                 }
                 break;
             case MagazineType.IntMagazine:
                 if (weaponData.equipMag.loadedBullets.Count == 0 && rigItems.Count == 0)
                 {
-                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    //Debug.Log("리그 또는 포켓에 탄이 없음");
+                    errorUI.ShowError("EC00002");
                     return;
                 }
                 break;
             case MagazineType.Cylinder:
                 if (rigItems.Count == 0)
                 {
-                    Debug.Log("리그 또는 포켓에 탄이 없음");
+                    //Debug.Log("리그 또는 포켓에 탄이 없음");
+                    errorUI.ShowError("EC00002");
                     return;
                 }
                 break;
@@ -1128,7 +1134,8 @@ public class GameManager : MonoBehaviour
             useAP = 1;
             if (useAP > selectChar.action)
             {
-                Debug.Log("행동이 소모량보다 적음");
+                //Debug.Log("행동이 소모량보다 적음");
+                errorUI.ShowError("EC00008");
                 return;
             }
 
@@ -1146,7 +1153,8 @@ public class GameManager : MonoBehaviour
                     useAP = Mathf.CeilToInt(weapon.weaponData.actionCost_reload);
                     if (useAP > selectChar.action)
                     {
-                        Debug.Log("행동이 소모량보다 적음");
+                        //Debug.Log("행동이 소모량보다 적음");
+                        errorUI.ShowError("EC00008");
                         return;
                     }
 
@@ -1167,7 +1175,8 @@ public class GameManager : MonoBehaviour
                     useAP = Mathf.CeilToInt(weapon.weaponData.actionCost_reload * ammoIcon.value);
                     if (useAP > selectChar.action)
                     {
-                        Debug.Log("행동이 소모량보다 적음");
+                        //Debug.Log("행동이 소모량보다 적음");
+                        errorUI.ShowError("EC00008");
                         return;
                     }
 
