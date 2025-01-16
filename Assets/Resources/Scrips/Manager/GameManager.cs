@@ -1162,7 +1162,7 @@ public class GameManager : MonoBehaviour
                     if (weapon.weaponData.isMag)
                     {
                         selectChar.AddCommand(CommandType.Reload, true, loadChamber);
-                        gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag, null);
+                        if (!gameMenuMgr.SetItemInStorage(weapon.weaponData.equipMag, null)) errorUI.ShowError("EC00004");
                     }
                     else
                     {
@@ -1214,19 +1214,23 @@ public class GameManager : MonoBehaviour
     {
         if (selectChar == null || selectChar.ownerType != CharacterOwner.Player) return;
 
+        rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
+                                                 && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
+                                                 && x.itemData.type == ItemType.Grenade);
+        if (rigItems.Count == 0)
+        {
+            errorUI.ShowError("EC00005");
+            return;
+        }
+
         gameState = GameState.Throw;
         uiMgr.throwButton.SetActiveButton(true);
+        uiMgr.iconIndex = 0;
+        uiMgr.SetActiveAmmoIcon(true);
         uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
         SwitchMovableNodes(false);
         ClearLine();
         RemoveTargetNode();
-        rigItems = gameMenuMgr.activeItem.FindAll(x => x.itemSlots.Count > 0 && x.itemSlots[0].myStorage != null
-                                                 && (x.itemSlots[0].myStorage.type == MyStorageType.Pocket || x.itemSlots[0].myStorage.type == MyStorageType.Rig)
-                                                 && x.itemData.type == ItemType.Grenade);
-        if (rigItems.Count == 0) return;
-
-        uiMgr.iconIndex = 0;
-        uiMgr.SetActiveAmmoIcon(true);
         for (int i = 0; i < rigItems.Count; i++)
         {
             var rigGrd = rigItems[i];
@@ -2133,18 +2137,14 @@ public class GameManager : MonoBehaviour
                     {
                         case UseActionType.Shoot:
                             enemy.fiarRate = remCost;
-                            if (enemy.fiarRate > DataUtility.shootRateMax)
-                            {
-                                enemy.fiarRate = DataUtility.shootRateMax;
-                            }
+                            if (enemy.fiarRate > DataUtility.shootRateMax) enemy.fiarRate = DataUtility.shootRateMax;
+
                             totalCost += enemy.fiarRate;
                             break;
                         case UseActionType.Aim:
                             enemy.sMode = (ShootingMode)remCost;
-                            if ((int)enemy.sMode > DataUtility.sModeMax)
-                            {
-                                enemy.sMode = (ShootingMode)DataUtility.shootRateMax;
-                            }
+                            if ((int)enemy.sMode > DataUtility.sModeMax) enemy.sMode = (ShootingMode)DataUtility.shootRateMax;
+
                             totalCost += (int)enemy.sMode;
                             break;
                         default:

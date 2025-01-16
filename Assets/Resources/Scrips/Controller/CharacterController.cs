@@ -1784,6 +1784,8 @@ public class CharacterController : MonoBehaviour
             stamina = maxStamina;
         }
         charUI.SetCharacterValue();
+
+        if (ownerType == CharacterOwner.Enemy) Debug.Log($"{transform.name}: º¯È­·® = {value} ({stamina} / {maxStamina})");
     }
 
     public void PayTheMoveCost(int useAction)

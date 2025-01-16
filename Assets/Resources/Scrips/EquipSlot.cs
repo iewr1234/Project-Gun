@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Linq;
 
 public enum EquipType
 {
@@ -95,124 +94,374 @@ public class EquipSlot : MonoBehaviour
         gameMenuMgr.allEquips.Add(this);
     }
 
-    public bool CheckEquip(ItemHandler putItem)
+    public bool CheckEquip(ItemHandler putItem, bool outputError)
     {
         var itemEquip = item != null && item != putItem;
         //if (this.item != null && this.item != item) return false;
         if (putItem == null || putItem.itemData == null) return false;
 
+        ErrorUI errorUI = outputError && gameMenuMgr.gameMgr != null ? gameMenuMgr.gameMgr.errorUI : null;
         switch (type)
         {
             case EquipType.Head:
-                return !itemEquip && putItem.itemData.type == ItemType.Head;
+                return CommonCheckProcess(ItemType.Head);
             case EquipType.Body:
-                return !itemEquip && putItem.itemData.type == ItemType.Body;
+                return CommonCheckProcess(ItemType.Body);
             case EquipType.Rig:
-                return !itemEquip && putItem.itemData.type == ItemType.Rig;
+                return CommonCheckProcess(ItemType.Rig);
             case EquipType.Backpack:
-                return !itemEquip && putItem.itemData.type == ItemType.Backpack;
+                return CommonCheckProcess(ItemType.Backpack);
             case EquipType.MainWeapon1:
-                return WeaponType();
+                return CheckWeaponType();
             case EquipType.MainWeapon2:
-                return WeaponType();
+                return CheckWeaponType();
             case EquipType.SubWeapon:
-                return WeaponType();
+                return CheckWeaponType();
             case EquipType.Chamber:
                 return !itemEquip && putItem.itemData.type == ItemType.Bullet
                     && popUp != null && popUp.item != null && (popUp.item.itemData.type == ItemType.MainWeapon || popUp.item.itemData.type == ItemType.SubWeapon)
                     && popUp.item.weaponData.caliber == putItem.bulletData.caliber;
             case EquipType.Magazine:
-                return MagazineType();
+                return CheckMagazineType();
             case EquipType.Muzzle:
-                return PartsType();
+                return CheckPartsType();
             case EquipType.Sight:
-                return PartsType();
+                return CheckPartsType();
             case EquipType.Attachment:
-                return PartsType();
+                return CheckPartsType();
             case EquipType.UnderBarrel:
-                return PartsType();
+                return CheckPartsType();
             default:
                 return false;
         }
 
-        bool WeaponType()
+        bool CommonCheckProcess(ItemType itemType)
+        {
+            if (errorUI != null)
+            {
+                if (itemEquip && putItem.itemData.type == itemType)
+                {
+                    // 장착은 가능하지만 이미 아이템이 존재하는 경우
+                    errorUI.ShowError("EC00010");
+                }
+                else if (putItem.itemData.type != itemType)
+                {
+                    // 장착이 불가능한 경우
+                    errorUI.ShowError("EC00006");
+                }
+            }
+
+            return !itemEquip && putItem.itemData.type == itemType;
+        }
+
+        bool CheckWeaponType()
         {
             switch (putItem.itemData.type)
             {
                 case ItemType.MainWeapon:
-                    return !itemEquip && (type == EquipType.MainWeapon1 || type == EquipType.MainWeapon2);
-                case ItemType.SubWeapon:
-                    return !itemEquip && type == EquipType.SubWeapon;
-                case ItemType.Bullet:
-                    if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
-
-                    if (item.weaponData.isMag)
+                    if (itemEquip && type != EquipType.SubWeapon)
                     {
-                        return item.weaponData.caliber == putItem.bulletData.caliber
-                           && (item.weaponData.equipMag.loadedBullets.Count < item.weaponData.equipMag.magSize || !item.weaponData.isChamber);
+                        // 장착은 가능하지만 이미 아이템이 존재하는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else if (type == EquipType.SubWeapon)
+                    {
+                        // 주무기를 보조무기 슬롯에 장착하려는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
                     }
                     else
                     {
-                        return !item.weaponData.isChamber && item.weaponData.caliber == putItem.bulletData.caliber;
+                        return true;
                     }
-                case ItemType.Magazine:
-                    if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
+                case ItemType.SubWeapon:
+                    if (itemEquip && type == EquipType.SubWeapon)
+                    {
+                        // 장착은 가능하지만 이미 아이템이 존재하는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else if (type != EquipType.SubWeapon)
+                    {
+                        // 보조무기를 주무기 슬롯에 장착하려는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                case ItemType.Bullet:
+                    if (item == null)
+                    {
+                        // 무기 슬롯에 탄을 삽입할 무기가 존재하지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (item.weaponData.caliber != putItem.bulletData.caliber)
+                    {
+                        // 무기와 탄의 구경이 같지 않을 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (!item.weaponData.isMag && item.weaponData.isChamber)
+                    {
+                        // 무기에 탄창이 없고 약실내 탄이 존재할 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else if (item.weaponData.isMag
+                          && item.weaponData.isChamber
+                          && item.weaponData.equipMag.loadedBullets.Count == item.weaponData.equipMag.magSize)
+                    {
+                        // 무기에 탄창이 가득 찼으며 약실내 탄이 존재할 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
 
-                    return item.weaponData.magType == global::MagazineType.Magazine && !item.weaponData.isMag
-                        && putItem.magData.compatModel.Contains(item.weaponData.model)
-                        && putItem.magData.compatCaliber == item.weaponData.caliber;
+                //if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
+
+                //if (item.weaponData.isMag)
+                //{
+                //    return item.weaponData.caliber == putItem.bulletData.caliber
+                //       && (item.weaponData.equipMag.loadedBullets.Count < item.weaponData.equipMag.magSize || !item.weaponData.isChamber);
+                //}
+                //else
+                //{
+                //    return !item.weaponData.isChamber && item.weaponData.caliber == putItem.bulletData.caliber;
+                //}
+                case ItemType.Magazine:
+                    if (item == null)
+                    {
+                        // 무기 슬롯에 탄창을 장착할 무기가 존재하지 않을 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (item.weaponData.magType != MagazineType.Magazine)
+                    {
+                        // 탄창을 장착할 수 없는 무기인 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (item.weaponData.isMag)
+                    {
+                        // 무기에 장착된 탄창이 존재할 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else if (!putItem.magData.compatModel.Contains(item.weaponData.model))
+                    {
+                        // 탄창의 모델이 무기와 호환되지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (putItem.magData.compatCaliber != item.weaponData.caliber)
+                    {
+                        // 탄창에 사용되는 구경이 무기와 맞지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
+                //if (item == null || !(item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)) return false;
+
+                //return item.weaponData.magType == global::MagazineType.Magazine && !item.weaponData.isMag
+                //    && putItem.magData.compatModel.Contains(item.weaponData.model)
+                //    && putItem.magData.compatCaliber == item.weaponData.caliber;
                 case ItemType.Muzzle:
-                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
-                        && item.weaponData.useMuzzle.Count > 0 && item.weaponData.useMuzzle.Contains(putItem.partsData.size)
-                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null;
+                    return CheckWeaponType_Parts(WeaponPartsType.Muzzle);
+
+                //return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                //    && item.weaponData.useMuzzle.Count > 0 && item.weaponData.useMuzzle.Contains(putItem.partsData.size)
+                //    && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null;
                 case ItemType.Sight:
-                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
-                        && item.weaponData.useSight.Count > 0 && item.weaponData.useSight.Contains(putItem.partsData.size)
-                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null;
+                    return CheckWeaponType_Parts(WeaponPartsType.Sight);
+
+                //return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                //    && item.weaponData.useSight.Count > 0 && item.weaponData.useSight.Contains(putItem.partsData.size)
+                //    && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null;
                 case ItemType.Attachment:
-                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
-                        && item.weaponData.useAttachment.Count > 0 && item.weaponData.useAttachment.Contains(putItem.partsData.size)
-                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Attachment) == null;
+                    return CheckWeaponType_Parts(WeaponPartsType.Attachment);
+
+                //return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                //    && item.weaponData.useAttachment.Count > 0 && item.weaponData.useAttachment.Contains(putItem.partsData.size)
+                //    && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Attachment) == null;
                 case ItemType.UnderBarrel:
-                    return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
-                        && item.weaponData.useUnderBarrel.Count > 0 && item.weaponData.useUnderBarrel.Contains(putItem.partsData.size)
-                        && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.UnderBarrel) == null;
+                    return CheckWeaponType_Parts(WeaponPartsType.UnderBarrel);
+
+                //return item != null && (item.itemData.type == ItemType.MainWeapon || item.itemData.type == ItemType.SubWeapon)
+                //    && item.weaponData.useUnderBarrel.Count > 0 && item.weaponData.useUnderBarrel.Contains(putItem.partsData.size)
+                //    && item.weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.UnderBarrel) == null;
                 default:
+                    // 장착할 수 없는 타입의 아이템인 경우
+                    if (errorUI != null) errorUI.ShowError("EC00006");
                     return false;
+            }
+
+            bool CheckWeaponType_Parts(WeaponPartsType partsType)
+            {
+                if (item != null)
+                {
+                    // 무기 슬롯에 부품을 장착할 무기가 존재하지 않을 경우
+                    if (errorUI != null) errorUI.ShowError("EC00006");
+                    return false;
+                }
+                else
+                {
+                    List<WeaponPartsSize> useParts;
+                    switch (partsType)
+                    {
+                        case WeaponPartsType.Muzzle:
+                            useParts = item.weaponData.useMuzzle;
+                            break;
+                        case WeaponPartsType.Sight:
+                            useParts = item.weaponData.useSight;
+                            break;
+                        case WeaponPartsType.Attachment:
+                            useParts = item.weaponData.useAttachment;
+                            break;
+                        case WeaponPartsType.UnderBarrel:
+                            useParts = item.weaponData.useUnderBarrel;
+                            break;
+                        default:
+                            // 체크오류
+                            return false;
+                    }
+
+                    if (useParts.Count == 0)
+                    {
+                        // 무기가 부품을 장착할 수 없는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (!putItem.magData.compatModel.Contains(item.weaponData.model))
+                    {
+                        // 부품의 모델이 무기와 호환되지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (!item.weaponData.useMuzzle.Contains(putItem.partsData.size))
+                    {
+                        // 부품 사이즈가 무기가 장착할 수 없는 사이즈일 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (item.weaponData.equipPartsList.Find(x => x.type == partsType) != null)
+                    {
+                        // 이미 장착된 부품이 존재하는 경우
+                        if (errorUI != null) errorUI.ShowError("EC000010");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
             }
         }
 
-        bool MagazineType()
+        bool CheckMagazineType()
         {
             switch (putItem.itemData.type)
             {
                 case ItemType.Bullet:
-                    if (popUp.item == null) return false;
+                    if (popUp == null || popUp.item == null) return false;
 
                     switch (popUp.item.weaponData.magType)
                     {
-                        case global::MagazineType.Magazine:
-                            return popUp.item.weaponData.isMag && popUp.item.weaponData.caliber == putItem.bulletData.caliber
-                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
-                        case global::MagazineType.IntMagazine:
-                            return popUp.item.weaponData.caliber == putItem.bulletData.caliber
-                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
-                        case global::MagazineType.Cylinder:
-                            return popUp.item.weaponData.caliber == putItem.bulletData.caliber
-                                && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        case MagazineType.Magazine:
+                            if (!popUp.item.weaponData.isMag)
+                            {
+                                // 탄을 삽입할 탄창이 존재하지 않는 경우
+                                if (errorUI != null) errorUI.ShowError("EC00002");
+                                return false;
+                            }
+                            else if (popUp.item.weaponData.caliber != putItem.bulletData.caliber)
+                            {
+                                // 탄의 구경이 무기와 호환되지 않는 경우
+                                if (errorUI != null) errorUI.ShowError("EC00006");
+                                return false;
+                            }
+                            else if (popUp.item.weaponData.equipMag.loadedBullets.Count == popUp.item.weaponData.equipMag.magSize)
+                            {
+                                // 무기의 탄창이 가득 찼을 경우
+                                if (errorUI != null) errorUI.ShowError("EC00010");
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+
+                        //return popUp.item.weaponData.isMag && popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                        //    && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        //case MagazineType.IntMagazine:
+                        //    return popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                        //        && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
+                        //case MagazineType.Cylinder:
+                        //    return popUp.item.weaponData.caliber == putItem.bulletData.caliber
+                        //        && popUp.item.weaponData.equipMag.loadedBullets.Count < popUp.item.weaponData.equipMag.magSize;
                         default:
-                            return false;
+                            if (popUp.item.weaponData.caliber != putItem.bulletData.caliber)
+                            {
+                                // 탄의 구경이 무기와 호환되지 않는 경우
+                                if (errorUI != null) errorUI.ShowError("EC00006");
+                                return false;
+                            }
+                            else if (popUp.item.weaponData.equipMag.loadedBullets.Count == popUp.item.weaponData.equipMag.magSize)
+                            {
+                                // 무기의 탄창이 가득 찼을 경우
+                                if (errorUI != null) errorUI.ShowError("EC00010");
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
                     }
                 case ItemType.Magazine:
-                    return item == null && putItem.magData != null && popUp != null
-                        && putItem.magData.compatModel.Contains(model)
-                        && putItem.magData.compatCaliber == caliber;
+                    if (popUp == null || popUp.item == null) return false;
+
+                    if (item != null)
+                    {
+                        // 탄창이 이미 존재하는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00010");
+                        return false;
+                    }
+                    else if (!putItem.magData.compatModel.Contains(model))
+                    {
+                        // 탄창의 모델이 무기와 호환되지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else if (putItem.magData.compatCaliber != caliber)
+                    {
+                        // 탄창에 사용되는 구경이 무기와 맞지 않는 경우
+                        if (errorUI != null) errorUI.ShowError("EC00006");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
+                //return item == null && putItem.magData != null && popUp != null
+                //    && putItem.magData.compatModel.Contains(model)
+                //    && putItem.magData.compatCaliber == caliber;
                 default:
                     return false;
             }
         }
 
-        bool PartsType()
+        bool CheckPartsType()
         {
             var partsData = putItem.partsData;
             if (partsData == null) return false;
@@ -432,7 +681,7 @@ public class EquipSlot : MonoBehaviour
         gameMenuMgr.onEquip = this;
         if (gameMenuMgr.holdingItem != null)
         {
-            if (CheckEquip(gameMenuMgr.holdingItem))
+            if (CheckEquip(gameMenuMgr.holdingItem, false))
             {
                 backImage.color = DataUtility.slot_onItemColor;
             }

@@ -639,7 +639,7 @@ public class GameMenuManager : MonoBehaviour
         item.transform.SetParent(itemPool, false);
         holdingItem = item;
 
-        var findEquips = allEquips.FindAll(x => x.CheckEquip(item));
+        var findEquips = allEquips.FindAll(x => x.CheckEquip(item, false));
         for (int i = 0; i < findEquips.Count; i++)
         {
             var equipSlot = findEquips[i];
@@ -733,11 +733,11 @@ public class GameMenuManager : MonoBehaviour
         PutTheItem(item, itemSlots);
     }
 
-    public void SetItemInStorage(MagazineDataInfo magData, List<ItemSlot> storageSlots)
+    public bool SetItemInStorage(MagazineDataInfo magData, List<ItemSlot> storageSlots)
     {
         var item = items.Find(x => !x.gameObject.activeSelf);
         item.SetItemInfo(magData);
-        if (!CheckSameItmeAndNesting(item, storageSlots)) return;
+        if (!CheckSameItmeAndNesting(item, storageSlots)) return true;
 
         List<ItemSlot> emptySlots = null;
         if (storageSlots != null)
@@ -747,7 +747,7 @@ public class GameMenuManager : MonoBehaviour
             {
                 //onSlots = emptySlots;
                 PutTheItem(item, emptySlots);
-                return;
+                return true;
             }
         }
 
@@ -758,7 +758,7 @@ public class GameMenuManager : MonoBehaviour
         {
             var myStorage = myStorages[i];
             var itemSlots = myStorage.itemSlots.FindAll(x => x.gameObject.activeSelf);
-            if (!CheckSameItmeAndNesting(item, itemSlots)) return;
+            if (!CheckSameItmeAndNesting(item, itemSlots)) return true;
 
             emptySlots = FindEmptySlots(item, itemSlots);
             if (emptySlots != null) break;
@@ -768,14 +768,17 @@ public class GameMenuManager : MonoBehaviour
         {
             //onSlots = emptySlots;
             PutTheItem(item, emptySlots);
+            return true;
         }
         else if (otherStorage.components.activeSelf)
         {
             MoveItmeInOtherStorage(item);
+            return true;
         }
         else
         {
             otherStorage.DropItmeOnTheFloor(item);
+            return false;
         }
     }
 
@@ -956,7 +959,7 @@ public class GameMenuManager : MonoBehaviour
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.ID == startingItem.itemID);
         item.SetItemInfo(itemData, startingItem.createNum, true);
 
-        var equipSlot = allEquips.Find(x => x.CheckEquip(item) == true);
+        var equipSlot = allEquips.Find(x => x.CheckEquip(item, false) == true);
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
         equipSlot.SetItemCount();
@@ -1414,7 +1417,8 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="equipSlot"></param>
     public void EquipItem(ItemHandler putItem, EquipSlot equipSlot)
     {
-        if (equipSlot.CheckEquip(putItem) && equipSlot != putItem.equipSlot)
+        bool canEquip = equipSlot.CheckEquip(putItem, true);
+        if (canEquip && equipSlot != putItem.equipSlot)
         {
             switch (putItem.itemData.type)
             {
@@ -1532,6 +1536,7 @@ public class GameMenuManager : MonoBehaviour
             putItem.SetItemSlots(DataUtility.slot_onItemColor);
             putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
             putItem.transform.position = putItem.itemSlots[0].transform.position;
+            DontEquipProcess();
         }
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
         putItem.targetImage.raycastTarget = true;
@@ -1695,6 +1700,41 @@ public class GameMenuManager : MonoBehaviour
                     var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                     if (weapon != null) weapon.SetParts();
                 }
+            }
+        }
+
+        void DontEquipProcess()
+        {
+            switch (putItem.itemData.type)
+            {
+                case ItemType.Head:
+                    break;
+                case ItemType.Body:
+                    break;
+                case ItemType.Rig:
+                    break;
+                case ItemType.Backpack:
+                    break;
+                case ItemType.SubWeapon:
+                    break;
+                case ItemType.MainWeapon:
+                    break;
+                case ItemType.Bullet:
+                    break;
+                case ItemType.Magazine:
+                    break;
+                case ItemType.Muzzle:
+                    break;
+                case ItemType.Sight:
+                    break;
+                case ItemType.Attachment:
+                    break;
+                case ItemType.UnderBarrel:
+                    break;
+                case ItemType.Grenade:
+                    break;
+                default:
+                    break;
             }
         }
     }
