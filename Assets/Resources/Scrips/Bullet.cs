@@ -42,7 +42,7 @@ public class Bullet : MonoBehaviour
     private float hitTime;
     private float destroyTime;
 
-    private readonly float startWidth = 0.01f;
+    private readonly float startWidth = 0.02f;
     private readonly float destroyTime_bullet = 1f;
     private readonly float destroyTime_pellet = 0.3f;
 

@@ -662,7 +662,7 @@ public class PopUp_Inventory : MonoBehaviour
             pos.x = -635f;
         }
 
-        pos.z = -50f - (index * 150);
+        pos.z = -150f - (index * 150);
         transform.localPosition = pos;
     }
 

@@ -55,8 +55,8 @@ public static class DataUtility
 
     public static readonly Color equip_defaultColor = new Color(25 / 255f, 25 / 255f, 25 / 255f);
 
-    public static readonly Vector3Int popUp_defaultPos = new Vector3Int(0, 350, -50);
-    public static readonly Vector3Int popUp_defaultPos_split = new Vector3Int(0, 150, -50);
+    public static readonly Vector3Int popUp_defaultPos = new Vector3Int(0, 350, -150);
+    public static readonly Vector3Int popUp_defaultPos_split = new Vector3Int(0, 150, -150);
 
     public static readonly int shootRateMax = 4;
     public static readonly int sModeMax = 2;
