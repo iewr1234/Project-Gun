@@ -1217,7 +1217,7 @@ public class GameMenuManager : MonoBehaviour
                 }
             }
 
-            item.targetImage.color = Color.clear;
+            item.targetImage.color = item.equipSlot == null ? new Color(0f, 0f, 0f, 240 / 255f) : Color.clear;
             holdingItem = null;
             onSlots.Clear();
             InactiveSampleItem();
@@ -1280,7 +1280,7 @@ public class GameMenuManager : MonoBehaviour
                 {
                     var itemSlot = item.itemSlots[i];
                     itemSlot.item = item;
-                    itemSlot.SetItemSlot(DataUtility.slot_onItemColor);
+                    itemSlot.SetItemSlot(DataUtility.slot_noItemColor);
                 }
                 UnequipItem(item);
 
@@ -1341,12 +1341,13 @@ public class GameMenuManager : MonoBehaviour
                     }
                     else
                     {
-                        itemSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
+                        itemSlot.item.SetItemSlots(DataUtility.slot_noItemColor);
                     }
                 }
                 break;
         }
 
+        item.FixTextTheItemCount();
         if (holdingItem != null)
         {
             item.targetImage.raycastTarget = true;
@@ -1533,12 +1534,12 @@ public class GameMenuManager : MonoBehaviour
         }
         else
         {
-            putItem.SetItemSlots(DataUtility.slot_onItemColor);
+            //putItem.SetItemSlots(DataUtility.slot_onItemColor);
             putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
             putItem.transform.position = putItem.itemSlots[0].transform.position;
-            DontEquipProcess();
         }
         equipSlot.backImage.color = DataUtility.equip_defaultColor;
+        putItem.FixTextTheItemCount();
         putItem.targetImage.raycastTarget = true;
         putItem.targetImage.color = Color.clear;
 
@@ -1700,41 +1701,6 @@ public class GameMenuManager : MonoBehaviour
                     var weapon = player.weapons.Find(x => x.weaponData == equipSlot.popUp.item.weaponData);
                     if (weapon != null) weapon.SetParts();
                 }
-            }
-        }
-
-        void DontEquipProcess()
-        {
-            switch (putItem.itemData.type)
-            {
-                case ItemType.Head:
-                    break;
-                case ItemType.Body:
-                    break;
-                case ItemType.Rig:
-                    break;
-                case ItemType.Backpack:
-                    break;
-                case ItemType.SubWeapon:
-                    break;
-                case ItemType.MainWeapon:
-                    break;
-                case ItemType.Bullet:
-                    break;
-                case ItemType.Magazine:
-                    break;
-                case ItemType.Muzzle:
-                    break;
-                case ItemType.Sight:
-                    break;
-                case ItemType.Attachment:
-                    break;
-                case ItemType.UnderBarrel:
-                    break;
-                case ItemType.Grenade:
-                    break;
-                default:
-                    break;
             }
         }
     }
@@ -1951,6 +1917,7 @@ public class GameMenuManager : MonoBehaviour
                     var rigStorage = item.equipSlot.myStorage;
                     if (rigStorage != null)
                     {
+                        onSlots.Clear();
                         var inItemSlots = rigStorage.itemSlots.FindAll(x => x.item != null);
                         for (int i = 0; i < inItemSlots.Count; i++)
                         {
@@ -1966,6 +1933,7 @@ public class GameMenuManager : MonoBehaviour
                     var backpackStorage = item.equipSlot.myStorage;
                     if (backpackStorage != null)
                     {
+                        onSlots.Clear();
                         var inItemSlots = backpackStorage.itemSlots.FindAll(x => x.item != null);
                         for (int i = 0; i < inItemSlots.Count; i++)
                         {

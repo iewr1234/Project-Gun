@@ -153,8 +153,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -286,7 +286,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5149074, g: 0.59646666, b: 0.8207547, a: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -362,6 +362,7 @@ MonoBehaviour:
     ID: 
     armorName: 
     prefabName: 
+    weight: 0
     maxBulletProof: 0
     bulletProof: 0
     maxDurability: 0
@@ -370,11 +371,13 @@ MonoBehaviour:
     indexName: 
     ID: 
     rigName: 
+    weight: 0
     storageSize: {x: 0, y: 0}
   backpackData:
     indexName: 
     ID: 
     backpackName: 
+    weight: 0
     storageSize: {x: 0, y: 0}
   weaponData:
     indexName: 
@@ -392,7 +395,8 @@ MonoBehaviour:
     RPM: 0
     range: 0
     watchAngle: 0
-    actionCost: 0
+    actionCost_shot: 0
+    actionCost_reload: 0
     MOA: 0
     stability: 0
     rebound: 0

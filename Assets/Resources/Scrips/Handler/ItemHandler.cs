@@ -828,9 +828,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             ChangeRectPivot(false);
         }
         targetImage.raycastTarget = false;
-        var color = DataUtility.slot_onItemColor;
-        color.a = 100 / 255f;
-        targetImage.color = color;
+        targetImage.color = Color.clear;
+        countText.enabled = false;
+        chamberImage.enabled = false;
 
         gameMenuMgr.TakeTheItem(this);
         FollowMouse();

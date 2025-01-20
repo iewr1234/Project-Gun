@@ -127,11 +127,11 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
                 var onSlot = invenMgr.onSlots[i];
                 if (onSlot.item != null && onSlot.item != invenMgr.holdingItem)
                 {
-                    onSlot.item.SetItemSlots(DataUtility.slot_onItemColor);
+                    onSlot.item.SetItemSlots(DataUtility.slot_noItemColor);
                 }
                 else if (onSlot.item != null && onSlot.item == invenMgr.holdingItem)
                 {
-                    onSlot.SetItemSlot(DataUtility.slot_onItemColor);
+                    onSlot.SetItemSlot(DataUtility.slot_noItemColor);
                 }
                 else
                 {
@@ -146,7 +146,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
             }
             else
             {
-                item.SetItemSlots(DataUtility.slot_onItemColor);
+                item.SetItemSlots(DataUtility.slot_noItemColor);
             }
         }
         else if (item != null)
