@@ -80,6 +80,7 @@ public class OtherStorage : MonoBehaviour
 
     public void DeactiveTabButtons()
     {
+        SaveStorageItems();
         ClearStorage();
         var floor = storageInfos.Find(x => x.type == StorageInfo.StorageType.Floor);
         if (floor != null && floor.itemList.Count == 0)
@@ -99,6 +100,7 @@ public class OtherStorage : MonoBehaviour
 
     public void GetStorageInfo(int index)
     {
+        SaveStorageItems();
         tabButtonImages[tabIndex].color = noneActiveColor_tab;
         tabIndex = index;
 
@@ -213,6 +215,8 @@ public class OtherStorage : MonoBehaviour
 
     public void AddItemInStorageInfo(StorageInfo storageInfo, Vector2Int slotIndex, ItemHandler item)
     {
+        if (storageInfo == null) return;
+
         var storageItemInfo = new StorageItemInfo()
         {
             indexName = $"{item.itemData.itemName}_{slotIndex.x}/{slotIndex.y}",
@@ -308,6 +312,29 @@ public class OtherStorage : MonoBehaviour
         }
     }
 
+    public void SaveStorageItems()
+    {
+        if (storageInfos.Count == 0) return;
+
+        var storageInfo = storageInfos[tabIndex];
+        var floorStorage = gameMenuMgr.dataMgr.gameData.floorStorages.Find(x => x.type == storageInfo.type && x.nodePos == storageInfo.nodePos);
+
+        var onItemSlots = itemSlots.FindAll(x => x.gameObject.activeSelf && x.item != null);
+        if (floorStorage != null && onItemSlots.Count > 0)
+        {
+            storageInfo.itemList.Clear();
+            floorStorage.itemList.Clear();
+            for (int i = 0; i < onItemSlots.Count; i++)
+            {
+                var itemSlot = onItemSlots[i];
+                if (itemSlot.item == null) continue;
+
+                AddItemInStorageInfo(floorStorage, itemSlot.item.itemSlots[0].slotIndex, itemSlot.item);
+                storageInfo.itemList = floorStorage.itemList;
+            }
+        }
+    }
+
     public void ClearStorage()
     {
         //if (storageInfos.Count == 0) return;
@@ -328,14 +355,28 @@ public class OtherStorage : MonoBehaviour
         //    }
         //}
 
-        var onItemSlots = itemSlots.FindAll(x => x.item != null);
-        for (int i = 0; i < onItemSlots.Count; i++)
-        {
-            var itemSlot = onItemSlots[i];
-            if (itemSlot.item == null) continue;
+        //var storageInfo = storageInfos[tabIndex];
+        //var floorStorage = gameMenuMgr.dataMgr.gameData.floorStorages.Find(x => x.type == storageInfo.type && x.nodePos == storageInfo.nodePos);
+        //if (floorStorage == null)
+        //{
+        //    var itemNode = gameMenuMgr.gameMgr.nodeList.Find(x => x.nodePos == floorStorage.nodePos);
+        //    itemNode.SetItemCase(false);
+        //    gameMenuMgr.dataMgr.gameData.floorStorages.Remove(floor);
+        //}
 
-            if (itemSlot.item.gameObject.activeSelf) itemSlot.item.DisableItem();
-            itemSlot.item = null;
+        //storageInfo.itemList.Clear();
+        var onItemSlots = itemSlots.FindAll(x => x.gameObject.activeSelf && x.item != null);
+        if (onItemSlots.Count > 0)
+        {
+            for (int i = 0; i < onItemSlots.Count; i++)
+            {
+                var itemSlot = onItemSlots[i];
+                if (itemSlot.item == null) continue;
+
+                //AddItemInStorageInfo(floorStorage, itemSlot.item.itemSlots[0].slotIndex, itemSlot.item);
+                if (itemSlot.item.gameObject.activeSelf) itemSlot.item.DisableItem();
+                //itemSlot.item = null;
+            }
         }
     }
 

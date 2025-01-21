@@ -483,23 +483,13 @@ public class GameMenuManager : MonoBehaviour
             }
         }
         gameMgr.camMgr.lockCam = value;
-
-        gameMenuCam.enabled = value;
         gameMgr.DeselectCharacter();
+        gameMenuCam.enabled = value;
 
-        if (gameMgr.uiMgr != null)
-        {
-            gameMgr.uiMgr.playUI.SetActive(!value);
-        }
-        if (gameMgr.mapEdt != null)
-        {
-            gameMgr.mapEdt.gameObject.SetActive(!value);
-        }
+        if (gameMgr.uiMgr != null) gameMgr.uiMgr.playUI.SetActive(!value);
+        if (gameMgr.mapEdt != null) gameMgr.mapEdt.gameObject.SetActive(!value);
+        if (!value && this.state != GameMenuState.None) SetStorageUI(false);
 
-        if (!value && this.state != GameMenuState.None)
-        {
-            SetStorageUI(false);
-        }
         this.state = value ? state : GameMenuState.None;
     }
 
@@ -1027,6 +1017,7 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.countText.enabled = false;
         equipSlot.chamberImage.enabled = false;
 
+        item.SetColorOfBackImage(Color.clear);
         item.countText.enabled = false;
         item.chamberImage.enabled = false;
         item.equipSlot = equipSlot;
@@ -1048,6 +1039,7 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.countText.enabled = true;
         equipSlot.chamberImage.enabled = false;
 
+        item.SetColorOfBackImage(Color.clear);
         item.countText.enabled = false;
         item.chamberImage.enabled = false;
         item.equipSlot = equipSlot;
@@ -1062,6 +1054,7 @@ public class GameMenuManager : MonoBehaviour
         var item = items.Find(x => !x.gameObject.activeSelf);
         var itemData = dataMgr.itemData.itemInfos.Find(x => x.dataID == partsData.ID);
         item.SetItemInfo(itemData, count, false);
+        item.SetColorOfBackImage(Color.clear);
 
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
@@ -1217,7 +1210,7 @@ public class GameMenuManager : MonoBehaviour
                 }
             }
 
-            item.targetImage.color = item.equipSlot == null ? new Color(0f, 0f, 0f, 240 / 255f) : Color.clear;
+            item.SetColorOfBackImage(item.equipSlot == null ? new Color(0f, 0f, 0f, 240 / 255f) : Color.clear);
             holdingItem = null;
             onSlots.Clear();
             InactiveSampleItem();
@@ -1242,8 +1235,8 @@ public class GameMenuManager : MonoBehaviour
                 item.SetTotalCount(newTotal - maxValue);
                 onSlot.item.SetTotalCount(maxValue);
             }
-            onSlot.item.targetImage.raycastTarget = true;
-            otherStorage.UpdateStorageInfo(onSlot.item);
+            onSlot.item.SetActiveItemTarget(true);
+            //otherStorage.UpdateStorageInfo(onSlot.item);
         }
 
         void ItemSplit()
@@ -1263,7 +1256,7 @@ public class GameMenuManager : MonoBehaviour
             holdingItem = null;
             sampleItem.transform.position = onSlots[0].transform.position;
 
-            item.targetImage.color = Color.clear;
+            item.SetColorOfBackImage(Color.clear);
         }
     }
 
@@ -1272,7 +1265,7 @@ public class GameMenuManager : MonoBehaviour
         switch (value)
         {
             case true:
-                ItemRegistration();
+                //ItemRegistration();
                 item.SetItemSlots(null, DataUtility.slot_noItemColor);
                 item.itemSlots = new List<ItemSlot>(itemSlots);
 
@@ -1347,11 +1340,8 @@ public class GameMenuManager : MonoBehaviour
                 break;
         }
 
-        item.FixTextTheItemCount();
-        if (holdingItem != null)
-        {
-            item.targetImage.raycastTarget = true;
-        }
+        item.SetItemCount(item.TotalCount);
+        if (holdingItem != null) item.SetActiveItemTarget(true);
 
         void ItemRegistration()
         {
@@ -1404,7 +1394,7 @@ public class GameMenuManager : MonoBehaviour
                 onEquip = null;
             }
             ItemMove(item, itemSlots, false);
-            item.targetImage.color = Color.clear;
+            item.SetColorOfBackImage(Color.clear);
             holdingItem = null;
             InactiveSampleItem();
         }
@@ -1418,6 +1408,11 @@ public class GameMenuManager : MonoBehaviour
     /// <param name="equipSlot"></param>
     public void EquipItem(ItemHandler putItem, EquipSlot equipSlot)
     {
+        equipSlot.backImage.color = DataUtility.equip_defaultColor;
+        putItem.SetItemCount(putItem.TotalCount);
+        putItem.SetActiveItemTarget(true);
+        putItem.SetColorOfBackImage(Color.clear);
+
         bool canEquip = equipSlot.CheckEquip(putItem, true);
         if (canEquip && equipSlot != putItem.equipSlot)
         {
@@ -1538,14 +1533,9 @@ public class GameMenuManager : MonoBehaviour
             putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
             putItem.transform.position = putItem.itemSlots[0].transform.position;
         }
-        equipSlot.backImage.color = DataUtility.equip_defaultColor;
-        putItem.FixTextTheItemCount();
-        putItem.targetImage.raycastTarget = true;
-        putItem.targetImage.color = Color.clear;
 
         holdingItem = null;
         InactiveSampleItem();
-
         if (gameMgr != null && gameMgr.playerList.Count > 0)
         {
             var player = gameMgr.playerList[0];
@@ -1567,7 +1557,6 @@ public class GameMenuManager : MonoBehaviour
             putItem.SetItemRotation(false);
             putItem.transform.SetParent(equipSlot.transform, false);
             putItem.transform.localPosition = Vector3.zero;
-            putItem.targetImage.raycastTarget = true;
             putItem.SetItemScale(true);
             putItem.itemSlots.Clear();
         }
@@ -1714,8 +1703,8 @@ public class GameMenuManager : MonoBehaviour
     {
         otherStorage.CheckBaseStorage(putItem);
         UnequipItem(putItem);
-        onItem.SetItemSlots(DataUtility.slot_onItemColor);
-        onItem.targetImage.raycastTarget = true;
+        onItem.SetItemSlots(DataUtility.slot_noItemColor);
+        onItem.SetActiveItemTarget(true);
         switch (putItem.itemData.type)
         {
             case ItemType.Bullet:
@@ -1802,6 +1791,8 @@ public class GameMenuManager : MonoBehaviour
                     {
                         putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
                         putItem.transform.localPosition = Vector3.zero;
+                        putItem.SetActiveItemTarget(false);
+                        putItem.SetColorOfBackImage(new Color(0f, 0f, 0f, 240 / 255f));
                     }
                     onItem.FixTextTheItemCount();
                 }
@@ -1883,6 +1874,8 @@ public class GameMenuManager : MonoBehaviour
             }
             putItem.transform.SetParent(putItem.itemSlots[0].transform, false);
             putItem.transform.localPosition = Vector3.zero;
+            putItem.SetActiveItemTarget(false);
+            putItem.SetColorOfBackImage(new Color(0f, 0f, 0f, 240 / 255f));
             putItem.ResultTotalCount(-num);
         }
         onItem.FixTextTheItemCount();
@@ -2024,8 +2017,7 @@ public class GameMenuManager : MonoBehaviour
                 item.equipSlot.popUp.PopUp_ItemInformation(item.equipSlot.popUp.item);
             }
             item.equipSlot = null;
-            item.FixTextTheItemCount();
-
+            item.SetItemCount(item.TotalCount);
         }
 
         if (gameMgr != null && gameMgr.playerList.Count > 0)
@@ -2439,7 +2431,8 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Next()
     {
-        if (otherStorage.storageInfos[otherStorage.tabIndex].itemList.Count > 0)
+        List<ItemSlot> itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf && x.item != null);
+        if (itemSlots.Count > 0)
         {
             popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }
@@ -2451,7 +2444,8 @@ public class GameMenuManager : MonoBehaviour
 
     public void Button_Result_Return()
     {
-        if (otherStorage.storageInfos[otherStorage.tabIndex].itemList.Count > 0)
+        List<ItemSlot> itemSlots = otherStorage.itemSlots.FindAll(x => x.gameObject.activeSelf && x.item != null);
+        if (itemSlots.Count > 0)
         {
             popUp_warning.SetWarning(WarningState.DeleteDropItems);
         }

@@ -79,7 +79,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         }
         else if (item != null)
         {
-            item.targetImage.raycastTarget = true;
+            item.SetActiveItemTarget(true);
         }
 
         void ProcessOfSlotSize(List<ItemSlot> itemSlots, ItemHandler item)
@@ -151,7 +151,7 @@ public class ItemSlot : MonoBehaviour, ICanvasRaycastFilter
         }
         else if (item != null)
         {
-            item.targetImage.raycastTarget = false;
+            item.SetActiveItemTarget(false);
         }
     }
 }

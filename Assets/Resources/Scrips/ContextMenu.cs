@@ -256,7 +256,7 @@ public class ContextMenu : MonoBehaviour
             if (findSlot != null)
             {
                 findSlot.item.ResultTotalCount(1);
-                gameMenuMgr.otherStorage.UpdateStorageInfo(findSlot.item);
+                //gameMenuMgr.otherStorage.UpdateStorageInfo(findSlot.item);
             }
             else
             {

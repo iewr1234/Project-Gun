@@ -24,7 +24,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     [Header("---Access Component---")]
     public RectTransform rect;
     [HideInInspector] public Image frameImage;
-    [HideInInspector] public Image targetImage;
+    private Image targetImage;
     [HideInInspector] public TextMeshProUGUI countText;
     [HideInInspector] public Image chamberImage;
 
@@ -92,6 +92,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 {
                     GameObject parts = partsObjects[j];
                     partsSamples.Add(parts);
+
+                    var mesh = parts.GetComponent<MeshRenderer>();
+                    if (mesh == null) continue;
+
+                    mesh.material = new Material(mesh.material);
+                    mesh.material.shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                    mesh.material.color = new Color(1f, 1f, 1f, 100 / 255f);
                 }
             }
             sample.SetActive(false);
@@ -565,10 +572,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void ResultTotalCount(int value)
     {
         totalCount += value;
+        countText.enabled = true;
         countText.text = $"{totalCount}";
     }
 
-    private void SetItemCount(int count)
+    public void SetItemCount(int count)
     {
         switch (itemData.type)
         {
@@ -660,7 +668,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             }
             countText.enabled = true;
 
-            string spriteName = weaponData.isChamber ? "Icon_Chamber_on" : "Icon_Chamber_off";
+            string spriteName = (weaponData.weaponType != global::WeaponType.Revolver && weaponData.isChamber)
+                             || (weaponData.weaponType == global::WeaponType.Revolver && weaponData.equipMag.loadedBullets.Count > 0)
+                              ? "Icon_Chamber_on" : "Icon_Chamber_off";
             chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
             chamberImage.enabled = true;
             SetTotalCount(bulletNum, magSize);
@@ -732,6 +742,24 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     }
 
     /// <summary>
+    /// 아이템 레이캐스팅 설정
+    /// </summary>
+    /// <param name="active"></param>
+    public void SetActiveItemTarget(bool active)
+    {
+        targetImage.raycastTarget = active;
+    }
+
+    /// <summary>
+    /// 아이템 배경이미지 색 설정
+    /// </summary>
+    /// <param name="color"></param>
+    public void SetColorOfBackImage(Color color)
+    {
+        targetImage.color = color;
+    }
+
+    /// <summary>
     /// 아이템 비활성화
     /// </summary>
     /// <param name="item"></param>
@@ -754,6 +782,13 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         SetItemScale(false);
         SetItemSlots(null, DataUtility.slot_noItemColor);
+        for (int i = 0; i < itemSlots.Count; i++)
+        {
+            ItemSlot itemSlot = itemSlots[i];
+            if (itemSlot.item == null) continue;
+
+            itemSlot.item = null;
+        }
         itemSlots.Clear();
         transform.SetParent(gameMenuMgr.itemPool, false);
 

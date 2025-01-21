@@ -101,6 +101,11 @@ public class EquipSlot : MonoBehaviour
         if (putItem == null || putItem.itemData == null) return false;
 
         ErrorUI errorUI = outputError && gameMenuMgr.gameMgr != null ? gameMenuMgr.gameMgr.errorUI : null;
+
+        if(outputError)
+        {
+
+        }
         switch (type)
         {
             case EquipType.Head:
@@ -206,8 +211,8 @@ public class EquipSlot : MonoBehaviour
                         return false;
                     }
                     else if (item.weaponData.isMag
-                          && item.weaponData.isChamber
-                          && item.weaponData.equipMag.loadedBullets.Count == item.weaponData.equipMag.magSize)
+                          && item.weaponData.equipMag.loadedBullets.Count == item.weaponData.equipMag.magSize
+                          && item.weaponData.isChamber)
                     {
                         // 무기에 탄창이 가득 찼으며 약실내 탄이 존재할 경우
                         if (errorUI != null) errorUI.ShowError("EC00010");
@@ -660,7 +665,9 @@ public class EquipSlot : MonoBehaviour
                 countText.enabled = true;
                 countText.text = $"{loadedNum}<size=14>/{magMax}</size>";
 
-                string spriteName = item.weaponData.isChamber ? "Icon_Chamber_on" : "Icon_Chamber_off";
+                string spriteName = (item.weaponData.weaponType != global::WeaponType.Revolver && item.weaponData.isChamber)
+                                 || (item.weaponData.weaponType == global::WeaponType.Revolver && item.weaponData.equipMag.loadedBullets.Count > 0)
+                                  ? "Icon_Chamber_on" : "Icon_Chamber_off";
                 chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
                 chamberImage.enabled = true;
             }
@@ -692,7 +699,7 @@ public class EquipSlot : MonoBehaviour
         }
         else if (item != null)
         {
-            item.targetImage.raycastTarget = true;
+            item.SetActiveItemTarget(true);
         }
     }
 
@@ -702,7 +709,7 @@ public class EquipSlot : MonoBehaviour
         backImage.color = DataUtility.equip_defaultColor;
         if (item != null)
         {
-            item.targetImage.raycastTarget = false;
+            item.SetActiveItemTarget(false);
         }
     }
 }
