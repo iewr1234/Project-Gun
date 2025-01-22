@@ -100,7 +100,7 @@ public class OtherStorage : MonoBehaviour
 
     public void GetStorageInfo(int index)
     {
-        SaveStorageItems();
+        //SaveStorageItems();
         tabButtonImages[tabIndex].color = noneActiveColor_tab;
         tabIndex = index;
 
@@ -271,6 +271,7 @@ public class OtherStorage : MonoBehaviour
             default:
                 break;
         }
+
         storageInfo.itemList.Add(storageItemInfo);
         FieldNode node = gameMenuMgr.gameMgr.nodeList.Find(x => x.nodePos == storageInfo.nodePos);
         if (node != null) node.SetItemCase(true);
@@ -320,18 +321,18 @@ public class OtherStorage : MonoBehaviour
         var floorStorage = gameMenuMgr.dataMgr.gameData.floorStorages.Find(x => x.type == storageInfo.type && x.nodePos == storageInfo.nodePos);
 
         var onItemSlots = itemSlots.FindAll(x => x.gameObject.activeSelf && x.item != null);
-        if (floorStorage != null && onItemSlots.Count > 0)
+        if (floorStorage != null)
         {
             storageInfo.itemList.Clear();
-            floorStorage.itemList.Clear();
             for (int i = 0; i < onItemSlots.Count; i++)
             {
                 var itemSlot = onItemSlots[i];
                 if (itemSlot.item == null) continue;
+                if (floorStorage.itemList.Find(x => x.itemData.serialID == itemSlot.item.itemData.serialID) != null) continue;
 
                 AddItemInStorageInfo(floorStorage, itemSlot.item.itemSlots[0].slotIndex, itemSlot.item);
-                storageInfo.itemList = floorStorage.itemList;
             }
+            storageInfo.itemList = floorStorage.itemList;
         }
     }
 
@@ -389,6 +390,7 @@ public class OtherStorage : MonoBehaviour
             PopUp_Inventory popUp = gameMenuMgr.activePopUp[i];
             popUp.ClosePopUp();
         }
+        SaveStorageItems();
         GetStorageInfo(index);
     }
 }

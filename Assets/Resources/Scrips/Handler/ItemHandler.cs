@@ -87,11 +87,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
                 for (int j = 0; j < partsObjects.Count; j++)
                 {
-                    GameObject parts = partsObjects[j];
-                    partsSamples.Add(parts);
+                    MeshFilter parts = partsObjects[j];
+                    partsSamples.Add(parts.gameObject);
 
                     var mesh = parts.GetComponent<MeshRenderer>();
                     if (mesh == null) continue;
@@ -145,11 +145,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
                 for (int j = 0; j < partsObjects.Count; j++)
                 {
-                    GameObject parts = partsObjects[j];
-                    partsSamples.Add(parts);
+                    MeshFilter parts = partsObjects[j];
+                    partsSamples.Add(parts.gameObject);
                 }
             }
             sample.SetActive(false);
@@ -172,10 +172,20 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             return;
         }
 
-        if (itemData.type == ItemType.Bullet)
+        switch (itemData.type)
         {
-            bulletData.bulletMesh = activeSample.GetComponent<MeshFilter>().mesh;
-            bulletData.bulletMat = activeSample.GetComponent<MeshRenderer>().material;
+            case ItemType.SubWeapon:
+                SetPartsSample();
+                break;
+            case ItemType.MainWeapon:
+                SetPartsSample();
+                break;
+            case ItemType.Bullet:
+                bulletData.bulletMesh = activeSample.GetComponent<MeshFilter>().mesh;
+                bulletData.bulletMat = activeSample.GetComponent<MeshRenderer>().material;
+                break;
+            default:
+                break;
         }
         activeSample.SetActive(true);
         gameObject.SetActive(true);
@@ -207,12 +217,10 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 case ItemType.MainWeapon:
                     var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                     weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
-                    SetPartsSample();
                     return weaponData.prefabName;
                 case ItemType.SubWeapon:
                     var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
                     weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
-                    SetPartsSample();
                     return weaponData.prefabName;
                 case ItemType.Bullet:
                     var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
@@ -476,79 +484,40 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public void SetPartsSample()
     {
-        var activeSamples = partsSamples.FindAll(x => x.activeSelf);
-        for (int i = 0; i < activeSamples.Count; i++)
-        {
-            var activeSample = activeSamples[i];
-            activeSample.SetActive(false);
-        }
-
-        if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
-
-        if (weaponData.isMag)
-        {
-            var samples = partsSamples.FindAll(x => x.name == weaponData.equipMag.prefabName);
-            for (int i = 0; i < samples.Count; i++)
-            {
-                GameObject sample = samples[i];
-                sample.SetActive(true);
-            }
-        }
-
-        if (activeSample != null)
-        {
-            var weapon = activeSample.GetComponent<Weapon>();
-            if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
-            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
-        }
-        for (int i = 0; i < weaponData.equipPartsList.Count; i++)
-        {
-            var partsData = weaponData.equipPartsList[i];
-            var smaples = partsSamples.FindAll(x => x.name == partsData.prefabName);
-            for (int j = 0; j < smaples.Count; j++)
-            {
-                var smaple = smaples[j];
-                smaple.SetActive(true);
-            }
-        }
+        SetActivePartsSample(weaponData);
     }
 
     public void SetPartsSample(WeaponDataInfo weaponData)
     {
-        var activeSamples = partsSamples.FindAll(x => x.activeSelf);
+        SetActivePartsSample(weaponData);
+    }
+
+    private void SetActivePartsSample(WeaponDataInfo weaponData)
+    {
+        if (activeSample == null) return;
+        if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
+
+        Weapon weapon = activeSample.GetComponent<Weapon>();
+        var activeSamples = weapon.partsMfs.FindAll(x => x.gameObject.activeSelf);
         for (int i = 0; i < activeSamples.Count; i++)
         {
-            var activeSample = activeSamples[i];
+            var activeSample = activeSamples[i].gameObject;
             activeSample.SetActive(false);
         }
-
-        if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
+        if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
+        if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
 
         if (weaponData.isMag)
         {
-            var samples = partsSamples.FindAll(x => x.name == weaponData.equipMag.prefabName);
-            for (int i = 0; i < samples.Count; i++)
-            {
-                GameObject sample = samples[i];
-                sample.SetActive(true);
-            }
+            MeshFilter sample = weapon.partsMfs.Find(x => x.name == weaponData.equipMag.prefabName);
+            if (sample != null) sample.gameObject.SetActive(true);
         }
 
-        if (activeSample != null)
-        {
-            var weapon = activeSample.GetComponent<Weapon>();
-            if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
-            if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
-        }
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            var smaples = partsSamples.FindAll(x => x.name == partsData.prefabName);
-            for (int j = 0; j < smaples.Count; j++)
-            {
-                var smaple = smaples[j];
-                smaple.SetActive(true);
-            }
+            MeshFilter sample = weapon.partsMfs.Find(x => x.name == partsData.prefabName);
+            if (sample != null) sample.gameObject.SetActive(true);
         }
     }
 

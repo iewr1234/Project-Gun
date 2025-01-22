@@ -32,13 +32,14 @@ public class StageIcon : MonoBehaviour
         if (gameMgr.uiMgr.selcetStage != null) return;
 
         gameMgr.uiMgr.selcetStage = this;
-        if (gameMgr.dataMgr.gameData.floorStorages.Count > 0)
+        switch (gameMgr.dataMgr.gameData.floorStorages.Count)
         {
-            gameMgr.gameMenuMgr.popUp_warning.SetWarning(WarningState.DeleteDropItems);
-        }
-        else
-        {
-            gameMgr.EnterTheStage();
+            case > 0:
+                gameMgr.gameMenuMgr.popUp_warning.SetWarning(WarningState.DeleteDropItems);
+                break;
+            default:
+                gameMgr.EnterTheStage();
+                break;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Progress;
 
 public enum PopUpState
 {
@@ -115,11 +116,11 @@ public class PopUp_Inventory : MonoBehaviour
                 var weapon = sample.GetComponent<Weapon>();
                 if (weapon != null)
                 {
-                    List<GameObject> partsObjects = weapon.GetWeaponPartsObjects();
+                    List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
                     for (int j = 0; j < partsObjects.Count; j++)
                     {
-                        GameObject parts = partsObjects[j];
-                        partsSamples.Add(parts);
+                        MeshFilter parts = partsObjects[j];
+                        partsSamples.Add(parts.gameObject);
                     }
                 }
                 sample.SetActive(false);
@@ -167,10 +168,14 @@ public class PopUp_Inventory : MonoBehaviour
         else if (split.slider.value > 0)
         {
             item.ResultTotalCount((int)-split.slider.value);
+            item.SetColorOfBackImage(new Color(0f, 0f, 0f, 240 / 255f));
             gameMenuMgr.SetItemInStorage(item.itemData, (int)split.slider.value, false, itemSlots);
         }
         else
         {
+            item.SetItemSlots(DataUtility.slot_noItemColor);
+            item.SetItemCount(item.TotalCount);
+            item.SetColorOfBackImage(new Color(0f, 0f, 0f, 240 / 255f));
             for (int i = 0; i < itemSlots.Count; i++)
             {
                 var itemSlot = itemSlots[i];
@@ -195,30 +200,22 @@ public class PopUp_Inventory : MonoBehaviour
     #region ItemInformation
     public void PopUp_ItemInformation(ItemHandler _item)
     {
-        if (gameObject.activeSelf)
+        switch (gameObject.activeSelf)
         {
-            for (int i = 0; i < itemInfo.equipSlots.Count; i++)
-            {
-                var equipSlot = itemInfo.equipSlots[i];
-                if (equipSlot.item == null) continue;
+            case true:
+                for (int i = 0; i < itemInfo.equipSlots.Count; i++)
+                {
+                    var equipSlot = itemInfo.equipSlots[i];
+                    if (equipSlot.item == null) continue;
 
-                equipSlot.item.DisableItem();
-            }
-        }
-        else
-        {
-            gameObject.SetActive(true);
+                    equipSlot.item.DisableItem();
+                }
+                break;
+            case false:
+                gameObject.SetActive(true);
+                break;
         }
 
-        //if (invenMgr.activePopUp.Count > 1)
-        //{
-        //    var offset = new Vector3(50f, -50f, 0f);
-        //    SetPopUpPosition(invenMgr.activePopUp[^1].transform.position);
-        //}
-        //else
-        //{
-        //    transform.localPosition = defaultPos_itemInfo;
-        //}
         item = _item;
         topText.text = $"{item.itemData.itemName}";
         state = PopUpState.ItemInformation;
@@ -541,10 +538,7 @@ public class PopUp_Inventory : MonoBehaviour
                         case MagazineType.Magazine:
                             if (item.weaponData.isMag && equipSlot.CheckEquip(item.weaponData.equipMag))
                             {
-                                if (equipSlot.item == null)
-                                {
-                                    gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag, 1, equipSlot);
-                                }
+                                if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(item.weaponData.equipMag, 1, equipSlot);
 
                                 var smaples = itemInfo.partsSamples.FindAll(x => x.name == item.weaponData.equipMag.prefabName);
                                 for (int j = 0; j < smaples.Count; j++)
@@ -583,17 +577,17 @@ public class PopUp_Inventory : MonoBehaviour
 
                     void Sample_WeaponPartsType(WeaponPartsType partsType)
                     {
+                        Weapon weapon = itemInfo.activeSample.GetComponent<Weapon>();
+                        if (weapon == null) return;
+
                         var partsData = item.weaponData.equipPartsList.Find(x => x.type == partsType);
-                        Weapon weapon;
                         switch (partsType)
                         {
                             case WeaponPartsType.Muzzle:
-                                weapon = itemInfo.activeSample.GetComponent<Weapon>();
-                                if (weapon != null && weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(partsData == null);
+                                if (weapon.baseMuzzle != null) weapon.baseMuzzle.SetActive(partsData == null);
                                 break;
                             case WeaponPartsType.Sight:
-                                weapon = itemInfo.activeSample.GetComponent<Weapon>();
-                                if (weapon != null && weapon.baseSight != null) weapon.baseSight.SetActive(partsData == null);
+                                if (weapon.baseSight != null) weapon.baseSight.SetActive(partsData == null);
                                 break;
                             default:
                                 break;
@@ -603,12 +597,15 @@ public class PopUp_Inventory : MonoBehaviour
                         {
                             if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
 
-                            var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
-                            for (int j = 0; j < smaples.Count; j++)
-                            {
-                                var smaple = smaples[j];
-                                smaple.SetActive(true);
-                            }
+                            var smaple = weapon.partsMfs.Find(x => x.name == partsData.prefabName);
+                            smaple.gameObject.SetActive(true);
+
+                            //var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
+                            //for (int j = 0; j < smaples.Count; j++)
+                            //{
+                            //    var smaple = smaples[j];
+                            //    smaple.SetActive(true);
+                            //}
                         }
                         else
                         {
@@ -672,6 +669,9 @@ public class PopUp_Inventory : MonoBehaviour
         {
             case PopUpState.Split:
                 gameMenuMgr.InactiveSampleItem();
+                item.SetItemSlots(DataUtility.slot_noItemColor);
+                item.SetItemCount(item.TotalCount);
+                item.SetColorOfBackImage(new Color(0f, 0f, 0f, 240 / 255f));
                 for (int i = 0; i < itemSlots.Count; i++)
                 {
                     var itemSlot = itemSlots[i];

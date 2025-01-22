@@ -46,18 +46,21 @@ public class Weapon : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
-    public Transform firePoint;
+    public List<MeshFilter> meshFilters;
+
+    [Space(5f)] public Transform firePoint;
     public ParticleSystem fx_gunShot;
     public ParticleSystem[] fx_sEjects;
     public ParticleSystemRenderer[] fx_sEject_Rdrs;
 
     [Space(5f)] public GameObject baseMuzzle;
     public GameObject baseSight;
-    public List<GameObject> partsObjects = new List<GameObject>();
+    public List<MeshFilter> partsMfs = new List<MeshFilter>();
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
     public WeaponDataInfo weaponData;
+    [SerializeField] private Vector3 weaponPivot;
     public WeaponGripInfo gripInfo;
     [Space(5f)]
 
@@ -91,7 +94,7 @@ public class Weapon : MonoBehaviour
 
         animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
-        partsObjects = GetWeaponPartsObjects();
+        GetWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
         if (weaponData.isMag) SetParts(weaponData.equipMag.prefabName, true);
@@ -119,7 +122,7 @@ public class Weapon : MonoBehaviour
 
         animator = GetComponent<Animator>();
         if (firePoint == null) firePoint = transform.Find("FirePoint");
-        partsObjects = GetWeaponPartsObjects();
+        GetWeaponPartsObjects();
         SetHolsterPositionAndRotation();
 
         magMax = _gearInfo.magMax;
@@ -128,9 +131,9 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public List<GameObject> GetWeaponPartsObjects()
+    public List<MeshFilter> GetWeaponPartsObjects()
     {
-        var parts = new List<GameObject>();
+        var parts = new List<MeshFilter>();
         var partsTf = transform.Find("PartsTransform");
 
         var magTf = partsTf.Find("Magazine");
@@ -152,7 +155,8 @@ public class Weapon : MonoBehaviour
         var underBarrelTf = partsTf.Find("UnderBarrel");
         AddParts(underBarrelTf);
 
-        return parts;
+        partsMfs = parts;
+        return partsMfs;
 
         void AddParts(Transform partsTf)
         {
@@ -160,8 +164,9 @@ public class Weapon : MonoBehaviour
 
             for (int i = 0; i < partsTf.childCount; i++)
             {
-                var sample = partsTf.GetChild(i).gameObject;
-                //sample.SetActive(false);
+                var sample = partsTf.GetChild(i).GetComponent<MeshFilter>();
+                if (sample == null) continue;
+
                 parts.Add(sample);
             }
         }
@@ -253,44 +258,44 @@ public class Weapon : MonoBehaviour
 
     public void SetParts()
     {
-        var activeParts = partsObjects.FindAll(x => x.activeSelf);
+        var activeParts = partsMfs.FindAll(x => x.gameObject.activeSelf);
         for (int i = 0; i < activeParts.Count; i++)
         {
             var activePart = activeParts[i];
-            activePart.SetActive(false);
+            activePart.gameObject.SetActive(false);
         }
 
         if (weaponData.isMag)
         {
-            var magParts = partsObjects.Find(x => x.name == weaponData.equipMag.prefabName);
-            if (magParts != null) magParts.SetActive(true);
+            var magParts = partsMfs.Find(x => x.name == weaponData.equipMag.prefabName);
+            if (magParts != null) magParts.gameObject.SetActive(true);
         }
         if (baseMuzzle != null) baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
         if (baseSight != null) baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
-            var equipParts = partsObjects.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
-            if (equipParts != null) equipParts.SetActive(true);
+            var equipParts = partsMfs.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
+            if (equipParts != null) equipParts.gameObject.SetActive(true);
         }
     }
 
     public void SetParts(string partsName, bool value)
     {
-        var partsList = partsObjects.FindAll(x => x.name == partsName);
+        var partsList = partsMfs.FindAll(x => x.name == partsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
-            parts.SetActive(value);
+            parts.gameObject.SetActive(value);
         }
     }
 
     public void SetAllParts(string parentsName, bool value)
     {
-        var partsList = partsObjects.FindAll(x => x.transform.parent.name == parentsName);
+        var partsList = partsMfs.FindAll(x => x.transform.parent.name == parentsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
-            parts.SetActive(value);
+            parts.gameObject.SetActive(value);
         }
     }
 
@@ -502,6 +507,33 @@ public class Weapon : MonoBehaviour
         }
         ejectBullets.Clear();
     }
+
+    public Vector3 GetMeshCenter()
+    {
+        if (meshFilters.Count == 0) return transform.position;
+
+        List<MeshFilter> mfs = new List<MeshFilter>(meshFilters);
+        if (partsMfs.Count > 0) mfs.AddRange(partsMfs);
+
+        Vector3 totalCenter = Vector3.zero;
+        int count = 0;
+        foreach (MeshFilter mf in mfs)
+        {
+            // 로컬 중심을 월드 좌표로 변환
+            totalCenter += mf.transform.TransformPoint(mf.mesh.bounds.center);
+            count++;
+        }
+
+        weaponPivot = totalCenter / count;
+        return weaponPivot;
+    }
+
+    //private void OnDrawGizmos()
+    //{
+    //    Vector3 center = GetMeshCenter();
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawSphere(center, 0.05f);
+    //}
 
     public void Event_EjectionBulletShell()
     {
