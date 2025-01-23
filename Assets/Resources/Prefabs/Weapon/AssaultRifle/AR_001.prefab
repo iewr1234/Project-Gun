@@ -1323,6 +1323,19 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   animator: {fileID: 0}
+  meshFilters: []
+  weaponRenderers:
+  - {fileID: 6923674893791260925}
+  - {fileID: 1016122754899844435}
+  - {fileID: 341768950454391053}
+  - {fileID: 1703487265452282803}
+  - {fileID: 8174169780931543125}
+  - {fileID: 4013531490308956157}
+  - {fileID: 5321413847632003781}
+  - {fileID: 3074941972790110656}
+  - {fileID: 5177562093247148181}
+  - {fileID: 959355835515161735}
+  - {fileID: 5484468578378381270}
   firePoint: {fileID: 357450767681435767}
   fx_gunShot: {fileID: 1509507694270063040}
   fx_sEjects:
@@ -1331,7 +1344,7 @@ MonoBehaviour:
   - {fileID: 8739642314566084267}
   baseMuzzle: {fileID: 0}
   baseSight: {fileID: 5331676305565594741}
-  partsObjects: []
+  partsMfs: []
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -1396,6 +1409,7 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
+  weaponPivot: {x: 0, y: 0, z: 0}
   magMax: 0
   loadedNum: 0
   hitInfos: []

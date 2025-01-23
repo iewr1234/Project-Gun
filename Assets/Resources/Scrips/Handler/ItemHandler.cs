@@ -87,18 +87,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
-                for (int j = 0; j < partsObjects.Count; j++)
+                weapon.GetWeaponPartsObjects();
+                for (int j = 0; j < weapon.partsRdrs.Count; j++)
                 {
-                    MeshFilter parts = partsObjects[j];
-                    partsSamples.Add(parts.gameObject);
-
-                    var mesh = parts.GetComponent<MeshRenderer>();
-                    if (mesh == null) continue;
-
-                    mesh.material = new Material(mesh.material);
-                    mesh.material.shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
-                    mesh.material.color = new Color(1f, 1f, 1f, 100 / 255f);
+                    Renderer partsRdr = weapon.partsRdrs[j];
+                    partsRdr.material = new Material(partsRdr.material);
+                    partsRdr.material.shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+                    partsRdr.material.color = new Color(1f, 1f, 1f, 100 / 255f);
+                    partsSamples.Add(partsRdr.gameObject);
                 }
             }
             sample.SetActive(false);
@@ -145,11 +141,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             var weapon = sample.GetComponent<Weapon>();
             if (weapon != null)
             {
-                List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
-                for (int j = 0; j < partsObjects.Count; j++)
+                weapon.GetWeaponPartsObjects();
+                for (int j = 0; j < weapon.partsRdrs.Count; j++)
                 {
-                    MeshFilter parts = partsObjects[j];
-                    partsSamples.Add(parts.gameObject);
+                    Renderer partsRdr = weapon.partsRdrs[j];
+                    partsSamples.Add(partsRdr.gameObject);
                 }
             }
             sample.SetActive(false);
@@ -498,7 +494,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (itemData.type != ItemType.MainWeapon && itemData.type != ItemType.SubWeapon) return;
 
         Weapon weapon = activeSample.GetComponent<Weapon>();
-        var activeSamples = weapon.partsMfs.FindAll(x => x.gameObject.activeSelf);
+        var activeSamples = weapon.partsRdrs.FindAll(x => x.gameObject.activeSelf);
         for (int i = 0; i < activeSamples.Count; i++)
         {
             var activeSample = activeSamples[i].gameObject;
@@ -509,16 +505,22 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         if (weaponData.isMag)
         {
-            MeshFilter sample = weapon.partsMfs.Find(x => x.name == weaponData.equipMag.prefabName);
+            Renderer sample = weapon.partsRdrs.Find(x => x.name == weaponData.equipMag.prefabName);
             if (sample != null) sample.gameObject.SetActive(true);
         }
 
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
             var partsData = weaponData.equipPartsList[i];
-            MeshFilter sample = weapon.partsMfs.Find(x => x.name == partsData.prefabName);
+            Renderer sample = weapon.partsRdrs.Find(x => x.name == partsData.prefabName);
             if (sample != null) sample.gameObject.SetActive(true);
         }
+
+        //ItemPivot pivot = activeSample.GetComponent<ItemPivot>();
+        //if (pivot == null) return;
+
+        Vector3 weaponCenter = weapon.GetWeaponCenter();
+        weapon.transform.localPosition = weaponCenter;
     }
 
     public void SetTotalCount(int newCount)

@@ -113,14 +113,13 @@ public class PopUp_Inventory : MonoBehaviour
             for (int i = 0; i < itemInfo.samplesTf.childCount; i++)
             {
                 var sample = _samplesTf.GetChild(i).gameObject;
-                var weapon = sample.GetComponent<Weapon>();
-                if (weapon != null)
+                if (sample.TryGetComponent(out Weapon weapon))
                 {
-                    List<MeshFilter> partsObjects = weapon.GetWeaponPartsObjects();
-                    for (int j = 0; j < partsObjects.Count; j++)
+                    weapon.GetWeaponPartsObjects();
+                    for (int j = 0; j < weapon.partsRdrs.Count; j++)
                     {
-                        MeshFilter parts = partsObjects[j];
-                        partsSamples.Add(parts.gameObject);
+                        Renderer partsRdr = weapon.partsRdrs[j];
+                        partsSamples.Add(partsRdr.gameObject);
                     }
                 }
                 sample.SetActive(false);
@@ -597,7 +596,7 @@ public class PopUp_Inventory : MonoBehaviour
                         {
                             if (equipSlot.item == null) gameMenuMgr.SetItemInEquipSlot(partsData, 1, equipSlot);
 
-                            var smaple = weapon.partsMfs.Find(x => x.name == partsData.prefabName);
+                            var smaple = weapon.partsRdrs.Find(x => x.name == partsData.prefabName);
                             smaple.gameObject.SetActive(true);
 
                             //var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);

@@ -1343,28 +1343,28 @@ public class GameMenuManager : MonoBehaviour
         item.SetItemCount(item.TotalCount);
         if (holdingItem != null) item.SetActiveItemTarget(true);
 
-        void ItemRegistration()
-        {
-            if (itemSlots.Count == 0) return;
-            if (gameMgr == null) return;
-            if (gameMgr.playerList.Count == 0) return;
-            //if (otherStorage.storageInfos.Count == 0) return;
+        //void ItemRegistration()
+        //{
+        //    if (itemSlots.Count == 0) return;
+        //    if (gameMgr == null) return;
+        //    if (gameMgr.playerList.Count == 0) return;
+        //    //if (otherStorage.storageInfos.Count == 0) return;
 
-            otherStorage.SetFloorStorage(gameMgr.playerList[0].currentNode);
-            var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
-            if (itemSlots[0].otherStorage != null && storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID) == null)
-            {
-                otherStorage.AddItemInStorageInfo(storageInfo, itemSlots[0].slotIndex, item);
-            }
-            else if (itemSlots[0].otherStorage == null && item.itemSlots.Count > 0)
-            {
-                var find = storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID);
-                if (find != null)
-                {
-                    storageInfo.itemList.Remove(find);
-                }
-            }
-        }
+        //    otherStorage.SetFloorStorage(gameMgr.playerList[0].currentNode);
+        //    var storageInfo = otherStorage.storageInfos[otherStorage.tabIndex];
+        //    if (itemSlots[0].otherStorage != null && storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID) == null)
+        //    {
+        //        otherStorage.AddItemInStorageInfo(storageInfo, itemSlots[0].slotIndex, item);
+        //    }
+        //    else if (itemSlots[0].otherStorage == null && item.itemSlots.Count > 0)
+        //    {
+        //        var find = storageInfo.itemList.Find(x => x.itemData.serialID == item.itemData.serialID);
+        //        if (find != null)
+        //        {
+        //            storageInfo.itemList.Remove(find);
+        //        }
+        //    }
+        //}
     }
 
     private void ItemMoveCancel(ItemHandler item, List<ItemSlot> itemSlots)

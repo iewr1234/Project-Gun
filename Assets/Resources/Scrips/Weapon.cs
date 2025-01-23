@@ -47,6 +47,7 @@ public class Weapon : MonoBehaviour
     [Header("---Access Component---")]
     public Animator animator;
     public List<MeshFilter> meshFilters;
+    public List<Renderer> weaponRenderers;
 
     [Space(5f)] public Transform firePoint;
     public ParticleSystem fx_gunShot;
@@ -55,7 +56,7 @@ public class Weapon : MonoBehaviour
 
     [Space(5f)] public GameObject baseMuzzle;
     public GameObject baseSight;
-    public List<MeshFilter> partsMfs = new List<MeshFilter>();
+    public List<Renderer> partsRdrs = new List<Renderer>();
 
     [Header("--- Assignment Variable---")]
     public EquipSlot equipSlot;
@@ -81,6 +82,8 @@ public class Weapon : MonoBehaviour
     private readonly float shootDisparity_bullet = 0.05f;
     private readonly float shootDisparity_pellet = 0.3f;
     private readonly float shootDisparity_spread = 0.15f;
+
+    public bool showCenter;
 
     public void SetComponets(CharacterController _charCtr, EquipSlot _equipSlot, WeaponDataInfo _weaponData)
     {
@@ -131,9 +134,9 @@ public class Weapon : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public List<MeshFilter> GetWeaponPartsObjects()
+    public List<Renderer> GetWeaponPartsObjects()
     {
-        var parts = new List<MeshFilter>();
+        var parts = new List<Renderer>();
         var partsTf = transform.Find("PartsTransform");
 
         var magTf = partsTf.Find("Magazine");
@@ -155,8 +158,8 @@ public class Weapon : MonoBehaviour
         var underBarrelTf = partsTf.Find("UnderBarrel");
         AddParts(underBarrelTf);
 
-        partsMfs = parts;
-        return partsMfs;
+        partsRdrs = parts;
+        return partsRdrs;
 
         void AddParts(Transform partsTf)
         {
@@ -164,7 +167,7 @@ public class Weapon : MonoBehaviour
 
             for (int i = 0; i < partsTf.childCount; i++)
             {
-                var sample = partsTf.GetChild(i).GetComponent<MeshFilter>();
+                var sample = partsTf.GetChild(i).GetComponent<Renderer>();
                 if (sample == null) continue;
 
                 parts.Add(sample);
@@ -258,7 +261,7 @@ public class Weapon : MonoBehaviour
 
     public void SetParts()
     {
-        var activeParts = partsMfs.FindAll(x => x.gameObject.activeSelf);
+        var activeParts = partsRdrs.FindAll(x => x.gameObject.activeSelf);
         for (int i = 0; i < activeParts.Count; i++)
         {
             var activePart = activeParts[i];
@@ -267,21 +270,21 @@ public class Weapon : MonoBehaviour
 
         if (weaponData.isMag)
         {
-            var magParts = partsMfs.Find(x => x.name == weaponData.equipMag.prefabName);
+            var magParts = partsRdrs.Find(x => x.name == weaponData.equipMag.prefabName);
             if (magParts != null) magParts.gameObject.SetActive(true);
         }
         if (baseMuzzle != null) baseMuzzle.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Muzzle) == null);
         if (baseSight != null) baseSight.SetActive(weaponData.equipPartsList.Find(x => x.type == WeaponPartsType.Sight) == null);
         for (int i = 0; i < weaponData.equipPartsList.Count; i++)
         {
-            var equipParts = partsMfs.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
+            var equipParts = partsRdrs.Find(x => x.name == weaponData.equipPartsList[i].prefabName);
             if (equipParts != null) equipParts.gameObject.SetActive(true);
         }
     }
 
     public void SetParts(string partsName, bool value)
     {
-        var partsList = partsMfs.FindAll(x => x.name == partsName);
+        var partsList = partsRdrs.FindAll(x => x.name == partsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
@@ -291,7 +294,7 @@ public class Weapon : MonoBehaviour
 
     public void SetAllParts(string parentsName, bool value)
     {
-        var partsList = partsMfs.FindAll(x => x.transform.parent.name == parentsName);
+        var partsList = partsRdrs.FindAll(x => x.transform.parent.name == parentsName);
         for (int i = 0; i < partsList.Count; i++)
         {
             var parts = partsList[i];
@@ -508,32 +511,48 @@ public class Weapon : MonoBehaviour
         ejectBullets.Clear();
     }
 
-    public Vector3 GetMeshCenter()
+    public Vector3 GetWeaponCenter()
     {
-        if (meshFilters.Count == 0) return transform.position;
+        if (weaponRenderers.Count == 0) return weaponPivot;
 
-        List<MeshFilter> mfs = new List<MeshFilter>(meshFilters);
-        if (partsMfs.Count > 0) mfs.AddRange(partsMfs);
-
-        Vector3 totalCenter = Vector3.zero;
-        int count = 0;
-        foreach (MeshFilter mf in mfs)
+        List<Renderer> renderers = new List<Renderer>(weaponRenderers);
+        for (int i = 0; i < partsRdrs.Count; i++)
         {
-            // 로컬 중심을 월드 좌표로 변환
-            totalCenter += mf.transform.TransformPoint(mf.mesh.bounds.center);
-            count++;
+            if (!partsRdrs[i].gameObject.activeSelf) continue;
+
+            renderers.Add(partsRdrs[i]);
         }
 
-        weaponPivot = totalCenter / count;
+        // 무기 전체를 감싸는 Bounds를 저장할 변수
+        Bounds combinedBounds = renderers[0].bounds;
+
+        for (int i = 1; i < renderers.Count; i++)
+        {
+            // 기존 Bounds에 병합
+            combinedBounds.Encapsulate(renderers[i].bounds);
+        }
+
+        // 중심 위치 반환 (로컬 좌표 기준)
+        weaponPivot = transform.InverseTransformPoint(combinedBounds.center) * 0.5f;
+
+        if (transform.TryGetComponent(out ItemPivot pivot))
+        {
+            transform.SetLocalPositionAndRotation(pivot.itemPivot.pos, Quaternion.Euler(pivot.itemPivot.rot));
+            transform.localScale = pivot.itemPivot.scale;
+        }
+        transform.localPosition -= weaponPivot;
+
         return weaponPivot;
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    Vector3 center = GetMeshCenter();
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawSphere(center, 0.05f);
-    //}
+    private void OnDrawGizmos()
+    {
+        if (!showCenter) return;
+
+        Vector3 center = transform.TransformPoint(GetWeaponCenter());
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(center, 0.05f);
+    }
 
     public void Event_EjectionBulletShell()
     {
