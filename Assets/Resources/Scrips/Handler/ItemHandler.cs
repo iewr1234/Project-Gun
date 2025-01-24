@@ -23,10 +23,11 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     [Header("---Access Component---")]
     public RectTransform rect;
-    [HideInInspector] public Image frameImage;
+    private MeshRenderer background;
     private Image targetImage;
-    [HideInInspector] public TextMeshProUGUI countText;
-    [HideInInspector] public Image chamberImage;
+    [HideInInspector] public Image frameImage;
+    [HideInInspector] public TextMeshPro countText;
+    //[HideInInspector] public Image chamberImage;
 
     private Transform samplesTf;
     [SerializeField] private List<GameObject> samples = new List<GameObject>();
@@ -61,12 +62,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         rect = GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
+        background = transform.Find("Background").GetComponent<MeshRenderer>();
+        background.material = new Material(background.material);
+        targetImage = transform.Find("RaycastTarget").GetComponent<Image>();
         frameImage = transform.Find("Frame").GetComponent<Image>();
         frameImage.enabled = false;
-        targetImage = transform.Find("BackGround").GetComponent<Image>();
-        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
-        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
-        chamberImage.enabled = false;
+        countText = transform.Find("Count").GetComponent<TextMeshPro>();
 
         samplesTf = transform.Find("Sample");
         for (int i = 0; i < samplesTf.childCount; i++)
@@ -115,12 +116,12 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         rect = GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
+        background = transform.Find("Background").GetComponent<MeshRenderer>();
+        background.material = new Material(background.material);
+        targetImage = transform.Find("RaycastTarget").GetComponent<Image>();
         frameImage = transform.Find("Frame").GetComponent<Image>();
         frameImage.enabled = false;
-        targetImage = transform.Find("BackGround").GetComponent<Image>();
-        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
-        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
-        chamberImage.enabled = false;
+        countText = transform.Find("Count").GetComponent<TextMeshPro>();
 
         samplesTf = transform.Find("Sample");
         for (int i = 0; i < samplesTf.childCount; i++)
@@ -519,8 +520,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         //ItemPivot pivot = activeSample.GetComponent<ItemPivot>();
         //if (pivot == null) return;
 
-        Vector3 weaponCenter = weapon.GetWeaponCenter();
-        weapon.transform.localPosition = weaponCenter;
+        weapon.transform.localPosition = weapon.GetWeaponCenter();
     }
 
     public void SetTotalCount(int newCount)
@@ -535,9 +535,9 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         countText.text = $"{newCount_1}/{newCount_2}";
     }
 
-    public void SetTotalCount(float newCount_1, int newCount_2)
+    public void SetTotalCount(string icon, float newCount_1, int newCount_2)
     {
-        countText.text = $"{newCount_1}/{newCount_2}";
+        countText.text = icon + $"{newCount_1}/{newCount_2}";
     }
 
     public void ResultTotalCount(int value)
@@ -568,7 +568,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                 break;
             default:
                 countText.enabled = itemData.maxNesting > 1;
-                chamberImage.enabled = false;
                 SetTotalCount(count);
                 break;
         }
@@ -624,7 +623,6 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         void ArmorType()
         {
             countText.enabled = true;
-            chamberImage.enabled = false;
             SetTotalCount(armorData.durability, armorData.maxDurability);
         }
 
@@ -639,18 +637,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             }
             countText.enabled = true;
 
-            string spriteName = (weaponData.weaponType != global::WeaponType.Revolver && weaponData.isChamber)
-                             || (weaponData.weaponType == global::WeaponType.Revolver && weaponData.equipMag.loadedBullets.Count > 0)
-                              ? "Icon_Chamber_on" : "Icon_Chamber_off";
-            chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
-            chamberImage.enabled = true;
-            SetTotalCount(bulletNum, magSize);
+            string chamberIcon = (weaponData.weaponType != global::WeaponType.Revolver && weaponData.isChamber)
+                              || (weaponData.weaponType == global::WeaponType.Revolver && weaponData.equipMag.loadedBullets.Count > 0)
+                               ? "<sprite=1>" : "<sprite=0>";
+            SetTotalCount(chamberIcon, bulletNum, magSize);
         }
 
         void MagazineType()
         {
             countText.enabled = true;
-            chamberImage.enabled = false;
             SetTotalCount(magData.loadedBullets.Count, magData.magSize);
         }
     }
@@ -662,12 +657,14 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (size == new Vector2Int(1, 1))
         {
             rect.sizeDelta = new Vector2Int(DataUtility.itemSize, DataUtility.itemSize);
+            background.transform.localScale = new Vector3Int(DataUtility.itemSize, DataUtility.itemSize, 1);
             pivotIndex = new Vector2Int(0, 0);
             movePivot = new Vector2(-DataUtility.itemSize / 2, DataUtility.itemSize / 2);
         }
         else
         {
             rect.sizeDelta = new Vector2Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y);
+            background.transform.localScale = new Vector3Int(DataUtility.itemSize * size.x, DataUtility.itemSize * size.y, 1);
             pivotIndex = new Vector2Int(size.x / 2, size.y / 2);
             var pivotX = (pivotIndex.x * DataUtility.itemSize) + (DataUtility.itemSize / 2);
             var pivotY = (pivotIndex.y * DataUtility.itemSize) + (DataUtility.itemSize / 2);
@@ -727,7 +724,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     /// <param name="color"></param>
     public void SetColorOfBackImage(Color color)
     {
-        targetImage.color = color;
+        //targetImage.color = color;
+        background.material.color = color;
     }
 
     /// <summary>
@@ -834,9 +832,8 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             ChangeRectPivot(false);
         }
         targetImage.raycastTarget = false;
-        targetImage.color = Color.clear;
         countText.enabled = false;
-        chamberImage.enabled = false;
+        SetColorOfBackImage(Color.clear);
 
         gameMenuMgr.TakeTheItem(this);
         FollowMouse();

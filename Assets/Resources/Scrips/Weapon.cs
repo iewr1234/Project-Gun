@@ -83,8 +83,6 @@ public class Weapon : MonoBehaviour
     private readonly float shootDisparity_pellet = 0.3f;
     private readonly float shootDisparity_spread = 0.15f;
 
-    public bool showCenter;
-
     public void SetComponets(CharacterController _charCtr, EquipSlot _equipSlot, WeaponDataInfo _weaponData)
     {
         gameMgr = _charCtr.GameMgr;
@@ -533,25 +531,9 @@ public class Weapon : MonoBehaviour
         }
 
         // 중심 위치 반환 (로컬 좌표 기준)
-        weaponPivot = transform.InverseTransformPoint(combinedBounds.center) * 0.5f;
-
-        if (transform.TryGetComponent(out ItemPivot pivot))
-        {
-            transform.SetLocalPositionAndRotation(pivot.itemPivot.pos, Quaternion.Euler(pivot.itemPivot.rot));
-            transform.localScale = pivot.itemPivot.scale;
-        }
-        transform.localPosition -= weaponPivot;
+        weaponPivot = -transform.InverseTransformPoint(combinedBounds.center) * 0.5f;
 
         return weaponPivot;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (!showCenter) return;
-
-        Vector3 center = transform.TransformPoint(GetWeaponCenter());
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(center, 0.05f);
     }
 
     public void Event_EjectionBulletShell()

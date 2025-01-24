@@ -33,8 +33,8 @@ public class EquipSlot : MonoBehaviour
     public Image outline;
     public Image backImage;
     public TextMeshProUGUI slotText;
-    public TextMeshProUGUI countText;
-    public Image chamberImage;
+    public TextMeshPro countText;
+    //public Image chamberImage;
 
     [Header("--- Assignment Variable---")]
     public EquipType type;
@@ -52,10 +52,8 @@ public class EquipSlot : MonoBehaviour
         outline.enabled = false;
         backImage = transform.Find("BackGround").GetComponent<Image>();
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
-        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshPro>();
         countText.enabled = false;
-        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
-        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -69,10 +67,8 @@ public class EquipSlot : MonoBehaviour
         outline.enabled = false;
         backImage = transform.Find("BackGround").GetComponent<Image>();
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
-        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshPro>();
         countText.enabled = false;
-        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
-        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -86,10 +82,8 @@ public class EquipSlot : MonoBehaviour
         outline.enabled = false;
         backImage = transform.Find("BackGround").GetComponent<Image>();
         slotText = transform.Find("SlotName").GetComponent<TextMeshProUGUI>();
-        countText = transform.Find("Count").GetComponent<TextMeshProUGUI>();
+        countText = transform.Find("Count").GetComponent<TextMeshPro>();
         countText.enabled = false;
-        chamberImage = transform.Find("Count/Chamber").GetComponent<Image>();
-        chamberImage.enabled = false;
 
         gameMenuMgr.allEquips.Add(this);
     }
@@ -102,7 +96,7 @@ public class EquipSlot : MonoBehaviour
 
         ErrorUI errorUI = outputError && gameMenuMgr.gameMgr != null ? gameMenuMgr.gameMgr.errorUI : null;
 
-        if(outputError)
+        if (outputError)
         {
 
         }
@@ -575,7 +569,6 @@ public class EquipSlot : MonoBehaviour
         {
             slotText.enabled = true;
             countText.enabled = false;
-            chamberImage.enabled = false;
         }
     }
 
@@ -607,7 +600,6 @@ public class EquipSlot : MonoBehaviour
                 break;
             default:
                 countText.enabled = false;
-                chamberImage.enabled = false;
                 break;
         }
 
@@ -615,7 +607,6 @@ public class EquipSlot : MonoBehaviour
         {
             countText.enabled = true;
             countText.text = $"{item.armorData.durability}<size=14>/{item.armorData.maxDurability}</size>";
-            chamberImage.enabled = false;
         }
 
         void WeaponType()
@@ -641,7 +632,6 @@ public class EquipSlot : MonoBehaviour
                     countText.enabled = true;
                     countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
                 }
-                chamberImage.enabled = false;
             }
             else
             {
@@ -663,13 +653,10 @@ public class EquipSlot : MonoBehaviour
                 }
                 slotText.enabled = false;
                 countText.enabled = true;
-                countText.text = $"{loadedNum}<size=14>/{magMax}</size>";
-
-                string spriteName = (item.weaponData.weaponType != global::WeaponType.Revolver && item.weaponData.isChamber)
-                                 || (item.weaponData.weaponType == global::WeaponType.Revolver && item.weaponData.equipMag.loadedBullets.Count > 0)
-                                  ? "Icon_Chamber_on" : "Icon_Chamber_off";
-                chamberImage.sprite = Resources.Load<Sprite>($"Sprites/{spriteName}");
-                chamberImage.enabled = true;
+                string chamberIcon = (item.weaponData.weaponType != global::WeaponType.Revolver && item.weaponData.isChamber)
+                                  || (item.weaponData.weaponType == global::WeaponType.Revolver && item.weaponData.equipMag.loadedBullets.Count > 0)
+                                   ? "<sprite=1>" : "<sprite=0>";
+                countText.text = chamberIcon + $"{loadedNum}<size=175>/{magMax}</size>";
             }
         }
 
@@ -677,7 +664,6 @@ public class EquipSlot : MonoBehaviour
         {
             countText.enabled = true;
             countText.text = $"{item.TotalCount}/{item.magData.magSize}";
-            chamberImage.enabled = false;
         }
     }
 

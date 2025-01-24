@@ -623,7 +623,6 @@ public class GameMenuManager : MonoBehaviour
         else
         {
             item.equipSlot.countText.enabled = false;
-            item.equipSlot.chamberImage.enabled = false;
         }
         item.SetItemScale(false);
         item.transform.SetParent(itemPool, false);
@@ -955,8 +954,8 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.SetItemCount();
 
         item.countText.enabled = false;
-        item.chamberImage.enabled = false;
         item.equipSlot = equipSlot;
+        item.SetColorOfBackImage(Color.clear);
         item.SetItemScale(true);
         item.ChangeRectPivot(true);
         item.transform.SetParent(equipSlot.transform, false);
@@ -1015,11 +1014,9 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
         equipSlot.countText.enabled = false;
-        equipSlot.chamberImage.enabled = false;
 
         item.SetColorOfBackImage(Color.clear);
         item.countText.enabled = false;
-        item.chamberImage.enabled = false;
         item.equipSlot = equipSlot;
         item.SetItemScale(true);
         item.ChangeRectPivot(true);
@@ -1037,11 +1034,9 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
         equipSlot.countText.enabled = true;
-        equipSlot.chamberImage.enabled = false;
 
         item.SetColorOfBackImage(Color.clear);
         item.countText.enabled = false;
-        item.chamberImage.enabled = false;
         item.equipSlot = equipSlot;
         item.SetItemScale(true);
         item.ChangeRectPivot(true);
@@ -1059,7 +1054,6 @@ public class GameMenuManager : MonoBehaviour
         equipSlot.item = item;
         equipSlot.slotText.enabled = false;
         equipSlot.countText.enabled = false;
-        equipSlot.chamberImage.enabled = false;
 
         item.equipSlot = equipSlot;
         item.SetItemScale(true);
@@ -1291,23 +1285,18 @@ public class GameMenuManager : MonoBehaviour
                     {
                         case EquipType.MainWeapon1:
                             item.equipSlot.countText.enabled = true;
-                            item.equipSlot.chamberImage.enabled = true;
                             break;
                         case EquipType.MainWeapon2:
                             item.equipSlot.countText.enabled = true;
-                            item.equipSlot.chamberImage.enabled = true;
                             break;
                         case EquipType.SubWeapon:
                             item.equipSlot.countText.enabled = true;
-                            item.equipSlot.chamberImage.enabled = true;
                             break;
                         case EquipType.Magazine:
                             item.equipSlot.countText.enabled = true;
-                            item.equipSlot.chamberImage.enabled = false;
                             break;
                         default:
                             item.equipSlot.countText.enabled = false;
-                            item.equipSlot.chamberImage.enabled = false;
                             break;
                     }
                     item.SetItemRotation(false);
@@ -1503,23 +1492,18 @@ public class GameMenuManager : MonoBehaviour
             {
                 case EquipType.MainWeapon1:
                     putItem.equipSlot.countText.enabled = true;
-                    putItem.equipSlot.chamberImage.enabled = true;
                     break;
                 case EquipType.MainWeapon2:
                     putItem.equipSlot.countText.enabled = true;
-                    putItem.equipSlot.chamberImage.enabled = true;
                     break;
                 case EquipType.SubWeapon:
                     putItem.equipSlot.countText.enabled = true;
-                    putItem.equipSlot.chamberImage.enabled = true;
                     break;
                 case EquipType.Magazine:
                     putItem.equipSlot.countText.enabled = true;
-                    putItem.equipSlot.chamberImage.enabled = false;
                     break;
                 default:
                     putItem.equipSlot.countText.enabled = false;
-                    putItem.equipSlot.chamberImage.enabled = false;
                     break;
             }
             putItem.SetItemScale(true);
@@ -1550,7 +1534,6 @@ public class GameMenuManager : MonoBehaviour
             equipSlot.slotText.enabled = false;
 
             putItem.countText.enabled = false;
-            putItem.chamberImage.enabled = false;
             putItem.equipSlot = equipSlot;
             putItem.SetItemSlots(null, DataUtility.slot_noItemColor);
             putItem.ChangeRectPivot(true);
@@ -1678,11 +1661,8 @@ public class GameMenuManager : MonoBehaviour
             {
                 EquipProcess();
                 equipSlot.countText.enabled = false;
-                equipSlot.chamberImage.enabled = false;
-                if (equipSlot.popUp.item.weaponData.equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null)
-                {
-                    equipSlot.popUp.item.weaponData.equipPartsList.Add(putItem.partsData);
-                }
+                var equipPartsList = equipSlot.popUp.item.weaponData.equipPartsList;
+                if (equipPartsList.Find(x => x.ID == putItem.partsData.ID) == null) equipPartsList.Add(putItem.partsData);
 
                 if (gameMgr != null && gameMgr.playerList.Count > 0)
                 {
