@@ -16,6 +16,7 @@ public class OtherStorage : MonoBehaviour
     public GameObject components;
     private TextMeshProUGUI nameText;
     private List<Image> tabButtonImages = new List<Image>();
+    private Scrollbar scrollbar;
 
     [Header("--- Assignment Variable---")]
     public Vector2Int size;
@@ -38,6 +39,7 @@ public class OtherStorage : MonoBehaviour
             tabButtonImages.Add(tabButton.GetComponent<Image>());
             tabButton.gameObject.SetActive(false);
         }
+        scrollbar = components.transform.Find("ScrollView/Scrollbar Vertical").GetComponent<Scrollbar>();
 
         itemSlots = GetComponentsInChildren<ItemSlot>().ToList();
         itemSlots.Reverse();
@@ -390,6 +392,7 @@ public class OtherStorage : MonoBehaviour
             PopUp_Inventory popUp = gameMenuMgr.activePopUp[i];
             popUp.ClosePopUp();
         }
+        scrollbar.value = 1;
         SaveStorageItems();
         GetStorageInfo(index);
     }

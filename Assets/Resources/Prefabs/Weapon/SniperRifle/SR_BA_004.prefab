@@ -1119,10 +1119,6 @@ MonoBehaviour:
     pos: {x: 0, y: -0.005, z: -0.154}
     rot: {x: 0, y: 0, z: 0}
     scale: {x: 0.5, y: 0.5, z: 0.5}
-  prefabPivot:
-    pos: {x: 0, y: 0, z: 0}
-    rot: {x: 0, y: 0, z: 0}
-    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &3549591800939824649
 Animator:
   serializedVersion: 5
@@ -1159,6 +1155,17 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   animator: {fileID: 0}
+  weaponRenderers:
+  - {fileID: 8999260205131016005}
+  - {fileID: 2872884936915979619}
+  - {fileID: 3772336188726231808}
+  - {fileID: 6151528308488064191}
+  - {fileID: 5868453985166144794}
+  - {fileID: 2948778264268829681}
+  - {fileID: 330802433832472006}
+  - {fileID: 6202085030693621692}
+  - {fileID: 9197666504613065836}
+  - {fileID: 1916193147733335166}
   firePoint: {fileID: 8946000215563391094}
   fx_gunShot: {fileID: 7791685955043281345}
   fx_sEjects:
@@ -1167,7 +1174,7 @@ MonoBehaviour:
   - {fileID: 7167524106889794794}
   baseMuzzle: {fileID: 5885647011954123011}
   baseSight: {fileID: 0}
-  partsObjects: []
+  partsRdrs: []
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -1185,7 +1192,8 @@ MonoBehaviour:
     RPM: 0
     range: 0
     watchAngle: 0
-    actionCost: 0
+    actionCost_shot: 0
+    actionCost_reload: 0
     MOA: 0
     stability: 0
     rebound: 0
@@ -1231,6 +1239,7 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
+  weaponPivot: {x: 0, y: 0, z: 0}
   magMax: 0
   loadedNum: 0
   hitInfos: []
@@ -5951,6 +5960,11 @@ PrefabInstance:
 --- !u!4 &8065806370385399555 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1483298961832570946, guid: 24c1e0fd9b9e8c2479c796f3478c9cb0, type: 3}
+  m_PrefabInstance: {fileID: 8897490692358274881}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &9197666504613065836 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 350876497199991597, guid: 24c1e0fd9b9e8c2479c796f3478c9cb0, type: 3}
   m_PrefabInstance: {fileID: 8897490692358274881}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &9033676805078728941

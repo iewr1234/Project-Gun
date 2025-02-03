@@ -419,10 +419,6 @@ MonoBehaviour:
     pos: {x: 0, y: -0.015, z: -0.157}
     rot: {x: 0, y: 0, z: 0}
     scale: {x: 0.5, y: 0.5, z: 0.5}
-  prefabPivot:
-    pos: {x: 0, y: 0, z: 0}
-    rot: {x: 0, y: 0, z: 0}
-    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &3840786509555417102
 Animator:
   serializedVersion: 5
@@ -459,6 +455,18 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   animator: {fileID: 0}
+  weaponRenderers:
+  - {fileID: 3096527453365291271}
+  - {fileID: 9154053877186358271}
+  - {fileID: 1882845115775827571}
+  - {fileID: 1850904417382624882}
+  - {fileID: 2475660372730457052}
+  - {fileID: 4319447212623618492}
+  - {fileID: 146824153703113514}
+  - {fileID: 4434598120060883109}
+  - {fileID: 5088055392939506498}
+  - {fileID: 5628378832230668942}
+  - {fileID: 3634124239328871700}
   firePoint: {fileID: 8438794442925483209}
   fx_gunShot: {fileID: 7285605944944573822}
   fx_sEjects:
@@ -467,7 +475,7 @@ MonoBehaviour:
   - {fileID: 2913113137499774681}
   baseMuzzle: {fileID: 7958360583755984910}
   baseSight: {fileID: 0}
-  partsObjects: []
+  partsRdrs: []
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -485,7 +493,8 @@ MonoBehaviour:
     RPM: 0
     range: 0
     watchAngle: 0
-    actionCost: 0
+    actionCost_shot: 0
+    actionCost_reload: 0
     MOA: 0
     stability: 0
     rebound: 0
@@ -531,6 +540,7 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
+  weaponPivot: {x: 0, y: 0, z: 0}
   magMax: 0
   loadedNum: 0
   hitInfos: []
@@ -4030,6 +4040,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 24c1e0fd9b9e8c2479c796f3478c9cb0, type: 3}
+--- !u!23 &5628378832230668942 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 350876497199991597, guid: 24c1e0fd9b9e8c2479c796f3478c9cb0, type: 3}
+  m_PrefabInstance: {fileID: 5387031839511433635}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6797946583514096097 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1483298961832570946, guid: 24c1e0fd9b9e8c2479c796f3478c9cb0, type: 3}

@@ -2940,7 +2940,7 @@ public class CharacterController : MonoBehaviour
                               : Mathf.FloorToInt(50 + Mathf.Max(bullet.penetrate + 5 - armor.armorData.bulletProof, -5f) * 8 + Mathf.Min(bullet.penetrate + 10 - armor.armorData.bulletProof, 0f));
             isPenetrate = value < penetrateRate;
 
-            int armorDamage = Mathf.FloorToInt(bullet.damage * (bullet.armorBreak / 100f));
+            int armorDamage = bullet.damage * bullet.armorBreak;
             SetArmor(armor, -armorDamage);
         }
         else

@@ -46,7 +46,6 @@ public class Weapon : MonoBehaviour
 
     [Header("---Access Component---")]
     public Animator animator;
-    public List<MeshFilter> meshFilters;
     public List<Renderer> weaponRenderers;
 
     [Space(5f)] public Transform firePoint;
@@ -530,8 +529,20 @@ public class Weapon : MonoBehaviour
             combinedBounds.Encapsulate(renderers[i].bounds);
         }
 
+
         // 중심 위치 반환 (로컬 좌표 기준)
-        weaponPivot = -transform.InverseTransformPoint(combinedBounds.center) * 0.5f;
+        var _weaponPivot = -transform.InverseTransformPoint(combinedBounds.center);
+        Vector3 itemScale = transform.GetComponent<ItemPivot>().itemPivot.scale;
+        if (_weaponPivot.z < -0.25f)
+        {
+            weaponPivot = _weaponPivot * 0.4f;
+            transform.localScale = itemScale - new Vector3(0.1f, 0.1f, 0.1f);
+        }
+        else
+        {
+            weaponPivot = _weaponPivot * 0.5f;
+            transform.localScale = itemScale;
+        }
 
         return weaponPivot;
     }

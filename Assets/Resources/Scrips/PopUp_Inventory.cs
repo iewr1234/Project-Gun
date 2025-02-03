@@ -506,6 +506,7 @@ public class PopUp_Inventory : MonoBehaviour
             activeSample.SetActive(false);
         }
 
+        itemInfo.activeSample.TryGetComponent(out Weapon weapon);
         var partsList = new List<WeaponPartsDataInfo>();
         for (int i = 0; i < itemInfo.equipSlots.Count; i++)
         {
@@ -575,7 +576,6 @@ public class PopUp_Inventory : MonoBehaviour
 
                     void Sample_WeaponPartsType(WeaponPartsType partsType)
                     {
-                        Weapon weapon = itemInfo.activeSample.GetComponent<Weapon>();
                         if (weapon == null) return;
 
                         var partsData = item.weaponData.equipPartsList.Find(x => x.type == partsType);
@@ -597,13 +597,6 @@ public class PopUp_Inventory : MonoBehaviour
 
                             var smaple = weapon.partsRdrs.Find(x => x.name == partsData.prefabName);
                             smaple.gameObject.SetActive(true);
-
-                            //var smaples = itemInfo.partsSamples.FindAll(x => x.name == partsData.prefabName);
-                            //for (int j = 0; j < smaples.Count; j++)
-                            //{
-                            //    var smaple = smaples[j];
-                            //    smaple.SetActive(true);
-                            //}
                         }
                         else
                         {
@@ -613,6 +606,8 @@ public class PopUp_Inventory : MonoBehaviour
                     }
             }
         }
+
+        if (weapon != null) weapon.transform.localPosition = weapon.GetWeaponCenter();
     }
     #endregion
 

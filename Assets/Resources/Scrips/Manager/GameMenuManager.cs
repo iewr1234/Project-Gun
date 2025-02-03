@@ -71,7 +71,7 @@ public class GameMenuManager : MonoBehaviour
     private float clickTime;
 
     private List<ItemHandler> items = new List<ItemHandler>();
-    private readonly int itemPoolMax = 100;
+    private readonly int itemPoolMax = 150;
 
     [Space(5f)]
     public List<ItemHandler> activeItem = new List<ItemHandler>();

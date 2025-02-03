@@ -298,10 +298,6 @@ MonoBehaviour:
     pos: {x: 0, y: -0.014, z: -0.179}
     rot: {x: 0, y: 0, z: 0}
     scale: {x: 0.5, y: 0.5, z: 0.5}
-  prefabPivot:
-    pos: {x: 0, y: 0, z: 0}
-    rot: {x: 0, y: 0, z: 0}
-    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &9020581151555054218
 Animator:
   serializedVersion: 5
@@ -338,6 +334,18 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   animator: {fileID: 0}
+  weaponRenderers:
+  - {fileID: 106012593525308116}
+  - {fileID: 3066487316793112134}
+  - {fileID: 6574844416733349390}
+  - {fileID: 7065477825833797407}
+  - {fileID: 7935762500402637102}
+  - {fileID: 821944851999681330}
+  - {fileID: 8725963976148170622}
+  - {fileID: 7049316716896702007}
+  - {fileID: 4165659562800663445}
+  - {fileID: 454266231334349430}
+  - {fileID: 1114964446695201397}
   firePoint: {fileID: 7707999214810787557}
   fx_gunShot: {fileID: 8862911057483626322}
   fx_sEjects:
@@ -346,7 +354,7 @@ MonoBehaviour:
   - {fileID: 5837416638578086660}
   baseMuzzle: {fileID: 2540765988262748421}
   baseSight: {fileID: 0}
-  partsObjects: []
+  partsRdrs: []
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -364,7 +372,8 @@ MonoBehaviour:
     RPM: 0
     range: 0
     watchAngle: 0
-    actionCost: 0
+    actionCost_shot: 0
+    actionCost_reload: 0
     MOA: 0
     stability: 0
     rebound: 0
@@ -410,6 +419,7 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
+  weaponPivot: {x: 0, y: 0, z: 0}
   magMax: 0
   loadedNum: 0
   hitInfos: []

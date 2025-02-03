@@ -388,10 +388,6 @@ MonoBehaviour:
     pos: {x: 0, y: 0.013, z: -0.17}
     rot: {x: 0, y: 0, z: 0}
     scale: {x: 0.5, y: 0.5, z: 0.5}
-  prefabPivot:
-    pos: {x: 0, y: 0, z: 0}
-    rot: {x: 0, y: 0, z: 0}
-    scale: {x: 1, y: 1, z: 1}
 --- !u!95 &-6468281047298763657
 Animator:
   serializedVersion: 5
@@ -428,6 +424,14 @@ MonoBehaviour:
   gameMgr: {fileID: 0}
   charCtr: {fileID: 0}
   animator: {fileID: 0}
+  weaponRenderers:
+  - {fileID: 3491564009523768878}
+  - {fileID: 3491489292266653264}
+  - {fileID: 4932868872901295043}
+  - {fileID: 5786499492010705975}
+  - {fileID: 8839228106605725391}
+  - {fileID: 8485330170371665405}
+  - {fileID: 3491046169749914762}
   firePoint: {fileID: 5354819000029133552}
   fx_gunShot: {fileID: 6509690848320922439}
   fx_sEjects:
@@ -436,7 +440,7 @@ MonoBehaviour:
   - {fileID: 7164574121761917691}
   baseMuzzle: {fileID: 0}
   baseSight: {fileID: 0}
-  partsObjects: []
+  partsRdrs: []
   equipSlot: {fileID: 0}
   weaponData:
     indexName: 
@@ -454,7 +458,8 @@ MonoBehaviour:
     RPM: 0
     range: 0
     watchAngle: 0
-    actionCost: 0
+    actionCost_shot: 0
+    actionCost_reload: 0
     MOA: 0
     stability: 0
     rebound: 0
@@ -500,6 +505,7 @@ MonoBehaviour:
     useUnderBarrel: 
     equipMagID: 
     equipPartsIDs: []
+  weaponPivot: {x: 0, y: 0, z: 0}
   magMax: 0
   loadedNum: 0
   hitInfos: []
@@ -981,6 +987,11 @@ PrefabInstance:
 --- !u!4 &7316904677050128018 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7246184110977398313, guid: 63b9ca0ee85a8ab4680eab5dc54be456, type: 3}
+  m_PrefabInstance: {fileID: 73535368084103355}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8485330170371665405 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8414046619854228806, guid: 63b9ca0ee85a8ab4680eab5dc54be456, type: 3}
   m_PrefabInstance: {fileID: 73535368084103355}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &127459117934020039
@@ -2057,6 +2068,11 @@ PrefabInstance:
 --- !u!4 &7701177343825280416 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5213930934892487586, guid: 37d709df501dea24583c69b244c93701, type: 3}
+  m_PrefabInstance: {fileID: 2502745142051610114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8839228106605725391 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6345772343195867341, guid: 37d709df501dea24583c69b244c93701, type: 3}
   m_PrefabInstance: {fileID: 2502745142051610114}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2791132366034702558

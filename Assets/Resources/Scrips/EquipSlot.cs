@@ -95,11 +95,6 @@ public class EquipSlot : MonoBehaviour
         if (putItem == null || putItem.itemData == null) return false;
 
         ErrorUI errorUI = outputError && gameMenuMgr.gameMgr != null ? gameMenuMgr.gameMgr.errorUI : null;
-
-        if (outputError)
-        {
-
-        }
         switch (type)
         {
             case EquipType.Head:
@@ -448,15 +443,23 @@ public class EquipSlot : MonoBehaviour
             switch (type)
             {
                 case EquipType.Muzzle:
+                    if (putItem.itemData.type != ItemType.Muzzle) return false;
+
                     useParts = weapon.weaponData.useMuzzle;
                     break;
                 case EquipType.Sight:
+                    if (putItem.itemData.type != ItemType.Sight) return false;
+
                     useParts = weapon.weaponData.useSight;
                     break;
                 case EquipType.Attachment:
+                    if (putItem.itemData.type != ItemType.Attachment) return false;
+
                     useParts = weapon.weaponData.useAttachment;
                     break;
                 case EquipType.UnderBarrel:
+                    if (putItem.itemData.type != ItemType.UnderBarrel) return false;
+
                     useParts = weapon.weaponData.useUnderBarrel;
                     break;
                 default:
