@@ -242,7 +242,7 @@ public class GameUIManager : MonoBehaviour
     {
         aimGauge.SetAimGauge(charCtr);
         var hitAccuracy = charCtr.currentWeapon.hitInfos[0].hitAccuracy;
-        var percent = 100 - hitAccuracy;
+        var percent = hitAccuracy;
         if (percent > 100) percent = 100;
 
         hitAccuracyText.text = $"{percent}%";

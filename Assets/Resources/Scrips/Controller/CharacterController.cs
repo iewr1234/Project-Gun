@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
+using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -115,14 +116,26 @@ public struct ThrowInfo
     public List<CharacterController> targetList;
 }
 
-public struct LineInfo
+public enum BodyPartsType
 {
-    public Vector3 startPos;
-    public Vector3 endPos;
+    Body,
+    RightArm,
+    LeftArm,
+    RightLeg,
+    LeftLeg,
 }
 
 public class CharacterController : MonoBehaviour
 {
+    [System.Serializable]
+    public class PartsHealth
+    {
+        public string indexName;
+        public BodyPartsType type;
+        public int maxHealth;
+        public int health;
+    }
+
     [Header("---Access Script---")]
     [SerializeField] private GameManager gameMgr;
     [HideInInspector] public CharacterUI charUI;
@@ -151,15 +164,11 @@ public class CharacterController : MonoBehaviour
     [HideInInspector] public Transform subHolsterPivot;
     [Space(5f)] public Transform rightHandPivot;
     public Transform leftHandPivot;
-    //public Transform gripPivot;
 
     [HideInInspector] public List<MeshRenderer> meshs = new List<MeshRenderer>();
     [HideInInspector] public List<SkinnedMeshRenderer> sMeshs = new List<SkinnedMeshRenderer>();
     private List<Collider> ragdollCds = new List<Collider>();
     private List<Rigidbody> ragdollRbs = new List<Rigidbody>();
-
-    //[Space(5f)] public Transform weaponPoolTf;
-    //public List<Weapon> weaponPool = new List<Weapon>();
 
     [Header("--- Assignment Variable---")]
     [Tooltip("사용자 타입")] public CharacterOwner ownerType;
@@ -183,6 +192,7 @@ public class CharacterController : MonoBehaviour
     public float currentWeight;
 
     [Header("[Physical]")]
+    public List<PartsHealth> healthList = new List<PartsHealth>();
     [Tooltip("최대 행동력")] public int maxAction;
     [Tooltip("행동력")] public int action;
     [Tooltip("최대 체력")] public int maxHealth;
@@ -209,15 +219,6 @@ public class CharacterController : MonoBehaviour
     [Tooltip("관통")] public int penetrate;
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
-
-    //[Space(5f)][Tooltip("최대 머리 방탄력")] public float maxBP_head;
-    //[Tooltip("머리 방탄력")] public float BP_head;
-    //[Tooltip("최대 머리 내구도")] public int maxDura_head;
-    //[Tooltip("머리 내구도")] public int dura_head;
-    //[Tooltip("최대 몸통 방탄력")] public float maxBP_body;
-    //[Tooltip("몸통 방탄력")] public float BP_body;
-    //[Tooltip("최대 몸통 내구도")] public int maxDura_body;
-    //[Tooltip("몸통 내구도")] public int dura_body;
 
     [HideInInspector] public int baseIndex;
     [HideInInspector] public int upperIndex;
@@ -281,8 +282,6 @@ public class CharacterController : MonoBehaviour
 
     private Coroutine curCoroutine;
 
-    //private bool weightCheck;
-    //private bool runInstantly;
     [HideInInspector] public bool moveGripPivot;
     [HideInInspector] public float targetWeight;
 
@@ -365,6 +364,7 @@ public class CharacterController : MonoBehaviour
             mobility = Mobility;
             maxWeight = MaxWeight;
 
+            SetPartsHealths(playerData.maxHealth);
             maxAction = playerData.maxAction;
             action = maxAction;
             maxHealth = playerData.maxHealth;
@@ -391,6 +391,7 @@ public class CharacterController : MonoBehaviour
             mobility = Mobility;
             maxWeight = MaxWeight;
 
+            SetPartsHealths(enemyData.maxHealth);
             maxAction = enemyData.maxAction;
             action = maxAction;
             maxHealth = enemyData.maxHealth;
@@ -422,6 +423,47 @@ public class CharacterController : MonoBehaviour
         currentNode = _currentNode;
         currentNode.charCtr = this;
         currentNode.canMove = false;
+
+        void SetPartsHealths(int maxHealth)
+        {
+            if (healthList.Count > 0) healthList.Clear();
+
+            float healthValue = maxHealth;
+
+            // 팔 체력
+            float armPercent = 13f;
+            PartsResult(BodyPartsType.RightArm, armPercent);
+            PartsResult(BodyPartsType.LeftArm, armPercent);
+
+            // 다리 체력
+            float legPercent = 14f;
+            PartsResult(BodyPartsType.RightLeg, legPercent);
+            PartsResult(BodyPartsType.LeftLeg, legPercent);
+
+            // 상체 체력
+            PartsHealth bodyHealth = new PartsHealth()
+            {
+                type = BodyPartsType.Body,
+                indexName = $"{BodyPartsType.Body}: {(int)healthValue}/{(int)healthValue}",
+                maxHealth = (int)healthValue,
+                health = (int)healthValue,
+            };
+            healthList.Add(bodyHealth);
+
+            void PartsResult(BodyPartsType type, float percent)
+            {
+                float maxHealth_parts = percent / maxHealth * 100;
+                healthValue -= maxHealth_parts;
+                PartsHealth partsHealth = new PartsHealth()
+                {
+                    indexName = $"{type}: {(int)maxHealth_parts}/{(int)maxHealth_parts}",
+                    type = type,
+                    maxHealth = (int)maxHealth_parts,
+                    health = (int)maxHealth_parts,
+                };
+                healthList.Add(partsHealth);
+            }
+        }
     }
 
     /// <summary>

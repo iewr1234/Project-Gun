@@ -592,7 +592,7 @@ public class Weapon : MonoBehaviour
 
             // 사격자 명중률 계산
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
-            hitAccuracy = 100 - DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
+            hitAccuracy = DataUtility.GetHitAccuracy(targetInfo, distance, shootNum);
             curStamina = weapon.charCtr.stamina;
 
             int loadedBulletNum = 0;
@@ -603,12 +603,12 @@ public class Weapon : MonoBehaviour
                 if (weapon.charCtr.ownerType == CharacterOwner.Player && i == loadedBulletNum) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
-                ResultHitAccuracys(shootNum, i);
-                var hitAccuracyText = pelletAccuracys.Count > 0 ? $"{hitAccuracy}~{pelletAccuracys[^1]}" : $"{hitAccuracy}";
+                int _hitAccuracy = ResultHitAccuracys_Fix(shootNum, i);
+                var hitAccuracyText = pelletAccuracys.Count > 0 ? $"{_hitAccuracy}~{pelletAccuracys[^1]}" : $"{_hitAccuracy}";
                 var hitInfo = new HitInfo()
                 {
                     indexName = $"거리 = {distance}, 충격량 = {impact}, 반동 = {rebound}, 장약 = {propellant}, 명중값 = {hitAccuracyText}",
-                    hitAccuracy = hitAccuracy - spreadAccuracy,
+                    hitAccuracy = _hitAccuracy,
                     pelletAccuracys = new List<int>(pelletAccuracys),
                     impact = impact,
                 };
@@ -621,7 +621,7 @@ public class Weapon : MonoBehaviour
             weapon.hitInfos.Clear();
 
             // 랜덤값
-            hitValue = Random.Range(1, 101);
+            //hitValue = Random.Range(1, 101);
 
             // 사격자 명중률 계산
             distance = DataUtility.GetDistance(targetInfo.shooterNode.transform.position, targetInfo.targetNode.transform.position);
@@ -658,6 +658,108 @@ public class Weapon : MonoBehaviour
             weapon.charCtr.SetStamina(useStamina);
 
             return hitCount == 0;
+        }
+
+        private int ResultHitAccuracys_Fix(int maxShotNum, int shotNum)
+        {
+            int _hitAccuracy = hitAccuracy;
+
+            // 사격자 스텟을 가져옴
+            SetUseValue(shotNum);
+
+            // 스테미너 체크
+            CheckStamina();
+
+            // 단발 or 연사 체크
+            CheckSingleOrBurst();
+
+            // 확산 체크
+            CheckSpread();
+
+            // 명중 여부 체크
+            CheckHitBullet();
+
+            return _hitAccuracy;
+
+            void SetUseValue(int index)
+            {
+                spreadAccuracy = 0;
+                stability = 0;
+                rebound = 0;
+                propellant = 0;
+                pelletNum = 0;
+                spread = 0;
+                switch (weapon.charCtr.ownerType)
+                {
+                    case CharacterOwner.Player:
+                        if (index == 0 && weapon.weaponData.isChamber)
+                        {
+                            stability = weapon.charCtr.stability;
+                            rebound = weapon.charCtr.rebound;
+                            propellant = weapon.charCtr.propellant;
+                            pelletNum = weapon.weaponData.chamberBullet.pelletNum;
+                            spread = weapon.weaponData.chamberBullet.spread;
+                        }
+                        else if (weapon.weaponData.isMag && weapon.weaponData.equipMag.loadedBullets.Count > 0)
+                        {
+                            var chamber = weapon.weaponData.isChamber ? index : 1 + index;
+                            var bulletIndex = weapon.weaponData.equipMag.loadedBullets.Count - chamber;
+                            var bullet = weapon.weaponData.equipMag.loadedBullets[bulletIndex];
+                            stability = weapon.charCtr.ability.stability + weapon.weaponData.stability + bullet.stability;
+                            rebound = weapon.charCtr.ability.rebound + weapon.weaponData.rebound + bullet.rebound;
+                            propellant = weapon.charCtr.ability.propellant + weapon.weaponData.propellant + bullet.propellant;
+                            pelletNum = bullet.pelletNum;
+                            spread = bullet.spread;
+                        }
+                        break;
+                    default:
+                        stability = weapon.charCtr.stability;
+                        rebound = weapon.charCtr.rebound;
+                        propellant = weapon.charCtr.propellant;
+                        break;
+                }
+            }
+
+            void CheckStamina()
+            {
+                // (계산식)반동 충격량
+                int recoilImpact = Mathf.CeilToInt((propellant * 0.1f) * 3 / (1 + stability * 0.05f));
+
+                curStamina -= recoilImpact;
+            }
+
+            void CheckSingleOrBurst()
+            {
+                if (maxShotNum == 1) return;
+
+                // (계산식)연사 명중 감소치
+                int burstAccuracyDecay = Mathf.CeilToInt((propellant * 0.1f) * (rebound * 0.01f) * (distance * 0.1f));
+
+                _hitAccuracy -= burstAccuracyDecay;
+                if (curStamina < 0)
+                {
+                    _hitAccuracy = Mathf.FloorToInt(_hitAccuracy * 0.5f);
+                    curStamina = 0;
+                }
+
+                if (_hitAccuracy < DataUtility.minHitAccuracy) _hitAccuracy = DataUtility.minHitAccuracy;
+            }
+
+            void CheckSpread()
+            {
+                if (pelletNum == 0) return;
+
+                // (계산식)확산 명중 감소치
+                int spreadAccuracyDecay = Mathf.CeilToInt(distance * 0.1f * spread * 0.1f);
+
+                _hitAccuracy -= spreadAccuracyDecay;
+            }
+
+            void CheckHitBullet()
+            {
+                hitValue = Random.Range(0, 100);
+                isHit = _hitAccuracy > hitValue;
+            }
         }
 
         private void ResultHitAccuracys(int maxShotNum, int shotNum)
@@ -780,7 +882,9 @@ public class Weapon : MonoBehaviour
 
             void ResultHitNum()
             {
-                isHit = hitAccuracy - spreadAccuracy <= hitValue;
+                //isHit = hitAccuracy - spreadAccuracy <= hitValue;
+                hitValue = Random.Range(0, 100);
+                isHit = hitAccuracy > hitValue;
                 hitNum = isHit ? 1 : 0;
                 if (pelletNum == 0) return;
 
