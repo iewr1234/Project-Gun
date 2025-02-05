@@ -61,86 +61,86 @@ public class AimGauge : MonoBehaviour
         }
     }
 
-    public void SetAimGauge(CharacterController charCtr)
-    {
-        var activeScales = gaugeScales.FindAll(x => x.gameObject.activeSelf);
-        for (int i = 0; i < activeScales.Count; i++)
-        {
-            var gaugeScale = activeScales[i];
-            gaugeScale.gameObject.SetActive(false);
-        }
+    //public void SetAimGauge(CharacterController charCtr)
+    //{
+    //    var activeScales = gaugeScales.FindAll(x => x.gameObject.activeSelf);
+    //    for (int i = 0; i < activeScales.Count; i++)
+    //    {
+    //        var gaugeScale = activeScales[i];
+    //        gaugeScale.gameObject.SetActive(false);
+    //    }
 
-        var targetInfo = charCtr.targetList[charCtr.targetIndex];
-        var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
-        var weapon = charCtr.currentWeapon;
-        weapon.CheckHitBullet(targetInfo, shootNum, false);
-        GaugeScalePlacement(weapon);
-        aimGauge.value = 0;
-    }
+    //    var targetInfo = charCtr.targetList[charCtr.targetIndex];
+    //    var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
+    //    var weapon = charCtr.currentWeapon;
+    //    weapon.CheckHitBullet(targetInfo, shootNum, false);
+    //    GaugeScalePlacement(weapon);
+    //    aimGauge.value = 0;
+    //}
 
-    public void SetAimGauge(bool value, Weapon weapon)
-    {
-        if (!value) return;
+    //public void SetAimGauge(bool value, Weapon weapon)
+    //{
+    //    if (!value) return;
 
-        var activeScales = gaugeScales.FindAll(x => x.gameObject.activeSelf);
-        for (int i = 0; i < activeScales.Count; i++)
-        {
-            var gaugeScale = activeScales[i];
-            gaugeScale.gameObject.SetActive(false);
-        }
+    //    var activeScales = gaugeScales.FindAll(x => x.gameObject.activeSelf);
+    //    for (int i = 0; i < activeScales.Count; i++)
+    //    {
+    //        var gaugeScale = activeScales[i];
+    //        gaugeScale.gameObject.SetActive(false);
+    //    }
 
-        targetValue = weapon.GetHitValue();
-        aimGauge.value = 0;
-        GaugeScalePlacement(weapon);
+    //    //targetValue = weapon.GetHitValue();
+    //    aimGauge.value = 0;
+    //    GaugeScalePlacement(weapon);
 
-        if (weapon.hitInfos.FindAll(x => x.isHit).Count == 0)
-        {
-            targetColor = Color.red;
-        }
-        else
-        {
-            targetColor = Color.yellow;
-        }
-        state = State.Check;
-        components.SetActive(true);
-    }
+    //    if (weapon.hitInfos.FindAll(x => x.hitNum > 0).Count == 0)
+    //    {
+    //        targetColor = Color.red;
+    //    }
+    //    else
+    //    {
+    //        targetColor = Color.yellow;
+    //    }
+    //    state = State.Check;
+    //    components.SetActive(true);
+    //}
 
     /// <summary>
     /// 게이지 눈금 배치
     /// </summary>
     /// <param name="weapon"></param>
-    private void GaugeScalePlacement(Weapon weapon)
-    {
-        for (int i = 0; i < weapon.hitInfos.Count; i++)
-        {
-            var hitInfo = weapon.hitInfos[i];
-            if (hitInfo.hitAccuracy >= 100) break;
+    //private void GaugeScalePlacement(Weapon weapon)
+    //{
+    //    for (int i = 0; i < weapon.hitInfos.Count; i++)
+    //    {
+    //        var hitInfo = weapon.hitInfos[i];
+    //        if (hitInfo.hitAccuracy >= 100) break;
 
-            Placement(hitInfo.hitAccuracy, false);
-            for (int j = 0; j < hitInfo.pelletAccuracys.Count; j++)
-            {
-                var pelletAccuracy = hitInfo.pelletAccuracys[j];
-                if (pelletAccuracy >= 100) break;
+    //        Placement(hitInfo.hitAccuracy, false);
+    //        for (int j = 0; j < hitInfo.pelletAccuracys.Count; j++)
+    //        {
+    //            var pelletAccuracy = hitInfo.pelletAccuracys[j];
+    //            if (pelletAccuracy >= 100) break;
 
-                Placement(pelletAccuracy, true);
-            }
-        }
+    //            Placement(pelletAccuracy, true);
+    //        }
+    //    }
 
-        void Placement(int accuracy, bool isPellet)
-        {
-            var gaugeScale = gaugeScales.Find(x => !x.gameObject.activeSelf);
-            var pos = gaugeScale.transform.localPosition;
-            pos.x = gaugeScaleLength * accuracy;
-            gaugeScale.SetGaugeScale(pos, accuracy, isPellet);
-        }
-    }
+    //    void Placement(int accuracy, bool isPellet)
+    //    {
+    //        var gaugeScale = gaugeScales.Find(x => !x.gameObject.activeSelf);
+    //        var pos = gaugeScale.transform.localPosition;
+    //        pos.x = gaugeScaleLength * accuracy;
+    //        gaugeScale.SetGaugeScale(pos, accuracy, isPellet);
+    //    }
+    //}
 
-    public void SetAimGauge(bool value)
-    {
-        if (value) return;
+    //public void SetAimGauge(bool value)
+    //{
+    //    if (value) return;
 
-        aimGaugeFill.color = Color.white;
-        state = State.None;
-        components.SetActive(false);
-    }
+    //    aimGaugeFill.color = Color.white;
+    //    state = State.None;
+    //    components.SetActive(false);
+    //}
 }

@@ -220,14 +220,9 @@ public static class DataUtility
         }
 
         // 사격자 명중률 계산
-        //var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 / (1 + target.reaction * 0.01f))
-        //               * (1 - GetCoverBonus() * 0.01f - 30 * ((Mathf.Pow(distance, 2) - 40) / (Mathf.Pow(distance, 2) + 80)) * 0.01f);
         var shooterHit = sModeValue * (1 + shooter.aiming * 0.01f) * (1 - 30 * ((Mathf.Pow(distance, 2) - 40) / (Mathf.Pow(distance, 2) + 80)) * 0.01f)
                          - GetCoverBonus() * (1 + target.reaction * 0.01f);
         var hitAccuracy = Mathf.FloorToInt(shooterHit);
-
-        // 연사 명중 보정
-        //hitAccuracy += Mathf.RoundToInt(30 * (shootNum - 1) / (shootNum - 1 + 25));
 
         // 최소, 최대값 보정
         if (hitAccuracy > 100)

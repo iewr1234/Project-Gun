@@ -56,7 +56,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, bool _isHit, bool _isPellet)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, HitInfo hitInfo, bool _isPellet)
     {
         shooter = _shooter;
         target = _target;
@@ -69,7 +69,7 @@ public class Bullet : MonoBehaviour
         armorBreak = shooter.armorBreak;
         critical = shooter.critical;
 
-        isHit = _isHit;
+        isHit = hitInfo.hitNum > 0;
         targetLayer = isHit ? LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") : LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
         hitCheck = false;
         resultCheck = false;

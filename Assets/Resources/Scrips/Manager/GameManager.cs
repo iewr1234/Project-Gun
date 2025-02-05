@@ -1,3 +1,4 @@
+using FIMSpace.Basics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -2156,6 +2157,7 @@ public class GameManager : MonoBehaviour
                 if (shootNum > enemy.currentWeapon.loadedNum) shootNum = enemy.currentWeapon.loadedNum;
 
                 enemy.animator.SetInteger("shootNum", shootNum);
+                enemy.currentWeapon.CheckHitBullet(targetInfo, shootNum, false);
                 enemy.SetAction(-totalCost);
                 enemy.state = CharacterState.Schedule;
             }
@@ -2193,35 +2195,36 @@ public class GameManager : MonoBehaviour
         var endEnemys = enemyList.FindAll(x => x.TurnEnd == true || x.state == CharacterState.Schedule || x.state == CharacterState.Dead);
         if (endEnemys.Count != enemyList.Count) return;
 
-        if (scheduleList.Count == 0)
+        switch (scheduleList.Count)
         {
-            TurnEnd();
-        }
-        else
-        {
-            var player = playerList[0];
-            CoverState playerState;
-            if (player.currentCover != null)
-            {
-                if (player.currentCover.coverType == CoverType.Full)
+            case 0:
+                TurnEnd();
+                break;
+            default:
+                var player = playerList[0];
+                CoverState playerState;
+                if (player.currentCover != null)
                 {
-                    playerState = player.animator.GetBool("isRight") ? CoverState.FullRight : CoverState.FullLeft;
+                    if (player.currentCover.coverType == CoverType.Full)
+                    {
+                        playerState = player.animator.GetBool("isRight") ? CoverState.FullRight : CoverState.FullLeft;
+                    }
+                    else
+                    {
+                        playerState = CoverState.Half;
+                    }
                 }
                 else
                 {
-                    playerState = CoverState.Half;
+                    playerState = CoverState.None;
                 }
-            }
-            else
-            {
-                playerState = CoverState.None;
-            }
-            scheduleList = scheduleList.OrderByDescending(x => x.type == playerState)
-                          .ThenByDescending(x => (int)x.type)
-                          .ToList();
-            scheduleState = ScheduleState.Check;
-            targetState = CoverState.None;
-            scheduleSignal = 0;
+                scheduleList = scheduleList.OrderByDescending(x => x.type == playerState)
+                              .ThenByDescending(x => (int)x.type)
+                              .ToList();
+                scheduleState = ScheduleState.Check;
+                targetState = CoverState.None;
+                scheduleSignal = 0;
+                break;
         }
     }
 
@@ -2275,10 +2278,7 @@ public class GameManager : MonoBehaviour
         {
             var targetInfo = scheduleList[0].targetInfo;
             targetInfo.shooter.AddCommand(CommandType.Shoot, targetInfo);
-            if (targetInfo.shooterCover != null)
-            {
-                targetInfo.shooter.AddCommand(CommandType.BackCover);
-            }
+            if (targetInfo.shooterCover != null) targetInfo.shooter.AddCommand(CommandType.BackCover);
             timer = 0f;
             scheduleState = ScheduleState.End;
         }

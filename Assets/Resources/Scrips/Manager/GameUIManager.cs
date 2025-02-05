@@ -240,7 +240,12 @@ public class GameUIManager : MonoBehaviour
 
     public void SetHitAccuracy(CharacterController charCtr)
     {
-        aimGauge.SetAimGauge(charCtr);
+        //aimGauge.SetAimGauge(charCtr);
+        var targetInfo = charCtr.targetList[charCtr.targetIndex];
+        var shootNum = DataUtility.GetShootNum(charCtr.RPM, charCtr.fiarRate);
+        var weapon = charCtr.currentWeapon;
+        weapon.CheckHitBullet(targetInfo, shootNum, false);
+
         var hitAccuracy = charCtr.currentWeapon.hitInfos[0].hitAccuracy;
         var percent = hitAccuracy;
         if (percent > 100) percent = 100;

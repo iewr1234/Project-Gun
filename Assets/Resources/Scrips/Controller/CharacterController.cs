@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.VisualScripting;
 using EPOOutline;
-using static CharacterController;
 
 public enum CharacterOwner
 {
@@ -118,6 +117,8 @@ public struct ThrowInfo
 
 public enum BodyPartsType
 {
+    None,
+    Head,
     Body,
     RightArm,
     LeftArm,
@@ -1529,35 +1530,35 @@ public class CharacterController : MonoBehaviour
             if (timer > aimTime && chestRig.weight == 1f
              && animator.GetCurrentAnimatorStateInfo(upperIndex).IsTag("Aim"))
             {
-                switch (ownerType)
-                {
-                    case CharacterOwner.Player:
-                        switch (gameMgr.uiMgr.aimGauge.state)
-                        {
-                            case AimGauge.State.None:
-                                gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
-                                return;
-                            case AimGauge.State.Done:
-                                break;
-                            default:
-                                return;
-                        }
-                        break;
-                    case CharacterOwner.Enemy:
-                        switch (charUI.aimGauge.state)
-                        {
-                            case AimGauge.State.None:
-                                charUI.aimGauge.SetAimGauge(true, currentWeapon);
-                                return;
-                            case AimGauge.State.Done:
-                                break;
-                            default:
-                                return;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                //switch (ownerType)
+                //{
+                //    case CharacterOwner.Player:
+                //        switch (gameMgr.uiMgr.aimGauge.state)
+                //        {
+                //            case AimGauge.State.None:
+                //                gameMgr.uiMgr.aimGauge.SetAimGauge(true, currentWeapon);
+                //                return;
+                //            case AimGauge.State.Done:
+                //                break;
+                //            default:
+                //                return;
+                //        }
+                //        break;
+                //    case CharacterOwner.Enemy:
+                //        switch (charUI.aimGauge.state)
+                //        {
+                //            case AimGauge.State.None:
+                //                charUI.aimGauge.SetAimGauge(true, currentWeapon);
+                //                return;
+                //            case AimGauge.State.Done:
+                //                break;
+                //            default:
+                //                return;
+                //        }
+                //        break;
+                //    default:
+                //        break;
+                //}
 
                 if (!animator.GetBool("fireTrigger")) animator.SetBool("fireTrigger", true);
 
@@ -1826,8 +1827,6 @@ public class CharacterController : MonoBehaviour
             stamina = maxStamina;
         }
         charUI.SetCharacterValue();
-
-        if (ownerType == CharacterOwner.Enemy) Debug.Log($"{transform.name}: º¯È­·® = {value} ({stamina} / {maxStamina})");
     }
 
     public void PayTheMoveCost(int useAction)
@@ -3379,12 +3378,12 @@ public class CharacterController : MonoBehaviour
             gameMgr.SetEnemyOutlinableAndUI(true);
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
-            gameMgr.uiMgr.aimGauge.SetAimGauge(false);
+            //gameMgr.uiMgr.aimGauge.SetAimGauge(false);
         }
-        else
-        {
-            charUI.aimGauge.SetAimGauge(false);
-        }
+        //else
+        //{
+        //    charUI.aimGauge.SetAimGauge(false);
+        //}
         commandList.Remove(command);
         curCoroutine = null;
     }
