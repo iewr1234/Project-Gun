@@ -17,7 +17,7 @@ public struct HitInfo
     public string indexName;
     public int hitAccuracy;
     public List<BodyPartsType> hitParts;
-    public int hitNum;
+    //public int hitNum;
     public int impact;
     public int rebound;
     public int propellant;
@@ -344,15 +344,15 @@ public class Weapon : MonoBehaviour
     public void FireBullet(CharacterController target)
     {
         var hitInfo = hitInfos[0];
-        int count;
+        int bulletNum;
         switch (charCtr.ownerType)
         {
             case CharacterOwner.Player:
                 LoadingChamber();
                 SetBulletShell();
                 var chamberBullet = weaponData.chamberBullet;
-                count = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
-                for (int i = 0; i < count; i++)
+                bulletNum = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
+                for (int i = 0; i < hitInfo.hitParts.Count; i++)
                 {
                     var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
                     if (bullet == null)
@@ -362,7 +362,7 @@ public class Weapon : MonoBehaviour
                     }
 
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, hitInfo, count > 1);
+                    bullet.SetBullet(charCtr, target, hitInfo.hitParts[i], bulletNum > 1);
                 }
                 hitInfos.RemoveAt(0);
                 weaponData.chamberBullet = null;
@@ -371,8 +371,8 @@ public class Weapon : MonoBehaviour
                 if (equipSlot != null) equipSlot.SetItemCount();
                 break;
             case CharacterOwner.Enemy:
-                count = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
-                for (int i = 0; i < count; i++)
+                bulletNum = hitAccuracy.pelletNum == 0 ? 1 : hitAccuracy.pelletNum;
+                for (int i = 0; i < hitInfo.hitParts.Count; i++)
                 {
                     var bullet = gameMgr.bulletPool.Find(x => !x.gameObject.activeSelf);
                     if (bullet == null)
@@ -380,8 +380,9 @@ public class Weapon : MonoBehaviour
                         Debug.LogError("There are no bullet in the bulletPool");
                         return;
                     }
+
                     SetBulletDirection(bullet);
-                    bullet.SetBullet(charCtr, target, hitInfo, count > 1);
+                    bullet.SetBullet(charCtr, target, hitInfo.hitParts[i], bulletNum > 1);
                 }
                 hitInfos.RemoveAt(0);
                 loadedNum--;
@@ -428,10 +429,10 @@ public class Weapon : MonoBehaviour
             bullet.gameObject.SetActive(true);
             bullet.transform.position = firePoint.position;
             float disparity;
-            if (count == 1)
+            if (bulletNum == 1)
             {
                 disparity = shootDisparity_bullet;
-                if (hitInfo.hitNum == 0) disparity += shootDisparity_spread;
+                if (hitInfo.hitParts.FindAll(x => x != BodyPartsType.Miss || x != BodyPartsType.Block).Count == 0) disparity += shootDisparity_spread;
             }
             else
             {
@@ -445,25 +446,26 @@ public class Weapon : MonoBehaviour
 
     public bool CheckHitBullet(TargetInfo targetInfo, int shootNum, bool resultShoot)
     {
-        var allMiss = false;
         if (!resultShoot)
         {
             hitAccuracy.ResultHitBullet(targetInfo, shootNum);
+            return false;
         }
         else
         {
-            allMiss = true;
+            int totalNum = 0;
+            int hitNum = 0;
             for (int i = 0; i < hitInfos.Count; i++)
             {
                 HitInfo hitInfo = hitInfos[i];
+                totalNum += hitInfo.hitParts.Count;
+                hitNum += hitInfo.hitParts.FindAll(x => x != BodyPartsType.Miss && x != BodyPartsType.Block).Count;
                 charCtr.SetStamina(-hitInfo.impact);
-
-                if (hitInfo.hitNum > 0) allMiss = false;
             }
-            Debug.Log($"{charCtr.name}: 발사수 = {hitInfos.Sum(x => x.hitParts.Count)}, 명중수 = {hitInfos.Sum(x => x.hitNum)}");
-        }
+            Debug.Log($"{charCtr.name}: 발사수 = {totalNum}, 명중수 = {hitNum}");
 
-        return allMiss;
+            return hitNum == 0;
+        }
     }
 
     //public int GetHitValue()
@@ -607,11 +609,11 @@ public class Weapon : MonoBehaviour
                 if (weapon.charCtr.ownerType == CharacterOwner.Player && i == loadedBulletNum) break;
                 if (weapon.charCtr.ownerType == CharacterOwner.Enemy && i > weapon.loadedNum) break;
 
-                ResultHitAccuracys(shootNum, i);
+                ResultHitAccuracys(targetInfo, shootNum, i);
             }
         }
 
-        private void ResultHitAccuracys(int maxShotNum, int shotNum)
+        private void ResultHitAccuracys(TargetInfo targetInfo, int maxShotNum, int shotNum)
         {
             int _hitAccuracy = hitAccuracy;
 
@@ -717,10 +719,11 @@ public class Weapon : MonoBehaviour
                     bool isHit = _hitAccuracy > hitValue;
                     if (!isHit)
                     {
-                        hitParts.Add(BodyPartsType.None);
+                        hitParts.Add(BodyPartsType.Miss);
                         continue;
                     }
 
+                    BodyPartsType parts = BodyPartsType.Block;
                     int headAccuracy = 15;
                     int armAccuracy = headAccuracy + 20;
                     int legAccuracy = armAccuracy + 15;
@@ -728,24 +731,105 @@ public class Weapon : MonoBehaviour
                     if (value < headAccuracy)
                     {
                         // 머리에 명중
-                        hitParts.Add(BodyPartsType.Head);
+                        if (CheckPartsCover(BodyPartsType.Body)) parts = BodyPartsType.Head;
                     }
                     else if (value < armAccuracy)
                     {
                         // 팔에 명중
-                        hitParts.Add(Random.value > 0.5f ? BodyPartsType.RightArm : BodyPartsType.LeftArm);
+                        BodyPartsType armType = Random.value > 0.5f ? BodyPartsType.RightArm : BodyPartsType.LeftArm;
+                        if (CheckPartsCover(armType)) parts = armType;
                     }
                     else if (value < legAccuracy)
                     {
                         // 다리에 명중
-                        hitParts.Add(Random.value > 0.5f ? BodyPartsType.RightLeg : BodyPartsType.LeftLeg);
+                        BodyPartsType legType = Random.value > 0.5f ? BodyPartsType.RightLeg : BodyPartsType.LeftLeg;
+                        if (CheckPartsCover(legType)) parts = legType;
                     }
                     else
                     {
                         // 몸통에 명중
-                        hitParts.Add(BodyPartsType.Body);
+                        if (CheckPartsCover(BodyPartsType.Body)) parts = BodyPartsType.Body;
                     }
-                    hitNum++;
+
+                    switch (parts)
+                    {
+                        case BodyPartsType.Miss:
+                            hitParts.Add(BodyPartsType.Miss);
+                            break;
+                        case BodyPartsType.Block:
+                            hitParts.Add(BodyPartsType.Block);
+                            break;
+                        default:
+                            hitParts.Add(parts);
+                            hitNum++;
+                            break;
+                    }
+                }
+
+                // 부위 엄폐 판정
+                bool CheckPartsCover(BodyPartsType type)
+                {
+                    if (targetInfo.targetCover == null) return true;
+
+                    int coverPercent;
+                    if (targetInfo.targetCover.coverType == CoverType.Full)
+                    {
+                        coverPercent = 50;
+                        if (targetInfo.isRight)
+                        {
+                            switch (type)
+                            {
+                                case BodyPartsType.Body:
+                                    return CheckBlockCover(coverPercent);
+                                case BodyPartsType.LeftArm:
+                                    return CheckBlockCover(coverPercent);
+                                case BodyPartsType.LeftLeg:
+                                    return CheckBlockCover(coverPercent);
+                                default:
+                                    return true;
+                            }
+                        }
+                        else
+                        {
+                            switch (type)
+                            {
+                                case BodyPartsType.Body:
+                                    return CheckBlockCover(coverPercent);
+                                case BodyPartsType.RightArm:
+                                    return CheckBlockCover(coverPercent);
+                                case BodyPartsType.RightLeg:
+                                    return CheckBlockCover(coverPercent);
+                                default:
+                                    return true;
+                            }
+                        }
+                    }
+                    else if (targetInfo.targetCover.coverType == CoverType.Half)
+                    {
+                        coverPercent = 50;
+                        switch (type)
+                        {
+                            case BodyPartsType.Body:
+                                return CheckBlockCover(coverPercent);
+                            case BodyPartsType.RightArm:
+                                return CheckBlockCover(coverPercent);
+                            case BodyPartsType.LeftArm:
+                                return CheckBlockCover(coverPercent);
+                            default:
+                                return true;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+
+                bool CheckBlockCover(int coverPercent)
+                {
+                    int value = Random.Range(0, 100);
+
+                    return coverPercent > value;
                 }
             }
 
@@ -775,7 +859,6 @@ public class Weapon : MonoBehaviour
                     indexName = $"{hitText}: 거리 = {distance}, 명중값 = {_hitAccuracy}",
                     hitAccuracy = _hitAccuracy,
                     hitParts = hitParts,
-                    hitNum = hitNum,
                     impact = impact,
                     rebound = rebound,
                     propellant = propellant,

@@ -29,10 +29,9 @@ public class Bullet : MonoBehaviour
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
 
-    [Space(5f)][SerializeField] private LayerMask targetLayer;
-    [SerializeField] private bool isHit;
+    [Space(5f)]public BodyPartsType hitParts;
+    [SerializeField] private LayerMask targetLayer;
     [SerializeField] private float speed = 30f;
-    [SerializeField] private int hitNum;
 
     private bool hitCheck;
     private bool resultCheck;
@@ -56,7 +55,7 @@ public class Bullet : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void SetBullet(CharacterController _shooter, CharacterController _target, HitInfo hitInfo, bool _isPellet)
+    public void SetBullet(CharacterController _shooter, CharacterController _target, BodyPartsType _hitParts, bool _isPellet)
     {
         shooter = _shooter;
         target = _target;
@@ -69,8 +68,9 @@ public class Bullet : MonoBehaviour
         armorBreak = shooter.armorBreak;
         critical = shooter.critical;
 
-        isHit = hitInfo.hitNum > 0;
-        targetLayer = isHit ? LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts") : LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
+        hitParts = _hitParts;
+        targetLayer = hitParts != BodyPartsType.Miss && hitParts != BodyPartsType.Block ? LayerMask.GetMask("Node") | LayerMask.GetMask("BodyParts")
+                                                                                        : LayerMask.GetMask("Node") | LayerMask.GetMask("Cover");
         hitCheck = false;
         resultCheck = false;
 
@@ -122,13 +122,17 @@ public class Bullet : MonoBehaviour
         timer += Time.deltaTime;
         if (!resultCheck && timer > hitTime)
         {
-            if (isHit)
+            switch (hitParts)
             {
-                target.OnHit(shooter, this);
-            }
-            else
-            {
-                target.GameMgr.SetFloatText(target.charUI, "Miss", Color.red);
+                case BodyPartsType.Miss:
+                    target.GameMgr.SetFloatText(target.charUI, "Miss", Color.red);
+                    break;
+                case BodyPartsType.Block:
+                    target.GameMgr.SetFloatText(target.charUI, "Block", Color.gray);
+                    break;
+                default:
+                    target.OnHit(shooter, this);
+                    break;
             }
             resultCheck = true;
         }

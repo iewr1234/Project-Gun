@@ -16,15 +16,14 @@ public class CharacterUI : MonoBehaviour
 
     private Slider hArmorGauge;
     private Slider bArmorGauge;
-    private Slider healthGauge;
+    private Slider hPartsGauge;
+    private Slider hBodyGauge;
     private Slider staminaGauge;
 
     private TextMeshProUGUI hArmorText;
     private TextMeshProUGUI bArmorText;
     private TextMeshProUGUI healthText;
     private TextMeshProUGUI staminaText;
-
-    [HideInInspector] public AimGauge aimGauge;
 
     [Header("--- Assignment Variable---")]
     [SerializeField] private Vector3 uiPos = new Vector3(0f, 2f, 0f);
@@ -43,17 +42,19 @@ public class CharacterUI : MonoBehaviour
 
         hArmorGauge = components.transform.Find("HeadArmorGauge").GetComponent<Slider>();
         bArmorGauge = components.transform.Find("BodyArmorGauge").GetComponent<Slider>();
-        healthGauge = components.transform.Find("HealthGauge").GetComponent<Slider>();
+        hPartsGauge = components.transform.Find("HealthGauge/PartsHealth").GetComponent<Slider>();
+        hBodyGauge = components.transform.Find("HealthGauge/BodyHealth").GetComponent<Slider>();
         staminaGauge = components.transform.Find("StaminaGauge").GetComponent<Slider>();
+        staminaGauge.gameObject.SetActive(false);
 
         hArmorText = hArmorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         bArmorText = bArmorGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
-        healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
+        healthText = hBodyGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
-        aimGauge = components.transform.Find("AimGauge").GetComponent<AimGauge>();
-        aimGauge.SetComponents();
 
-        healthGauge.maxValue = charCtr.maxHealth;
+        int maxHealth = charCtr.healthList.Sum(x => x.maxHealth);
+        hPartsGauge.maxValue = maxHealth;
+        hBodyGauge.maxValue = maxHealth;
         staminaGauge.maxValue = charCtr.maxStamina;
         SetActiveArmorGauge();
         SetCharacterValue();
@@ -99,8 +100,10 @@ public class CharacterUI : MonoBehaviour
             armorGauge.value = armor.armorData.durability;
             armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
         }
-        healthGauge.value = charCtr.health;
-        healthText.text = $"{healthGauge.value} / {healthGauge.maxValue}";
+        int curHealth = charCtr.healthList.Sum(x => x.health);
+        hPartsGauge.value = curHealth;
+        hBodyGauge.value = charCtr.healthList.Find(x => x.type == BodyPartsType.Body).health;
+        healthText.text = $"{curHealth} / {hBodyGauge.maxValue}";
         staminaGauge.value = charCtr.stamina;
         staminaText.text = $"{staminaGauge.value} / {staminaGauge.maxValue}";
     }

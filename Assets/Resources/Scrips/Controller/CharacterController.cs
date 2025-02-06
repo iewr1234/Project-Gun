@@ -117,7 +117,8 @@ public struct ThrowInfo
 
 public enum BodyPartsType
 {
-    None,
+    Miss,
+    Block,
     Head,
     Body,
     RightArm,
@@ -429,8 +430,6 @@ public class CharacterController : MonoBehaviour
         {
             if (healthList.Count > 0) healthList.Clear();
 
-            float healthValue = maxHealth;
-
             // 팔 체력
             float armPercent = 13f;
             PartsResult(BodyPartsType.RightArm, armPercent);
@@ -442,19 +441,19 @@ public class CharacterController : MonoBehaviour
             PartsResult(BodyPartsType.LeftLeg, legPercent);
 
             // 상체 체력
+            int bMaxHealth = maxHealth - healthList.Sum(x => x.maxHealth);
             PartsHealth bodyHealth = new PartsHealth()
             {
                 type = BodyPartsType.Body,
-                indexName = $"{BodyPartsType.Body}: {(int)healthValue}/{(int)healthValue}",
-                maxHealth = (int)healthValue,
-                health = (int)healthValue,
+                indexName = $"{BodyPartsType.Body}: {bMaxHealth}/{bMaxHealth}",
+                maxHealth = bMaxHealth,
+                health = bMaxHealth,
             };
             healthList.Add(bodyHealth);
 
             void PartsResult(BodyPartsType type, float percent)
             {
-                float maxHealth_parts = percent / maxHealth * 100;
-                healthValue -= maxHealth_parts;
+                float maxHealth_parts = maxHealth * percent / 100;
                 PartsHealth partsHealth = new PartsHealth()
                 {
                     indexName = $"{type}: {(int)maxHealth_parts}/{(int)maxHealth_parts}",
@@ -1811,6 +1810,21 @@ public class CharacterController : MonoBehaviour
         charUI.SetCharacterValue();
     }
 
+    public void SetHealth(PartsHealth parts, int value)
+    {
+        parts.health += value;
+        if (parts.health < 0)
+        {
+            parts.health = 0;
+        }
+        else if (parts.health > parts.maxHealth)
+        {
+            parts.health = parts.maxHealth;
+        }
+        parts.indexName = $"{parts.type}: {parts.health}/{parts.maxHealth}";
+        charUI.SetCharacterValue();
+    }
+
     /// <summary>
     /// 활력값 설정
     /// </summary>
@@ -2967,9 +2981,22 @@ public class CharacterController : MonoBehaviour
     /// </summary>
     public void OnHit(CharacterController shooter, Bullet bullet)
     {
+        bool isDead = false;
         bool isPenetrate;
-        bool headHit = Random.Range(0, 100) < 25;
-        Armor armor = headHit ? armors.Find(x => x.type == Armor.Type.Head) : armors.Find(x => x.type == Armor.Type.Body);
+        Armor armor;
+        switch (bullet.hitParts)
+        {
+            case BodyPartsType.Head:
+                armor = armors.Find(x => x.type == Armor.Type.Head);
+                break;
+            case BodyPartsType.Body:
+                armor = armors.Find(x => x.type == Armor.Type.Body);
+                break;
+            default:
+                armor = null;
+                break;
+        }
+
         if (armor != null && armor.armorData.durability > 0)
         {
             int value = Random.Range(0, 100);
@@ -2990,32 +3017,79 @@ public class CharacterController : MonoBehaviour
         }
 
         int damage;
+        PartsHealth parts = healthList.Find(x => x.type == bullet.hitParts || x.type == BodyPartsType.Body && bullet.hitParts == BodyPartsType.Head);
         if (isPenetrate)
         {
             float hDamage = bullet.damage - ((armor != null ? armor.armorData.durability : 0f) * 0.1f);
-            damage = headHit ? Mathf.FloorToInt(hDamage * 1.5f) : Mathf.FloorToInt(hDamage);
-            SetHealth(-damage);
-            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 체력 피해량 = {damage}, 체력 = {health}/{maxHealth}");
-            gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
+            if (bullet.hitParts == BodyPartsType.Head)
+            {
+                damage = Mathf.FloorToInt(hDamage * 1.5f);
+                HealthDamageResult(parts, null, damage);
+            }
+            else if (bullet.hitParts == BodyPartsType.Body)
+            {
+                damage = Mathf.FloorToInt(hDamage);
+                HealthDamageResult(parts, null, damage);
+            }
+            else
+            {
+                damage = Mathf.FloorToInt(hDamage);
+                if (parts.health == 0)
+                {
+                    // BleckOut에 의한 피해분산
+                    List<PartsHealth> activeParts = healthList.FindAll(x => x.health > 0);
+                    float damageFactor = parts.type == BodyPartsType.RightArm || parts.type == BodyPartsType.LeftArm ? 0.7f : 1f;
+                    int scaleDamage = Mathf.FloorToInt(damage * damageFactor / activeParts.Count);
+                    for (int j = 0; j < activeParts.Count; j++)
+                    {
+                        PartsHealth _parts = activeParts[j];
+                        HealthDamageResult(parts, _parts, scaleDamage);
+                    }
+                }
+                else
+                {
+                    HealthDamageResult(parts, null, damage);
+                }
+            }
+
+            PartsHealth bodyParts = healthList.Find(x => x.type == BodyPartsType.Body);
+            isDead = bodyParts.health == 0;
         }
         else
         {
             float sDamage = bullet.propellant * 0.1f;
-            damage = headHit ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
+            damage = bullet.hitParts == BodyPartsType.Head ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
             SetStamina(-damage);
-            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 기력 피해량 = {damage}, 기력 = {stamina}/{maxStamina}");
+            Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = {bullet.hitParts}, 기력 피해량 = {damage}, 기력 = {stamina}/{maxStamina}");
             gameMgr.SetFloatText(charUI, $"{damage}", Color.yellow);
         }
 
         if (state == CharacterState.Dead) return;
-        if (health == 0)
+        if (isDead)
         {
             var force = 500f;
             CharacterDead(bullet.transform.forward, force);
         }
-        else if (health > 0 && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
+        else if (!isDead && !animator.GetCurrentAnimatorStateInfo(baseIndex).IsTag("Hit") && !animator.GetBool("isMove"))
         {
             animator.SetTrigger("isHit");
+        }
+
+        void HealthDamageResult(PartsHealth hitParts, PartsHealth scaleHitParts, int damage)
+        {
+            if (damage == 0) return;
+
+            if (scaleHitParts != null)
+            {
+                SetHealth(scaleHitParts, -damage);
+                Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = (손상){hitParts.type}, 분할부위: {scaleHitParts.type}, 체력 피해량 = {damage}, 체력 = {scaleHitParts.health}/{scaleHitParts.maxHealth}");
+            }
+            else
+            {
+                SetHealth(hitParts, -damage);
+                Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = {hitParts.type}, 체력 피해량 = {damage}, 체력 = {hitParts.health}/{hitParts.maxHealth}");
+            }
+            gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
         }
     }
 
