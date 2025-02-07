@@ -623,7 +623,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         void ArmorType()
         {
             countText.enabled = true;
-            SetTotalCount(armorData.durability, armorData.maxDurability);
+            SetTotalCount(Mathf.FloorToInt(armorData.durability * 0.01f), Mathf.FloorToInt(armorData.maxDurability * 0.01f));
         }
 
         void WeaponType()

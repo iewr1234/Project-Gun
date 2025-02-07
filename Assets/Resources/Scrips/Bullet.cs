@@ -29,7 +29,7 @@ public class Bullet : MonoBehaviour
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
 
-    [Space(5f)]public BodyPartsType hitParts;
+    [Space(5f)] public BodyPartsType hitParts;
     [SerializeField] private LayerMask targetLayer;
     [SerializeField] private float speed = 30f;
 
@@ -125,10 +125,10 @@ public class Bullet : MonoBehaviour
             switch (hitParts)
             {
                 case BodyPartsType.Miss:
-                    target.GameMgr.SetFloatText(target.charUI, "Miss", Color.red);
+                    target.GameMgr.SetFloatText(target.charUI, BodyPartsType.Miss, "Miss", Color.red);
                     break;
                 case BodyPartsType.Block:
-                    target.GameMgr.SetFloatText(target.charUI, "Block", Color.gray);
+                    target.GameMgr.SetFloatText(target.charUI, BodyPartsType.Block, "Block", Color.gray);
                     break;
                 default:
                     target.OnHit(shooter, this);

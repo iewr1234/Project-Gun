@@ -117,9 +117,9 @@ public struct ThrowInfo
 
 public enum BodyPartsType
 {
-    Miss,
-    Block,
-    Head,
+    Miss = -2,
+    Block = -1,
+    Head = 0,
     Body,
     RightArm,
     LeftArm,
@@ -2469,7 +2469,6 @@ public class CharacterController : MonoBehaviour
             gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
             gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost_shot);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
-            gameMgr.uiMgr.aimGauge.components.SetActive(true);
             gameMgr.uiMgr.SetHitAccuracy(targetInfo.shooter);
             return true;
         }
@@ -2586,7 +2585,6 @@ public class CharacterController : MonoBehaviour
         targetList[targetIndex].target.SetActiveOutline(false);
         gameMgr.SetEnemyOutlinable(true);
         gameMgr.uiMgr.SetActiveAimUI(this, false);
-        gameMgr.uiMgr.aimGauge.components.SetActive(false);
     }
 
     /// <summary>
@@ -3020,7 +3018,7 @@ public class CharacterController : MonoBehaviour
         PartsHealth parts = healthList.Find(x => x.type == bullet.hitParts || x.type == BodyPartsType.Body && bullet.hitParts == BodyPartsType.Head);
         if (isPenetrate)
         {
-            float hDamage = bullet.damage - ((armor != null ? armor.armorData.durability : 0f) * 0.1f);
+            float hDamage = bullet.damage - ((armor != null ? armor.armorData.durability : 0f) * 0.001f);
             if (bullet.hitParts == BodyPartsType.Head)
             {
                 damage = Mathf.FloorToInt(hDamage * 1.5f);
@@ -3061,7 +3059,7 @@ public class CharacterController : MonoBehaviour
             damage = bullet.hitParts == BodyPartsType.Head ? Mathf.FloorToInt(sDamage * 1.5f) : Mathf.FloorToInt(sDamage);
             SetStamina(-damage);
             Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = {bullet.hitParts}, 기력 피해량 = {damage}, 기력 = {stamina}/{maxStamina}");
-            gameMgr.SetFloatText(charUI, $"{damage}", Color.yellow);
+            gameMgr.SetFloatText(charUI, bullet.hitParts, $"{damage}", Color.yellow);
         }
 
         if (state == CharacterState.Dead) return;
@@ -3083,20 +3081,21 @@ public class CharacterController : MonoBehaviour
             {
                 SetHealth(scaleHitParts, -damage);
                 Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = (손상){hitParts.type}, 분할부위: {scaleHitParts.type}, 체력 피해량 = {damage}, 체력 = {scaleHitParts.health}/{scaleHitParts.maxHealth}");
+                gameMgr.SetFloatText(charUI, scaleHitParts.type, $"{damage}", new Color(80f / 255f, 10f / 255f, 10f / 255f));
             }
             else
             {
                 SetHealth(hitParts, -damage);
                 Debug.Log($"{transform.name}: 공격자 = {shooter.name}, 피격부위 = {hitParts.type}, 체력 피해량 = {damage}, 체력 = {hitParts.health}/{hitParts.maxHealth}");
+                gameMgr.SetFloatText(charUI, hitParts.type, $"{damage}", Color.white);
             }
-            gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
         }
     }
 
     public void OnHit(Vector3 dir, int damage)
     {
         SetHealth(-damage);
-        gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
+        //gameMgr.SetFloatText(charUI, $"{damage}", Color.white);
 
         if (health == 0)
         {

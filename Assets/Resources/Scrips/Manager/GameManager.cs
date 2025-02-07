@@ -1697,10 +1697,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetFloatText(CharacterUI charUI, string text, Color color)
+    public void SetFloatText(CharacterUI charUI, BodyPartsType partsType, string text, Color color)
     {
         var floatText = floatTextPool.Find(x => !x.gameObject.activeSelf);
-        floatText.ShowFloatText(charUI, text, color);
+        floatText.ShowFloatText(charUI, partsType, text, color);
     }
 
     public void SetFireWarning(FieldNode node)

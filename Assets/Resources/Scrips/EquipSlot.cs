@@ -609,7 +609,7 @@ public class EquipSlot : MonoBehaviour
         void ArmorType()
         {
             countText.enabled = true;
-            countText.text = $"{item.armorData.durability}<size=14>/{item.armorData.maxDurability}</size>";
+            countText.text = $"{Mathf.FloorToInt(item.armorData.durability * 0.01f)}<size=175>/{Mathf.FloorToInt(item.armorData.maxDurability * 0.01f)}</size>";
         }
 
         void WeaponType()
@@ -621,7 +621,7 @@ public class EquipSlot : MonoBehaviour
                     if (item.weaponData.isMag)
                     {
                         countText.enabled = true;
-                        countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
+                        countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=175>/{item.weaponData.equipMag.magSize}</size>";
                     }
                     else
                     {
@@ -633,7 +633,7 @@ public class EquipSlot : MonoBehaviour
                 {
                     slotText.enabled = true;
                     countText.enabled = true;
-                    countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=14>/{item.weaponData.equipMag.magSize}</size>";
+                    countText.text = $"{item.weaponData.equipMag.loadedBullets.Count}<size=175>/{item.weaponData.equipMag.magSize}</size>";
                 }
             }
             else

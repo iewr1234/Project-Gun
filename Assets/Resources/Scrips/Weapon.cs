@@ -17,7 +17,6 @@ public struct HitInfo
     public string indexName;
     public int hitAccuracy;
     public List<BodyPartsType> hitParts;
-    //public int hitNum;
     public int impact;
     public int rebound;
     public int propellant;
@@ -459,7 +458,7 @@ public class Weapon : MonoBehaviour
             {
                 HitInfo hitInfo = hitInfos[i];
                 totalNum += hitInfo.hitParts.Count;
-                hitNum += hitInfo.hitParts.FindAll(x => x != BodyPartsType.Miss && x != BodyPartsType.Block).Count;
+                hitNum += hitInfo.hitParts.FindAll(x => x != BodyPartsType.Miss).Count;
                 charCtr.SetStamina(-hitInfo.impact);
             }
             Debug.Log($"{charCtr.name}: 발사수 = {totalNum}, 명중수 = {hitNum}");
@@ -467,11 +466,6 @@ public class Weapon : MonoBehaviour
             return hitNum == 0;
         }
     }
-
-    //public int GetHitValue()
-    //{
-    //    return hitAccuracy.hitValue;
-    //}
 
     public void SetBulletShell()
     {
@@ -569,7 +563,6 @@ public class Weapon : MonoBehaviour
 
         [Tooltip("명중값")] public int hitAccuracy;
         [Tooltip("명중부위")] public List<BodyPartsType> hitParts;
-        [Tooltip("명중수")] public int hitNum;
         [Tooltip("충격량")] public int impact;
         [Tooltip("안정성")] public int stability;
         [Tooltip("반동")] public int rebound;
@@ -637,7 +630,6 @@ public class Weapon : MonoBehaviour
 
             void SetUseValue(int index)
             {
-                hitNum = 0;
                 stability = 0;
                 rebound = 0;
                 propellant = 0;
@@ -761,7 +753,6 @@ public class Weapon : MonoBehaviour
                             break;
                         default:
                             hitParts.Add(parts);
-                            hitNum++;
                             break;
                     }
                 }
@@ -835,23 +826,64 @@ public class Weapon : MonoBehaviour
 
             void AddHitInfo()
             {
-                string hitText = null;
-                switch (hitNum)
+                int missNum = 0;
+                int blockNum = 0;
+                int headHitNum = 0;
+                int bodyHitNum = 0;
+                int armHitNum = 0;
+                int legHitNum = 0;
+                for (int i = 0; i < hitParts.Count; i++)
                 {
-                    case 0:
+                    switch (hitParts[i])
+                    {
+                        case BodyPartsType.Miss:
+                            missNum++;
+                            break;
+                        case BodyPartsType.Block:
+                            blockNum++;
+                            break;
+                        case BodyPartsType.Head:
+                            headHitNum++;
+                            break;
+                        case BodyPartsType.Body:
+                            bodyHitNum++;
+                            break;
+                        case BodyPartsType.RightArm:
+                            armHitNum++;
+                            break;
+                        case BodyPartsType.LeftArm:
+                            armHitNum++;
+                            break;
+                        case BodyPartsType.RightLeg:
+                            legHitNum++;
+                            break;
+                        case BodyPartsType.LeftLeg:
+                            legHitNum++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                string hitText = null;
+                if (headHitNum == 0 && bodyHitNum == 0 && armHitNum == 0 && legHitNum == 0)
+                {
+                    if (blockNum > missNum)
+                    {
+                        hitText = "막힘";
+                    }
+                    else
+                    {
                         hitText = "빗나감";
-                        break;
-                    default:
-                        int headHitNum = hitParts.FindAll(x => x == BodyPartsType.Head).Count();
-                        int bodyHitNum = hitParts.FindAll(x => x == BodyPartsType.Body).Count();
-                        int armHitNum = hitParts.FindAll(x => x == BodyPartsType.RightArm || x == BodyPartsType.LeftArm).Count();
-                        int legHitNum = hitParts.FindAll(x => x == BodyPartsType.RightLeg || x == BodyPartsType.LeftLeg).Count();
-                        if (headHitNum > 0) hitText += $"머리 {headHitNum}발 ";
-                        if (bodyHitNum > 0) hitText += $"몸 {bodyHitNum}발 ";
-                        if (armHitNum > 0) hitText += $"팔 {armHitNum}발 ";
-                        if (legHitNum > 0) hitText += $"다리 {legHitNum}발 ";
-                        hitText += "명중";
-                        break;
+                    }
+                }
+                else
+                {
+                    if (headHitNum > 0) hitText += $"머리 {headHitNum}발 ";
+                    if (bodyHitNum > 0) hitText += $"몸 {bodyHitNum}발 ";
+                    if (armHitNum > 0) hitText += $"팔 {armHitNum}발 ";
+                    if (legHitNum > 0) hitText += $"다리 {legHitNum}발 ";
+                    hitText += "명중";
                 }
 
                 var hitInfo = new HitInfo()

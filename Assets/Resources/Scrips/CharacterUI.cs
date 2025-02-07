@@ -98,7 +98,7 @@ public class CharacterUI : MonoBehaviour
             Slider armorGauge = armor.type == Armor.Type.Head ? hArmorGauge : bArmorGauge;
             TextMeshProUGUI armorText = armor.type == Armor.Type.Head ? hArmorText : bArmorText;
             armorGauge.value = armor.armorData.durability;
-            armorText.text = $"{armorGauge.value} / {armorGauge.maxValue}";
+            armorText.text = $"{Mathf.FloorToInt(armorGauge.value * 0.01f)} / {Mathf.FloorToInt(armorGauge.maxValue * 0.01f)}";
         }
         int curHealth = charCtr.healthList.Sum(x => x.health);
         hPartsGauge.value = curHealth;

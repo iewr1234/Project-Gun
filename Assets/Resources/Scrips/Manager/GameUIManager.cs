@@ -59,8 +59,6 @@ public class GameUIManager : MonoBehaviour
     //private TextMeshProUGUI healthText;
     //private TextMeshProUGUI staminaText;
 
-    [HideInInspector] public AimGauge aimGauge;
-
     [Header("--- Assignment Variable---")]
     public Button onButton;
     [HideInInspector] public int iconIndex;
@@ -134,9 +132,6 @@ public class GameUIManager : MonoBehaviour
         //healthText = healthGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         //staminaText = staminaGauge.transform.Find("Text").GetComponent<TextMeshProUGUI>();
         aimUI.SetActive(false);
-
-        aimGauge = playUI.transform.Find("AimGauge").GetComponent<AimGauge>();
-        aimGauge.SetComponents();
 
         var actionButtons = bottomUI.transform.Find("ActionButtons").GetComponentsInChildren<ActionButton>().ToList();
         for (int i = 0; i < actionButtons.Count; i++)
