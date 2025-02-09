@@ -90,6 +90,7 @@ public struct TargetInfo
     public Cover targetCover;
     public bool isRight;
     public bool targetRight;
+    public float angle;
 }
 
 [System.Serializable]
@@ -2265,6 +2266,7 @@ public class CharacterController : MonoBehaviour
                         targetCover = targetCover,
                         targetRight = targetRight,
                         isRight = isRight,
+                        angle = GetTargetAngle(this, target, targetCover),
                     };
                     targetList.Add(targetInfo);
                     return true;
@@ -2293,6 +2295,33 @@ public class CharacterController : MonoBehaviour
                             distance = dist;
                         }
                     }
+                }
+
+                float GetTargetAngle(CharacterController shooter, CharacterController target, Cover targetCover)
+                {
+                    if (targetCover == null) return 0f;
+
+                    Vector3 shooterPos = shooter.currentNode.transform.position;
+                    Vector3 targetPos = target.currentNode.transform.position;
+                    Vector3 coverPos = targetCover.transform.position;
+
+                    // 타겟 → 엄폐물 방향 벡터 (타겟이 바라보는 방향)
+                    Vector3 dir_TtoC = (coverPos - targetPos).normalized;
+
+                    // 타겟 → 슈터 방향 벡터
+                    Vector3 dir_TtoS = (shooterPos - targetPos).normalized;
+
+                    // 타겟의 "오른쪽 벡터"를 구하기 (법선 벡터를 사용)
+                    Vector3 rightVector = Vector3.Cross(Vector3.up, dir_TtoC).normalized;
+
+                    // Signed Angle 구하기
+                    float angle = Vector3.Angle(dir_TtoC, dir_TtoS);
+
+                    // 왼쪽/오른쪽 판별
+                    float direction = Vector3.Dot(rightVector, dir_TtoS);
+                    if (direction < 0) angle = -angle; // 오른쪽이면 음수, 왼쪽이면 양수
+
+                    return angle; // 양수 = 왼쪽, 음수 = 오른쪽
                 }
             }
         }
