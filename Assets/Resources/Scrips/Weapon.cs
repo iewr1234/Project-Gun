@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -350,6 +349,7 @@ public class Weapon : MonoBehaviour
                 LoadingChamber();
                 SetBulletShell();
                 var chamberBullet = weaponData.chamberBullet;
+                DecreaseDurability(chamberBullet);
                 bulletNum = chamberBullet.pelletNum == 0 ? 1 : chamberBullet.pelletNum;
                 for (int i = 0; i < hitInfo.hitParts.Count; i++)
                 {
@@ -421,6 +421,13 @@ public class Weapon : MonoBehaviour
             weaponData.equipMag.loadedBullets.Remove(loadedBullet);
             SetBulletShell_Revolver();
             charCtr.SetAbility();
+        }
+
+        void DecreaseDurability(BulletDataInfo bulletData)
+        {
+            int decreaseValue = Mathf.FloorToInt(weaponData.failureRate * 0.1f * ((float)bulletData.level / weaponData.level));
+            weaponData.durability -= decreaseValue;
+            if (weaponData.durability < 0) weaponData.durability = 0;
         }
 
         void SetBulletDirection(Bullet bullet)
@@ -758,57 +765,27 @@ public class Weapon : MonoBehaviour
                 }
 
                 // 부위 엄폐 판정
-                bool CheckPartsCover(BodyPartsType type)
+                bool CheckPartsCover(BodyPartsType partsType)
                 {
                     if (targetInfo.targetCover == null) return true;
 
-                    int coverPercent;
-                    if (targetInfo.targetCover.coverType == CoverType.Full)
+                    List<BodyPartsType> blockingParts;
+                    switch (targetInfo.targetCover.coverType)
                     {
-                        coverPercent = 50;
-                        if (targetInfo.isRight)
-                        {
-                            switch (type)
-                            {
-                                case BodyPartsType.Body:
-                                    return CheckBlockCover(coverPercent);
-                                case BodyPartsType.LeftArm:
-                                    return CheckBlockCover(coverPercent);
-                                case BodyPartsType.LeftLeg:
-                                    return CheckBlockCover(coverPercent);
-                                default:
-                                    return true;
-                            }
-                        }
-                        else
-                        {
-                            switch (type)
-                            {
-                                case BodyPartsType.Body:
-                                    return CheckBlockCover(coverPercent);
-                                case BodyPartsType.RightArm:
-                                    return CheckBlockCover(coverPercent);
-                                case BodyPartsType.RightLeg:
-                                    return CheckBlockCover(coverPercent);
-                                default:
-                                    return true;
-                            }
-                        }
+                        case CoverType.Half:
+                            blockingParts = new List<BodyPartsType>() { BodyPartsType.Body, BodyPartsType.RightLeg, BodyPartsType.LeftLeg };
+                            break;
+                        case CoverType.Full:
+                            blockingParts = targetInfo.isRight ? new List<BodyPartsType>() { BodyPartsType.Body, BodyPartsType.LeftArm, BodyPartsType.LeftLeg }
+                                                               : new List<BodyPartsType>() { BodyPartsType.Body, BodyPartsType.RightArm, BodyPartsType.RightLeg };
+                            break;
+                        default:
+                            return true;
                     }
-                    else if (targetInfo.targetCover.coverType == CoverType.Half)
+
+                    if (blockingParts.Contains(partsType))
                     {
-                        coverPercent = 50;
-                        switch (type)
-                        {
-                            case BodyPartsType.Body:
-                                return CheckBlockCover(coverPercent);
-                            case BodyPartsType.RightArm:
-                                return CheckBlockCover(coverPercent);
-                            case BodyPartsType.LeftArm:
-                                return CheckBlockCover(coverPercent);
-                            default:
-                                return true;
-                        }
+                        return CheckBlockCover(targetInfo);
                     }
                     else
                     {
@@ -816,9 +793,12 @@ public class Weapon : MonoBehaviour
                     }
                 }
 
-                bool CheckBlockCover(int coverPercent)
+                bool CheckBlockCover(TargetInfo targetInfo)
                 {
+                    int coverPercent = Mathf.FloorToInt(50 - (35 - targetInfo.angle) * 0.7f);
                     int value = Random.Range(0, 100);
+
+                    Debug.Log($"{targetInfo.target.name}: {coverPercent}%");
 
                     return coverPercent > value;
                 }

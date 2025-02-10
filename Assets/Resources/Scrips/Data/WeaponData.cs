@@ -48,9 +48,13 @@ public class WeaponDataInfo
     public string prefabName;
     [Space(5f)]
 
+    [HideInInspector] public int level;
     [Tooltip("모델")] public int model;
     [Tooltip("구경")] public float caliber;
     [Tooltip("무게")] public int weight;
+    [Tooltip("최대내구도")] public int maxDurability;
+    [Tooltip("현재내구도")] public int durability;
+    [Tooltip("고장계수")] public float failureRate;
     [Tooltip("구분")] public bool isMain;
     [Tooltip("무기분류")] public WeaponType weaponType;
     [Tooltip("탄창분류")] public MagazineType magType;
@@ -88,7 +92,7 @@ public class WeaponDataInfo
     [HideInInspector][Tooltip("장착탄창ID")] public string equipMagID;
     [HideInInspector][Tooltip("장착부품IDs")] public List<string> equipPartsIDs;
 
-    public WeaponDataInfo CopyData(DataManager dataMgr)
+    public WeaponDataInfo CopyData(DataManager dataMgr, int level)
     {
         var weaponData = new WeaponDataInfo()
         {
@@ -98,9 +102,13 @@ public class WeaponDataInfo
             weaponName = weaponName,
             prefabName = prefabName,
 
+            level = level,
             model = model,
             caliber = caliber,
             weight = weight,
+            maxDurability = maxDurability,
+            durability = maxDurability,
+            failureRate = failureRate,
             isMain = isMain,
             weaponType = weaponType,
             magType = magType,

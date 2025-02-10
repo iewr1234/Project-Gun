@@ -14,8 +14,8 @@ public class BulletDataInfo
     public Mesh bulletMesh;
     public Material bulletMat;
 
-    [Space(5f)] public int level;
-    [Tooltip("구경")] public float caliber;
+    [HideInInspector] public int level;
+    [Space(5f)][Tooltip("구경")] public float caliber;
     [Tooltip("펠릿 수")] public int pelletNum;
     [Tooltip("확산")] public int spread;
     [Tooltip("무게")] public int weight;
@@ -32,7 +32,7 @@ public class BulletDataInfo
     [Tooltip("방어구 손상")] public int armorBreak;
     [Tooltip("파편화")] public int critical;
 
-    public BulletDataInfo CopyData()
+    public BulletDataInfo CopyData(int level)
     {
         var bulletData = new BulletDataInfo()
         {

@@ -213,15 +213,15 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
                     return backpackData.backpackName;
                 case ItemType.MainWeapon:
                     var _mainWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                    weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr);
+                    weaponData = _mainWeaponData.CopyData(gameMenuMgr.dataMgr, itemData.level);
                     return weaponData.prefabName;
                 case ItemType.SubWeapon:
                     var _subWeaponData = gameMenuMgr.dataMgr.weaponData.weaponInfos.Find(x => x.ID == itemData.dataID);
-                    weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr);
+                    weaponData = _subWeaponData.CopyData(gameMenuMgr.dataMgr, itemData.level);
                     return weaponData.prefabName;
                 case ItemType.Bullet:
                     var _bulletData = gameMenuMgr.dataMgr.bulletData.bulletInfos.Find(x => x.ID == itemData.dataID);
-                    bulletData = _bulletData.CopyData();
+                    bulletData = _bulletData.CopyData(itemData.level);
                     return bulletData.prefabName;
                 case ItemType.Magazine:
                     var _magData = gameMenuMgr.dataMgr.magData.magInfos.Find(x => x.ID == itemData.dataID);
@@ -396,7 +396,7 @@ public class ItemHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         itemData = gameMenuMgr.dataMgr.itemData.itemInfos.Find(x => x.dataID == _bulletData.ID).CopyData();
         transform.name = $"Item_{index}_{itemData.itemName}";
         size = itemData.size;
-        bulletData = _bulletData.CopyData();
+        bulletData = _bulletData.CopyData(itemData.level);
         countText.enabled = true;
         SetTotalCount(count);
         gameObject.SetActive(true);

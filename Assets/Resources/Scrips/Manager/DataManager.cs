@@ -792,7 +792,7 @@ public class DataManager : MonoBehaviour
 
     #region Weapon Data
     [HideInInspector] public WeaponData weaponData;
-    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AC";
+    private readonly string weaponDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=719783222&range=A3:AE";
     private enum WeaponVariable
     {
         ID,
@@ -801,6 +801,8 @@ public class DataManager : MonoBehaviour
         Model,
         Caliber,
         Weight,
+        MaxDurability,
+        FailureRate,
         IsMain,
         WeaponType,
         MagazineType,
@@ -854,6 +856,8 @@ public class DataManager : MonoBehaviour
                     model = int.Parse(data[(int)WeaponVariable.Model]),
                     caliber = float.Parse(data[(int)WeaponVariable.Caliber]),
                     weight = int.Parse(data[(int)WeaponVariable.Weight]),
+                    maxDurability = int.Parse(data[(int)WeaponVariable.MaxDurability]),
+                    failureRate = float.Parse(data[(int)WeaponVariable.FailureRate]),
                     isMain = System.Convert.ToBoolean(int.Parse(data[(int)WeaponVariable.IsMain])),
                     weaponType = (WeaponType)int.Parse(data[(int)WeaponVariable.WeaponType]),
                     magType = (MagazineType)int.Parse(data[(int)WeaponVariable.MagazineType]),
@@ -1088,7 +1092,7 @@ public class DataManager : MonoBehaviour
 
     #region Bullet Data
     [HideInInspector] public BulletData bulletData;
-    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:R";
+    private readonly string bulletDB = "https://docs.google.com/spreadsheets/d/1K4JDpojMJeJPpvA-u_sOK591Y16PBG45T77HCHyn_9w/export?format=tsv&gid=515744337&range=A2:Q";
     private enum BulletVariable
     {
         ID,
@@ -1096,7 +1100,6 @@ public class DataManager : MonoBehaviour
         BulletName,
         Mesh,
         Marerial,
-        Level,
         Caliber,
         PelletNum,
         Spread,
@@ -1142,7 +1145,6 @@ public class DataManager : MonoBehaviour
                     bulletName = data[(int)BulletVariable.BulletName],
                     bulletMesh = Resources.Load<Mesh>($"Meshs/{data[(int)BulletVariable.Mesh]}"),
                     bulletMat = Resources.Load<Material>($"Materials/{data[(int)BulletVariable.Marerial]}"),
-                    level = int.Parse(data[(int)BulletVariable.Level]),
                     caliber = float.Parse(data[(int)BulletVariable.Caliber]),
                     pelletNum = int.Parse(data[(int)BulletVariable.PelletNum]),
                     spread = int.Parse(data[(int)BulletVariable.Spread]),

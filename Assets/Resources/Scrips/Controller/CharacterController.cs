@@ -90,7 +90,7 @@ public struct TargetInfo
     public Cover targetCover;
     public bool isRight;
     public bool targetRight;
-    public float angle;
+    public int angle;
 }
 
 [System.Serializable]
@@ -2266,7 +2266,7 @@ public class CharacterController : MonoBehaviour
                         targetCover = targetCover,
                         targetRight = targetRight,
                         isRight = isRight,
-                        angle = GetTargetAngle(this, target, targetCover),
+                        angle = GetTargetAngle(this, target, targetRight, targetCover),
                     };
                     targetList.Add(targetInfo);
                     return true;
@@ -2297,9 +2297,9 @@ public class CharacterController : MonoBehaviour
                     }
                 }
 
-                float GetTargetAngle(CharacterController shooter, CharacterController target, Cover targetCover)
+                int GetTargetAngle(CharacterController shooter, CharacterController target, bool targetRight, Cover targetCover)
                 {
-                    if (targetCover == null) return 0f;
+                    if (targetCover == null) return 0;
 
                     Vector3 shooterPos = shooter.currentNode.transform.position;
                     Vector3 targetPos = target.currentNode.transform.position;
@@ -2319,9 +2319,9 @@ public class CharacterController : MonoBehaviour
 
                     // 왼쪽/오른쪽 판별
                     float direction = Vector3.Dot(rightVector, dir_TtoS);
-                    if (direction < 0) angle = -angle; // 오른쪽이면 음수, 왼쪽이면 양수
+                    if ((targetRight && direction < 0) || (!targetRight && direction > 0)) angle = -angle;
 
-                    return angle; // 양수 = 왼쪽, 음수 = 오른쪽
+                    return (int)angle;
                 }
             }
         }
