@@ -21,7 +21,7 @@ public enum MapEditorType
     Box,
     HalfCover,
     FullCover,
-    SideObject,
+    LineObject,
     BaseObject,
 }
 
@@ -125,7 +125,7 @@ public class MapEditor : MonoBehaviour
     private TextMeshProUGUI allFloorText;
     private TextMeshProUGUI floorRandomText;
     private TextMeshProUGUI gridSwitchText;
-    [HideInInspector] public bool onSideButton;
+    public bool onSideButton;
 
     [Header("[Floor]")]
     private GameObject floorUI;
@@ -145,7 +145,7 @@ public class MapEditor : MonoBehaviour
     private GameObject fullCoverUI;
 
     [Header("[SideObject]")]
-    private GameObject sideObjectUI;
+    private GameObject lineObjectUI;
 
     [Header("[BaseObject]")]
     private GameObject baseObjectUI;
@@ -228,7 +228,7 @@ public class MapEditor : MonoBehaviour
         hurdleUI = components.Find("Side/UI/Hurdle").gameObject;
         halfCoverUI = components.Find("Side/UI/HalfCover").gameObject;
         fullCoverUI = components.Find("Side/UI/FullCover").gameObject;
-        sideObjectUI = components.Find("Side/UI/SideObject").gameObject;
+        lineObjectUI = components.Find("Side/UI/LineObject").gameObject;
         baseObjectUI = components.Find("Side/UI/BaseObject").gameObject;
         SetActiveAllSideUI(true);
         mapItems = sideUI.GetComponentsInChildren<MapItem>().ToList();
@@ -246,7 +246,7 @@ public class MapEditor : MonoBehaviour
             hurdleUI.SetActive(value);
             halfCoverUI.SetActive(value);
             fullCoverUI.SetActive(value);
-            sideObjectUI.SetActive(value);
+            lineObjectUI.SetActive(value);
             baseObjectUI.SetActive(value);
         }
     }
@@ -346,7 +346,7 @@ public class MapEditor : MonoBehaviour
                 case MapEditorType.FullCover:
                     SetObject(true);
                     break;
-                case MapEditorType.SideObject:
+                case MapEditorType.LineObject:
                     SetObject(true);
                     break;
                 case MapEditorType.BaseObject:
@@ -392,7 +392,7 @@ public class MapEditor : MonoBehaviour
                 case MapEditorType.FullCover:
                     SetObject(false);
                     break;
-                case MapEditorType.SideObject:
+                case MapEditorType.LineObject:
                     SetObject(false);
                     break;
                 case MapEditorType.BaseObject:
@@ -843,10 +843,8 @@ public class MapEditor : MonoBehaviour
         await ReadMapData(mapData, allLoad, isBase);
 
         Debug.Log("Map load complete");
-        if (gameMgr.playerList.Count > 0)
-        {
-            gameMgr.camMgr.pivotPoint.position = gameMgr.playerList[0].currentNode.transform.position;
-        }
+        if (gameMgr.playerList.Count > 0) gameMgr.camMgr.pivotPoint.position = gameMgr.playerList[0].currentNode.transform.position;
+        gameMgr.camMgr.SetBlockLines(true);
         gameMgr.sceneHlr.EndLoadScene();
     }
 
@@ -1124,8 +1122,11 @@ public class MapEditor : MonoBehaviour
 
     private async Task SpawnCharactersAsync(bool isBase)
     {
-        var playerNode = pMarkerNodes[0];
-        gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
+        for (int i = 0; i < pMarkerNodes.Count; i++)
+        {
+            var playerNode = pMarkerNodes[i];
+            gameMgr.CreateCharacter(CharacterOwner.Player, playerNode.nodePos, gameMgr.dataMgr.gameData.playerID);
+        }
 
         if (isBase)
         {
@@ -1192,8 +1193,8 @@ public class MapEditor : MonoBehaviour
                 return halfCoverUI;
             case MapEditorType.FullCover:
                 return fullCoverUI;
-            case MapEditorType.SideObject:
-                return sideObjectUI;
+            case MapEditorType.LineObject:
+                return lineObjectUI;
             default:
                 return null;
         }
@@ -1362,7 +1363,7 @@ public class MapEditor : MonoBehaviour
 
     public void Button_SideObject()
     {
-        OnInterface(InterfaceType.Side, MapEditorType.SideObject, sideObjectUI);
+        OnInterface(InterfaceType.Side, MapEditorType.LineObject, lineObjectUI);
     }
 
     public void Button_BaseObject()
@@ -1468,7 +1469,7 @@ public class MapEditor : MonoBehaviour
                             case MapEditorType.FullCover:
                                 findType = FindNodeType.SetObject;
                                 break;
-                            case MapEditorType.SideObject:
+                            case MapEditorType.LineObject:
                                 findType = FindNodeType.SetObject;
                                 break;
                             case MapEditorType.BaseObject:

@@ -1258,11 +1258,13 @@ public class CharacterController : MonoBehaviour
                         case true:
                             aimTf = command.lookAt;
                             headAim = true;
+                            animator.ResetTrigger("unTargeting");
                             animator.SetTrigger("targeting");
                             break;
                         case false:
                             aimTf = null;
                             headAim = false;
+                            animator.ResetTrigger("targeting");
                             animator.SetTrigger("unTargeting");
                             break;
                     }
@@ -2269,6 +2271,7 @@ public class CharacterController : MonoBehaviour
                         angle = GetTargetAngle(this, target, targetRight, targetCover),
                     };
                     targetList.Add(targetInfo);
+
                     return true;
                 }
                 else
@@ -2325,6 +2328,9 @@ public class CharacterController : MonoBehaviour
                 }
             }
         }
+
+        if (targetList.Count > 1)
+            targetList = targetList.OrderBy(x => DataUtility.GetDistance(x.shooterNode.transform.position, x.targetNode.transform.position)).ToList();
     }
 
     /// <summary>
@@ -2495,6 +2501,7 @@ public class CharacterController : MonoBehaviour
             gameMgr.SwitchCharacterUI(false);
             targetInfo.target.charUI.components.SetActive(true);
 
+            gameMgr.camMgr.SetBlockLines(false);
             gameMgr.camMgr.SetCameraState(camState, this, targetInfo.target);
             gameMgr.uiMgr.SetUsedActionPoint_Bottom(this, currentWeapon.weaponData.actionCost_shot);
             gameMgr.uiMgr.SetActiveAimUI(this, true);
@@ -2569,10 +2576,6 @@ public class CharacterController : MonoBehaviour
             {
                 target.AddCommand(CommandType.TakeCover, targetInfo.targetCover, targetInfo.targetRight);
             }
-            //else
-            //{
-            //    target.transform.LookAt(shooter.transform);
-            //}
             target.AddCommand(CommandType.Targeting, true, shooter.transform);
         }
 
@@ -2591,7 +2594,6 @@ public class CharacterController : MonoBehaviour
                 }
                 else if (targetInfo.isRight != shooter.animator.GetBool("isRight"))
                 {
-                    //shooter.animator.SetBool("isRight", targetInfo.isRight);
                     shooter.AddCommand(CommandType.TakeCover, targetInfo.shooterCover, targetInfo.isRight);
                 }
             }
@@ -3478,6 +3480,7 @@ public class CharacterController : MonoBehaviour
         {
             charUI.components.SetActive(true);
             gameMgr.SetEnemyOutlinableAndUI(true);
+            gameMgr.camMgr.SetBlockLines(true);
             gameMgr.camMgr.SetCameraState(CameraState.None);
             gameMgr.camMgr.lockCam = false;
             //gameMgr.uiMgr.aimGauge.SetAimGauge(false);

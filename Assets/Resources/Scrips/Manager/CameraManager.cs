@@ -38,8 +38,9 @@ public class CameraManager : MonoBehaviour
     private readonly float moveSpeed = 15f;
     private readonly Vector3 defaultPos = new Vector3(12.5f, 15f, -12.5f);
 
-    private float currentRot;
-    private readonly float rotSpeed = 150f;
+    [SerializeField] private int currentRot;
+    [SerializeField] private List<TargetDirection> blockLines = new List<TargetDirection>();
+    private readonly float rotTime = 0.25f;
 
     private Vector3 camDirection;
     private float camDistance = 25f;
@@ -83,8 +84,10 @@ public class CameraManager : MonoBehaviour
             if (rotDiff == 0f) return;
 
             var rotDir = Mathf.Sign(rotDiff);
-            var rotStep = rotSpeed * Time.deltaTime;
-            if (Mathf.Abs(rotDiff) < rotStep) rotStep = Mathf.Abs(rotDiff);
+            var rotStep = (45 / rotTime) * Time.deltaTime; // 시간 기반 회전 속도
+
+            if (Mathf.Abs(rotDiff) < rotStep) rotStep = Mathf.Abs(rotDiff); // 오버슈팅 방지
+
             pivotPoint.transform.Rotate(Vector3.up * rotDir * rotStep, Space.Self);
             mainCam.transform.LookAt(pivotPoint);
         }
@@ -140,11 +143,17 @@ public class CameraManager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                currentRot += 45f;
+                currentRot += 45;
+                if (currentRot == 360) currentRot = 0;
+
+                SetBlockLines(true);
             }
             else if (Input.GetKeyDown(KeyCode.E))
             {
-                currentRot -= 45f;
+                currentRot -= 45;
+                if (currentRot < 0) currentRot += 360;
+
+                SetBlockLines(true);
             }
         }
 
@@ -165,6 +174,69 @@ public class CameraManager : MonoBehaviour
             }
 
             mainCam.transform.localPosition = camDirection * camDistance;
+        }
+    }
+
+    public void SetBlockLines(bool rotCheck)
+    {
+        if (rotCheck)
+        {
+            switch (currentRot)
+            {
+                case 0:
+                    blockLines = new List<TargetDirection> { TargetDirection.Front, TargetDirection.Right };
+                    break;
+                case 45:
+                    blockLines = new List<TargetDirection> { TargetDirection.Front };
+                    break;
+                case 90:
+                    blockLines = new List<TargetDirection> { TargetDirection.Left, TargetDirection.Front };
+                    break;
+                case 135:
+                    blockLines = new List<TargetDirection> { TargetDirection.Left };
+                    break;
+                case 180:
+                    blockLines = new List<TargetDirection> { TargetDirection.Left, TargetDirection.Back };
+                    break;
+                case 225:
+                    blockLines = new List<TargetDirection> { TargetDirection.Back };
+                    break;
+                case 270:
+                    blockLines = new List<TargetDirection> { TargetDirection.Back, TargetDirection.Right };
+                    break;
+                case 315:
+                    blockLines = new List<TargetDirection> { TargetDirection.Right };
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            blockLines.Clear();
+        }
+
+        List<FieldNode> nodes = gameMgr.nodeList.FindAll(x => x.nodePos.x == 0
+                                                           || x.nodePos.y == 0
+                                                           || x.nodePos.x == gameMgr.endPos_x - 1
+                                                           || x.nodePos.y == gameMgr.endPos_y - 1);
+        foreach (FieldNode node in nodes)
+        {
+            for (int i = 0; i < node.setObjects.Count; i++)
+            {
+                SetObject setObject = node.setObjects[i];
+                if (setObject.type != MapEditorType.LineObject) continue;
+
+                if (blockLines.Contains(setObject.setDir))
+                {
+                    // LineObject 비 가시화
+                    setObject.setObject.SetActive(false);
+                }
+                else if (!setObject.setObject.activeSelf)
+                {
+                    setObject.setObject.SetActive(true);
+                }
+            }
         }
     }
 

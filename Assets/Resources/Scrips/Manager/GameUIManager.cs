@@ -450,15 +450,20 @@ public class GameUIManager : MonoBehaviour
         if (gameMgr.currentTurn != CharacterOwner.Player) return;
         if (gameMgr.playerList.Count == 0) return;
 
-        var player = gameMgr.playerList[0];
-        if (player.commandList.Count > 0) return;
+        var activePlayers = gameMgr.playerList.FindAll(x => x.state != CharacterState.Dead && x.commandList.Count > 0);
+        if (activePlayers.Count > 0) return;
 
         if (pressSpace)
         {
             turnEndUI.slider.value = 0;
             pressSpace = false;
         }
-        player.SetTurnEnd(true);
+
+        for (int i = 0; i < gameMgr.playerList.Count; i++)
+        {
+            CharacterController player = gameMgr.playerList[i];
+            player.SetTurnEnd(true);
+        }
         gameMgr.TurnEnd();
     }
 

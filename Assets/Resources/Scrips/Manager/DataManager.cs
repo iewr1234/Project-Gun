@@ -242,20 +242,30 @@ public class DataManager : MonoBehaviour
 
     public void ReadMapLoadIndex(TMP_Dropdown dropdown)
     {
+        //dropdown.ClearOptions();
+        //var folderPath = Application.dataPath + DataUtility.mapDataPath;
+        //if (Directory.Exists(folderPath))
+        //{
+        //    string[] fileNames = Directory.GetFiles(folderPath, "*.json");
+        //    var options = new List<TMP_Dropdown.OptionData>();
+        //    for (int i = 0; i < fileNames.Length; i++)
+        //    {
+        //        var fileName = Path.GetFileName(fileNames[i]).Split('.')[0];
+        //        var option = new TMP_Dropdown.OptionData(fileName);
+        //        options.Add(option);
+        //    }
+        //    dropdown.AddOptions(options);
+        //}
+
         dropdown.ClearOptions();
-        var folderPath = Application.dataPath + DataUtility.mapDataPath;
-        if (Directory.Exists(folderPath))
+        var options = new List<TMP_Dropdown.OptionData>();
+        TextAsset[] jsonFiles = Resources.LoadAll<TextAsset>("MapData");
+        foreach (var jsonFile in jsonFiles)
         {
-            string[] fileNames = Directory.GetFiles(folderPath, "*.json");
-            var options = new List<TMP_Dropdown.OptionData>();
-            for (int i = 0; i < fileNames.Length; i++)
-            {
-                var fileName = Path.GetFileName(fileNames[i]).Split('.')[0];
-                var option = new TMP_Dropdown.OptionData(fileName);
-                options.Add(option);
-            }
-            dropdown.AddOptions(options);
+            var option = new TMP_Dropdown.OptionData(jsonFile.name);
+            options.Add(option);
         }
+        dropdown.AddOptions(options);
     }
 
     public MapData LoadMapData(string loadName)

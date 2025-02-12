@@ -624,7 +624,7 @@ public class FieldNode : MonoBehaviour
 
     public void SetOnObject(MapItem item, TargetDirection setDirection)
     {
-        var find = setObjects.Find(x => x.type == item.type);
+        var find = setObjects.Find(x => x.type == item.type && x.setDir == setDirection);
         if (find != null) return;
 
         SwitchOfMapItemType(item, setDirection);
@@ -632,12 +632,14 @@ public class FieldNode : MonoBehaviour
 
     public void SetOnObject(List<FieldNode> setNodes, MapItem item, TargetDirection setDirection)
     {
-        var findAll = setNodes.Find(x => x.setObjects.Find(x => x.type == item.type) != null);
+        var findAll = setNodes.Find(x => x.setObjects.Find(x => x.type == item.type && x.setDir == setDirection) != null);
         if (findAll != null) return;
 
         var subNodes = new List<FieldNode>(setNodes);
         subNodes.Remove(this);
         var setObject = SwitchOfMapItemType(item, setDirection);
+        if (setObject == null) return;
+
         setObject.subNodes = subNodes;
         for (int i = 0; i < subNodes.Count; i++)
         {
@@ -648,6 +650,8 @@ public class FieldNode : MonoBehaviour
 
     private SetObject SwitchOfMapItemType(MapItem item, TargetDirection setDirection)
     {
+        if (item == null) return null;
+
         switch (item.type)
         {
             case MapEditorType.FloorObject:
@@ -658,7 +662,7 @@ public class FieldNode : MonoBehaviour
                 return SetObject();
             case MapEditorType.FullCover:
                 return SetObject();
-            case MapEditorType.SideObject:
+            case MapEditorType.LineObject:
                 return SetObject();
             case MapEditorType.BaseObject:
                 return SetObject();
@@ -675,11 +679,15 @@ public class FieldNode : MonoBehaviour
             if (item.type == MapEditorType.BaseObject)
             {
                 var _baseStorage = _object.GetComponent<BaseStorage>();
-                if (_baseStorage != null)
-                {
-                    baseStorage = _baseStorage;
-                }
+                if (_baseStorage != null) baseStorage = _baseStorage;
             }
+
+            //var meshRdrs = _object.GetComponentsInChildren<MeshRenderer>();
+            //for (int i = 0; i < meshRdrs.Length; i++)
+            //{
+            //    var meshRdr = meshRdrs[i];
+            //    meshRdr.material = new Material(meshRdr.material);
+            //}
 
             var setObject = new SetObject()
             {
@@ -707,35 +715,14 @@ public class FieldNode : MonoBehaviour
             }
 
             var setNode = setObject.setNode;
-            //setNode.RemoveSetObject(type);
             setNode.setObjects.Remove(setObject);
             for (int i = 0; i < setObject.subNodes.Count; i++)
             {
                 var subNode = setObject.subNodes[i];
                 var _setObject = subNode.setObjects.Find(x => x.type == type);
-                //subNode.RemoveSetObject(type);
                 subNode.setObjects.Remove(_setObject);
             }
             Destroy(setObject.setObject);
-        }
-    }
-
-    private void RemoveSetObject(MapEditorType type)
-    {
-        switch (type)
-        {
-            case MapEditorType.HalfCover:
-                canMove = true;
-                AddAdjacentNodes();
-                Destroy(cover.gameObject);
-                break;
-            case MapEditorType.FullCover:
-                canMove = true;
-                AddAdjacentNodes();
-                Destroy(cover.gameObject);
-                break;
-            default:
-                break;
         }
     }
 

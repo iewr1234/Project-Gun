@@ -2,9 +2,7 @@ using FIMSpace.Basics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public enum GameState
 {
@@ -106,8 +104,8 @@ public class GameManager : MonoBehaviour
 
     [Header("[FieldNode]")]
     [SerializeField] private FieldNode targetNode;
-    private int endPos_x;
-    private int endPos_y;
+    public int endPos_x;
+    public int endPos_y;
 
     private DrawRange currentRange;
     [HideInInspector] public List<LineRenderer> linePool = new List<LineRenderer>();
@@ -520,6 +518,7 @@ public class GameManager : MonoBehaviour
                     var targetInfo = selectChar.targetList[selectChar.targetIndex];
                     targetInfo.target.AddCommand(CommandType.Targeting, false, transform);
                     selectChar.SetTargetOff();
+                    camMgr.SetBlockLines(true);
                     camMgr.SetCameraState(CameraState.None);
                     uiMgr.SetUsedActionPoint_Bottom(selectChar, 0);
                     selectChar = null;
@@ -2222,7 +2221,7 @@ public class GameManager : MonoBehaviour
                               .ThenByDescending(x => (int)x.type)
                               .ToList();
                 scheduleState = ScheduleState.Check;
-                targetState = CoverState.None;
+                //targetState = CoverState.None;
                 scheduleSignal = 0;
                 break;
         }
@@ -2260,10 +2259,35 @@ public class GameManager : MonoBehaviour
             }
             if (!shooter.animator.GetCurrentAnimatorStateInfo(shooter.upperIndex).IsTag("Aim")) return;
 
-            if (targetState != schedule.type)
+            TargetInfo targetInfo = schedule.targetInfo;
+            if (targetInfo.target.animator.GetBool("isCover"))
             {
-                var targetInfo = schedule.targetInfo;
-                targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
+                if (targetInfo.target.animator.GetBool("fullCover"))
+                {
+                    if (targetInfo.target.animator.GetBool("isRight"))
+                    {
+                        targetState = CoverState.FullRight;
+                    }
+                    else
+                    {
+                        targetState = CoverState.FullLeft;
+                    }
+                }
+                else
+                {
+                    targetState = CoverState.Half;
+                }
+            }
+            else
+            {
+                targetState = CoverState.None;
+            }
+
+            bool isTargeting = targetInfo.target.animator.GetCurrentAnimatorStateInfo(targetInfo.target.baseIndex).IsTag("Targeting");
+            if (targetState != schedule.type || (targetState == schedule.type && !isTargeting))
+            {
+                if (isTargeting) targetInfo.target.AddCommand(CommandType.Targeting, false, targetInfo.target.transform);
+
                 targetInfo.shooter.SetTargeting(targetInfo, CharacterOwner.Player);
                 scheduleState = ScheduleState.Wait;
                 targetState = schedule.type;
@@ -2294,6 +2318,9 @@ public class GameManager : MonoBehaviour
                 if (scheduleList.Count > 1)
                 {
                     var nextSchedule = scheduleList[1];
+                    if (curSchedule.targetInfo.target != nextSchedule.targetInfo.target)
+                        curSchedule.targetInfo.target.AddCommand(CommandType.Targeting, false, curSchedule.targetInfo.target.transform);
+
                     if (curSchedule.type == nextSchedule.type)
                     {
                         scheduleList.RemoveAt(0);

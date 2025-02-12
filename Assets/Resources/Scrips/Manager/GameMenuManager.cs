@@ -2284,26 +2284,26 @@ public class GameMenuManager : MonoBehaviour
 
         otherStorage.storageInfos.Clear();
         var baseStorages = dataMgr.gameData.baseStorages;
-        //var storageInfos = new List<StorageInfo>();
         if (node != null)
         {
             var storageInfo = baseStorages.Find(x => x.nodePos == node.nodePos);
             if (storageInfo != null) otherStorage.storageInfos.Add(storageInfo);
         }
-        var currentNode = gameMgr.playerList[0].currentNode;
-        //otherStorage.storageInfos = storageInfos.Union(baseStorages.FindAll(x => x.nodePos.x <= currentNode.nodePos.x + 1 && x.nodePos.x >= currentNode.nodePos.x - 1
-        //                                                                      && x.nodePos.y <= currentNode.nodePos.y + 1 && x.nodePos.y >= currentNode.nodePos.y - 1)).ToList();
 
+        var currentNode = gameMgr.playerList[0].currentNode;
         if (gameMgr.gameState != GameState.Result)
         {
-            for (int i = 0; i < baseStorages.Count; i++)
+            if (gameMgr.gameState == GameState.Base)
             {
-                var baseStorage = baseStorages[i];
-                if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
-                 && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
-                 && !otherStorage.storageInfos.Contains(baseStorage))
+                for (int i = 0; i < baseStorages.Count; i++)
                 {
-                    otherStorage.storageInfos.Add(baseStorage);
+                    var baseStorage = baseStorages[i];
+                    if (baseStorage.nodePos.x <= currentNode.nodePos.x + 1 && baseStorage.nodePos.x >= currentNode.nodePos.x - 1
+                     && baseStorage.nodePos.y <= currentNode.nodePos.y + 1 && baseStorage.nodePos.y >= currentNode.nodePos.y - 1
+                     && !otherStorage.storageInfos.Contains(baseStorage))
+                    {
+                        otherStorage.storageInfos.Add(baseStorage);
+                    }
                 }
             }
             otherStorage.SetFloorStorage(currentNode);

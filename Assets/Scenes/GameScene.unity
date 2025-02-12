@@ -670,6 +670,9 @@ MonoBehaviour:
   state: -1
   lockCam: 0
   currrentActionCam: {fileID: 0}
+  currentRot: 0
+  blockLines: 
+  rotTime: 1
 --- !u!1 &40275136
 GameObject:
   m_ObjectHideFlags: 0
@@ -10632,7 +10635,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1103950273787725592, guid: 4fd35820a50ffd44485f80d3eda36e0f, type: 3}
       propertyPath: m_Name
-      value: SideObject_0
+      value: LineObject_0
       objectReference: {fileID: 0}
     - target: {fileID: 1103950273787725595, guid: 4fd35820a50ffd44485f80d3eda36e0f, type: 3}
       propertyPath: m_Pivot.x
@@ -25387,7 +25390,7 @@ GameObject:
   - component: {fileID: 1716577899}
   - component: {fileID: 1716577898}
   m_Layer: 5
-  m_Name: SideObject
+  m_Name: LineObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26427,7 +26430,7 @@ Canvas:
   m_GameObject: {fileID: 1781354358}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 963194227}
   m_PlaneDistance: 2
   m_PixelPerfect: 0
@@ -30216,6 +30219,8 @@ MonoBehaviour:
   scheduleList: []
   targetState: 0
   targetNode: {fileID: 0}
+  endPos_x: 0
+  endPos_y: 0
   linePool: []
   rangePool: []
   bulletPool: []

@@ -62,8 +62,8 @@ public class MapItem : MonoBehaviour
             case "Full":
                 type = MapEditorType.FullCover;
                 break;
-            case "SideObject":
-                type = MapEditorType.SideObject;
+            case "LineObject":
+                type = MapEditorType.LineObject;
                 break;
             case "BaseObject":
                 type = MapEditorType.BaseObject;
